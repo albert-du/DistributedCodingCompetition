@@ -1,4 +1,4 @@
-﻿namespace DistributedCodingCompetition.ExecRunner;
+﻿namespace DistributedCodingCompetition.ExecRunner.Controllers;
 
 using DistributedCodingCompetition.ExecRunner.Services;
 using DistributedCodingCompetition.ExecutionShared;

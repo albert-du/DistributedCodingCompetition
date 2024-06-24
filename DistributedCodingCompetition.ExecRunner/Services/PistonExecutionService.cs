@@ -2,8 +2,9 @@
 
 using DistributedCodingCompetition.ExecutionShared;
 using DistributedCodingCompetition.ExecRunner.Models;
+using System.Net.Http.Json;
 
-public class PistonExecutionService(HttpClient httpClient, ILogger<PistonExecutionService> logger) : IExecutionService
+public class PistonExecutionService(HttpClient httpClient, ILogger<PistonExecutionService> logger, IConfiguration configuration) : IExecutionService
 {
     public async Task<ExecutionResult> ExecuteCodeAsync(ExecutionRequest request)
     {
@@ -30,7 +31,7 @@ public class PistonExecutionService(HttpClient httpClient, ILogger<PistonExecuti
             Stdin = request.Input
         };
         var startTime = DateTime.UtcNow;
-        var response = await httpClient.PostAsJsonAsync("piston", pistonRequest);
+        var response = await httpClient.PostAsJsonAsync(configuration["Piston"], pistonRequest);
         response.EnsureSuccessStatusCode();
         var pistonResult = await response.Content.ReadFromJsonAsync<PistonResult>() ?? throw new Exception("Failed to parse response");
         return new()
