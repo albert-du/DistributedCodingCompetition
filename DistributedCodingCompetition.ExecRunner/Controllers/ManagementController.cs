@@ -2,11 +2,11 @@
 
 using Microsoft.AspNetCore.Mvc;
 using DistributedCodingCompetition.ExecutionShared;
-
+using System.Text;
 
 [Route("api/[controller]")]
 [ApiController]
-public class ManagementController : ControllerBase
+public class ManagementController(IConfiguration configuration) : ControllerBase
 {
     [HttpGet]
     public RunnerStatus Get()
@@ -14,10 +14,23 @@ public class ManagementController : ControllerBase
         return new()
         {
             TimeStamp = DateTime.UtcNow,
-            Status = "Running",
             Version = "1.0.0",
-            LastExecution = DateTime.UtcNow,
-            LastExecutionDuration = TimeSpan.FromSeconds(1),,
+            Healthy = true,
+            Message = "Ready",
+            Name = configuration["Name"] ?? "EXEC",
+            Languages = "",
+            SystemInfo = SystemInfo()
         };
+    }
+
+    private static string SystemInfo()
+    {
+        StringBuilder sb = new();
+        sb.AppendLine("OS: " + System.Runtime.InteropServices.RuntimeInformation.OSDescription);
+        sb.AppendLine("Framework: " + System.Runtime.InteropServices.RuntimeInformation.FrameworkDescription);
+        sb.AppendLine("Processors: " + Environment.ProcessorCount);
+        sb.AppendLine("Runtime: " + System.Runtime.InteropServices.RuntimeInformation.RuntimeIdentifier);
+        sb.AppendLine("Memory: " + (Environment.WorkingSet / 1024 / 1024) + "MB");
+        return sb.ToString();
     }
 }
