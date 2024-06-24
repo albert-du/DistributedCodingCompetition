@@ -6,11 +6,14 @@ using Microsoft.AspNetCore.Mvc;
 
 [Route("api/[controller]")]
 [ApiController]
-public class ExecutionController(IExecutionService executionService) : ControllerBase
+public class ExecutionController(IExecutionService executionService, IConfiguration configuration) : ControllerBase
 {
     [HttpPost]
-    public async Task<ActionResult<ExecutionResult>> PostAsync([FromBody] ExecutionRequest request)
+    public async Task<ActionResult<ExecutionResult>> PostAsync(string key, [FromBody] ExecutionRequest request)
     {
+        if (key != configuration["Key"])
+            return Unauthorized();
+
         var result = await executionService.ExecuteCodeAsync(request);
         return Ok(result);
     }
