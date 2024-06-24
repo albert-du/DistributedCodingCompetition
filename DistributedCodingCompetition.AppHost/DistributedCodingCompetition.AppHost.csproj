@@ -11,6 +11,8 @@
 
   <ItemGroup>
     <ProjectReference Include="..\DistributedCodingCompetition.ApiService\DistributedCodingCompetition.ApiService.csproj" />
+    <ProjectReference Include="..\DistributedCodingCompetition.CodeExecution\DistributedCodingCompetition.CodeExecution.csproj" />
+    <ProjectReference Include="..\DistributedCodingCompetition.Judge\DistributedCodingCompetition.Judge.csproj" />
     <ProjectReference Include="..\DistributedCodingCompetition.Web\DistributedCodingCompetition.Web.csproj" />
   </ItemGroup>
 

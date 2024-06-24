@@ -2,7 +2,7 @@ Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio Version 17
 VisualStudioVersion = 17.10.35013.160
 MinimumVisualStudioVersion = 10.0.40219.1
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "DistributedCodingCompetition.AppHost", "DistributedCodingCompetition.AppHost\DistributedCodingCompetition.AppHost.csproj", "{BC5A5C8C-0CB6-4888-BB52-5C301BCBCDEB}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "DistributedCodingCompetition.AppHost", "DistributedCodingCompetition.AppHost\DistributedCodingCompetition.AppHost.csproj", "{BC5A5C8C-0CB6-4888-BB52-5C301BCBCDEB}"
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "DistributedCodingCompetition.ServiceDefaults", "DistributedCodingCompetition.ServiceDefaults\DistributedCodingCompetition.ServiceDefaults.csproj", "{EC8D630D-CDDD-4374-AA94-8FC63DF7E035}"
 EndProject
@@ -11,6 +11,10 @@ EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "DistributedCodingCompetition.Web", "DistributedCodingCompetition.Web\DistributedCodingCompetition.Web.csproj", "{F02BDA13-A6FE-49C6-8733-B5ABFE664865}"
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "DistributedCodingCompetition.Tests", "DistributedCodingCompetition.Tests\DistributedCodingCompetition.Tests.csproj", "{640E0871-B453-4F34-BFC5-92E0A492DC92}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "DistributedCodingCompetition.CodeExecution", "DistributedCodingCompetition.CodeExecution\DistributedCodingCompetition.CodeExecution.csproj", "{2459C841-C1AC-49DF-AEC7-012678D8F440}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "DistributedCodingCompetition.Judge", "DistributedCodingCompetition.Judge\DistributedCodingCompetition.Judge.csproj", "{1D2D7FA8-557B-4196-BECE-10AB80166058}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -38,6 +42,14 @@ Global
 		{640E0871-B453-4F34-BFC5-92E0A492DC92}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{640E0871-B453-4F34-BFC5-92E0A492DC92}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{640E0871-B453-4F34-BFC5-92E0A492DC92}.Release|Any CPU.Build.0 = Release|Any CPU
+		{2459C841-C1AC-49DF-AEC7-012678D8F440}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{2459C841-C1AC-49DF-AEC7-012678D8F440}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{2459C841-C1AC-49DF-AEC7-012678D8F440}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{2459C841-C1AC-49DF-AEC7-012678D8F440}.Release|Any CPU.Build.0 = Release|Any CPU
+		{1D2D7FA8-557B-4196-BECE-10AB80166058}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{1D2D7FA8-557B-4196-BECE-10AB80166058}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{1D2D7FA8-557B-4196-BECE-10AB80166058}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{1D2D7FA8-557B-4196-BECE-10AB80166058}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

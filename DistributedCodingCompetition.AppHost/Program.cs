@@ -2,11 +2,13 @@ var builder = DistributedApplication.CreateBuilder(args);
 
 var cache = builder.AddRedis("cache");
 
-var apiService = builder.AddProject<Projects.DistributedCodingCompetition_ApiService>("apiservice");
+var codeExecution = builder.AddProject<Projects.DistributedCodingCompetition_CodeExecution>("codeexecution");
+var judge = builder.AddProject<Projects.DistributedCodingCompetition_Judge>("judge").WithReference(codeExecution);
 
 builder.AddProject<Projects.DistributedCodingCompetition_Web>("webfrontend")
     .WithExternalHttpEndpoints()
     .WithReference(cache)
-    .WithReference(apiService);
+    .WithReference(judge)
+    .WithReference(codeExecution);
 
 builder.Build().Run();

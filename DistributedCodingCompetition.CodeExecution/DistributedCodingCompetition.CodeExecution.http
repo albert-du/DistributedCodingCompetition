@@ -1,0 +1,6 @@
+@DistributedCodingCompetition.CodeExecution_HostAddress = http://localhost:5211
+
+GET {{DistributedCodingCompetition.CodeExecution_HostAddress}}/weatherforecast/
+Accept: application/json
+
+###
