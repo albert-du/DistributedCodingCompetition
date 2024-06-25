@@ -3,6 +3,8 @@
 @page "/execrunner/{execRunnerId:guid?}"
 @inject ExecRunnerContext ExecRunnerContext
 @inject IExecRunnerService ExecRunnerService
+@inject NavigationManager NavigationManager
+@inject IRefreshEventService RefreshEventService
 
 <div class="sm:w-1/2 mx-auto">
     <a class="hover:underline italic my-2 py-1" href="/">back</a>
@@ -85,5 +87,7 @@
         }
 
         ExecRunnerContext.SaveChanges();
+        RefreshEventService.Refresh(this);
+        NavigationManager.NavigateTo("");
     }
 }

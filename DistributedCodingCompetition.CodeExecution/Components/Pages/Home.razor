@@ -2,6 +2,7 @@
 @page "/"
 @inject ExecRunnerContext ExecRunnerContext
 @inject NavigationManager NavigationManager
+@inject IRefreshEventService RefreshEventService
 @implements IDisposable
 
 <h3>Runner CRUD</h3>
@@ -13,14 +14,17 @@
 else
 {
     <button class="btn btn-primary" @onclick="AddRunner">Add New Runner</button>
-    <table class="table">
+    <table class="table-auto">
         <thead>
             <tr>
                 <th>Name</th>
                 <th>Endpoint</th>
                 <th>Enabled</th>
+                <th>Available</th>
                 <th>Live</th>
                 <th>System</th>
+                <th>Packages</th>
+                <th>Languages</th>
             </tr>
         </thead>
         <tbody>
@@ -30,6 +34,11 @@ else
                     <td>@runner.Name</td>
                     <td>@runner.Endpoint</td>
                     <td>@runner.Available</td>
+                    <td>@runner.Available</td>
+                    <td>@runner.Live</td>
+                    <td>@runner.SystemInfo</td>
+                    <td>@runner.Packages</td>
+                    <td>@runner.Languages</td>
                     <td>
                         <button class="" @onclick="() => EditRunner(runner.Id)">Edit</button>
                         <button class="" @onclick="() => DeleteRunner(runner.Id)">Delete</button>
@@ -43,9 +52,25 @@ else
 @code {
     private List<ExecRunner>? execRunners;
 
-    protected override void OnInitialized()
+    protected override Task OnInitializedAsync()
     {
         execRunners = ExecRunnerContext.ExecRunners.ToList();
+        return Task.CompletedTask;
+    }
+
+    protected override Task OnAfterRenderAsync(bool firstRender)
+    {
+        if (firstRender)
+        {
+            RefreshEventService.RefreshEvent += RefreshRunners;
+        }
+        return Task.CompletedTask;
+    }
+
+    private void RefreshRunners(object? sender, EventArgs args)
+    {
+        execRunners = ExecRunnerContext.ExecRunners.ToList();
+        InvokeAsync(StateHasChanged);
     }
 
     private void AddRunner()
@@ -70,6 +95,6 @@ else
 
     public void Dispose()
     {
-        
+        RefreshEventService.RefreshEvent -= RefreshRunners;
     }
 }
