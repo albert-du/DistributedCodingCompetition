@@ -8,7 +8,7 @@ public class PistonExecutionService(HttpClient httpClient, ILogger<PistonExecuti
 {
     public async Task<ExecutionResult> ExecuteCodeAsync(ExecutionRequest request)
     {
-        var components = request.Language.Split('-');
+        var components = request.Language.Split('=');
         if (components.Length != 2)
             throw new ArgumentException("Invalid language format");
 
@@ -31,18 +31,18 @@ public class PistonExecutionService(HttpClient httpClient, ILogger<PistonExecuti
             Stdin = request.Input
         };
         var startTime = DateTime.UtcNow;
-        var response = await httpClient.PostAsJsonAsync(configuration["Piston"], pistonRequest);
+        var response = await httpClient.PostAsJsonAsync(configuration["Piston"] + "api/v2/execute", pistonRequest);
         response.EnsureSuccessStatusCode();
         var pistonResult = await response.Content.ReadFromJsonAsync<PistonResult>() ?? throw new Exception("Failed to parse response");
+        var error = pistonResult.Compile is null ? pistonResult.Run.Stderr : pistonResult.Compile.Stderr;
         return new()
         {
             Id = Guid.NewGuid(),
-            RequestId = request.Id,
             TimeStamp = startTime,
             ExecutionTime = DateTime.UtcNow - startTime,
             ExitCode = pistonResult.Run.Code,
             Output = pistonResult.Run.Stdout,
-            Error = $"{pistonResult.Compile?.Stdout}\n{pistonResult.Run.Stderr}"
+            Error = error
         };
     }
 }

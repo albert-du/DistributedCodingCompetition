@@ -6,11 +6,6 @@
 public record ExecutionRequest
 {
     /// <summary>
-    /// Identification of the execution.
-    /// </summary>
-    public Guid Id { get; init; }
-
-    /// <summary>
     /// The source code to execute.
     /// </summary>
     public string Code { get; init; } = string.Empty;

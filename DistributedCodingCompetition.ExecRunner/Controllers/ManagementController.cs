@@ -36,7 +36,7 @@ public class ManagementController(IConfiguration configuration, HttpClient httpC
             TimeStamp = DateTime.UtcNow,
             Version = "1.0.0",
             Ready = Available,
-            Message = !selfCheck ? "Self Check Failed" : "Ready",
+            Message = installing ? "Installation in progress" : !selfCheck ? "Self Check Failed" : "Ready",
             Name = configuration["Name"] ?? "EXEC",
             Languages = languages ?? string.Empty,
             SystemInfo = SystemInfo()
@@ -49,7 +49,7 @@ public class ManagementController(IConfiguration configuration, HttpClient httpC
         if (key != configuration["Key"])
             return Unauthorized();
 
-        var packages = await httpClient.GetFromJsonAsync<IReadOnlyList<Package>>(configuration["Piston"] + "/api/v2/packages") ?? [];
+        var packages = await httpClient.GetFromJsonAsync<IReadOnlyList<Package>>(configuration["Piston"] + "api/v2/packages") ?? [];
 
         return Ok(packages.Where(x => x.Installed).Select(x => $"{x.Name}={x.Version}").Where(x => !string.IsNullOrWhiteSpace(x)));
     }
@@ -60,7 +60,7 @@ public class ManagementController(IConfiguration configuration, HttpClient httpC
         if (key != configuration["Key"])
             return Unauthorized();
 
-        var packages = await httpClient.GetFromJsonAsync<IReadOnlyList<Package>>(configuration["Piston"] + "/api/v2/packages") ?? [];
+        var packages = await httpClient.GetFromJsonAsync<IReadOnlyList<Package>>(configuration["Piston"] + "api/v2/packages") ?? [];
 
         return Ok(packages.Select(x => $"{x.Name}={x.Version}").Where(x => !string.IsNullOrWhiteSpace(x)));
     }
@@ -78,7 +78,7 @@ public class ManagementController(IConfiguration configuration, HttpClient httpC
         installing = true;
         try
         {
-            var oldSpec = (await httpClient.GetFromJsonAsync<IReadOnlyList<Package>>(configuration["Piston"] + "/api/v2/packages") ?? []).Where(x => x.Installed).Select(x => $"{x.Name}={x.Version}").Where(x => !string.IsNullOrWhiteSpace(x));
+            var oldSpec = (await httpClient.GetFromJsonAsync<IReadOnlyList<Package>>(configuration["Piston"] + "api/v2/packages") ?? []).Where(x => x.Installed).Select(x => $"{x.Name}={x.Version}").Where(x => !string.IsNullOrWhiteSpace(x));
             HashSet<string> removed = new(oldSpec);
             removed.ExceptWith(lines);
             List<string> response = [];
@@ -91,7 +91,7 @@ public class ManagementController(IConfiguration configuration, HttpClient httpC
                 using HttpRequestMessage message = new()
                 {
                     Method = HttpMethod.Delete,
-                    RequestUri = new(configuration["Piston"] + "/api/v2/packages"),
+                    RequestUri = new(configuration["Piston"] + "api/v2/packages"),
                     Content = new StringContent($$"""{ "language": "{{name}}", "version": "{{version}}"}""", Encoding.UTF8, "application/json")
                 };
                 var resp = await httpClient.SendAsync(message);
@@ -112,7 +112,7 @@ public class ManagementController(IConfiguration configuration, HttpClient httpC
                 using HttpRequestMessage message = new()
                 {
                     Method = HttpMethod.Post,
-                    RequestUri = new(configuration["Piston"] + "/api/v2/packages"),
+                    RequestUri = new(configuration["Piston"] + "api/v2/packages"),
                     Content = new StringContent($$"""{ "language": "{{name}}", "version": "{{version}}"}""", Encoding.UTF8, "application/json")
 
                 };

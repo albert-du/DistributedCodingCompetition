@@ -11,11 +11,6 @@ public record ExecutionResult
     public Guid Id { get; init; }
 
     /// <summary>
-    /// The Id of the request that this result is for.
-    /// </summary>
-    public Guid RequestId { get; init; }
-
-    /// <summary>
     /// The start time of the execution.
     /// </summary>
     public DateTime TimeStamp { get; init; }
