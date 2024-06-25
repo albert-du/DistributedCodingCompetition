@@ -1,7 +1,9 @@
+using Microsoft.EntityFrameworkCore;
+using Quartz;
+using Quartz.AspNetCore;
 using DistributedCodingCompetition.CodeExecution.Models;
 using DistributedCodingCompetition.CodeExecution.Components;
 using DistributedCodingCompetition.CodeExecution.Services;
-using Microsoft.EntityFrameworkCore;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -21,7 +23,23 @@ builder.Services.AddAntiforgery();
 builder.Services.AddRazorComponents()
     .AddInteractiveServerComponents();
 
+builder.Services.AddQuartz(q =>
+{
+    q.AddJobAndTrigger<RefreshExecRunnerJob>(trigger =>
+    {
+        trigger.WithIdentity("RefreshExecRunnerJob");
+        trigger.WithCronSchedule("0 0/5 * * * ?");
+    });
+});
+
+builder.Services.AddQuartzServer(options =>
+{
+    options.WaitForJobsToComplete = true;
+});
+
 builder.Services.AddSingleton<IExecRunnerService, ExecRunnerService>();
+builder.Services.AddSingleton<IRefreshEventService, IRefreshEventService>();
+
 
 var app = builder.Build();
 
