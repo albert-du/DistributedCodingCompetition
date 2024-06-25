@@ -12,5 +12,6 @@ public class ExecRunner
     public bool Available { get; set; }
     public bool Live { get; set; }
     public bool Enabled { get; set; }
+    public bool Authenticated { get; set; }
     public int Weight { get; set; }
 }

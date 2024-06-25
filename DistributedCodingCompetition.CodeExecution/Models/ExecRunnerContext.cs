@@ -8,6 +8,5 @@ public class ExecRunnerContext : DbContext
 
     public ExecRunnerContext(DbContextOptions<ExecRunnerContext> options) : base(options)
     {
-
     }
 }

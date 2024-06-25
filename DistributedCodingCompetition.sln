@@ -16,9 +16,9 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "DistributedCodingCompetitio
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "DistributedCodingCompetition.Judge", "DistributedCodingCompetition.Judge\DistributedCodingCompetition.Judge.csproj", "{1D2D7FA8-557B-4196-BECE-10AB80166058}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "DistributedCodingCompetition.ExecRunner", "DistributedCodingCompetition.ExecRunner\DistributedCodingCompetition.ExecRunner.csproj", "{01242147-9D15-4A9C-91BF-BC898D29226C}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "DistributedCodingCompetition.ExecRunner", "DistributedCodingCompetition.ExecRunner\DistributedCodingCompetition.ExecRunner.csproj", "{01242147-9D15-4A9C-91BF-BC898D29226C}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "DistributedCodingCompetition.ExecutionShared", "DistributedCodingCompetition.ExecutionShared\DistributedCodingCompetition.ExecutionShared.csproj", "{681566E2-498C-40F3-A492-BC14F600187F}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "DistributedCodingCompetition.ExecutionShared", "DistributedCodingCompetition.ExecutionShared\DistributedCodingCompetition.ExecutionShared.csproj", "{681566E2-498C-40F3-A492-BC14F600187F}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
