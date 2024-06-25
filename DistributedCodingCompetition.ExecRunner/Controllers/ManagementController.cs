@@ -32,7 +32,7 @@ public class ManagementController(IConfiguration configuration, HttpClient httpC
             selfCheck = false;
         }
 
-        return new RunnerStatus()
+        return new RunnerStatus
         {
             TimeStamp = DateTime.UtcNow,
             Version = "1.0.0",
