@@ -1,10 +1,12 @@
-using Aspire.Npgsql;
 var builder = DistributedApplication.CreateBuilder(args);
 
 var cache = builder.AddRedis("cache");
-var runners = builder.AddNpgsqlDataSource("exec");
 
-var codeExecution = builder.AddProject<Projects.DistributedCodingCompetition_CodeExecution>("codeexecution");
+var postgres = builder.AddPostgres("postgres");
+var executorDatabase = postgres.AddDatabase("evaluationdb");
+
+var codeExecution = builder.AddProject<Projects.DistributedCodingCompetition_CodeExecution>("codeexecution").WithReference(executorDatabase);
+
 var judge = builder.AddProject<Projects.DistributedCodingCompetition_Judge>("judge").WithReference(codeExecution);
 
 builder.AddProject<Projects.DistributedCodingCompetition_Web>("webfrontend")

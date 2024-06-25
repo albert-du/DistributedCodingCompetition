@@ -1,3 +1,5 @@
+using DistributedCodingCompetition.CodeExecution.Models;
+
 var builder = WebApplication.CreateBuilder(args);
 
 builder.AddServiceDefaults();
@@ -8,7 +10,7 @@ builder.Services.AddControllers();
 // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
-
+builder.AddNpgsqlDbContext<ExecRunnerContext>("postgresdb");
 var app = builder.Build();
 
 app.MapDefaultEndpoints();
