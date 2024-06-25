@@ -25,4 +25,18 @@ public class ExecRunnerService(HttpClient httpClient) : IExecRunnerService
         runner.Available = status.Ready;
         runner.Languages = status.Languages.Split('\n').ToList();
     }
+
+    public async Task<ExecutionResult> ExecuteCodeAsync(ExecRunner runner, ExecutionRequest request)
+    {
+        if (!runner.Available)
+            throw new Exception("ExecRunner not available");
+        if (!runner.Authenticated)
+            throw new Exception("ExecRunner not authenticated");
+        var result = await httpClient.PostAsJsonAsync($"{runner.Endpoint}{(runner.Endpoint.EndsWith('/') ? "" : "/")}api/execution?key={runner.Key}", request);
+        if (result.StatusCode is HttpStatusCode.Unauthorized)
+            throw new Exception("Unauthorized");
+        if (result.StatusCode is not HttpStatusCode.OK)
+            throw new Exception("ExecRunner failed to execute code");
+        return await result.Content.ReadFromJsonAsync<ExecutionResult>() ?? throw new Exception("execrunner result empty");
+    }
 }

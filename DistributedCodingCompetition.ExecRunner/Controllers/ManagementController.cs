@@ -20,15 +20,16 @@ public class ManagementController(IConfiguration configuration, HttpClient httpC
         if (key != configuration["Key"])
             return Unauthorized();
         string? languages = null;
+        string packages = string.Empty;
         selfCheck = true;
         try
         {
             languages = await GetLanguages();
+            packages = await GetPackages();
         }
         catch
         {
             selfCheck = false;
-            throw;
         }
 
         return new RunnerStatus()
@@ -39,6 +40,7 @@ public class ManagementController(IConfiguration configuration, HttpClient httpC
             Message = installing ? "Installation in progress" : !selfCheck ? "Self Check Failed" : "Ready",
             Name = configuration["Name"] ?? "EXEC",
             Languages = languages ?? string.Empty,
+            Packages = packages,
             SystemInfo = SystemInfo()
         };
     }
@@ -149,6 +151,14 @@ public class ManagementController(IConfiguration configuration, HttpClient httpC
         if (languages == null)
             return string.Empty;
         return string.Join('\n', languages.Select(l => l.Name + " " + l.Version + " " + l.Runtime));
+    }
+
+    private async Task<string> GetPackages()
+    {
+        var packages = await httpClient.GetFromJsonAsync<IReadOnlyList<Package>>(configuration["Piston"] + "api/v2/packages");
+        if (packages == null)
+            return string.Empty;
+        return string.Join('\n', packages.Select(p => p.Name + " " + p.Version + " " + p.Installed));
     }
 }
 internal record Language

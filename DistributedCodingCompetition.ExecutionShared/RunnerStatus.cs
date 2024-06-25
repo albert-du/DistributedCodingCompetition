@@ -8,5 +8,6 @@ public record RunnerStatus
     public required string Message { get; init; }
     public required string Name { get; init; }
     public required string Languages { get; init; }
+    public required string Packages { get; init; }
     public required string SystemInfo { get; init; }
 }

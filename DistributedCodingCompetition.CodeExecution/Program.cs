@@ -1,5 +1,6 @@
 using DistributedCodingCompetition.CodeExecution.Models;
 using DistributedCodingCompetition.CodeExecution.Components;
+using DistributedCodingCompetition.CodeExecution.Services;
 using Microsoft.EntityFrameworkCore;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -19,6 +20,9 @@ builder.Services.AddAntiforgery();
 
 builder.Services.AddRazorComponents()
     .AddInteractiveServerComponents();
+
+builder.Services.AddSingleton<IExecRunnerService, ExecRunnerService>();
+
 var app = builder.Build();
 
 app.MapDefaultEndpoints();
