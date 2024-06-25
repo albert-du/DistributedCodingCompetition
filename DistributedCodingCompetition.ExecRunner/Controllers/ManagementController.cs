@@ -10,20 +10,35 @@ using System.Text.Json.Serialization;
 [ApiController]
 public class ManagementController(IConfiguration configuration, HttpClient httpClient) : ControllerBase
 {
+    static bool installing = false;
+    static bool selfCheck = false;
+    static bool Available => !installing && selfCheck;
+
     [HttpGet]
     public async Task<ActionResult<RunnerStatus>> GetAsync(string key)
     {
         if (key != configuration["Key"])
             return Unauthorized();
-        var languages = await GetLanguages();
+        string? languages = null;
+        selfCheck = true;
+        try
+        {
+            languages = await GetLanguages();
+        }
+        catch
+        {
+            selfCheck = false;
+            throw;
+        }
+
         return new RunnerStatus()
         {
             TimeStamp = DateTime.UtcNow,
             Version = "1.0.0",
-            Healthy = true,
-            Message = "Ready",
+            Ready = Available,
+            Message = !selfCheck ? "Self Check Failed" : "Ready",
             Name = configuration["Name"] ?? "EXEC",
-            Languages = languages,
+            Languages = languages ?? string.Empty,
             SystemInfo = SystemInfo()
         };
     }
@@ -58,51 +73,61 @@ public class ManagementController(IConfiguration configuration, HttpClient httpC
         var lines = spec.Where(x => !string.IsNullOrWhiteSpace(x));
         if (!lines.All(x => x.Split('=').Length == 2))
             return BadRequest("Bad Spec");
-        var oldSpec = (await httpClient.GetFromJsonAsync<IReadOnlyList<Package>>(configuration["Piston"] + "/api/v2/packages") ?? []).Where(x => x.Installed).Select(x => $"{x.Name}={x.Version}").Where(x => !string.IsNullOrWhiteSpace(x));
-        HashSet<string> removed = new(oldSpec);
-        removed.ExceptWith(lines);
-        List<string> response = [];
-        // Uninstall removed packages
-        foreach (var package in removed)
+        if (installing)
+            return BadRequest("Already installing");
+        installing = true;
+        try
         {
-            var tokens = package.Split('=');
-            var name = tokens[0];
-            var version = tokens[1];
-            using HttpRequestMessage message = new()
+            var oldSpec = (await httpClient.GetFromJsonAsync<IReadOnlyList<Package>>(configuration["Piston"] + "/api/v2/packages") ?? []).Where(x => x.Installed).Select(x => $"{x.Name}={x.Version}").Where(x => !string.IsNullOrWhiteSpace(x));
+            HashSet<string> removed = new(oldSpec);
+            removed.ExceptWith(lines);
+            List<string> response = [];
+            // Uninstall removed packages
+            foreach (var package in removed)
             {
-                Method = HttpMethod.Delete,
-                RequestUri = new(configuration["Piston"] + "/api/v2/packages"),
-                Content = new StringContent($$"""{ "language": "{{name}}", "version": "{{version}}"}""", Encoding.UTF8, "application/json")
-            };
-            var resp = await httpClient.SendAsync(message);
-            if (resp.IsSuccessStatusCode)
-                response.Add($"Removed {name}={version}");
-            else
-                response.Add($"ERROR: Could not remove {name}={version}; {await resp.Content.ReadAsStringAsync()}");
-        }
+                var tokens = package.Split('=');
+                var name = tokens[0];
+                var version = tokens[1];
+                using HttpRequestMessage message = new()
+                {
+                    Method = HttpMethod.Delete,
+                    RequestUri = new(configuration["Piston"] + "/api/v2/packages"),
+                    Content = new StringContent($$"""{ "language": "{{name}}", "version": "{{version}}"}""", Encoding.UTF8, "application/json")
+                };
+                var resp = await httpClient.SendAsync(message);
+                if (resp.IsSuccessStatusCode)
+                    response.Add($"Removed {name}={version}");
+                else
+                    response.Add($"ERROR: Could not remove {name}={version}; {await resp.Content.ReadAsStringAsync()}");
+            }
 
-        HashSet<string> installed = new(lines);
-        installed.ExceptWith(oldSpec);
-        // Install new packages
-        foreach (var package in installed)
+            HashSet<string> installed = new(lines);
+            installed.ExceptWith(oldSpec);
+            // Install new packages
+            foreach (var package in installed)
+            {
+                var tokens = package.Split('=');
+                var name = tokens[0];
+                var version = tokens[1];
+                using HttpRequestMessage message = new()
+                {
+                    Method = HttpMethod.Post,
+                    RequestUri = new(configuration["Piston"] + "/api/v2/packages"),
+                    Content = new StringContent($$"""{ "language": "{{name}}", "version": "{{version}}"}""", Encoding.UTF8, "application/json")
+
+                };
+                var resp = await httpClient.SendAsync(message);
+                if (resp.IsSuccessStatusCode)
+                    response.Add($"Installed {name}={version}");
+                else
+                    response.Add($"ERROR: Could not install {name}={version}; {await resp.Content.ReadAsStringAsync()}");
+            }
+            return Ok(response.Count is 0 ? "Already to spec" : string.Join('\n', response));
+        }
+        finally
         {
-            var tokens = package.Split('=');
-            var name = tokens[0];
-            var version = tokens[1];
-            using HttpRequestMessage message = new()
-            {
-                Method = HttpMethod.Post,
-                RequestUri = new(configuration["Piston"] + "/api/v2/packages"),
-                Content = new StringContent($$"""{ "language": "{{name}}", "version": "{{version}}"}""", System.Text.Encoding.UTF8, "application/json")
-
-            };
-            var resp = await httpClient.SendAsync(message);
-            if (resp.IsSuccessStatusCode)
-                response.Add($"Installed {name}={version}");
-            else
-                response.Add($"ERROR: Could not install {name}={version}; {await resp.Content.ReadAsStringAsync()}");
+            installing = false;
         }
-        return Ok(response.Count is 0 ? "Already to spec" : string.Join('\n', response));
     }
 
     private static string SystemInfo()
@@ -119,7 +144,8 @@ public class ManagementController(IConfiguration configuration, HttpClient httpC
     private async Task<string> GetLanguages()
     {
         StringBuilder sb = new();
-        var languages = await httpClient.GetFromJsonAsync<IReadOnlyList<Language>>(configuration["Piston"] + "/api/v2/runtimes");
+        var s = configuration["Piston"] + "api/v2/runtimes";
+        var languages = await httpClient.GetFromJsonAsync<IReadOnlyList<Language>>(s);
         if (languages == null)
             return string.Empty;
         return string.Join('\n', languages.Select(l => l.Name + " " + l.Version + " " + l.Runtime));
