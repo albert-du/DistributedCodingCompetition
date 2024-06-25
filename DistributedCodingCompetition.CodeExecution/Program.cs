@@ -46,7 +46,6 @@ app.MapControllers();
 app.MapRazorComponents<App>()
     .AddInteractiveServerRenderMode();
 
-
 // migrate
 using (var scope = app.Services.CreateScope())
     scope.ServiceProvider.GetRequiredService<ExecRunnerContext>().Database.MigrateAsync().Wait();

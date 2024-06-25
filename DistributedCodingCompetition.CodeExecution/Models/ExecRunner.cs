@@ -4,6 +4,8 @@ public class ExecRunner
 {
     public Guid Id { get; set; }
     public string Endpoint { get; set; } = string.Empty;
+    public string Version { get; set; } = "Unknown";
+    public string Key { get; set; } = string.Empty;
     public string Name { get; set; } = "Unknown";
     public List<string> Languages { get; set; } = [];
     public List<string> Packages { get; set; } = [];

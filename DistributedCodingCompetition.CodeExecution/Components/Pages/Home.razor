@@ -26,9 +26,7 @@ else
                 <tr>
                     <td>@runner.Name</td>
                     <td>@runner.Endpoint</td>
-                    <td>@runner.Enabled</td>
-                    <td>@runner.Live</td>
-                    <td>@runner.SystemInfo</td>
+                    <td>@runner.Available</td>
                     <td>
                         <button class="" @onclick="() => EditRunner(runner.Id)">Edit</button>
                         <button class="" @onclick="() => DeleteRunner(runner.Id)">Delete</button>
