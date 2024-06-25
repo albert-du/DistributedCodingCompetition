@@ -13,7 +13,7 @@ public class ExecRunner
     public string Status { get; set; } = "Unknown";
     public bool Available { get; set; }
     public bool Live { get; set; }
-    public bool Enabled { get; set; }
+    public bool Enabled { get; set; } = true;
     public bool Authenticated { get; set; }
-    public int Weight { get; set; }
+    public int Weight { get; set; } = 100;
 }

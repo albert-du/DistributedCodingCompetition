@@ -23,7 +23,10 @@ public class ExecRunnerService(HttpClient httpClient) : IExecRunnerService
         var status = await result.Content.ReadFromJsonAsync<RunnerStatus>() ?? throw new Exception("execrunner status empty");
         runner.Authenticated = true;
         runner.Available = status.Ready;
-        runner.Languages = status.Languages.Split('\n').ToList();
+        runner.Languages = [..status.Languages.Split('\n')];
+        runner.Packages = [..status.Packages.Split('\n')];
+        runner.SystemInfo = status.SystemInfo;
+        runner.Status = status.Message;
     }
 
     public async Task<ExecutionResult> ExecuteCodeAsync(ExecRunner runner, ExecutionRequest request)

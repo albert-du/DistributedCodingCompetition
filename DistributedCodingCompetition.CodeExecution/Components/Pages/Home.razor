@@ -1,5 +1,8 @@
-﻿@page "/"
+﻿@rendermode InteractiveServer
+@page "/"
 @inject ExecRunnerContext ExecRunnerContext
+@inject NavigationManager NavigationManager
+@implements IDisposable
 
 <h3>Runner CRUD</h3>
 
@@ -47,7 +50,7 @@ else
 
     private void AddRunner()
     {
-        // Navigate to Add/Edit page with null or 0 as ID
+        NavigationManager.NavigateTo("execrunner");
     }
 
     private async Task EditRunner(Guid runnerId)
@@ -63,5 +66,10 @@ else
         ExecRunnerContext.ExecRunners.Remove(runner);
         await ExecRunnerContext.SaveChangesAsync();
         execRunners?.Remove(runner); // Update UI
+    }
+
+    public void Dispose()
+    {
+        
     }
 }
