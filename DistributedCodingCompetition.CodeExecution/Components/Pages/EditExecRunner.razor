@@ -5,10 +5,11 @@
 @inject IExecRunnerService ExecRunnerService
 @inject NavigationManager NavigationManager
 @inject IRefreshEventService RefreshEventService
+@using System.Collections.Frozen
 
 <div class="sm:w-1/2 mx-auto">
     <a class="hover:underline italic my-2 py-1" href="/">back</a>
-    
+
     @if (ExecRunnerId.HasValue)
     {
         <h3 class="text-2xl">
@@ -25,7 +26,7 @@
 
     <EditForm Model="@execRunner" class="flex flex-col gap-y-2 gap-x-3">
         <div>
-            <label for="Endpoint" >Endpoint</label>
+            <label for="Endpoint">Endpoint</label>
             <InputText class="rounded-md px-2 py-1 bg-gray-100" id="Endpoint" placeholder="http://execrunner:2000/" @bind-Value="execRunner.Endpoint" />
         </div>
         <div>
@@ -43,27 +44,57 @@
 
         @if (ExecRunnerId.HasValue)
         {
-            @foreach (var package in execRunner.Packages)
-            {
-                <div>
-                    @package
-                </div>
-            }
+            <div>
+                @foreach (var package in execRunner.Packages)
+                {
+                    <div class="w-64 flex justify-between ">
+                        <div>
+                            @package
+                        </div>
+                        <button>
+                            Remove
+                        </button>
+                    </div>
+                }
+            </div>
+            <div>
+                @foreach (var package in execRunner.Packages)
+                {
+                    <div class="w-64 flex justify-between ">
+                        <div>
+                            @package
+                        </div>
+                        <button @onclick="() => RemovePackage(package)">
+                            Remove
+                        </button>
+                    </div>
+                }
+            </div>
+            <div>
+                @foreach (var package in availablePackages)
+                {
+                    <div class="w-64 flex justify-between ">
+                        <div>
+                            @package
+                        </div>
+                        <button @onclick="() => AddPackage(package)">
+                            Add
+                        </button>
+                    </div>
+                }
+            </div>
         }
-
-
         <button type="submit" @onclick="SaveRunnerAsync">Save</button>
         <DataAnnotationsValidator />
         <ValidationSummary />
     </EditForm>
-
 </div>
-
-
 
 @code
 {
     private ExecRunner execRunner = new();
+
+    private List<string> availablePackages = [];
 
     [Parameter]
     public Guid? ExecRunnerId { get; set; }
@@ -74,17 +105,34 @@
             execRunner = runner;
     }
 
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        if (firstRender && ExecRunnerId.HasValue)
+        {
+            var set = execRunner.Packages.ToFrozenSet();
+            availablePackages = (await ExecRunnerService.FetchAvailablePackagesAsync(execRunner)).Where(x => !set.Contains(x)).ToList();
+        }
+    }
+
+    private void AddPackage(string name)
+    {
+        execRunner.Packages.Add(name);
+        availablePackages.Remove(name);
+    }
+
+    private void RemovePackage(string name)
+    {
+        execRunner.Packages.Remove(name);
+        availablePackages.Add(name);
+    }
+
     private async Task SaveRunnerAsync()
     {
         await ExecRunnerService.RefreshExecRunnerAsync(execRunner);
         if (ExecRunnerId.HasValue)
-        {
             ExecRunnerContext.ExecRunners.Update(execRunner);
-        }
         else
-        {
             ExecRunnerContext.ExecRunners.Add(execRunner);
-        }
 
         ExecRunnerContext.SaveChanges();
         RefreshEventService.Refresh(this);

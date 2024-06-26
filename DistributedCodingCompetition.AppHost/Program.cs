@@ -1,15 +1,8 @@
-using Microsoft.Extensions.Hosting;
-
 var builder = DistributedApplication.CreateBuilder(args);
 
 var cache = builder.AddRedis("cache");
 
 var postgres = builder.AddPostgres("postgres");
-
-if (builder.Environment.IsDevelopment())
-{
-    postgres.WithBindMount("./data/postgres", "/var/lib/postgresql/data");
-}
 
 var executorDatabase = postgres.AddDatabase("evaluationdb");
 

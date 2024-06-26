@@ -31,7 +31,7 @@ builder.Services.AddQuartz(q =>
     q.AddTrigger(t => t
         .WithIdentity("RefreshExecRunnerJobTrigger")
         .ForJob(jobKey)
-        .WithCronSchedule("0 * * ? * *")); // every minute
+        .WithCalendarIntervalSchedule(s => s.WithIntervalInSeconds(10))); // every 10 seconds
 });
 
 builder.Services.AddQuartzServer(options => options.WaitForJobsToComplete = true);
@@ -69,7 +69,10 @@ app.MapRazorComponents<App>()
 
 // migrate
 using (var scope = app.Services.CreateScope())
-    scope.ServiceProvider.GetRequiredService<ExecRunnerContext>().Database.MigrateAsync().Wait();
+{
+    var ctx = scope.ServiceProvider.GetRequiredService<ExecRunnerContext>();
+    ctx?.Database.MigrateAsync().Wait();
+}
 
 
 app.Run();

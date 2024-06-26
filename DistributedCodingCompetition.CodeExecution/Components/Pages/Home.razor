@@ -80,7 +80,7 @@ else
 
     private async Task EditRunner(Guid runnerId)
     {
-        // Navigate to Add/Edit page with runnerId
+        NavigationManager.NavigateTo($"execrunner/{runnerId}");
     }
 
     private async Task DeleteRunner(Guid runnerId)

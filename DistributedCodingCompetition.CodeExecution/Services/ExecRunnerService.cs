@@ -31,6 +31,16 @@ public class ExecRunnerService(HttpClient httpClient) : IExecRunnerService
         runner.Name = status.Name;
     }
 
+    public async Task<IReadOnlyList<string>> FetchAvailablePackagesAsync(ExecRunner runner)
+    {
+        var result = await httpClient.GetAsync($"{runner.Endpoint}{(runner.Endpoint.EndsWith('/') ? "" : "/")}api/management/available?key={runner.Key}");
+        if (result.StatusCode is HttpStatusCode.Unauthorized)
+            throw new Exception("Unauthorized");
+        if (result.StatusCode is not HttpStatusCode.OK)
+            throw new Exception("ExecRunner failed to fetch available packages");
+        return await result.Content.ReadFromJsonAsync<IReadOnlyList<string>>() ?? throw new Exception("execrunner packages empty");
+    }
+
     public async Task<ExecutionResult> ExecuteCodeAsync(ExecRunner runner, ExecutionRequest request)
     {
         if (!runner.Available)
