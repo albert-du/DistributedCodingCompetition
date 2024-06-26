@@ -13,45 +13,59 @@
 }
 else
 {
+    <div>Last Refresh Time: @lastRefreshTime</div>
     <button class="btn btn-primary" @onclick="AddRunner">Add New Runner</button>
-    <table class="table-auto">
-        <thead>
+    <table class="table-auto border-collapse border border-slate-400 sm:w-4/5">
+        <thead class="border border-slate-400 ">
             <tr>
-                <th>Name</th>
-                <th>Endpoint</th>
-                <th>Enabled</th>
-                <th>Available</th>
-                <th>Live</th>
-                <th>System</th>
-                <th>Packages</th>
-                <th>Languages</th>
+                <th class="border border-slate-400">Name</th>
+                <th class="border border-slate-400 w-64">Endpoint</th>
+                <th class="border border-slate-400">Weight</th>
+                <th class="border border-slate-400">Enabled</th>
+                <th class="border border-slate-400">Available</th>
+                <th class="border border-slate-400">Live</th>
+                <th class="border border-slate-400">Status</th>
+                <th class="border border-slate-400">System</th>
+                <th class="border border-slate-400">Packages</th>
+                <th class="border border-slate-400">Languages</th>
             </tr>
         </thead>
         <tbody>
             @foreach (var runner in execRunners)
             {
-                <tr>
-                    <td>@runner.Name</td>
-                    <td>@runner.Endpoint</td>
-                    <td>@runner.Available</td>
-                    <td>@runner.Available</td>
-                    <td>@runner.Live</td>
-                    <td>@runner.SystemInfo</td>
-                    <td>
+                <tr class="border border-slate-400 ">
+                    <td class="border border-slate-300">@runner.Name</td>
+                    <td class="border border-slate-300">@runner.Endpoint</td>
+                    <td class="border border-slate-300">@((runner.Available && runner.Enabled ? runner.Weight : 0) *
+                100 / totalWeight) &percnt;</td>
+                    <td class="border border-slate-300">@runner.Available</td>
+                    <td class="border border-slate-300">@runner.Available</td>
+                    <td class="border border-slate-300">@runner.Live</td>
+                    <td class="border border-slate-300">@runner.Status</td>
+                    <td class="border border-slate-300">
+                        @foreach (var line in runner.SystemInfo.Split('\n'))
+                        {
+                            <div>@line</div>
+                        }
+
+                    </td>
+                    <td class="border border-slate-300">
                         @foreach (var p in runner.Packages)
                         {
                             <div>@p</div>
                         }
                     </td>
-                    <td>
+                    <td class="border border-slate-300">
                         @foreach (var l in runner.Languages)
                         {
                             <div>@l</div>
                         }
                     </td>
-                    <td>
-                        <button class="" @onclick="() => EditRunner(runner.Id)">Edit</button>
-                        <button class="" @onclick="() => DeleteRunner(runner.Id)">Delete</button>
+                    <td class="border border-slate-300">
+                        <button class="rounded-sm p-1 mx-1 my-2 bg-gray-200 hover:bg-gray-300"
+                            @onclick="() => EditRunner(runner.Id)">Edit</button>
+                        <button class="rounded-sm p-1 mx-1 my-2 bg-rose-500 hover:rose-gray-600"
+                            @onclick="() => DeleteRunner(runner.Id)">Delete</button>
                     </td>
                 </tr>
             }
@@ -60,11 +74,15 @@ else
 }
 
 @code {
+    private DateTime lastRefreshTime = DateTime.Now;
     private List<ExecRunner>? execRunners;
-
+    private int totalWeight = -1;
     protected override Task OnInitializedAsync()
     {
         execRunners = ExecRunnerContext.ExecRunners.ToList();
+        var t = execRunners.Where(r => r.Available && r.Enabled).Sum(r => r.Weight);
+        if (t == 0) t = -1;
+        totalWeight = t;
         return Task.CompletedTask;
     }
 
@@ -77,10 +95,14 @@ else
         return Task.CompletedTask;
     }
 
-    private void RefreshRunners(object? sender, EventArgs args)
+    private async void RefreshRunners(object? sender, EventArgs args)
     {
         execRunners = ExecRunnerContext.ExecRunners.ToList();
-        InvokeAsync(StateHasChanged);
+        var t = execRunners.Where(r => r.Available && r.Enabled).Sum(r => r.Weight);
+        if (t == 0) t = -1;
+        totalWeight = t;
+        lastRefreshTime = DateTime.Now;
+        await InvokeAsync(StateHasChanged);
     }
 
     private void AddRunner()

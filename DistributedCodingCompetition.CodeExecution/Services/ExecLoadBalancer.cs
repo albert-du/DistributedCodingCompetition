@@ -7,7 +7,7 @@ public class ExecLoadBalancer(ILogger<ExecLoadBalancer> logger) : IExecLoadBalan
 {
     public ExecRunner? SelectRunner(IReadOnlyCollection<ExecRunner> runners, ExecutionRequest request)
     {
-        var supportedRunner = runners.Where(r => r.Languages.Contains(request.Language));
+        var supportedRunner = runners.Where(r => r.Available && r.Enabled && r.Languages.Contains(request.Language));
         var totalweight = runners.Sum(r => r.Weight);
         var random = new Random();
 

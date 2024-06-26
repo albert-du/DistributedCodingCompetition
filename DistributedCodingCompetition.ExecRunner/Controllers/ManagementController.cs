@@ -132,16 +132,12 @@ public class ManagementController(IConfiguration configuration, HttpClient httpC
         }
     }
 
-    private static string SystemInfo()
-    {
-        StringBuilder sb = new();
-        sb.AppendLine("OS: " + System.Runtime.InteropServices.RuntimeInformation.OSDescription);
-        sb.AppendLine("Framework: " + System.Runtime.InteropServices.RuntimeInformation.FrameworkDescription);
-        sb.AppendLine("Processors: " + Environment.ProcessorCount);
-        sb.AppendLine("Runtime: " + System.Runtime.InteropServices.RuntimeInformation.RuntimeIdentifier);
-        sb.AppendLine("Memory: " + (Environment.WorkingSet / 1024 / 1024) + "MB");
-        return sb.ToString();
-    }
+    private static string SystemInfo() =>
+        $"OS: {System.Runtime.InteropServices.RuntimeInformation.OSDescription}\n" +
+        $"Framework: {System.Runtime.InteropServices.RuntimeInformation.FrameworkDescription}\n" +
+        $"Processors: {Environment.ProcessorCount}\n" +
+        $"Runtime: {System.Runtime.InteropServices.RuntimeInformation.RuntimeIdentifier}\n" +
+        $"Memory: {Environment.WorkingSet / 1024 / 1024}MB";
 
     private async Task<string> GetLanguages()
     {
@@ -150,7 +146,7 @@ public class ManagementController(IConfiguration configuration, HttpClient httpC
         var languages = await httpClient.GetFromJsonAsync<IReadOnlyList<Language>>(s);
         if (languages == null)
             return string.Empty;
-        return string.Join('\n', languages.Select(l => l.Name + " " + l.Version + " " + l.Runtime));
+        return string.Join('\n', languages.Select(l => $"{l.Name}={l.Version}"));
     }
 
     private async Task<string> GetInstalledPackages()

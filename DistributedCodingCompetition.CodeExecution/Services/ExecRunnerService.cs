@@ -8,7 +8,20 @@ public class ExecRunnerService(HttpClient httpClient) : IExecRunnerService
 {
     public async Task RefreshExecRunnerAsync(ExecRunner runner)
     {
-        var result = await httpClient.GetAsync($"{runner.Endpoint}{(runner.Endpoint.EndsWith('/') ? "" : "/")}api/management?key={runner.Key}");
+        HttpResponseMessage result;
+        try
+        {
+            result = await httpClient.GetAsync($"{runner.Endpoint}{(runner.Endpoint.EndsWith('/') ? "" : "/")}api/management?key={runner.Key}");
+
+        }
+        catch (HttpRequestException)
+        {
+            runner.Live = false;
+            runner.Available = false;
+            runner.Status = "Offline";
+            return;
+        }
+        
         if (result.StatusCode is HttpStatusCode.Unauthorized)
         {
             runner.Authenticated = false;
