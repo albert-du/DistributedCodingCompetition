@@ -8,6 +8,7 @@ public class RefreshExecRunnerJob(IExecRunnerService execRunnerService, ExecRunn
 {
     public async Task Execute(IJobExecutionContext context)
     {
+        await Task.Delay(15000);
         foreach (var runner in db.ExecRunners)
             await execRunnerService.RefreshExecRunnerAsync(runner);
         await db.SaveChangesAsync();

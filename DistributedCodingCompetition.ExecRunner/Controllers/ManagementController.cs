@@ -25,7 +25,7 @@ public class ManagementController(IConfiguration configuration, HttpClient httpC
         try
         {
             languages = await GetLanguages();
-            packages = await GetPackages();
+            packages = await GetInstalledPackages();
         }
         catch
         {
@@ -153,12 +153,12 @@ public class ManagementController(IConfiguration configuration, HttpClient httpC
         return string.Join('\n', languages.Select(l => l.Name + " " + l.Version + " " + l.Runtime));
     }
 
-    private async Task<string> GetPackages()
+    private async Task<string> GetInstalledPackages()
     {
         var packages = await httpClient.GetFromJsonAsync<IReadOnlyList<Package>>(configuration["Piston"] + "api/v2/packages");
         if (packages == null)
             return string.Empty;
-        return string.Join('\n', packages.Select(p => p.Name + " " + p.Version + " " + p.Installed));
+        return string.Join('\n', packages.Where(p => p.Installed).Select(p => $"{p.Name}={p.Version}"));
     }
 }
 internal record Language

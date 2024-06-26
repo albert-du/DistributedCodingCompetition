@@ -13,8 +13,8 @@ using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 namespace DistributedCodingCompetition.CodeExecution.Migrations
 {
     [DbContext(typeof(ExecRunnerContext))]
-    [Migration("20240625041150_Authstate")]
-    partial class Authstate
+    [Migration("20240626043623_Init")]
+    partial class Init
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -45,6 +45,10 @@ namespace DistributedCodingCompetition.CodeExecution.Migrations
                         .IsRequired()
                         .HasColumnType("text");
 
+                    b.Property<string>("Key")
+                        .IsRequired()
+                        .HasColumnType("text");
+
                     b.Property<List<string>>("Languages")
                         .IsRequired()
                         .HasColumnType("text[]");
@@ -65,6 +69,10 @@ namespace DistributedCodingCompetition.CodeExecution.Migrations
                         .HasColumnType("text");
 
                     b.Property<string>("SystemInfo")
+                        .IsRequired()
+                        .HasColumnType("text");
+
+                    b.Property<string>("Version")
                         .IsRequired()
                         .HasColumnType("text");
 

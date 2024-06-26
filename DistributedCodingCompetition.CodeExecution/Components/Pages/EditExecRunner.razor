@@ -58,19 +58,6 @@
                 }
             </div>
             <div>
-                @foreach (var package in execRunner.Packages)
-                {
-                    <div class="w-64 flex justify-between ">
-                        <div>
-                            @package
-                        </div>
-                        <button @onclick="() => RemovePackage(package)">
-                            Remove
-                        </button>
-                    </div>
-                }
-            </div>
-            <div>
                 @foreach (var package in availablePackages)
                 {
                     <div class="w-64 flex justify-between ">
@@ -111,6 +98,7 @@
         {
             var set = execRunner.Packages.ToFrozenSet();
             availablePackages = (await ExecRunnerService.FetchAvailablePackagesAsync(execRunner)).Where(x => !set.Contains(x)).ToList();
+            await InvokeAsync(StateHasChanged);
         }
     }
 

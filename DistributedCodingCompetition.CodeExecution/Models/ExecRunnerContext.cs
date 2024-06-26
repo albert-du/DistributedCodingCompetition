@@ -2,11 +2,7 @@
 
 using Microsoft.EntityFrameworkCore;
 
-public class ExecRunnerContext : DbContext
+public class ExecRunnerContext(DbContextOptions<ExecRunnerContext> options) : DbContext(options)
 {
-    public DbSet<ExecRunner> ExecRunners { get; set; } = null!;
-
-    public ExecRunnerContext(DbContextOptions<ExecRunnerContext> options) : base(options)
-    {
-    }
+    public DbSet<ExecRunner> ExecRunners => Set<ExecRunner>();
 }

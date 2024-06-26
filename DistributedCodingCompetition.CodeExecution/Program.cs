@@ -49,6 +49,15 @@ if (app.Environment.IsDevelopment())
 {
     app.UseSwagger();
     app.UseSwaggerUI();
+
+    // migrate delayed
+    _ = Task.Run(async () =>
+    {
+        await Task.Delay(5000);
+        using var scope = app.Services.CreateScope();
+        var context = scope.ServiceProvider.GetRequiredService<ExecRunnerContext>();
+        await context.Database.MigrateAsync();
+    });
 }
 else
 {
@@ -67,12 +76,6 @@ app.MapControllers();
 app.MapRazorComponents<App>()
     .AddInteractiveServerRenderMode();
 
-// migrate
-using (var scope = app.Services.CreateScope())
-{
-    var ctx = scope.ServiceProvider.GetRequiredService<ExecRunnerContext>();
-    ctx?.Database.MigrateAsync().Wait();
-}
 
 
 app.Run();

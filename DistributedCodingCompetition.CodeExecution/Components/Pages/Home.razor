@@ -5,7 +5,7 @@
 @inject IRefreshEventService RefreshEventService
 @implements IDisposable
 
-<h3>Runner CRUD</h3>
+<h3>Execution Runners</h3>
 
 @if (execRunners == null)
 {
@@ -37,8 +37,18 @@ else
                     <td>@runner.Available</td>
                     <td>@runner.Live</td>
                     <td>@runner.SystemInfo</td>
-                    <td>@runner.Packages</td>
-                    <td>@runner.Languages</td>
+                    <td>
+                        @foreach (var p in runner.Packages)
+                        {
+                            <div>@p</div>
+                        }
+                    </td>
+                    <td>
+                        @foreach (var l in runner.Languages)
+                        {
+                            <div>@l</div>
+                        }
+                    </td>
                     <td>
                         <button class="" @onclick="() => EditRunner(runner.Id)">Edit</button>
                         <button class="" @onclick="() => DeleteRunner(runner.Id)">Delete</button>
