@@ -5,7 +5,7 @@ using DistributedCodingCompetition.ExecutionShared;
 
 public class ExecLoadBalancer(ILogger<ExecLoadBalancer> logger) : IExecLoadBalancer
 {
-    public ExecRunner? SelectRunner(ICollection<ExecRunner> runners, ExecutionRequest request)
+    public ExecRunner? SelectRunner(IReadOnlyCollection<ExecRunner> runners, ExecutionRequest request)
     {
         var supportedRunner = runners.Where(r => r.Languages.Contains(request.Language));
         var totalweight = runners.Sum(r => r.Weight);
@@ -25,7 +25,7 @@ public class ExecLoadBalancer(ILogger<ExecLoadBalancer> logger) : IExecLoadBalan
 
     public IReadOnlyList<(ExecutionRequest, ExecRunner?)> BalanceRequests(IReadOnlyCollection<ExecRunner> runners, IReadOnlyCollection<ExecutionRequest> requests)
     {
-        Dictionary<string, List<ExecRunner>> supportedRunners = new();
+        Dictionary<string, List<ExecRunner>> supportedRunners = [];
         foreach (var request in requests)
         {
             var lang = request.Language;
@@ -40,7 +40,7 @@ public class ExecLoadBalancer(ILogger<ExecLoadBalancer> logger) : IExecLoadBalan
                     execRunners.Add(runner);
             }
         }
-        List<(ExecutionRequest, ExecRunner?)> result = new();
+        List<(ExecutionRequest, ExecRunner?)> result = [];
         foreach (var request in requests)
         {
             var runner = SelectRunner(supportedRunners[request.Language], request);
