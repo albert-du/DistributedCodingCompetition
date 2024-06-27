@@ -77,7 +77,4 @@ app.MapControllers();
 app.MapRazorComponents<App>()
     .AddInteractiveServerRenderMode();
 
-
-
 app.Run();
-

@@ -2,7 +2,7 @@
 
 using Microsoft.EntityFrameworkCore;
 
-public class ContestContext : DbContext
+public class ContestContext(DbContextOptions<ContestContext> options) : DbContext(options)
 {
     public DbSet<Contest> Contests => Set<Contest>();
     public DbSet<Problem> Problems => Set<Problem>();
