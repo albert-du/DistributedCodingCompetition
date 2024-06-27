@@ -60,12 +60,23 @@
         try
         {
             var models = await BlazorMonaco.Editor.Global.GetModels(JSRuntime);
-            var model = models.FirstOrDefault(m => m.Id == "my-editor-instance-id");
+            var model = models.FirstOrDefault();
             if (model is null)
                 return;
 
             var lines = await model.GetLinesContent();
             var code = string.Join('\n', lines);
+            var res = await CodeExecutionClient.ExecuteCodeAsync(new()
+            {
+                Code = code,
+                Language = selectedLanguage
+            });
+            if (res is null)
+            {
+                result = "Failed";
+                return;
+            }
+            result = res.Output;
 
         }
         finally

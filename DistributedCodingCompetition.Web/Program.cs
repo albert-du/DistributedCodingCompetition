@@ -11,12 +11,11 @@ builder.AddRedisOutputCache("cache");
 builder.Services.AddRazorComponents()
     .AddInteractiveServerComponents();
 
-builder.Services.AddHttpClient<CodeExecutionClient>(client =>
+builder.Services.AddSingleton<CodeExecutionClient>();
+builder.Services.AddHttpClient<CodeExecutionClient>(static client =>
 {
     client.BaseAddress = new("https+http://codeexecution");
 });
-
-builder.Services.AddTransient<CodeExecutionClient>();
 
 var app = builder.Build();
 
