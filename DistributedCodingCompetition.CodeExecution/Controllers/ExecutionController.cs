@@ -12,7 +12,7 @@ public class ExecutionController(ILogger<ExecutionController> logger, IExecLoadB
     [HttpPost]
     public async Task<ActionResult<ExecutionResult>> PostAsync([FromBody] ExecutionRequest request)
     {
-        var execRunner = execLoadBalancer.SelectRunner([.. execRunnerContext.ExecRunners], request);
+        var execRunner = execLoadBalancer.SelectRunner(request);
         if (execRunner == null)
             return StatusCode(503, $"No available runners for language: \"{request.Language}\"");
         return await execRunnerService.ExecuteCodeAsync(execRunner, request);
@@ -21,7 +21,7 @@ public class ExecutionController(ILogger<ExecutionController> logger, IExecLoadB
     [HttpPost("batch")]
     public async Task<ActionResult<IReadOnlyList<ExecutionResult>>> PostBatchAsync([FromBody] IReadOnlyCollection<ExecutionRequest> requests)
     {
-        var execRunnerRequests = execLoadBalancer.BalanceRequests([.. execRunnerContext.ExecRunners], requests);
+        var execRunnerRequests = execLoadBalancer.BalanceRequests(requests);
         List<Task<ExecutionResult>> tasks = [];
 
         foreach (var (request, execRunner) in execRunnerRequests)
@@ -35,4 +35,8 @@ public class ExecutionController(ILogger<ExecutionController> logger, IExecLoadB
         foreach (var task in tasks) results.Add(await task);
         return results;
     }
+
+    [HttpGet("languages")]
+    public IEnumerable<string> GetLanguages() =>
+        execRunnerContext.ExecRunners.ToArray().SelectMany(x => x.Languages).Distinct();
 }

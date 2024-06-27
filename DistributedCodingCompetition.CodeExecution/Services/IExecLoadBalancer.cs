@@ -17,7 +17,7 @@ public interface IExecLoadBalancer
     /// <param name="runners"></param>
     /// <param name="request"></param>
     /// <returns>Assigned Execution Runner</returns>
-    ExecRunner? SelectRunner(IReadOnlyCollection<ExecRunner> runners, ExecutionRequest request);
+    ExecRunner? SelectRunner(ExecutionRequest request);
 
     /// <summary>
     /// Balences requests for group of requests.
@@ -26,5 +26,5 @@ public interface IExecLoadBalancer
     /// <param name="runners"></param>
     /// <param name="requests"></param>
     /// <returns>Assigned Execution Runners</returns>
-    IReadOnlyList<(ExecutionRequest, ExecRunner?)> BalanceRequests(IReadOnlyCollection<ExecRunner> runners, IReadOnlyCollection<ExecutionRequest> requests);
+    IReadOnlyList<(ExecutionRequest, ExecRunner?)> BalanceRequests(IReadOnlyCollection<ExecutionRequest> requests);
 }

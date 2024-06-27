@@ -38,7 +38,7 @@ builder.Services.AddQuartzServer(options => options.WaitForJobsToComplete = true
 
 builder.Services.AddSingleton<IExecRunnerService, ExecRunnerService>();
 builder.Services.AddSingleton<IRefreshEventService, RefreshEventService>();
-
+builder.Services.AddScoped<IExecLoadBalancer, ExecLoadBalancer>();
 
 var app = builder.Build();
 

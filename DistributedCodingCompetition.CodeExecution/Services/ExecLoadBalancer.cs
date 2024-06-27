@@ -2,13 +2,42 @@
 
 using DistributedCodingCompetition.CodeExecution.Models;
 using DistributedCodingCompetition.ExecutionShared;
+using System.Collections.Frozen;
 
-public class ExecLoadBalancer(ILogger<ExecLoadBalancer> logger) : IExecLoadBalancer
+public class ExecLoadBalancer : IExecLoadBalancer
 {
-    public ExecRunner? SelectRunner(IReadOnlyCollection<ExecRunner> runners, ExecutionRequest request)
+    private readonly IReadOnlyDictionary<string, List<ExecRunner>> languageRunners;
+    private readonly IReadOnlyDictionary<string, int> totalWeights;
+    public ExecLoadBalancer(ILogger<ExecLoadBalancer> logger, ExecRunnerContext execRunnerContext)
     {
-        var supportedRunner = runners.Where(r => r.Available && r.Enabled && r.Languages.Contains(request.Language));
-        var totalweight = runners.Sum(r => r.Weight);
+        Dictionary<string, int> weights = [];
+        Dictionary<string, List<ExecRunner>> allRunners = [];
+        foreach (var runner in execRunnerContext.ExecRunners)
+        {
+            if (!runner.Live || !runner.Available || !runner.Enabled)
+                continue;
+
+            foreach (var language in runner.Languages)
+            {
+                if (allRunners.TryGetValue(language, out var runners))
+                    runners.Add(runner);
+                else
+                    allRunners.Add(language, [runner]);
+                if (!weights.ContainsKey(language))
+                    weights.Add(language, 0);
+                weights[language] += runner.Weight;
+            }
+        }
+        languageRunners = allRunners.ToFrozenDictionary();
+        totalWeights = weights.ToFrozenDictionary();
+
+    }
+    public ExecRunner? SelectRunner(ExecutionRequest request)
+    {
+        var runners = languageRunners[request.Language];
+
+        var totalweight = totalWeights[request.Language];
+
         var random = new Random();
 
         var choice = random.NextDouble() * totalweight;
@@ -23,33 +52,17 @@ public class ExecLoadBalancer(ILogger<ExecLoadBalancer> logger) : IExecLoadBalan
         return null;
     }
 
-    public IReadOnlyList<(ExecutionRequest, ExecRunner?)> BalanceRequests(IReadOnlyCollection<ExecRunner> runners, IReadOnlyCollection<ExecutionRequest> requests)
+    public IReadOnlyList<(ExecutionRequest, ExecRunner?)> BalanceRequests(IReadOnlyCollection<ExecutionRequest> requests)
     {
-        Dictionary<string, List<ExecRunner>> supportedRunners = [];
-        foreach (var request in requests)
+        // Balance requests by language.
+        var balancedRequests = requests.GroupBy(x => x.Language).Select(x => x.ToList()).ToList();
+        var results = new List<(ExecutionRequest, ExecRunner?)>(requests.Count);
+        foreach (var requestList in balancedRequests)
         {
-            var lang = request.Language;
-            if (!supportedRunners.ContainsKey(lang))
-                supportedRunners[lang] = [];
+            var runner = SelectRunner(requestList[0]);
+            foreach (var request in requestList)
+                results.Add((request, runner));
         }
-        foreach (var runner in runners)
-        {
-            foreach (var lang in runner.Languages)
-            {
-                if (supportedRunners.TryGetValue(lang, out var execRunners))
-                    execRunners.Add(runner);
-            }
-        }
-        List<(ExecutionRequest, ExecRunner?)> result = [];
-        foreach (var request in requests)
-        {
-            var runner = SelectRunner(supportedRunners[request.Language], request);
-            if (runner is not null)
-                result.Add((request, runner));
-            else
-                result.Add((request, null));
-
-        }
-        return result;
+        return results;
     }
 }
