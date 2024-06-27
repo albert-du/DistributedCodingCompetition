@@ -1,0 +1,88 @@
+﻿@inject IJSRuntime JSRuntime
+@inject CodeExecutionClient CodeExecutionClient
+
+<div class="flex">
+    <button @onclick=RunAsync class="bg-blue-500 text-white px-4 py-2 rounded-md">Run</button>
+    <p>Press the Run button to execute the code</p>
+</div>
+
+<select @onchange=SelectedCarsChanged>
+    @foreach (var lang in languages)
+    {
+        <option>@lang</option>
+    }
+</select>
+<div class="h-96 border border-gray-100">
+    <StandaloneCodeEditor CssClass="h-full" Id="my-editor-instance-id" ConstructionOptions="EditorConstructionOptions" />
+
+</div>
+
+<div>
+    <p>@message</p>
+    @if (executing)
+    {
+        <div>Executing</div>   
+    }
+    else
+    {
+        <pre>@result</pre>
+    }
+</div>
+
+@code {
+    IReadOnlyList<string> languages = Array.Empty<string>();
+    string? selectedLanguage;
+
+    private StandaloneEditorConstructionOptions EditorConstructionOptions(StandaloneCodeEditor editor)
+    {
+        return new StandaloneEditorConstructionOptions
+            {
+                AutomaticLayout = true,
+                Language = "javascript",
+                Value = "function xyz() {\n" +
+                                        "   console.log(\"Hello world!\");\n" +
+                                        "}",
+            };
+    }
+
+    bool executing;
+    string? message;
+    string? result;
+    private async Task RunAsync()
+    {
+        if (selectedLanguage is null)
+            return;
+        if (executing)
+            return;
+
+        executing = true;
+        await InvokeAsync(StateHasChanged);
+        try
+        {
+            var models = await BlazorMonaco.Editor.Global.GetModels(JSRuntime);
+            var model = models.FirstOrDefault(m => m.Id == "my-editor-instance-id");
+            if (model is null)
+                return;
+
+            var lines = await model.GetLinesContent();
+            var code = string.Join('\n', lines);
+
+        }
+        finally
+        {
+            executing = false;
+        }
+    }
+
+    private void SelectedCarsChanged(ChangeEventArgs e)
+    {
+        if (e.Value is not null)
+            selectedLanguage = e.Value.ToString();
+    }
+
+    protected override async Task OnInitializedAsync()
+    {
+        languages = await CodeExecutionClient.AvailableLanguagesAsync();
+        selectedLanguage = languages.FirstOrDefault() ;
+    }
+}

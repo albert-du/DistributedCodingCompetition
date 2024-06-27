@@ -7,28 +7,13 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <Content Remove="Components\Pages\CodeTest.razor" />
-  </ItemGroup>
-
-  <ItemGroup>
+    <ProjectReference Include="..\DistributedCodingCompetition.ExecutionShared\DistributedCodingCompetition.ExecutionShared.csproj" />
     <ProjectReference Include="..\DistributedCodingCompetition.ServiceDefaults\DistributedCodingCompetition.ServiceDefaults.csproj" />
   </ItemGroup>
 
   <ItemGroup>
     <PackageReference Include="Aspire.StackExchange.Redis.OutputCaching" Version="8.0.0" />
     <PackageReference Include="BlazorMonaco" Version="3.2.0" />
-  </ItemGroup>
-
-  <ItemGroup>
-    <UpToDateCheckInput Remove="Components\Pages\CodeTest.razor" />
-  </ItemGroup>
-
-  <ItemGroup>
-    <_ContentIncludedByDefault Remove="Components\Pages\CodeTest.razor" />
-  </ItemGroup>
-
-  <ItemGroup>
-    <None Include="Components\Pages\CodeTest.razor" />
   </ItemGroup>
 
 </Project>
