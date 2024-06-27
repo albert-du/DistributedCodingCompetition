@@ -51,7 +51,7 @@
                         <div>
                             @package
                         </div>
-                        <button>
+                        <button class="text-rose-500" @onclick="() => RemovePackage(package)">
                             Remove
                         </button>
                     </div>
@@ -64,14 +64,14 @@
                         <div>
                             @package
                         </div>
-                        <button @onclick="() => AddPackage(package)">
+                        <button class="text-emerald-500" @onclick="() => AddPackage(package)">
                             Add
                         </button>
                     </div>
                 }
             </div>
         }
-        <button type="submit" @onclick="SaveRunnerAsync">Save</button>
+        <button class="bg-gray-100 hover:bg-gray-200 rounded-lg px-2 my-1" type="submit" @onclick="SaveRunnerAsync">Save</button>
         <DataAnnotationsValidator />
         <ValidationSummary />
     </EditForm>
@@ -101,21 +101,26 @@
             await InvokeAsync(StateHasChanged);
         }
     }
-
+    bool modified = false;
     private void AddPackage(string name)
     {
         execRunner.Packages.Add(name);
         availablePackages.Remove(name);
+        modified = true;
     }
 
     private void RemovePackage(string name)
     {
         execRunner.Packages.Remove(name);
         availablePackages.Add(name);
+        modified = true;
     }
 
     private async Task SaveRunnerAsync()
     {
+        if (modified)
+            _ = ExecRunnerService.SetPackagesAsync(execRunner, execRunner.Packages);
+
         await ExecRunnerService.RefreshExecRunnerAsync(execRunner);
         if (ExecRunnerId.HasValue)
             ExecRunnerContext.ExecRunners.Update(execRunner);
@@ -123,7 +128,7 @@
             ExecRunnerContext.ExecRunners.Add(execRunner);
 
         ExecRunnerContext.SaveChanges();
-        RefreshEventService.Refresh(this, [..ExecRunnerContext.ExecRunners]);
+        RefreshEventService.Refresh(this, [.. ExecRunnerContext.ExecRunners]);
         NavigationManager.NavigateTo("");
     }
 }

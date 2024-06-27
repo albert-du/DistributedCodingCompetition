@@ -54,6 +54,15 @@ public class ExecRunnerService(HttpClient httpClient) : IExecRunnerService
         return await result.Content.ReadFromJsonAsync<IReadOnlyList<string>>() ?? throw new Exception("execrunner packages empty");
     }
 
+    public async Task SetPackagesAsync(ExecRunner execRunner, IEnumerable<string> packages)
+    {
+        var result = await httpClient.PostAsJsonAsync($"{execRunner.Endpoint}{(execRunner.Endpoint.EndsWith('/') ? "" : "/")}api/management/packages?key={execRunner.Key}", packages);
+        if (result.StatusCode is HttpStatusCode.Unauthorized)
+            throw new Exception("Unauthorized");
+        if (result.StatusCode is not HttpStatusCode.OK)
+            throw new Exception("ExecRunner failed to set packages");
+    }
+
     public async Task<ExecutionResult> ExecuteCodeAsync(ExecRunner runner, ExecutionRequest request)
     {
         if (!runner.Available)

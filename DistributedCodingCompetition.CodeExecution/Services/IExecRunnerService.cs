@@ -9,4 +9,5 @@ public interface IExecRunnerService
 
     Task<ExecutionResult> ExecuteCodeAsync(ExecRunner runner, ExecutionRequest request);
     Task<IReadOnlyList<string>> FetchAvailablePackagesAsync(ExecRunner runner);
+    Task SetPackagesAsync(ExecRunner execRunner, IEnumerable<string> packages);
 }

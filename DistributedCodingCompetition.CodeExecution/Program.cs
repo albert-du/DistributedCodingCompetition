@@ -26,7 +26,7 @@ builder.Services.AddRazorComponents()
 
 builder.Services.AddQuartz(q =>
 {
-    var jobKey = new JobKey("RefreshExecRunnerJob");
+    JobKey jobKey = new("RefreshExecRunnerJob");
     q.AddJob<RefreshExecRunnerJob>(jobKey, j => j.WithDescription("Refreshes the exec runner"));
     q.AddTrigger(t => t
         .WithIdentity("RefreshExecRunnerJobTrigger")
