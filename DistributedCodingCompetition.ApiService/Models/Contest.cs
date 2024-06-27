@@ -12,4 +12,6 @@ public class Contest
     public ICollection<User> Participants { get; set; } = [];
     public ICollection<Submission> Submissions { get; set; } = [];
     public ICollection<User> Administrators { get; set; } = [];
+    public bool Public { get; set; }
+    public ICollection<JoinCode> JoinCodes { get; set; } = [];
 }

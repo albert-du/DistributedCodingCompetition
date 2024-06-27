@@ -7,6 +7,10 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <PackageReference Include="Aspire.Npgsql.EntityFrameworkCore.PostgreSQL" Version="8.0.1" />
+  </ItemGroup>
+
+  <ItemGroup>
     <ProjectReference Include="..\DistributedCodingCompetition.ServiceDefaults\DistributedCodingCompetition.ServiceDefaults.csproj" />
   </ItemGroup>
 
