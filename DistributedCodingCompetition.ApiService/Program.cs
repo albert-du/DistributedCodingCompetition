@@ -1,4 +1,5 @@
 using Microsoft.EntityFrameworkCore;
+using DistributedCodingCompetition.ApiService;
 using DistributedCodingCompetition.ApiService.Models;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -27,6 +28,7 @@ if (app.Environment.IsDevelopment())
         using var scope = app.Services.CreateScope();
         var context = scope.ServiceProvider.GetRequiredService<ContestContext>();
         await context.Database.MigrateAsync();
+        await Seeding.SeedDataAsync(context);
     });
 }
 
