@@ -6,17 +6,16 @@ var cache = builder.AddRedis("cache");
 
 var postgres = builder.AddPostgres("postgres");
 
-//if (builder.Environment.IsDevelopment())
-//    postgres.WithBindMount("/data/postgres", "/var/lib/postgresql/data");
+var mongo = builder.AddMongoDB("mongo");
 
 var executorDatabase = postgres.AddDatabase("evaluationdb");
 
 var contestDatabase = postgres.AddDatabase("contestdb");
 
-var authDatabase = postgres.AddDatabase("authdb");
+var authDatabase = mongo.AddDatabase("authdb");
 
 var auth = builder.AddProject<Projects.DistributedCodingCompetition_AuthService>("authentiation")
-                 .WithReference(authDatabase);
+                  .WithReference(authDatabase);
 
 var codeExecution = builder.AddProject<Projects.DistributedCodingCompetition_CodeExecution>("codeexecution")
                            .WithExternalHttpEndpoints()

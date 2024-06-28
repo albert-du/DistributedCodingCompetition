@@ -19,6 +19,7 @@
 
   <ItemGroup>
     <PackageReference Include="Aspire.Hosting.AppHost" Version="8.0.0" />
+    <PackageReference Include="Aspire.Hosting.MongoDB" Version="8.0.1" />
     <PackageReference Include="Aspire.Hosting.Redis" Version="8.0.0" />
     <PackageReference Include="Aspire.Hosting.PostgreSQL" Version="8.0.1" />
     <PackageReference Include="Quartz" Version="3.9.0" />
