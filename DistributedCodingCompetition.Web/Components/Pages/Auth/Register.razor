@@ -1,8 +1,34 @@
 ﻿@page "/auth/register"
 @rendermode InteractiveServer
 
-
 <PageTitle>Register</PageTitle>
+
+<EditForm Model=model OnValidSubmit=SubmitAsync FormName="Registration">
+    <label>
+        Email
+        <InputText id="username" type="email" @bind-Value=model.Email />
+        <ValidationMessage For=@(() => model.Email) />
+    </label>
+
+    <label>
+        Password
+        <InputText type="password" @bind-Value=model.Password />
+        <ValidationMessage For=@(() => model.Password) />
+    </label>
+
+    <label>
+        Confirm Password
+        <InputText type="password" @bind-Value=model.ConfirmPassword />
+        <ValidationMessage For=@(() => model.ConfirmPassword) />
+    </label>
+
+    <button type="submit">Submit</button>
+
+    <div class="text-rose-500">
+        <DataAnnotationsValidator />
+        <ValidationSummary />
+    </div>
+</EditForm>
 
 @code {
     [Parameter]
@@ -17,6 +43,7 @@
         public string Email { get; set; } = "";
 
         [Required]
+        [MinLength(8)]
         [DataType(DataType.Password)]
         public string Password { get; set; } = "";
 
@@ -24,5 +51,14 @@
         [DataType(DataType.Password)]
         [Compare(nameof(Password))]
         public string ConfirmPassword { get; set; } = "";
+    }
+
+    private async Task SubmitAsync()
+    {
+        var result = await AuthService.RegisterAsync(model.Email, model.Password);
+        if (result.Succeeded)
+        {
+            NavigationManager.NavigateTo(ReturnUrl ?? "");
+        }
     }
 }
