@@ -40,4 +40,25 @@ public class AuthController : ControllerBase
         await collection.InsertOneAsync(userAuth);
         return new RegisterResult { Id = userAuth.Id };
     }
+
+    // POST login
+    [HttpPost("login")]
+    public async Task<ActionResult<LoginResult>> Login(Guid id, string password)
+    {
+        var user = await collection.Find(u => u.Id == id).FirstOrDefaultAsync();
+        if (user is null)
+            return NotFound();
+
+        (bool valid, string? newHash) = _passwordService.VerifyPassword(password, user.PasswordHash);
+        if (!valid)
+            return Unauthorized();
+
+        if (newHash is not null)
+        {
+            user.PasswordHash = newHash;
+            await collection.ReplaceOneAsync(u => u.Id == id, user);
+        }
+
+        return new LoginResult { Token = user.Id, Admin = user.Admin };
+    }
 }
