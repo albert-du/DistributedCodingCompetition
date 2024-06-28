@@ -10,10 +10,8 @@ public class ContestsController(ContestContext context) : ControllerBase
 {
     // GET: api/Contests
     [HttpGet]
-    public async Task<ActionResult<IEnumerable<Contest>>> GetContests()
-    {
-        return await context.Contests.ToListAsync();
-    }
+    public async Task<ActionResult<IEnumerable<Contest>>> GetContests() =>
+        await context.Contests.ToListAsync();
 
     // GET: api/Contests/5
     [HttpGet("{id}")]
@@ -21,12 +19,7 @@ public class ContestsController(ContestContext context) : ControllerBase
     {
         var contest = await context.Contests.FindAsync(id);
 
-        if (contest == null)
-        {
-            return NotFound();
-        }
-
-        return contest;
+        return contest is null ? NotFound() : contest;
     }
 
     // PUT: api/Contests/5
@@ -35,9 +28,7 @@ public class ContestsController(ContestContext context) : ControllerBase
     public async Task<IActionResult> PutContest(Guid id, Contest contest)
     {
         if (id != contest.Id)
-        {
             return BadRequest();
-        }
 
         context.Entry(contest).State = EntityState.Modified;
 
@@ -48,13 +39,9 @@ public class ContestsController(ContestContext context) : ControllerBase
         catch (DbUpdateConcurrencyException)
         {
             if (!ContestExists(id))
-            {
                 return NotFound();
-            }
             else
-            {
                 throw;
-            }
         }
 
         return NoContent();
@@ -76,10 +63,8 @@ public class ContestsController(ContestContext context) : ControllerBase
     public async Task<IActionResult> DeleteContest(Guid id)
     {
         var contest = await context.Contests.FindAsync(id);
-        if (contest == null)
-        {
+        if (contest is null)
             return NotFound();
-        }
 
         context.Contests.Remove(contest);
         await context.SaveChangesAsync();
@@ -87,8 +72,6 @@ public class ContestsController(ContestContext context) : ControllerBase
         return NoContent();
     }
 
-    private bool ContestExists(Guid id)
-    {
-        return context.Contests.Any(e => e.Id == id);
-    }
+    private bool ContestExists(Guid id) =>
+        context.Contests.Any(e => e.Id == id);
 }

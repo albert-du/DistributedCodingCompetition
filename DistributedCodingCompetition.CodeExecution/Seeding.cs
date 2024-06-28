@@ -11,7 +11,7 @@ public static class Seeding
         await context.ExecRunners.AddAsync(new()
         {
             Id = Guid.NewGuid(),
-            Endpoint = "http://localhost:7110/",
+            Endpoint = "http://localhost:5227/",
             Key = "changeme",
         });
         await context.SaveChangesAsync();

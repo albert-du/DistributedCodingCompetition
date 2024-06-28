@@ -11,10 +11,8 @@ public class JoinCodesController(ContestContext context) : ControllerBase
 {
     // GET: api/JoinCodes
     [HttpGet]
-    public async Task<ActionResult<IEnumerable<JoinCode>>> GetJoinCodes()
-    {
-        return await context.JoinCodes.ToListAsync();
-    }
+    public async Task<ActionResult<IEnumerable<JoinCode>>> GetJoinCodes() =>
+        await context.JoinCodes.ToListAsync();
 
     // GET: api/JoinCodes/Code/5
     [HttpGet("Code/{code}")]
@@ -22,12 +20,7 @@ public class JoinCodesController(ContestContext context) : ControllerBase
     {
         var joinCode = await context.JoinCodes.FirstOrDefaultAsync(j => j.Code == code);
 
-        if (joinCode == null)
-        {
-            return NotFound();
-        }
-
-        return joinCode;
+        return joinCode is null ? NotFound() : joinCode;
     }
 
     // GET: api/JoinCodes/5
@@ -36,12 +29,7 @@ public class JoinCodesController(ContestContext context) : ControllerBase
     {
         var joinCode = await context.JoinCodes.FindAsync(id);
 
-        if (joinCode == null)
-        {
-            return NotFound();
-        }
-
-        return joinCode;
+        return joinCode is null ? NotFound() : joinCode;
     }
 
     // PUT: api/JoinCodes/5
@@ -50,9 +38,7 @@ public class JoinCodesController(ContestContext context) : ControllerBase
     public async Task<IActionResult> PutJoinCode(Guid id, JoinCode joinCode)
     {
         if (id != joinCode.Id)
-        {
             return BadRequest();
-        }
 
         context.Entry(joinCode).State = EntityState.Modified;
 
@@ -63,13 +49,9 @@ public class JoinCodesController(ContestContext context) : ControllerBase
         catch (DbUpdateConcurrencyException)
         {
             if (!JoinCodeExists(id))
-            {
                 return NotFound();
-            }
             else
-            {
                 throw;
-            }
         }
 
         return NoContent();
@@ -92,9 +74,7 @@ public class JoinCodesController(ContestContext context) : ControllerBase
     {
         var joinCode = await context.JoinCodes.FindAsync(id);
         if (joinCode == null)
-        {
             return NotFound();
-        }
 
         context.JoinCodes.Remove(joinCode);
         await context.SaveChangesAsync();
@@ -102,8 +82,6 @@ public class JoinCodesController(ContestContext context) : ControllerBase
         return NoContent();
     }
 
-    private bool JoinCodeExists(Guid id)
-    {
-        return context.JoinCodes.Any(e => e.Id == id);
-    }
+    private bool JoinCodeExists(Guid id) =>
+        context.JoinCodes.Any(e => e.Id == id);
 }
