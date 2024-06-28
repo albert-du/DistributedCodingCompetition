@@ -1,11 +1,15 @@
-﻿using System.Security.Cryptography;
+﻿namespace DistributedCodingCompetition.AuthService.Models;
 
-namespace DistributedCodingCompetition.AuthService.Models;
+using MongoDB.Bson;
+using MongoDB.Bson.Serialization.Attributes;
+using System.Security.Cryptography;
 
 public class UserAuth
 {
+    [BsonId]
+    [BsonRepresentation(BsonType.ObjectId)]
     public Guid Id { get; set; }
-    public string Password { get; set; } = string.Empty;
+    public string PasswordHash { get; set; } = string.Empty;
     public DateTime PasswordChangeTime { get; set; } = DateTime.UtcNow;
     public string UserSecret { get; private set; } = RandomString();
     public bool Active { get; set; } = true;
