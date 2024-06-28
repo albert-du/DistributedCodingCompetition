@@ -2,12 +2,18 @@ using Microsoft.EntityFrameworkCore;
 using DistributedCodingCompetition.ApiService;
 using DistributedCodingCompetition.ApiService.Models;
 
+
 var builder = WebApplication.CreateBuilder(args);
 
 // Add service defaults & Aspire components.
 builder.AddServiceDefaults();
 
 builder.AddNpgsqlDbContext<ContestContext>("contestdb");
+
+// Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
+builder.Services.AddEndpointsApiExplorer();
+builder.Services.AddSwaggerGen();
+builder.Services.AddControllers();
 
 // Add services to the container.
 builder.Services.AddProblemDetails();
@@ -18,9 +24,12 @@ var app = builder.Build();
 app.UseExceptionHandler();
 
 app.MapDefaultEndpoints();
+app.MapControllers();
 
 if (app.Environment.IsDevelopment())
 {
+    app.UseSwagger();
+    app.UseSwaggerUI();
     // migrate delayed
     _ = Task.Run(async () =>
     {

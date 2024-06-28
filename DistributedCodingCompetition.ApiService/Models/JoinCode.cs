@@ -9,4 +9,6 @@ public class JoinCode
     public string Name { get; set; } = string.Empty;
     public bool Active { get; set; } = true;
     public DateTime Expiration { get; set; }
+    public bool CloseAfterUse { get; set; }
+    public int Uses { get; set; }
 }
