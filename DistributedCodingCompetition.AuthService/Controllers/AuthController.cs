@@ -1,26 +1,19 @@
 ﻿namespace DistributedCodingCompetition.AuthService.Controllers;
 
-using DistributedCodingCompetition.AuthService.Models;
-using DistributedCodingCompetition.AuthService.Services;
 using Microsoft.AspNetCore.Mvc;
 using MongoDB.Driver;
+using DistributedCodingCompetition.AuthService.Models;
+using DistributedCodingCompetition.AuthService.Services;
 
+/// <summary>
+/// Authentication Endpoints
+/// </summary>
 [Route("api/[controller]")]
 [ApiController]
-public class AuthController : ControllerBase
+public class AuthController(IPasswordService passwordService, IMongoClient mongoClient, ITokenService tokenService) : ControllerBase
 {
-    private readonly IMongoCollection<UserAuth> collection;
-    private readonly IPasswordService _passwordService;
-    private readonly ITokenService _tokenService;
-
-    public AuthController(IPasswordService passwordService, IMongoClient mongoClient, ITokenService tokenService)
-    {
-        _tokenService = tokenService;
-        _passwordService = passwordService;
-        var db = mongoClient.GetDatabase("authdb");
-        collection = db.GetCollection<UserAuth>(nameof(UserAuth));
-
-    }
+    // Services
+    private readonly IMongoCollection<UserAuth> collection = mongoClient.GetDatabase("authdb").GetCollection<UserAuth>(nameof(UserAuth));
 
     // POST /register
     [HttpPost]
@@ -29,7 +22,7 @@ public class AuthController : ControllerBase
         if (password.Length < 8)
             return BadRequest("Password must be at least 8 characters long");
 
-        var hash = _passwordService.HashPassword(password);
+        var hash = passwordService.HashPassword(password);
         UserAuth userAuth = new()
         {
             Id = Guid.NewGuid(),
@@ -48,7 +41,7 @@ public class AuthController : ControllerBase
         if (user is null)
             return NotFound();
 
-        (bool valid, string? newHash) = _passwordService.VerifyPassword(password, user.PasswordHash);
+        (bool valid, string? newHash) = passwordService.VerifyPassword(password, user.PasswordHash);
         if (!valid)
         {
             user.LoginAttempts.Add(new()
@@ -65,7 +58,7 @@ public class AuthController : ControllerBase
 
         if (newHash is not null)
             user.PasswordHash = newHash;
-        
+
         user.LoginAttempts.Add(new()
         {
             Time = DateTime.UtcNow,
@@ -74,12 +67,13 @@ public class AuthController : ControllerBase
             Success = true
         });
         await collection.ReplaceOneAsync(u => u.Id == id, user);
-        return new LoginResult { Token = _tokenService.GenerateToken(user), Admin = user.Admin };
+        return new LoginResult { Token = tokenService.GenerateToken(user), Admin = user.Admin };
     }
 
     [HttpGet("validate")]
-    public ActionResult<Guid?> ValidateToken(string token)
+    public ActionResult<Guid> ValidateToken(string token)
     {
-        return _tokenService.ValidateToken(token);
+        var id = tokenService.ValidateToken(token);
+        return id is null ? Unauthorized() : id;
     }
 }

@@ -1,0 +1,28 @@
+﻿@page "/auth/register"
+@rendermode InteractiveServer
+
+
+<PageTitle>Register</PageTitle>
+
+@code {
+    [Parameter]
+    public string? ReturnUrl { get; set; }
+
+    private RegisterModel model = new();
+
+    private class RegisterModel
+    {
+        [Required]
+        [EmailAddress]
+        public string Email { get; set; } = "";
+
+        [Required]
+        [DataType(DataType.Password)]
+        public string Password { get; set; } = "";
+
+        [Required]
+        [DataType(DataType.Password)]
+        [Compare(nameof(Password))]
+        public string ConfirmPassword { get; set; } = "";
+    }
+}

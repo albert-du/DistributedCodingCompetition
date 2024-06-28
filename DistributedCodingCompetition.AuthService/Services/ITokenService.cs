@@ -19,5 +19,5 @@ public interface ITokenService
     /// </summary>
     /// <param name="token"></param>
     /// <returns></returns>
-    Guid? ValidateToken(string token);
+    Guid? ValidateToken(string token, DateTime minTime);
 }

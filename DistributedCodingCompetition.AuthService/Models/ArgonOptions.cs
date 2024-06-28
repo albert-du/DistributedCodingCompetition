@@ -1,5 +1,8 @@
 ﻿namespace DistributedCodingCompetition.AuthService.Models;
 
+/// <summary>
+/// Options for Argon2 password hashing
+/// </summary>
 public class ArgonOptions
 {
     public const string Argon = nameof(Argon);

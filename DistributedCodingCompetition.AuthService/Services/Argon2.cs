@@ -9,12 +9,26 @@ using DistributedCodingCompetition.AuthService.Models;
 // Format:
 // argon2id:<parrallelism>;<memory>;<iterations>;<salt>;<key>
 
+/// <summary>
+/// Service for hashing and verifying passwords using Argon2 algorithm.
+/// </summary>
+/// <param name="options"></param>
 public class Argon2(IOptions<ArgonOptions> options) : IPasswordService
 {
+    // options filled from environment, default is fine
     private readonly ArgonOptions _options = options.Value;
+
+    /// <summary>
+    /// Hashes a password using Argon2 algorithm.
+    /// </summary>
+    /// <param name="password"></param>
+    /// <returns></returns>
     public string HashPassword(string password)
     {
+        // fill salt
         var salt = GenerateSalt();
+
+        // create Argon2 instance
         using Argon2id argon2 = new(Encoding.UTF8.GetBytes(password))
         {
             DegreeOfParallelism = _options.DegreeOfParallelism,
@@ -22,12 +36,17 @@ public class Argon2(IOptions<ArgonOptions> options) : IPasswordService
             Iterations = _options.Iterations,
             Salt = salt
         };
+
+        // get key
         var key = argon2.GetBytes(_options.KeySize);
+        
+        // encode
         return $"{_options.DegreeOfParallelism}:{_options.MemorySize}:{_options.Iterations}:{Convert.ToBase64String(salt)}:{Convert.ToBase64String(key)}";
     }
 
     public (bool, string?) VerifyPassword(string password, string hash)
     {
+        // parse hash
         var parts = hash.Split(':');
         if (parts[0] != "argon2id")
             throw new ArgumentException("Invalid hash format, expected \"argon2id\"");
@@ -40,6 +59,7 @@ public class Argon2(IOptions<ArgonOptions> options) : IPasswordService
         var saltSize = salt.Length;
         var keySize = key.Length;
 
+        // check if rehash is needed
         var needsRehash =
             parallelism != _options.DegreeOfParallelism ||
             memory != _options.MemorySize ||
@@ -47,6 +67,7 @@ public class Argon2(IOptions<ArgonOptions> options) : IPasswordService
             saltSize != _options.SaltSize ||
             keySize != _options.KeySize;
 
+        // create Argon2 instance
         using Argon2id argon2 = new(Encoding.UTF8.GetBytes(password))
         {
             DegreeOfParallelism = parallelism,
@@ -54,9 +75,15 @@ public class Argon2(IOptions<ArgonOptions> options) : IPasswordService
             Iterations = iterations,
             Salt = salt
         };
+
+        // get key, compare, ?rehash, return
         return (argon2.GetBytes(keySize).SequenceEqual(key), needsRehash ? HashPassword(password) : null);
     }
 
+    /// <summary>
+    /// Fill RNG bytes.
+    /// </summary>
+    /// <returns></returns>
     private byte[] GenerateSalt() =>
         RandomNumberGenerator.GetBytes(_options.SaltSize);
 }
