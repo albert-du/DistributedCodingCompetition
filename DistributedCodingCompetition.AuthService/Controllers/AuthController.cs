@@ -2,11 +2,8 @@
 
 using DistributedCodingCompetition.AuthService.Models;
 using DistributedCodingCompetition.AuthService.Services;
-using Microsoft.AspNetCore.Http;
-using Microsoft.AspNetCore.Identity.Data;
 using Microsoft.AspNetCore.Mvc;
 using MongoDB.Driver;
-using System.Security.Cryptography;
 
 [Route("api/[controller]")]
 [ApiController]
@@ -14,9 +11,11 @@ public class AuthController : ControllerBase
 {
     private readonly IMongoCollection<UserAuth> collection;
     private readonly IPasswordService _passwordService;
+    private readonly ITokenService _tokenService;
 
-    public AuthController(IPasswordService passwordService, IMongoClient mongoClient)
+    public AuthController(IPasswordService passwordService, IMongoClient mongoClient, ITokenService tokenService)
     {
+        _tokenService = tokenService;
         _passwordService = passwordService;
         var db = mongoClient.GetDatabase("authdb");
         collection = db.GetCollection<UserAuth>(nameof(UserAuth));
@@ -43,7 +42,7 @@ public class AuthController : ControllerBase
 
     // POST login
     [HttpPost("login")]
-    public async Task<ActionResult<LoginResult>> Login(Guid id, string password)
+    public async Task<ActionResult<LoginResult>> Login(Guid id, string password, string userAgent, string ipAddress)
     {
         var user = await collection.Find(u => u.Id == id).FirstOrDefaultAsync();
         if (user is null)
@@ -51,14 +50,36 @@ public class AuthController : ControllerBase
 
         (bool valid, string? newHash) = _passwordService.VerifyPassword(password, user.PasswordHash);
         if (!valid)
-            return Unauthorized();
-
-        if (newHash is not null)
         {
-            user.PasswordHash = newHash;
+            user.LoginAttempts.Add(new()
+            {
+                Time = DateTime.UtcNow,
+                UserAgent = userAgent,
+                IP = ipAddress,
+                Success = false,
+                Error = "Invalid password"
+            });
             await collection.ReplaceOneAsync(u => u.Id == id, user);
+            return Unauthorized();
         }
 
-        return new LoginResult { Token = user.Id, Admin = user.Admin };
+        if (newHash is not null)
+            user.PasswordHash = newHash;
+        
+        user.LoginAttempts.Add(new()
+        {
+            Time = DateTime.UtcNow,
+            UserAgent = userAgent,
+            IP = ipAddress,
+            Success = true
+        });
+        await collection.ReplaceOneAsync(u => u.Id == id, user);
+        return new LoginResult { Token = _tokenService.GenerateToken(user), Admin = user.Admin };
+    }
+
+    [HttpGet("validate")]
+    public ActionResult<Guid?> ValidateToken(string token)
+    {
+        return _tokenService.ValidateToken(token);
     }
 }

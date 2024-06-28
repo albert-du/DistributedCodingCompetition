@@ -8,60 +8,41 @@ using Microsoft.IdentityModel.Tokens;
 
 public class JWTTokenService(IConfiguration configuration, ILogger<JWTTokenService> logger) : ITokenService
 {
-    byte[] key = Encoding.UTF8.GetBytes(configuration["Jwt:Key"] ?? "CHANGEKEYNOW");
-    public async Task<string> GenerateTokenAsync(UserAuth userAuth)
+    byte[] key = Encoding.ASCII.GetBytes(configuration["Jwt:Key"] ?? "CHANGEKEYNOW");
+    public string GenerateToken(UserAuth userAuth)
     {
-        var userKey = Combine(key, Convert.FromBase64String(userAuth.UserSecret));
         JwtSecurityTokenHandler tokenHandler = new();
-        SigningCredentials signingCredentials = new(new SymmetricSecurityKey(userKey), SecurityAlgorithms.HmacSha512Signature);
-        List<Claim> claims = [
-            new(ClaimTypes.NameIdentifier, userAuth.Id.ToString()),
-        ];
-        if (userAuth.Admin)
-            claims.Add(new(ClaimTypes.Role, "Admin"));
-        JwtSecurityToken token = new(claims: claims, notBefore: DateTime.UtcNow, expires: DateTime.UtcNow.AddDays(30));
+
+        SigningCredentials signingCredentials = new(new SymmetricSecurityKey(key), SecurityAlgorithms.HmacSha512Signature);
+
+        List<Claim> claims = [new(ClaimTypes.NameIdentifier, userAuth.Id.ToString())];
+
+        if (userAuth.Admin) claims.Add(new(ClaimTypes.Role, "Admin"));
+
+        JwtSecurityToken token = new(claims: claims, notBefore: DateTime.UtcNow, expires: DateTime.UtcNow.AddDays(7), signingCredentials: signingCredentials);
+        return tokenHandler.WriteToken(token);
     }
 
-    public async Task InvalidateUserTokensAsync(UserAuth userAuth)
+    public Guid? ValidateToken(string token)
     {
-        _logger.LogInformation($"Invalidating tokens for user {userAuth.Username}");
-    }
-
-    public async Task<UserAuth?> ValidateToken(string token)
-    {
-        var tokenHandler = new JwtSecurityTokenHandler();
-        var key = Encoding.ASCII.GetBytes(_configuration["Jwt:Key"]);
+        JwtSecurityTokenHandler tokenHandler = new();
         try
         {
-            tokenHandler.ValidateToken(token, new TokenValidationParameters
+            tokenHandler.ValidateToken(token, new()
             {
                 ValidateIssuerSigningKey = true,
                 IssuerSigningKey = new SymmetricSecurityKey(key),
                 ValidateIssuer = false,
                 ValidateAudience = false,
                 ClockSkew = TimeSpan.Zero
-            }, out SecurityToken validatedToken);
+            }, out var validatedToken);
 
             var jwtToken = (JwtSecurityToken)validatedToken;
-            var username = jwtToken.Claims.First(x => x.Type == ClaimTypes.Name).Value;
-            var admin = jwtToken.Claims.First(x => x.Type == ClaimTypes.Role).Value == "Admin";
-            return new UserAuth
-            {
-                Username = username,
-                Admin = admin
-            };
+            return Guid.Parse(jwtToken.Claims.First(x => x.Type == ClaimTypes.NameIdentifier).Value);
         }
-        catch (Exception e)
+        catch
         {
-            _logger.LogError(e, "Failed to validate token");
             return null;
         }
-    }
-    private static byte[] Combine(byte[] a1, byte[] a2)
-    {
-        byte[] ret = new byte[a1.Length + a2.Length];
-        Array.Copy(a1, 0, ret, 0, a1.Length);
-        Array.Copy(a2, 0, ret, a1.Length, a2.Length);
-        return ret;
     }
 }

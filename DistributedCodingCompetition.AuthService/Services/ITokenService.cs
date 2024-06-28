@@ -12,19 +12,12 @@ public interface ITokenService
     /// </summary>
     /// <param name="userAuth"></param>
     /// <returns></returns>
-    Task<string> GenerateTokenAsync(UserAuth userAuth);
-    
-    /// <summary>
-    /// Invalidate all tokens for a user.
-    /// </summary>
-    /// <param name="userId"></param>
-    /// <returns></returns>
-    Task InvalidateUserTokensAsync(UserAuth userId);
+    string GenerateToken(UserAuth userAuth);
 
     /// <summary>
     /// Validate a token and return the user it belongs to.
     /// </summary>
     /// <param name="token"></param>
     /// <returns></returns>
-    Task<UserAuth?> ValidateToken(string token);
+    Guid? ValidateToken(string token);
 }
