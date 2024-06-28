@@ -20,6 +20,8 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "DistributedCodingCompetitio
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "DistributedCodingCompetition.ExecutionShared", "DistributedCodingCompetition.ExecutionShared\DistributedCodingCompetition.ExecutionShared.csproj", "{681566E2-498C-40F3-A492-BC14F600187F}"
 EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "DistributedCodingCompetition.AuthService", "DistributedCodingCompetition.AuthService\DistributedCodingCompetition.AuthService.csproj", "{7739CF6E-76D9-4A5A-93AF-3534CAA97ED0}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -62,6 +64,10 @@ Global
 		{681566E2-498C-40F3-A492-BC14F600187F}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{681566E2-498C-40F3-A492-BC14F600187F}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{681566E2-498C-40F3-A492-BC14F600187F}.Release|Any CPU.Build.0 = Release|Any CPU
+		{7739CF6E-76D9-4A5A-93AF-3534CAA97ED0}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{7739CF6E-76D9-4A5A-93AF-3534CAA97ED0}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{7739CF6E-76D9-4A5A-93AF-3534CAA97ED0}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{7739CF6E-76D9-4A5A-93AF-3534CAA97ED0}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

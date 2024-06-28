@@ -1,0 +1,6 @@
+@DistributedCodingCompetition.AuthService_HostAddress = http://localhost:5076
+
+GET {{DistributedCodingCompetition.AuthService_HostAddress}}/weatherforecast/
+Accept: application/json
+
+###

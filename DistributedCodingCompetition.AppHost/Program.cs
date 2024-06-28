@@ -13,6 +13,11 @@ var executorDatabase = postgres.AddDatabase("evaluationdb");
 
 var contestDatabase = postgres.AddDatabase("contestdb");
 
+var authDatabase = postgres.AddDatabase("authdb");
+
+var auth = builder.AddProject<Projects.DistributedCodingCompetition_AuthService>("authentiation")
+                 .WithReference(authDatabase);
+
 var codeExecution = builder.AddProject<Projects.DistributedCodingCompetition_CodeExecution>("codeexecution")
                            .WithExternalHttpEndpoints()
                            .WithReference(executorDatabase);
@@ -28,6 +33,9 @@ builder.AddProject<Projects.DistributedCodingCompetition_Web>("webfrontend")
        .WithReference(cache)
        .WithReference(apiService)
        .WithReference(judge)
+       .WithReference(auth)
        .WithReference(codeExecution);
+
+builder.AddProject<Projects.DistributedCodingCompetition_AuthService>("distributedcodingcompetition-authservice");
 
 builder.Build().Run();
