@@ -47,7 +47,7 @@ internal class UsersController(ContestContext context) : ControllerBase
         }
         catch (DbUpdateConcurrencyException)
         {
-            if (!userExists(id))
+            if (!UserExists(id))
                 return NotFound();
             else
                 throw;

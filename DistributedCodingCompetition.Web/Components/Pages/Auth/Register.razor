@@ -1,8 +1,20 @@
 ﻿@page "/auth/register"
 @rendermode InteractiveServer
 @inject IAuthService AuthService
+@inject IApiService ApiService
+@inject NavigationManager NavigationManager
 
 <PageTitle>Register</PageTitle>
+
+@if (loading)
+{
+    @*TODO show spinner or something in future*@
+    <h3>Loading...</h3>
+}
+else
+{
+
+}
 
 <EditForm Model=model OnValidSubmit=SubmitAsync FormName="Registration">
     <label>
@@ -37,6 +49,10 @@
 
     private RegisterModel model = new();
 
+    string otc = Utils.RandomOTC();
+
+    private bool loading;
+
     private class RegisterModel
     {
         [Required]
@@ -56,11 +72,44 @@
 
     private async Task SubmitAsync()
     {
-        // TODO CHECK FOR USER EXISTANCE
-        var result = await AuthService.TryRegister(model.Password);
-        if (result.Succeeded)
+        if (!await ApiService.TryUserByEmailAsync(model.Email, out var user))
+            // req failed
+            return;
+
+        if (user is not null)
         {
-            NavigationManager.NavigateTo(ReturnUrl ?? "");
+            // email already in use
+            // throws exn if email is already in use
+
+            // redirect to login page
+            if (ReturnUrl is not null)
+                NavigationManager.NavigateTo("/auth/login?returnUrl=" + ReturnUrl);
+            else
+                NavigationManager.NavigateTo("/auth/login");
+            return;
         }
+
+        // EMAIL NOT TAKEN
+
+        // validate email
+
+        var result = await AuthService.TryRegister(model.Email, model.Password);
+        if (!result.HasValue)
+            return;
+
+
     }
 }
+
+
+@*
+    Registration Steps:
+    1. Check email is not in use
+    2. Validate email
+    3. Get user profile information
+    3. Create auth record in db
+    4. Create user record in db
+    5. Fetch login token
+    6. Update login state
+    7. Redirect to page
+*@

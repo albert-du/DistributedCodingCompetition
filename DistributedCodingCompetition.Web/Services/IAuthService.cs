@@ -4,7 +4,7 @@ using DistributedCodingCompetition.AuthService.Models;
 
 public interface IAuthService
 {
-    Task<Guid?> TryRegister(string password);
+    Task<Guid?> TryRegister(string email, string password);
 
     Task<LoginResult?> TryLogin(Guid id, string password, string userAgent, string ipAddress);
 

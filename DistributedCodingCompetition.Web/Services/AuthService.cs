@@ -3,12 +3,18 @@
 using Microsoft.Extensions.Logging;
 using DistributedCodingCompetition.AuthService.Models;
 
-public class AuthService(HttpClient httpClient, ILogger<AuthService> logger, IModalService modalService) : IAuthService
+public class AuthService(HttpClient httpClient, ILogger<AuthService> logger, IModalService modalService, IApiService apiService) : IAuthService
 {
-    public async Task<Guid?> TryRegister(string password)
+    public async Task<Guid?> TryRegister(string email, string password)
     {
         try
         {
+            var emailUser = await apiService.UserByEmailAsync(email);
+            if (emailUser != null)
+            {
+                modalService.ShowError("Cannot register", "Email already in use");
+                return null;
+            }
             var resp = await httpClient.PostAsync("/register?password=" + password, null);
             resp.EnsureSuccessStatusCode();
             return await resp.Content.ReadFromJsonAsync<Guid>();
