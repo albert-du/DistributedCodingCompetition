@@ -1,17 +1,20 @@
 ﻿<div>
     <nav class="flex justify-between w-full py-1 sm:px-8">
-        <div class="text-2xl font-semibold text-violet-500">Distributed Coding Competition</div>
+        <div>
+            <a href="/" class="text-2xl font-semibold text-violet-500">Distributed Coding Competition</a>
+        </div>
         <AuthorizeView>
             <Authorized>
-                <div></div>
+                <a href="dashboard">Dashboard</a>
             </Authorized>
             <NotAuthorized>
-                <div class="flex align-middle gap-x-1">
-                    <a href="/auth/login" class="px-2 font-semibold text-center align-middle border-2 text-md rounded-xl text-violet-500 hover:bg-violet-200 border-violet-500">Login</a>
-                    <a href="/auth/register" class="px-2 font-semibold text-center text-white align-middle border-2 text-md rounded-xl bg-violet-500 border-violet-500">Register</a>
+                <div class="flex py-3 align-middle gap-x-1">
+                    <a href="/auth/login"
+                        class="px-2 font-semibold text-center align-middle border-2 active:bg-violet-300 text-md rounded-xl text-violet-500 hover:bg-violet-200 border-violet-500">Login</a>
+                    <a href="/auth/register"
+                        class="px-2 font-semibold text-center text-white align-middle border-2 active:bg-violet-600 hover:text-violet-200 text-md rounded-xl bg-violet-500 border-violet-500">Register</a>
                 </div>
             </NotAuthorized>
         </AuthorizeView>
     </nav>
 </div>
-

@@ -1,45 +1,79 @@
 ﻿@page "/auth/login"
 @inject IAuthService AuthService
+@inject IApiService ApiService
 @inject IJSRuntime JSRuntime
 @inject NavigationManager NavigationManager
-<RedirectToLogin />
 
 <PageTitle>Login</PageTitle>
+<div class="flex flex-col justify-center mx-auto align-middle w-96">
+    <div class="flex flex-col gap-y-2">
+        <h2 class="text-2xl text-center">Login</h2>
+        <EditForm class="flex flex-col justify-center align-middle gap-y-3" Model=model OnValidSubmit=SubmitAsync FormName="Login">
+            <label class="flex justify-center">
+                Email
+                <InputText class="px-2 py-1 ml-2 bg-gray-100 rounded-lg text-slate-800" id="username" type="email" @bind-Value=model.Email />
+                <ValidationMessage For=@(() => model.Email) />
+            </label>
 
-<EditForm Model=model OnValidSubmit=SubmitAsync FormName="Login">
-    <label>
-        Email
-        <InputText id="username" type="email" @bind-Value=model.Email />
-        <ValidationMessage For=@(() => model.Email) />
-    </label>
+            <label class="flex justify-center">
+                Password
+                <InputText class="px-2 py-1 ml-2 bg-gray-100 rounded-lg text-slate-800" type="password" @bind-Value=model.Password />
+                <ValidationMessage For=@(() => model.Password) />
+            </label>
 
-    <label>
-        Password
-        <InputText type="password" @bind-Value=model.Password />
-        <ValidationMessage For=@(() => model.Password) />
-    </label>
+            <button type="submit">Submit</button>
 
-    <button type="submit">Submit</button>
+            <div class="text-rose-500">
+                <DataAnnotationsValidator />
+                <ValidationSummary />
+            </div>
+        </EditForm>
+        <div>
+            @error
+        </div>
 
-    <div class="text-rose-500">
-        <DataAnnotationsValidator />
-        <ValidationSummary />
     </div>
-</EditForm>
-
-<div>
-    @error
 </div>
 
+
 @code {
+    [CascadingParameter]
+    public ConnectionDetails? ConnectionDetails { get; set; }
+
     [Parameter]
     public string? ReturnUrl { get; set; }
     private string? error;
     private LoginModel model = new();
 
+    bool submitted;
     private async Task SubmitAsync()
     {
-        
+        if (submitted)
+            return;
+        submitted = true;
+        await InvokeAsync(StateHasChanged);
+        await Task.Delay(1000);
+
+        (var success, var user) = await ApiService.TryUserByEmailAsync(model.Email);
+        if (!success || user is null)
+        {
+            error = "Failed to login.";
+            submitted = false;
+            return;
+        }
+
+        var token = await AuthService.TryLoginAsync(user.Id, model.Password, ConnectionDetails?.UserAgent ?? "Unknown", ConnectionDetails?.IpAddress ?? "Unknown");
+        var res = await JSRuntime.InvokeAsync<int>("post", "/api/auth/login", token);
+
+        if (res != 200)
+        {
+            error = $"Failed to login. Status: {res}";
+            submitted = false;
+            return;
+        }
+
+        submitted= false;
+        await InvokeAsync(StateHasChanged);
     }
 
     private class LoginModel
