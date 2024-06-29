@@ -5,14 +5,17 @@ using System.Security.Claims;
 using System.IdentityModel.Tokens.Jwt;
 using Microsoft.IdentityModel.Tokens;
 using DistributedCodingCompetition.AuthService.Models;
+using MongoDB.Driver;
 
 /// <summary>
 /// Service for generating and validating JWT tokens.
 /// </summary>
 /// <param name="configuration"></param>
 /// <param name="logger"></param>
-public class JWTTokenService(IConfiguration configuration, ILogger<JWTTokenService> logger) : ITokenService
+public class JWTTokenService(IConfiguration configuration, ILogger<JWTTokenService> logger, IMongoClient mongoClient) : ITokenService
 {
+    private readonly IMongoCollection<UserAuth> collection = mongoClient.GetDatabase("authdb").GetCollection<UserAuth>(nameof(UserAuth));
+
     // key for signing tokens
     private readonly byte[] key = Encoding.ASCII.GetBytes(configuration["Jwt:Key"] ?? "CHANGEKEYNOW");
 
@@ -46,7 +49,7 @@ public class JWTTokenService(IConfiguration configuration, ILogger<JWTTokenServi
     /// </summary>
     /// <param name="token"></param>
     /// <returns>null if invalid</returns>
-    public Guid? ValidateToken(string token, DateTime minTime)
+    public Guid? ValidateToken(string token)
     {
         JwtSecurityTokenHandler tokenHandler = new();
         try
@@ -62,10 +65,17 @@ public class JWTTokenService(IConfiguration configuration, ILogger<JWTTokenServi
 
             var jwtToken = (JwtSecurityToken)validatedToken;
 
-            if (jwtToken.ValidFrom < minTime)
+            var id = Guid.Parse(jwtToken.Claims.First(x => x.Type == ClaimTypes.NameIdentifier).Value);
+
+            // check user not invalid
+            var user = collection.Find(x => x.Id == id).FirstOrDefault();
+            if (user is null)
                 return null;
 
-            return Guid.Parse(jwtToken.Claims.First(x => x.Type == ClaimTypes.NameIdentifier).Value);
+            if (jwtToken.ValidFrom < user.MinTokenTime)
+                return null;
+
+            return id;
         }
         catch
         {

@@ -12,17 +12,17 @@ using Microsoft.AspNetCore.Authentication.Cookies;
 public class AuthController(IAuthService authService) : ControllerBase
 {
     [HttpPost("login")]
-    public async Task<IActionResult> LoginAsync(Guid id, string password)
+    public async Task<IActionResult> LoginAsync(string token)
     {
-        var result = await authService.TryLoginAsync(id, password, Request.Headers["User-Agent"].ToString(), Request.HttpContext.Connection.RemoteIpAddress?.ToString() ?? "Unknown");
+        var result = await authService.ValidateToken(token);
         if (result is null)
             return Unauthorized();
 
         List<Claim> claims = [
-            new (ClaimTypes.NameIdentifier, id.ToString()),
+            new (ClaimTypes.NameIdentifier, result.Value.ToString()),
         ];
-        if (result.Admin)
-            claims.Add(new Claim(ClaimTypes.Role, "Admin"));
+        //if (result.Admin)
+        //    claims.Add(new Claim(ClaimTypes.Role, "Admin"));
 
         // cookie auth
         var claimsIdentity = new ClaimsIdentity(claims, CookieAuthenticationDefaults.AuthenticationScheme);

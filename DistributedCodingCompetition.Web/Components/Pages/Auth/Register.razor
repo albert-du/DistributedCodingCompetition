@@ -4,6 +4,7 @@
 @inject IApiService ApiService
 @inject NavigationManager NavigationManager
 @inject IEmailService EmailService
+@inject IJSRuntime JSRuntime
 @using DistributedCodingCompetition.ApiService.Models
 
 <PageTitle>Register</PageTitle>
@@ -152,9 +153,8 @@ else
         }
 
         // login
-        var token = await AuthService.TryLoginAsync(model.Email, model.Password);
-
-        // TODO cookie writing
+        var token = await AuthService.TryLoginAsync(id.Value, model.Password, ConnectionDetails?.UserAgent ?? "Unknown", ConnectionDetails?.IpAddress ?? "Unknown");
+        var res = await JSRuntime.InvokeAsync<int>("post", "/api/auth/login", token);
     }
 
     private async Task SendOTCAsync()

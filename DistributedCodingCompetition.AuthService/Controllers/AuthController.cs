@@ -71,12 +71,9 @@ public class AuthController(IPasswordService passwordService, IMongoClient mongo
     }
 
     [HttpGet("validate")]
-    public ActionResult<Guid> ValidateToken(string token, Guid id)
+    public ActionResult<Guid> ValidateToken(string token)
     {
-        UserAuth userAuth = collection.Find(u => u.Id == id).FirstOrDefault();
-        if (userAuth is null)
-            return NotFound();
-        var realid = tokenService.ValidateToken(token, userAuth.MinTokenTime);
-        return realid is null || realid != id ? Unauthorized() : realid;
+        var id = tokenService.ValidateToken(token);
+        return id is null ? Unauthorized() : id;
     }
 }

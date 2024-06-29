@@ -5,11 +5,13 @@ using DistributedCodingCompetition.AuthService.Models;
 
 public class AuthService(HttpClient httpClient, ILogger<AuthService> logger, IModalService modalService, IApiService apiService) : IAuthService
 {
-    public async Task<Guid?> TryRegister(string email, string password)
+    public async Task<Guid?> TryRegisterAsync(string email, string password)
     {
         try
         {
-            var emailUser = await apiService.UserByEmailAsync(email);
+            if (!await apiService.TryUserByEmailAsync(email, out var emailUser))
+                return null;
+            
             if (emailUser != null)
             {
                 modalService.ShowError("Cannot register", "Email already in use");
@@ -27,7 +29,7 @@ public class AuthService(HttpClient httpClient, ILogger<AuthService> logger, IMo
         }
     }
 
-    public async Task<LoginResult?> TryLogin(Guid id, string password, string userAgent, string ipAddress)
+    public async Task<LoginResult?> TryLoginAsync(Guid id, string password, string userAgent, string ipAddress)
     {
         Dictionary<string, string> data = new()
         {
@@ -52,19 +54,19 @@ public class AuthService(HttpClient httpClient, ILogger<AuthService> logger, IMo
         }
     }
 
-    public async Task<bool> ValidateToken(string token, Guid id)
+    public async Task<Guid?> ValidateToken(string token)
     {
         try
         {
-            var resp = await httpClient.PostAsync($"/validate?token={token}&id={id}", null);
+            var resp = await httpClient.PostAsync($"/validate?token={token}", null);
             resp.EnsureSuccessStatusCode();
-            return await resp.Content.ReadFromJsonAsync<bool>();
+            return await resp.Content.ReadFromJsonAsync<Guid>();
         }
         catch (Exception ex)
         {
             modalService.ShowError("Failed to validate token", ex.Message);
             logger.LogError(ex, "Failed to validate token");
-            return false;
+            return null;
         }
     }
 }
