@@ -1,0 +1,46 @@
+@inject IJSRuntime JSRuntime
+
+<div class="border rounded-lg border-slate-700 h-96">
+    <StandaloneCodeEditor @ref=editor CssClass="h-full" Id=@id ConstructionOptions=EditorConstructionOptions
+        OnDidChangeModel=EditorModelChangedAsync />
+</div>
+
+@code {
+    private StandaloneCodeEditor editor = default!;
+    private string id = Guid.NewGuid().ToString();
+    private string code = string.Empty;
+    private async Task SetCodeAsync(string code)
+    {
+        await editor.SetValue(code);
+    }
+
+    [Parameter]
+    public EventCallback<string> CodeChanged { get; set; }
+    
+    [Parameter, EditorRequired]
+    public string Code 
+    { 
+        get => code; 
+        set => _ = SetCodeAsync(value);
+    }
+
+    [Parameter]
+    public string Language { get; set; } = "text";
+
+    [Parameter]
+    public bool ReadOnly { get; set; }
+    private StandaloneEditorConstructionOptions EditorConstructionOptions(StandaloneCodeEditor editor)
+    {
+        return new StandaloneEditorConstructionOptions
+            {
+                AutomaticLayout = true,
+                Language = Language,
+                Value = Code,
+            };
+    }
+    private async Task EditorModelChangedAsync()
+    {
+        var model = await editor.GetModel();
+        code = string.Join('\n', await model.GetLinesContent());
+    }
+}

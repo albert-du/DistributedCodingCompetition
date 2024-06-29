@@ -2,7 +2,7 @@
 @inject CodeExecutionClient CodeExecutionClient
 
 <div class="flex">
-    <button @onclick=RunAsync class="bg-blue-500 text-white px-4 py-2 rounded-md">Run</button>
+    <button @onclick=RunAsync class="px-4 py-2 text-white bg-blue-500 rounded-md">Run</button>
     <p>Press the Run button to execute the code</p>
 </div>
 
@@ -12,7 +12,7 @@
         <option>@lang</option>
     }
 </select>
-<div class="h-96 border border-gray-100">
+<div class="border border-gray-100 h-96">
     <StandaloneCodeEditor CssClass="h-full" Id="my-editor-instance-id" ConstructionOptions="EditorConstructionOptions" />
 
 </div>
