@@ -98,7 +98,8 @@ else
     private async Task SubmitAsync()
     {
         error = null;
-        if (!await ApiService.TryUserByEmailAsync(model.Email, out var user))
+        (var success, var user) = await ApiService.TryUserByEmailAsync(model.Email);
+        if (!success)
             // req failed
             return;
 
@@ -145,7 +146,7 @@ else
             Username = model2.Username,
             Birthday = model2.Birthday
         };
-        var success = await ApiService.TryCreateUser(user);
+        var success = await ApiService.TryCreateUserAsync(user);
         if (!success)
         {
             error = "Failed to create user.";
@@ -155,6 +156,17 @@ else
         // login
         var token = await AuthService.TryLoginAsync(id.Value, model.Password, ConnectionDetails?.UserAgent ?? "Unknown", ConnectionDetails?.IpAddress ?? "Unknown");
         var res = await JSRuntime.InvokeAsync<int>("post", "/api/auth/login", token);
+
+        if (res != 200)
+        {
+            error = "Failed to login.";
+            return;
+        }
+
+        if (ReturnUrl is not null)
+            NavigationManager.NavigateTo(ReturnUrl);
+        else
+            NavigationManager.NavigateTo("/");
     }
 
     private async Task SendOTCAsync()

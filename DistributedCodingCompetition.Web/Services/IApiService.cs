@@ -4,6 +4,6 @@ using DistributedCodingCompetition.ApiService.Models;
 
 public interface IApiService
 {
-    Task<bool> TryUserByEmailAsync(string email, out User? user);
+    Task<(bool,User?)> TryUserByEmailAsync(string email);
     Task<bool> TryCreateUserAsync(User user);
 }

@@ -9,7 +9,8 @@ public class AuthService(HttpClient httpClient, ILogger<AuthService> logger, IMo
     {
         try
         {
-            if (!await apiService.TryUserByEmailAsync(email, out var emailUser))
+            (var success, var emailUser) = await apiService.TryUserByEmailAsync(email);
+            if (!success)
                 return null;
             
             if (emailUser != null)

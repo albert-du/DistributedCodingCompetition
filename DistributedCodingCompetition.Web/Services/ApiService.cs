@@ -18,15 +18,22 @@ public class ApiService(HttpClient httpClient, ILogger<ApiService> logger) : IAp
         catch (Exception ex)
         {
             logger.LogError(ex, "Failed to fetch user by email");
-
             return (false, null);
         }
     }
 
     public async Task<bool> TryCreateUserAsync(User user)
     {
-        var response = await httpClient.PostAsJsonAsync("api/users", user);
-        response.EnsureSuccessStatusCode();
-        return await response.Content.ReadFromJsonAsync<User>() ?? throw new Exception("Failed to create user");
+        try
+        {
+            var response = await httpClient.PostAsJsonAsync("api/users", user);
+            response.EnsureSuccessStatusCode();
+            return true;
+        }
+        catch (Exception ex)
+        {
+            logger.LogError(ex, "Failed to create user");
+            return false;
+        }
     }
 }
