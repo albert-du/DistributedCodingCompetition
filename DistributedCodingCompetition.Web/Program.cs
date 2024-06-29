@@ -12,8 +12,10 @@ builder.AddRedisOutputCache("cache");
 builder.Services.AddRazorComponents()
     .AddInteractiveServerComponents();
 
-builder.Services.AddSingleton<IEmailService, EmailService>();
+builder.Services.AddAuthentication()
+    .AddCookie();
 
+builder.Services.AddSingleton<IEmailService, EmailService>();
 builder.Services.AddSingleton<CodeExecutionClient>();
 builder.Services.AddScoped<IAuthService, AuthService>();
 builder.Services.AddScoped<IApiService, ApiService>();

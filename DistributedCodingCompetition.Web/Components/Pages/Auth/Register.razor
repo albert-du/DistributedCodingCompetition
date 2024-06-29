@@ -152,7 +152,7 @@ else
         }
 
         // login
-        var token = await AuthService.TryLoginAsync(id.Value, model.Password, ConnectionDetails?.UserAgent ?? "Unknown", ConnectionDetails?.IpAddress ?? "Unknown");
+        var token = await AuthService.TryLoginAsync(model.Email, model.Password);
 
         // TODO cookie writing
     }
