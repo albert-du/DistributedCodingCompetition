@@ -4,6 +4,7 @@
 @inject IApiService ApiService
 @inject NavigationManager NavigationManager
 @inject IEmailService EmailService
+@using DistributedCodingCompetition.ApiService.Models
 
 <PageTitle>Register</PageTitle>
 
@@ -42,32 +43,26 @@ else if (otc is null)
         </div>
     </EditForm>
 }
-else if (otc is not null && otc != otcREAL)
+else if (!otcValid)
 {
     <h3>Enter the verification code sent to your email</h3>
     <InputText @bind-Value=otcREAL />
-    <button @onclick=Submit2>Submit</button>
+    <button @onclick=SubmitAsync2>Submit</button>
 }
 else
 {
     // otc is correct
     <EditForm Model=model2 OnValidSubmit=SubmitAsync3 FormName="UserDetails">
         <label>
-            Email
-            <InputText id="username" type="email" @bind-Value=model.Email />
-            <ValidationMessage For=@(() => model.Email) />
+            Name
+            <InputText @bind-Value=model2.Username />
+            <ValidationMessage For=@(() => model2.Username) />
         </label>
 
         <label>
-            Password
-            <InputText type="password" @bind-Value=model.Password />
-            <ValidationMessage For=@(() => model.Password) />
-        </label>
-
-        <label>
-            Confirm Password
-            <InputText type="password" @bind-Value=model.ConfirmPassword />
-            <ValidationMessage For=@(() => model.ConfirmPassword) />
+            Birthday
+            <InputDate @bind-Value=model2.Birthday />
+            <ValidationMessage For=@(() => model2.Birthday) />
         </label>
 
         <button type="submit">Submit</button>
@@ -80,6 +75,10 @@ else
 }
 
 @code {
+    [CascadingParameter]
+    public ConnectionDetails? ConnectionDetails { get; set; }
+
+
     [Parameter]
     public string? ReturnUrl { get; set; }
 
@@ -89,12 +88,15 @@ else
     string? otc = null;
     DateTime otcGenTime;
     string otcREAL = string.Empty;
+    bool otcValid;
     bool resendEnabled;
+    string? error = null;
 
     private bool loading;
 
     private async Task SubmitAsync()
     {
+        error = null;
         if (!await ApiService.TryUserByEmailAsync(model.Email, out var user))
             // req failed
             return;
@@ -114,13 +116,45 @@ else
         await SendOTCAsync();
     }
 
-    private void Submit2()
+    private async Task SubmitAsync2()
     {
-        // should force rerender by itself if otc is correct.
+        error = null;
+        loading = true;
+        await InvokeAsync(StateHasChanged);
+        await Task.Delay(1000); // avoid spam
+        otcValid = otc is not null && otc != otcREAL;
+        if (!otcValid)
+            error = "Invalid Code.";
+        await InvokeAsync(StateHasChanged);
     }
 
-    private void Submit3()
+    private async Task SubmitAsync3()
     {
+        error = null;
+        var id = await AuthService.TryRegisterAsync(model.Email, model.Password);
+        if (id is null)
+        {
+            error = "Failed to register.";
+            return;
+        }
+        User user = new()
+        {
+            Id = id.Value,
+            Email = model.Email,
+            Username = model2.Username,
+            Birthday = model2.Birthday
+        };
+        var success = await ApiService.TryCreateUser(user);
+        if (!success)
+        {
+            error = "Failed to create user.";
+            return;
+        }
+
+        // login
+        var token = await AuthService.TryLoginAsync(id.Value, model.Password, ConnectionDetails?.UserAgent ?? "Unknown", ConnectionDetails?.IpAddress ?? "Unknown");
+
+        // TODO cookie writing
     }
 
     private async Task SendOTCAsync()
@@ -156,7 +190,7 @@ else
 
     private class RegisterModel2
     {
-        [Required(AllowEmptyStrings=false)]
+        [Required(AllowEmptyStrings = false)]
         public string Username { get; set; } = "";
 
         public DateTime Birthday { get; set; } = DateTime.UtcNow;

@@ -1,4 +1,9 @@
-﻿<!DOCTYPE html>
+﻿@inject IHttpContextAccessor httpContextAccessor
+@{
+    var connectionDetails = new ConnectionDetails(httpContextAccessor.HttpContext?.Connection.RemoteIpAddress?.ToString() ?? "Unknown", httpContextAccessor.HttpContext?.Request.Headers["User-Agent"].ToString() ?? "Unknown");
+}
+ 
+ <!DOCTYPE html>
 <html lang="en">
 
 <head>
@@ -12,7 +17,9 @@
 </head>
 
 <body>
-    <Routes />
+    <CascadingValue Value="@connectionDetails">
+        <Routes />
+    </CascadingValue>
     <script src="_content/BlazorMonaco/jsInterop.js"></script>
     <script src="_content/BlazorMonaco/lib/monaco-editor/min/vs/loader.js"></script>
     <script src="_content/BlazorMonaco/lib/monaco-editor/min/vs/editor/editor.main.js"></script>
