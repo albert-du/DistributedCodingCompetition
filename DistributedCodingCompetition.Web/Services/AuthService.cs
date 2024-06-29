@@ -1,8 +1,7 @@
 ﻿namespace DistributedCodingCompetition.Web.Services;
 
-using DistributedCodingCompetition.AuthService.Models;
-using DistributedCodingCompetition.AuthService.Services;
 using Microsoft.Extensions.Logging;
+using DistributedCodingCompetition.AuthService.Models;
 
 public class AuthService(HttpClient httpClient, ILogger<AuthService> logger, IModalService modalService) : IAuthService
 {
@@ -16,7 +15,7 @@ public class AuthService(HttpClient httpClient, ILogger<AuthService> logger, IMo
         }
         catch (Exception ex)
         {
-            await modalService.ShowError("Failed to register", ex.Message);
+            modalService.ShowError("Failed to register", ex.Message);
             logger.LogError(ex, "Failed to register");
             return null;
         }
@@ -41,7 +40,7 @@ public class AuthService(HttpClient httpClient, ILogger<AuthService> logger, IMo
         }
         catch (Exception ex)
         {
-            await modalService.ShowError("Failed to login", ex.Message);
+            modalService.ShowError("Failed to login", ex.Message);
             logger.LogError(ex, "Failed to login");
             return null;
         }
@@ -57,7 +56,7 @@ public class AuthService(HttpClient httpClient, ILogger<AuthService> logger, IMo
         }
         catch (Exception ex)
         {
-            await modalService.ShowError("Failed to validate token", ex.Message);
+            modalService.ShowError("Failed to validate token", ex.Message);
             logger.LogError(ex, "Failed to validate token");
             return false;
         }

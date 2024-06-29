@@ -4,10 +4,9 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using DistributedCodingCompetition.ApiService.Models;
 
-
 [Route("api/[controller]")]
 [ApiController]
-public class JoinCodesController(ContestContext context) : ControllerBase
+internal class JoinCodesController(ContestContext context) : ControllerBase
 {
     // GET: api/JoinCodes
     [HttpGet]

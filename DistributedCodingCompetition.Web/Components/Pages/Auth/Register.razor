@@ -1,5 +1,6 @@
 ﻿@page "/auth/register"
 @rendermode InteractiveServer
+@inject IAuthService AuthService
 
 <PageTitle>Register</PageTitle>
 
@@ -55,7 +56,8 @@
 
     private async Task SubmitAsync()
     {
-        var result = await AuthService.RegisterAsync(model.Email, model.Password);
+        // TODO CHECK FOR USER EXISTANCE
+        var result = await AuthService.TryRegister(model.Password);
         if (result.Succeeded)
         {
             NavigationManager.NavigateTo(ReturnUrl ?? "");
