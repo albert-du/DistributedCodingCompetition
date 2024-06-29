@@ -1,4 +1,5 @@
 using DistributedCodingCompetition.Web;
+using DistributedCodingCompetition.Web.Services;
 using DistributedCodingCompetition.Web.Components;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -11,10 +12,16 @@ builder.AddRedisOutputCache("cache");
 builder.Services.AddRazorComponents()
     .AddInteractiveServerComponents();
 
+builder.Services.AddSingleton<IEmailService, EmailService>();
+
 builder.Services.AddSingleton<CodeExecutionClient>();
 builder.Services.AddHttpClient<CodeExecutionClient>(static client =>
 {
     client.BaseAddress = new("https+http://codeexecution");
+});
+builder.Services.AddHttpClient<AuthService>(static client =>
+{
+    client.BaseAddress = new("https+http://authentication");
 });
 
 var app = builder.Build();

@@ -14,7 +14,7 @@ var contestDatabase = postgres.AddDatabase("contestdb");
 
 var authDatabase = mongo.AddDatabase("authdb");
 
-var auth = builder.AddProject<Projects.DistributedCodingCompetition_AuthService>("authentiation")
+var auth = builder.AddProject<Projects.DistributedCodingCompetition_AuthService>("authentication")
                   .WithReference(authDatabase);
 
 var codeExecution = builder.AddProject<Projects.DistributedCodingCompetition_CodeExecution>("codeexecution")
