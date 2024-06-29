@@ -4,6 +4,8 @@ public class User
 {
     public Guid Id { get; set; }
     public string Username { get; set; } = string.Empty;
+    public DateTime Birthday { get; set; }
+    public DateTime Creation { get; set; }
     public string Email { get; set; } = string.Empty;
     public ICollection<Submission> Submissions { get; set; } = [];
     public ICollection<Contest> EnteredContests { get; set; } = [];

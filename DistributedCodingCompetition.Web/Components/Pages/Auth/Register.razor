@@ -3,6 +3,7 @@
 @inject IAuthService AuthService
 @inject IApiService ApiService
 @inject NavigationManager NavigationManager
+@inject IEmailService EmailService
 
 <PageTitle>Register</PageTitle>
 
@@ -11,64 +12,86 @@
     @*TODO show spinner or something in future*@
     <h3>Loading...</h3>
 }
-else
+else if (otc is null)
 {
 
+    <EditForm Model=model OnValidSubmit=SubmitAsync FormName="Registration">
+        <label>
+            Email
+            <InputText id="username" type="email" @bind-Value=model.Email />
+            <ValidationMessage For=@(() => model.Email) />
+        </label>
+
+        <label>
+            Password
+            <InputText type="password" @bind-Value=model.Password />
+            <ValidationMessage For=@(() => model.Password) />
+        </label>
+
+        <label>
+            Confirm Password
+            <InputText type="password" @bind-Value=model.ConfirmPassword />
+            <ValidationMessage For=@(() => model.ConfirmPassword) />
+        </label>
+
+        <button type="submit">Submit</button>
+
+        <div class="text-rose-500">
+            <DataAnnotationsValidator />
+            <ValidationSummary />
+        </div>
+    </EditForm>
 }
+else if (otc is not null && otc != otcREAL)
+{
+    <h3>Enter the verification code sent to your email</h3>
+    <InputText @bind-Value=otcREAL />
+    <button @onclick=Submit2>Submit</button>
+}
+else
+{
+    // otc is correct
+    <EditForm Model=model2 OnValidSubmit=SubmitAsync3 FormName="UserDetails">
+        <label>
+            Email
+            <InputText id="username" type="email" @bind-Value=model.Email />
+            <ValidationMessage For=@(() => model.Email) />
+        </label>
 
-<EditForm Model=model OnValidSubmit=SubmitAsync FormName="Registration">
-    <label>
-        Email
-        <InputText id="username" type="email" @bind-Value=model.Email />
-        <ValidationMessage For=@(() => model.Email) />
-    </label>
+        <label>
+            Password
+            <InputText type="password" @bind-Value=model.Password />
+            <ValidationMessage For=@(() => model.Password) />
+        </label>
 
-    <label>
-        Password
-        <InputText type="password" @bind-Value=model.Password />
-        <ValidationMessage For=@(() => model.Password) />
-    </label>
+        <label>
+            Confirm Password
+            <InputText type="password" @bind-Value=model.ConfirmPassword />
+            <ValidationMessage For=@(() => model.ConfirmPassword) />
+        </label>
 
-    <label>
-        Confirm Password
-        <InputText type="password" @bind-Value=model.ConfirmPassword />
-        <ValidationMessage For=@(() => model.ConfirmPassword) />
-    </label>
+        <button type="submit">Submit</button>
 
-    <button type="submit">Submit</button>
-
-    <div class="text-rose-500">
-        <DataAnnotationsValidator />
-        <ValidationSummary />
-    </div>
-</EditForm>
+        <div class="text-rose-500">
+            <DataAnnotationsValidator />
+            <ValidationSummary />
+        </div>
+    </EditForm>
+}
 
 @code {
     [Parameter]
     public string? ReturnUrl { get; set; }
 
     private RegisterModel model = new();
+    private RegisterModel2 model2 = new();
 
-    string otc = Utils.RandomOTC();
+    string? otc = null;
+    DateTime otcGenTime;
+    string otcREAL = string.Empty;
+    bool resendEnabled;
 
     private bool loading;
-
-    private class RegisterModel
-    {
-        [Required]
-        [EmailAddress]
-        public string Email { get; set; } = "";
-
-        [Required]
-        [MinLength(8)]
-        [DataType(DataType.Password)]
-        public string Password { get; set; } = "";
-
-        [Required]
-        [DataType(DataType.Password)]
-        [Compare(nameof(Password))]
-        public string ConfirmPassword { get; set; } = "";
-    }
 
     private async Task SubmitAsync()
     {
@@ -88,19 +111,57 @@ else
                 NavigationManager.NavigateTo("/auth/login");
             return;
         }
+        await SendOTCAsync();
+    }
 
-        // EMAIL NOT TAKEN
+    private void Submit2()
+    {
+        // should force rerender by itself if otc is correct.
+    }
 
-        // validate email
+    private void Submit3()
+    {
+    }
 
-        var result = await AuthService.TryRegister(model.Email, model.Password);
-        if (!result.HasValue)
-            return;
+    private async Task SendOTCAsync()
+    {
+        otc = Utils.RandomOTC();
+        await EmailService.SendEmailAsync(model.Email, "Verify your email", $"Your verification code is {otc}");
+        _ = Wait30ThenEnableResend();
+    }
 
+    private async Task Wait30ThenEnableResend()
+    {
+        await Task.Delay(30000);
+        resendEnabled = true;
+        await InvokeAsync(StateHasChanged);
+    }
 
+    private class RegisterModel
+    {
+        [Required]
+        [EmailAddress]
+        public string Email { get; set; } = "";
+
+        [Required]
+        [MinLength(8)]
+        [DataType(DataType.Password)]
+        public string Password { get; set; } = "";
+
+        [Required]
+        [DataType(DataType.Password)]
+        [Compare(nameof(Password))]
+        public string ConfirmPassword { get; set; } = "";
+    }
+
+    private class RegisterModel2
+    {
+        [Required(AllowEmptyStrings=false)]
+        public string Username { get; set; } = "";
+
+        public DateTime Birthday { get; set; } = DateTime.UtcNow;
     }
 }
-
 
 @*
     Registration Steps:

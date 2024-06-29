@@ -1,4 +1,4 @@
-﻿namespace DistributedCodingCompetition.ApiService;
+﻿namespace DistributedCodingCompetition.Web;
 
 public static class Utils
 {
