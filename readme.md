@@ -1,0 +1,50 @@
+# Distributed Coding Competition
+
+All in one cloud native solution for administering coding competitions with user configurable and manageable contests.
+
+* ASP.NET Core Blazor
+* .NET Aspire
+* MongoDB
+* Postgres
+* Docker
+* [Piston](https://github.com/engineer-man/piston)
+
+# Development
+## Piston 
+*Code Execution Sandbox*
+
+Start from Linux/WSL 
+```
+docker run \
+    -v $PWD:'/piston' \
+    --tmpfs /piston/jobs \
+    -dit \
+    -p 2000:2000 \
+    --name piston_api \a
+    ghcr.io/engineer-man/piston
+```
+
+
+## SMTP Dev server
+*Email Server for development*
+
+https://github.com/rnwood/smtp4dev
+
+```
+docker run --rm -it -p 5000:80 -p 2525:25 rnwood/smtp4dev
+```
+
+## Execution Runner
+*Sandbox manager*
+
+```
+cd ./DistributedCodingCompetition/ExecRunner/
+dotnet run
+```
+
+## Application cluster
+
+```
+cd ./DistributedCodingCompetition/AppHost/
+dotnet run
+```

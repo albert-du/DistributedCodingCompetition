@@ -1,0 +1,9 @@
+@attribute [AllowAnonymous]
+@inject NavigationManager _navigationManager
+@code {
+    protected override void OnInitialized()
+    {
+        var current = _navigationManager.Uri;
+        _navigationManager.NavigateTo($"/login?returnUrl={HttpUtility.UrlEncode(_navigationManager.ToBaseRelativePath(_navigationManager.Uri))}");
+    }
+}
