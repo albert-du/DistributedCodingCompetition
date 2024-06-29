@@ -14,9 +14,10 @@ builder.Services.AddRazorComponents()
 
 builder.Services.AddAuthentication()
     .AddCookie();
-
+builder.Services.AddHttpContextAccessor();
 builder.Services.AddSingleton<IEmailService, EmailService>();
 builder.Services.AddSingleton<CodeExecutionClient>();
+builder.Services.AddScoped<IModalService, ModalService>();
 builder.Services.AddScoped<IAuthService, AuthService>();
 builder.Services.AddScoped<IApiService, ApiService>();
 builder.Services.AddHttpClient<CodeExecutionClient>(static client => client.BaseAddress = new("https+http://codeexecution"));

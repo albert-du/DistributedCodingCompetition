@@ -34,17 +34,24 @@ https://github.com/rnwood/smtp4dev
 docker run --rm -it -p 5000:80 -p 2525:25 rnwood/smtp4dev
 ```
 
+## Tailwind.CSS
+
+```
+cd ./DistributedCodingCompetition/DistributedCodingCompetition.Web/
+tailwind-(watch|build).(cmd|sh)
+```
+
 ## Execution Runner
 *Sandbox manager*
 
 ```
-cd ./DistributedCodingCompetition/ExecRunner/
+cd ./DistributedCodingCompetition/DistributedCodingCompetition.ExecRunner/
 dotnet run
 ```
 
 ## Application cluster
 
 ```
-cd ./DistributedCodingCompetition/AppHost/
+cd ./DistributedCodingCompetition/DistributedCodingCompetition.AppHost/
 dotnet run
 ```

@@ -1,8 +1,15 @@
-@attribute [AllowAnonymous]
+@using Microsoft.AspNetCore.Components.Authorization
 @inject NavigationManager _navigationManager
 @code {
+    [CascadingParameter]
+    private Task<AuthenticationState> authenticationStateTask { get; set; } = default!;
+
     protected override void OnInitialized()
     {
+        if (authenticationStateTask.Result.User?.Identity?.IsAuthenticated is true)
+        {
+            return;
+        }
         var current = _navigationManager.Uri;
         _navigationManager.NavigateTo($"/login?returnUrl={HttpUtility.UrlEncode(_navigationManager.ToBaseRelativePath(_navigationManager.Uri))}");
     }
