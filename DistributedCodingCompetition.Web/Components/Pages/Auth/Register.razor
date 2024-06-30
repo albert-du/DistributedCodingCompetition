@@ -93,9 +93,18 @@
             FormName="UserDetails">
             <label class="flex flex-col">
                 <div class="pl-2">
-                    Name
+                    Full Name
                 </div>
-                <InputText placeholder="" class="w-64 px-2 py-1 ml-2 bg-gray-100 rounded-lg text-slate-800"
+                <InputText placeholder="First Last" class="w-64 px-2 py-1 ml-2 bg-gray-100 rounded-lg text-slate-800"
+                    @bind-Value=model2.FullName />
+                <ValidationMessage For=@(() => model2.FullName) />
+            </label>
+            <label class="flex flex-col">
+                <div class="pl-2">
+                    Username
+                    <div class="text-xs text-gray-500">5-25 characters</div>
+                </div>
+                <InputText placeholder="cool_hckr-23" class="w-64 px-2 py-1 ml-2 bg-gray-100 rounded-lg text-slate-800"
                     @bind-Value=model2.Username />
                 <ValidationMessage For=@(() => model2.Username) />
             </label>
@@ -107,13 +116,6 @@
                 <InputDate class="w-64 px-2 py-1 ml-2 bg-gray-100 rounded-lg text-slate-800" @bind-Value=model2.Birthday />
                 <ValidationMessage For=@(() => model2.Birthday) />
             </label>
-
-            <div class="flex justify-center">
-                <button
-                    class="px-2 py-1 border rounded-xl text-violet-500 border-violet-500 hover:bg-violet-200 active:bg-violet-400"
-                    type="submit">Submit</button>
-            </div>
-
             <DataAnnotationsValidator />
         </EditForm>
     }
@@ -150,17 +152,13 @@
         await InvokeAsync(StateHasChanged);
         try
         {
-            (var success, var user) = await ApiService.TryUserByEmailAsync(model.Email);
+            (var success, var user) = await ApiService.TryReadUserByEmailAsync(model.Email);
             if (!success)
                 // req failed
                 return;
 
             if (user is not null)
             {
-                // email already in use
-                // throws exn if email is already in use
-
-                // redirect to login page
                 if (ReturnUrl is not null)
                     NavigationManager.NavigateTo("/auth/login?returnUrl=" + ReturnUrl);
                 else
@@ -201,6 +199,20 @@
         await InvokeAsync(StateHasChanged);
         try
         {
+            // make sure user doesn't exist
+            (var success, var existing) = await ApiService.TryReadUserByEmailAsync(model.Email);
+            if (!success)
+            {
+                error = "Failed to check if user exists.";
+                return;
+            }
+
+            if (existing is not null)
+            {
+                error = "Username already exists.";
+                return;
+            }
+
             var id = await AuthService.TryRegisterAsync(model.Email, model.Password);
             if (id is null)
             {
@@ -214,7 +226,7 @@
                     Username = model2.Username,
                     Birthday = model2.Birthday
                 };
-            var success = await ApiService.TryCreateUserAsync(user);
+            success = await ApiService.TryCreateUserAsync(user);
             if (!success)
             {
                 error = "Failed to create user.";
@@ -286,7 +298,12 @@
     private class RegisterModel2
     {
         [Required(AllowEmptyStrings = false)]
+        [Length(5, 25)]
+        [RegularExpression(@"^[a-zA-Z0-9_\-]+$")]
         public string Username { get; set; } = "";
+
+        [Required(AllowEmptyStrings = false)]
+        public string FullName { get; set; } = "";
 
         public DateTime Birthday { get; set; } = DateTime.UtcNow;
     }

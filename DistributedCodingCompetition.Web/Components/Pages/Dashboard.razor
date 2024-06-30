@@ -1,28 +1,23 @@
 @page "/dashboard"
 @rendermode InteractiveServer
 @inject AuthenticationStateProvider AuthenticationStateProvider
+@inject IUserStateService UserStateService
+@using DistributedCodingCompetition.ApiService.Models
+<RedirectToLogin />
 
+<h1>Dashboard</h1>
 
-<AuthorizeView>
-    <Authorized>
-        You are logged in
-    </Authorized>
-    <NotAuthorized>
-        You are not logged in
-    </NotAuthorized>
-</AuthorizeView>
-
-@username
+@if (user is not null)
+{
+    <p>Welcome, @user.Username</p>
+    <p>Your email is: @user.Email</p>
+}
 
 @code {
+    User? user;
 
-    string username = "test";
-    protected override async Task OnAfterRenderAsync(bool firstRender)
+    protected override async Task OnInitializedAsync()
     {
-        if (!firstRender)
-            return;
-        var authState = await AuthenticationStateProvider.GetAuthenticationStateAsync();
-        username = authState.User?.Identity?.IsAuthenticated is true ? "logged in" : "not logged in";
-        await InvokeAsync(StateHasChanged);
+        user = await UserStateService.UserAsync();
     }
 }

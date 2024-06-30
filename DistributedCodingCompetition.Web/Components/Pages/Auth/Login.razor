@@ -72,7 +72,7 @@
         Console.WriteLine("\n\n\n\n" + model.Email + "\n\n\n\n");
         Console.WriteLine("\n\n\n\n" + model.Password + "\n\n\n\n");
 
-        (var success, var user) = await ApiService.TryUserByEmailAsync(model.Email);
+        (var success, var user) = await ApiService.TryReadUserByEmailAsync(model.Email);
         if (!success || user is null)
         {
             error = "Failed to login.";
@@ -81,11 +81,19 @@
         }
 
         var res = await AuthService.TryLoginAsync(user.Id, model.Password, ConnectionDetails?.UserAgent ?? "Unknown", ConnectionDetails?.IpAddress ?? "Unknown");
+
+        if (res is null)
+        {
+            error = $"Failed to login. Status";
+            submitted = false;
+            return;
+        }
+
         var code = await JSRuntime.InvokeAsync<int>("post", $"htau/login?token={Uri.EscapeDataString(res.Token)}");
 
         if (code != 200)
         {
-            error = $"Failed to login. Status: {res}";
+            error = $"Failed to login. Status: {code}";
             submitted = false;
             return;
         }

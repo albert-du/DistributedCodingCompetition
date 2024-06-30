@@ -5,7 +5,7 @@ using System.Net;
 
 public class ApiService(HttpClient httpClient, ILogger<ApiService> logger) : IApiService
 {
-    public async Task<(bool,User?)> TryUserByEmailAsync(string email)
+    public async Task<(bool,User?)> TryReadUserByEmailAsync(string email)
     {
         try
         {
@@ -33,6 +33,38 @@ public class ApiService(HttpClient httpClient, ILogger<ApiService> logger) : IAp
         catch (Exception ex)
         {
             logger.LogError(ex, "Failed to create user");
+            return false;
+        }
+    }
+
+    public async Task<(bool, User?)> TryReadUserAsync(Guid id)
+    {
+        try
+        {
+            var response = await httpClient.GetAsync($"api/users/{id}");
+            if (response.StatusCode == HttpStatusCode.NotFound)
+                return (true, null);
+            response.EnsureSuccessStatusCode();
+            return (true, await response.Content.ReadFromJsonAsync<User>());
+        }
+        catch (Exception ex)
+        {
+            logger.LogError(ex, "Failed to fetch user by id");
+            return (false, null);
+        }
+    }
+
+    public async Task<bool> TryUpdateUserAsync(User user)
+    {
+        try
+        {
+            var response = await httpClient.PutAsJsonAsync($"api/users/{user.Id}", user);
+            response.EnsureSuccessStatusCode();
+            return true;
+        }
+        catch (Exception ex)
+        {
+            logger.LogError(ex, "Failed to update user");
             return false;
         }
     }

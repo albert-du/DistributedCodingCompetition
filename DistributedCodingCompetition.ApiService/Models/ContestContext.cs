@@ -17,6 +17,9 @@ public class ContestContext(DbContextOptions<ContestContext> options) : DbContex
         modelBuilder.Entity<User>()
             .HasIndex(u => u.Email).IsUnique();
 
+        modelBuilder.Entity<User>()
+            .HasIndex(u => u.Username).IsUnique();
+
         modelBuilder.Entity<Contest>()
             .HasOne(c => c.Owner).WithMany(u => u.OwnedContests);
 

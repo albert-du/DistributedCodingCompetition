@@ -25,7 +25,8 @@ builder.Services.AddSingleton<IEmailService, EmailService>();
 builder.Services.AddSingleton<CodeExecutionClient>();
 builder.Services.AddSingleton<IApiService, ApiService>();
 builder.Services.AddScoped<IModalService, ModalService>();
-builder.Services.AddScoped<IAuthService, AuthService>(); // TODO rewrite as singleton
+builder.Services.AddScoped<IAuthService, AuthService>();
+builder.Services.AddScoped<IUserStateService, UserStateService>();
 
 // MUST BE AFTER
 builder.Services.AddHttpClient<CodeExecutionClient>(client => client.BaseAddress = new("https+http://codeexecution"));
