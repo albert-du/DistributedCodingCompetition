@@ -5,34 +5,42 @@
 @inject NavigationManager NavigationManager
 
 <PageTitle>Login</PageTitle>
-<div class="flex flex-col justify-center mx-auto align-middle w-96">
-    <div class="flex flex-col gap-y-2">
-        <h2 class="text-2xl text-center">Login</h2>
-        <EditForm class="flex flex-col justify-center align-middle gap-y-3" Model=model OnValidSubmit=SubmitAsync FormName="Login">
-            <label class="flex justify-center">
+<div class="py-2 mx-auto align-middle border rounded-lg border-slate-200 w-96">
+    <h2 class="py-2 text-2xl text-center">Login</h2>
+    <EditForm class="flex flex-col items-center justify-center gap-y-5" Model=model OnValidSubmit=SubmitAsync
+        FormName="Login">
+        <label class="flex flex-col">
+            <div class="pl-2">
                 Email
-                <InputText class="px-2 py-1 ml-2 bg-gray-100 rounded-lg text-slate-800" id="username" type="email" @bind-Value=model.Email />
-                <ValidationMessage For=@(() => model.Email) />
-            </label>
-
-            <label class="flex justify-center">
-                Password
-                <InputText class="px-2 py-1 ml-2 bg-gray-100 rounded-lg text-slate-800" type="password" @bind-Value=model.Password />
-                <ValidationMessage For=@(() => model.Password) />
-            </label>
-
-            <button type="submit">Submit</button>
-
-            <div class="text-rose-500">
-                <DataAnnotationsValidator />
-                <ValidationSummary />
             </div>
-        </EditForm>
-        <div>
-            @error
-        </div>
+            <InputText class="w-64 px-2 py-1 ml-2 bg-gray-100 rounded-lg text-slate-800" id="username" type="email"
+                @bind-Value=model.Email />
+            <div class="h-2 text-rose-500">
+                <ValidationMessage For=@(() => model.Email) />
+            </div>
+        </label>
 
+        <label class="flex flex-col">
+            <div class="pl-2">
+                Password
+            </div>
+            <InputText class="w-64 px-2 py-1 ml-2 bg-gray-100 rounded-lg text-slate-800" type="password"
+                @bind-Value=model.Password />
+            <div class="h-2 text-rose-500">
+                <ValidationMessage For=@(() => model.Password) />
+            </div>
+        </label>
+        <div class="flex justify-center">
+            <button
+                class="px-2 py-1 border rounded-xl text-violet-500 border-violet-500 hover:bg-violet-200 active:bg-violet-400"
+                type="submit">Submit</button>
+        </div>
+        <DataAnnotationsValidator />
+    </EditForm>
+    <div>
+        @error
     </div>
+
 </div>
 
 
@@ -62,7 +70,8 @@
             return;
         }
 
-        var token = await AuthService.TryLoginAsync(user.Id, model.Password, ConnectionDetails?.UserAgent ?? "Unknown", ConnectionDetails?.IpAddress ?? "Unknown");
+        var token = await AuthService.TryLoginAsync(user.Id, model.Password, ConnectionDetails?.UserAgent ?? "Unknown",
+        ConnectionDetails?.IpAddress ?? "Unknown");
         var res = await JSRuntime.InvokeAsync<int>("post", "htau/login", token);
 
         if (res != 200)
@@ -72,7 +81,7 @@
             return;
         }
 
-        submitted= false;
+        submitted = false;
         await InvokeAsync(StateHasChanged);
     }
 

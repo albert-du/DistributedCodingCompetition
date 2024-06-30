@@ -65,7 +65,7 @@
     }
     else if (!otcValid)
     {
-        <div class="flex flex-col items-center gap-y-2">
+        <EditForm class="flex flex-col items-center gap-y-2">
             <h3>Enter the verification code sent to your email</h3>
             <p class="italic">@model.Email</p>
             <InputText pattern="[0-9]{6}" placeholder="000000"
@@ -73,9 +73,18 @@
             <div class="flex justify-center py-3">
                 <button
                     class="px-2 py-1 border rounded-xl text-violet-500 border-violet-500 hover:bg-violet-200 active:bg-violet-400"
+                    type="submit"
                     @onclick=SubmitAsync2>Submit</button>
             </div>
-        </div>
+            @if (resendEnabled)
+            {
+                <div class="flex justify-center">
+                    <button
+                        class="px-2 py-1 border rounded-xl text-violet-500 border-violet-500 hover:bg-violet-200 active:bg-violet-400"
+                        @onclick=SendOTCAsync>Resend</button>
+                </div>
+            }
+        </EditForm>
     }
     else
     {
@@ -86,7 +95,8 @@
                 <div class="pl-2">
                     Name
                 </div>
-                <InputText placeholder="" class="w-64 px-2 py-1 ml-2 bg-gray-100 rounded-lg text-slate-800" @bind-Value=model2.Username />
+                <InputText placeholder="" class="w-64 px-2 py-1 ml-2 bg-gray-100 rounded-lg text-slate-800"
+                    @bind-Value=model2.Username />
                 <ValidationMessage For=@(() => model2.Username) />
             </label>
 
@@ -135,29 +145,44 @@
 
     private async Task SubmitAsync()
     {
+        if (loading)
+            return;
+        loading = true;
         error = null;
-        (var success, var user) = await ApiService.TryUserByEmailAsync(model.Email);
-        if (!success)
-            // req failed
-            return;
-
-        if (user is not null)
+        await InvokeAsync(StateHasChanged);
+        try
         {
-            // email already in use
-            // throws exn if email is already in use
+            (var success, var user) = await ApiService.TryUserByEmailAsync(model.Email);
+            if (!success)
+                // req failed
+                return;
 
-            // redirect to login page
-            if (ReturnUrl is not null)
-                NavigationManager.NavigateTo("/auth/login?returnUrl=" + ReturnUrl);
-            else
-                NavigationManager.NavigateTo("/auth/login");
-            return;
+            if (user is not null)
+            {
+                // email already in use
+                // throws exn if email is already in use
+
+                // redirect to login page
+                if (ReturnUrl is not null)
+                    NavigationManager.NavigateTo("/auth/login?returnUrl=" + ReturnUrl);
+                else
+                    NavigationManager.NavigateTo("/auth/login");
+                return;
+            }
+            await SendOTCAsync();
         }
-        await SendOTCAsync();
+        finally
+        {
+            loading = false;
+            await InvokeAsync(StateHasChanged);
+        }
+
     }
 
     private async Task SubmitAsync2()
     {
+        if (loading)
+            return;
         error = null;
         loading = true;
         await InvokeAsync(StateHasChanged);
@@ -171,51 +196,67 @@
 
     private async Task SubmitAsync3()
     {
+        if (loading)
+            return;
         error = null;
-        var id = await AuthService.TryRegisterAsync(model.Email, model.Password);
-        if (id is null)
+        loading = true;
+        await InvokeAsync(StateHasChanged);
+        try
         {
-            error = "Failed to register.";
-            return;
-        }
-        User user = new()
+            var id = await AuthService.TryRegisterAsync(model.Email, model.Password);
+            if (id is null)
             {
-                Id = id.Value,
-                Email = model.Email,
-                Username = model2.Username,
-                Birthday = model2.Birthday
-            };
-        var success = await ApiService.TryCreateUserAsync(user);
-        if (!success)
-        {
-            error = "Failed to create user.";
-            return;
-        }
-        await Task.Delay(1000);
-        // login
-        var res = await AuthService.TryLoginAsync(id.Value, model.Password, ConnectionDetails?.UserAgent ?? "Unknown", ConnectionDetails?.IpAddress ?? "Unknown");
-        if (res is null)
-        {
-            error = "Failed to login.";
-            return;
-        }
+                error = "Failed to register.";
+                return;
+            }
+            User user = new()
+                {
+                    Id = id.Value,
+                    Email = model.Email,
+                    Username = model2.Username,
+                    Birthday = model2.Birthday
+                };
+            var success = await ApiService.TryCreateUserAsync(user);
+            if (!success)
+            {
+                error = "Failed to create user.";
+                return;
+            }
+            await Task.Delay(1000);
+            // login
+            var res = await AuthService.TryLoginAsync(id.Value, model.Password, ConnectionDetails?.UserAgent ?? "Unknown",
+            ConnectionDetails?.IpAddress ?? "Unknown");
+            if (res is null)
+            {
+                error = "Failed to login.";
+                return;
+            }
 
-        var code = await JSRuntime.InvokeAsync<int>("post", $"htau/login?token={Uri.EscapeDataString(res.Token)}");
+            var code = await JSRuntime.InvokeAsync<int>("post", $"htau/login?token={Uri.EscapeDataString(res.Token)}");
 
-        if (code != 200)
-        {
-            error = "Failed to login.";
-            return;
+            if (code != 200)
+            {
+                error = "Failed to login.";
+                return;
+            }
+
+            if (ReturnUrl is not null)
+                NavigationManager.NavigateTo(ReturnUrl);
+            else
+                NavigationManager.NavigateTo("/");
         }
-
-        if (ReturnUrl is not null)
-            NavigationManager.NavigateTo(ReturnUrl);
-        else
-            NavigationManager.NavigateTo("/");
+        finally
+        {
+            loading = false;
+            await InvokeAsync(StateHasChanged);
+        }
     }
 
     private async Task SendOTCAsync()
     {
+        if (!resendEnabled)
+            return;
+        resendEnabled = false;
         otc = Utils.RandomOTC();
         await EmailService.SendEmailAsync(model.Email, "Verify your email", $"Your verification code is {otc}");
         _ = Wait30ThenEnableResend();
@@ -253,15 +294,3 @@
         public DateTime Birthday { get; set; } = DateTime.UtcNow;
     }
 }
-
-@*
-Registration Steps:
-1. Check email is not in use
-2. Validate email
-3. Get user profile information
-3. Create auth record in db
-4. Create user record in db
-5. Fetch login token
-6. Update login state
-7. Redirect to page
-*@
