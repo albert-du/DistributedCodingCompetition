@@ -10,8 +10,8 @@
 
 <PageTitle>Register</PageTitle>
 
-<div class="mx-auto align-middle border rounded-2xl border-slate-200 w-96">
-    <h2 class="pb-2 text-2xl text-center">Register</h2>
+<div class="py-2 mx-auto align-middle border rounded-lg border-slate-200 w-72">
+    <h2 class="py-2 text-2xl text-center">Register</h2>
 
     @if (loading)
     {
@@ -20,32 +20,47 @@
     }
     else if (otc is null)
     {
-        <EditForm class="flex flex-col gap-y-5" Model=model OnValidSubmit=SubmitAsync FormName="Registration">
-            <label class="flex justify-center">
-                Email
-                <InputText class="px-2 py-1 ml-2 bg-gray-100 rounded-lg text-slate-800" id="username" type="email" @bind-Value=model.Email />
-                <ValidationMessage For=@(() => model.Email) />
+        <EditForm class="flex flex-col items-center justify-center gap-y-5" Model=model OnValidSubmit=SubmitAsync
+            FormName="Registration">
+            <label class="flex flex-col">
+                <div class="pl-2">
+                    Email
+                </div>
+                <InputText class="w-64 px-2 py-1 ml-2 bg-gray-100 rounded-lg text-slate-800" id="username" type="email"
+                    @bind-Value=model.Email placeholder="me@example.com" />
+                <div class="h-2 text-rose-500">
+                    <ValidationMessage For=@(() => model.Email) />
+                </div>
             </label>
 
-            <label class="flex justify-center">
-                Password
-                <InputText class="px-2 py-1 ml-2 bg-gray-100 rounded-lg text-slate-800" type="password" @bind-Value=model.Password />
-                <ValidationMessage For=@(() => model.Password) />
+            <label class="flex flex-col">
+                <div class="pl-2">
+                    Password
+                </div>
+                <InputText class="w-64 px-2 py-1 ml-2 bg-gray-100 rounded-lg text-slate-800" type="password"
+                    @bind-Value=model.Password />
+                <div class="h-2 text-rose-500">
+                    <ValidationMessage For=@(() => model.Password) />
+                </div>
+            </label>
+            <label class="flex flex-col">
+                <div class="pl-2">
+                    Confirm Password
+                </div>
+                <InputText class="w-64 px-2 py-1 ml-2 bg-gray-100 rounded-lg text-slate-800" type="password"
+                    @bind-Value=model.ConfirmPassword />
+                <div class="h-2 text-rose-500">
+                    <ValidationMessage For=@(() => model.ConfirmPassword) />
+                </div>
             </label>
 
-            <label class="flex justify-center">
-                Confirm Password
-                <InputText class="px-2 py-1 ml-2 bg-gray-100 rounded-lg text-slate-800" type="password" @bind-Value=model.ConfirmPassword />
-                <ValidationMessage For=@(() => model.ConfirmPassword) />
-            </label>
             <div class="flex justify-center">
-                <button class="px-2 py-1 border rounded-xl text-violet-500 border-violet-500 " type="submit">Submit</button>
+                <button
+                    class="px-2 py-1 border rounded-xl text-violet-500 border-violet-500 hover:bg-violet-200 active:bg-violet-400"
+                    type="submit">Submit</button>
             </div>
 
-            <div class="text-rose-500">
-                <DataAnnotationsValidator />
-                <ValidationSummary />
-            </div>
+            <DataAnnotationsValidator />
         </EditForm>
     }
     else if (!otcValid)
@@ -78,6 +93,9 @@
             </div>
         </EditForm>
     }
+    <div class="text-rose-500">
+        @error
+    </div>
 </div>
 
 

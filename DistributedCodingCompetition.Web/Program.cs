@@ -1,6 +1,7 @@
 using DistributedCodingCompetition.Web;
 using DistributedCodingCompetition.Web.Services;
 using DistributedCodingCompetition.Web.Components;
+using DistributedCodingCompetition.Web.Models;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -14,15 +15,22 @@ builder.Services.AddRazorComponents()
 
 builder.Services.AddAuthentication()
     .AddCookie();
+
 builder.Services.AddHttpContextAccessor();
+
+
 builder.Services.AddSingleton<IEmailService, EmailService>();
 builder.Services.AddSingleton<CodeExecutionClient>();
+builder.Services.AddSingleton<IApiService, ApiService>();
 builder.Services.AddScoped<IModalService, ModalService>();
-builder.Services.AddScoped<IAuthService, AuthService>();
-builder.Services.AddScoped<IApiService, ApiService>();
-builder.Services.AddHttpClient<CodeExecutionClient>(static client => client.BaseAddress = new("https+http://codeexecution"));
-builder.Services.AddHttpClient<AuthService>(static client => client.BaseAddress = new("https+http://authentication"));
-builder.Services.AddHttpClient<ApiService>(static client => client.BaseAddress = new("https+http://apiservice"));
+builder.Services.AddScoped<IAuthService, AuthService>(); // TODO rewrite as singleton
+
+// MUST BE AFTER
+builder.Services.AddHttpClient<CodeExecutionClient>(client => client.BaseAddress = new("https+http://codeexecution"));
+builder.Services.AddHttpClient<IAuthService, AuthService>(client => client.BaseAddress = new("https+http://authentication"));
+builder.Services.AddHttpClient<IApiService, ApiService>(client => client.BaseAddress = new("https+http://apiservice"));
+
+builder.Services.Configure<SMTPOptions>(builder.Configuration.GetSection("SMTP"));
 
 var app = builder.Build();
 
