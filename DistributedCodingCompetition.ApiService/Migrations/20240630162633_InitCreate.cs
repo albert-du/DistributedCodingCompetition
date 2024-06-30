@@ -68,6 +68,54 @@ namespace DistributedCodingCompetition.ApiService.Migrations
                 });
 
             migrationBuilder.CreateTable(
+                name: "ContestUser",
+                columns: table => new
+                {
+                    AdministeredContestsId = table.Column<Guid>(type: "uuid", nullable: false),
+                    AdministratorsId = table.Column<Guid>(type: "uuid", nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_ContestUser", x => new { x.AdministeredContestsId, x.AdministratorsId });
+                    table.ForeignKey(
+                        name: "FK_ContestUser_Contests_AdministeredContestsId",
+                        column: x => x.AdministeredContestsId,
+                        principalTable: "Contests",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Cascade);
+                    table.ForeignKey(
+                        name: "FK_ContestUser_Users_AdministratorsId",
+                        column: x => x.AdministratorsId,
+                        principalTable: "Users",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Cascade);
+                });
+
+            migrationBuilder.CreateTable(
+                name: "ContestUser1",
+                columns: table => new
+                {
+                    EnteredContestsId = table.Column<Guid>(type: "uuid", nullable: false),
+                    ParticipantsId = table.Column<Guid>(type: "uuid", nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_ContestUser1", x => new { x.EnteredContestsId, x.ParticipantsId });
+                    table.ForeignKey(
+                        name: "FK_ContestUser1_Contests_EnteredContestsId",
+                        column: x => x.EnteredContestsId,
+                        principalTable: "Contests",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Cascade);
+                    table.ForeignKey(
+                        name: "FK_ContestUser1_Users_ParticipantsId",
+                        column: x => x.ParticipantsId,
+                        principalTable: "Users",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Cascade);
+                });
+
+            migrationBuilder.CreateTable(
                 name: "Problems",
                 columns: table => new
                 {
@@ -182,6 +230,16 @@ namespace DistributedCodingCompetition.ApiService.Migrations
                 });
 
             migrationBuilder.CreateIndex(
+                name: "IX_ContestUser_AdministratorsId",
+                table: "ContestUser",
+                column: "AdministratorsId");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_ContestUser1_ParticipantsId",
+                table: "ContestUser1",
+                column: "ParticipantsId");
+
+            migrationBuilder.CreateIndex(
                 name: "IX_JoinCodes_Code",
                 table: "JoinCodes",
                 column: "Code",
@@ -242,6 +300,12 @@ namespace DistributedCodingCompetition.ApiService.Migrations
         /// <inheritdoc />
         protected override void Down(MigrationBuilder migrationBuilder)
         {
+            migrationBuilder.DropTable(
+                name: "ContestUser");
+
+            migrationBuilder.DropTable(
+                name: "ContestUser1");
+
             migrationBuilder.DropTable(
                 name: "JoinCodes");
 

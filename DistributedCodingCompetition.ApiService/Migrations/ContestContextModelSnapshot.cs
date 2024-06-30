@@ -22,6 +22,36 @@ namespace DistributedCodingCompetition.ApiService.Migrations
 
             NpgsqlModelBuilderExtensions.UseIdentityByDefaultColumns(modelBuilder);
 
+            modelBuilder.Entity("ContestUser", b =>
+                {
+                    b.Property<Guid>("AdministeredContestsId")
+                        .HasColumnType("uuid");
+
+                    b.Property<Guid>("AdministratorsId")
+                        .HasColumnType("uuid");
+
+                    b.HasKey("AdministeredContestsId", "AdministratorsId");
+
+                    b.HasIndex("AdministratorsId");
+
+                    b.ToTable("ContestUser");
+                });
+
+            modelBuilder.Entity("ContestUser1", b =>
+                {
+                    b.Property<Guid>("EnteredContestsId")
+                        .HasColumnType("uuid");
+
+                    b.Property<Guid>("ParticipantsId")
+                        .HasColumnType("uuid");
+
+                    b.HasKey("EnteredContestsId", "ParticipantsId");
+
+                    b.HasIndex("ParticipantsId");
+
+                    b.ToTable("ContestUser1");
+                });
+
             modelBuilder.Entity("DistributedCodingCompetition.ApiService.Models.Contest", b =>
                 {
                     b.Property<Guid>("Id")
@@ -258,6 +288,36 @@ namespace DistributedCodingCompetition.ApiService.Migrations
                         .IsUnique();
 
                     b.ToTable("Users");
+                });
+
+            modelBuilder.Entity("ContestUser", b =>
+                {
+                    b.HasOne("DistributedCodingCompetition.ApiService.Models.Contest", null)
+                        .WithMany()
+                        .HasForeignKey("AdministeredContestsId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("DistributedCodingCompetition.ApiService.Models.User", null)
+                        .WithMany()
+                        .HasForeignKey("AdministratorsId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+                });
+
+            modelBuilder.Entity("ContestUser1", b =>
+                {
+                    b.HasOne("DistributedCodingCompetition.ApiService.Models.Contest", null)
+                        .WithMany()
+                        .HasForeignKey("EnteredContestsId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("DistributedCodingCompetition.ApiService.Models.User", null)
+                        .WithMany()
+                        .HasForeignKey("ParticipantsId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
                 });
 
             modelBuilder.Entity("DistributedCodingCompetition.ApiService.Models.JoinCode", b =>

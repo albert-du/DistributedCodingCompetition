@@ -191,7 +191,7 @@
             error = "Failed to create user.";
             return;
         }
-
+        await Task.Delay(1000);
         // login
         var res = await AuthService.TryLoginAsync(id.Value, model.Password, ConnectionDetails?.UserAgent ?? "Unknown", ConnectionDetails?.IpAddress ?? "Unknown");
         if (res is null)

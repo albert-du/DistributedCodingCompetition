@@ -8,7 +8,7 @@ public class User
     public DateTime Creation { get; set; } = DateTime.UtcNow;
     public string Email { get; set; } = string.Empty;
     public ICollection<Submission> Submissions { get; set; } = [];
-    // public ICollection<Contest> EnteredContests { get; set; } = [];
-    // public ICollection<Contest> AdministeredContests { get; set; } = [];
+    public ICollection<Contest> EnteredContests { get; set; } = [];
+    public ICollection<Contest> AdministeredContests { get; set; } = [];
     public ICollection<Problem> Problems { get; set; } = [];
 }
