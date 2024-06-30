@@ -14,7 +14,10 @@ public class ExecutionController(ILogger<ExecutionController> logger, IExecLoadB
     {
         var execRunner = execLoadBalancer.SelectRunner(request);
         if (execRunner == null)
+        {
+            logger.LogWarning("No available runners for requested language: \"{Language}\"", request.Language);
             return StatusCode(503, $"No available runners for language: \"{request.Language}\"");
+        }
         return await execRunnerService.ExecuteCodeAsync(execRunner, request);
     }
 
@@ -27,12 +30,17 @@ public class ExecutionController(ILogger<ExecutionController> logger, IExecLoadB
         foreach (var (request, execRunner) in execRunnerRequests)
         {
             if (execRunner is null)
+            {
+                logger.LogWarning("No available runners for requested language: \"{Language}\"", request.Language);
                 return StatusCode(503, $"No available runners for language: \"{request.Language}\"");
+            }
             else
                 tasks.Add(execRunnerService.ExecuteCodeAsync(execRunner, request));
         }
         List<ExecutionResult> results = new(tasks.Count);
         foreach (var task in tasks) results.Add(await task);
+        logger.LogInformation("Batch execution completed with {Count} results", results.Count);
+
         return results;
     }
 

@@ -3,46 +3,53 @@
 @inject IApiService ApiService
 @inject IJSRuntime JSRuntime
 @inject NavigationManager NavigationManager
+@inject AuthenticationStateProvider AuthenticationStateProvider
 
 <PageTitle>Login</PageTitle>
 <div class="py-2 mx-auto align-middle border rounded-lg border-slate-200 w-96">
     <h2 class="py-2 text-2xl text-center">Login</h2>
-    <EditForm class="flex flex-col items-center justify-center gap-y-5" Model=model OnValidSubmit=SubmitAsync
-        FormName="Login">
-        <label class="flex flex-col">
-            <div class="pl-2">
-                Email
-            </div>
-            <InputText class="w-64 px-2 py-1 ml-2 bg-gray-100 rounded-lg text-slate-800" id="username" type="email"
-                @bind-Value=model.Email />
-            <div class="h-2 text-rose-500">
-                <ValidationMessage For=@(() => model.Email) />
-            </div>
-        </label>
+    @if (submitted)
+    {
+        @*TODO add spinner*@
+        <h3>Loading...</h3>
+    }
+    else
+    {
+        <EditForm class="flex flex-col items-center justify-center gap-y-5" Model=model OnValidSubmit=SubmitAsync
+            FormName="Login">
+            <label class="flex flex-col">
+                <div class="pl-2">
+                    Email
+                </div>
+                <InputText class="w-64 px-2 py-1 ml-2 bg-gray-100 rounded-lg text-slate-800" id="username" type="email"
+                    @bind-Value=model.Email />
+                <div class="h-2 text-rose-500">
+                    <ValidationMessage For=@(() => model.Email) />
+                </div>
+            </label>
 
-        <label class="flex flex-col">
-            <div class="pl-2">
-                Password
+            <label class="flex flex-col">
+                <div class="pl-2">
+                    Password
+                </div>
+                <InputText class="w-64 px-2 py-1 ml-2 bg-gray-100 rounded-lg text-slate-800" type="password"
+                    @bind-Value=model.Password />
+                <div class="h-2 text-rose-500">
+                    <ValidationMessage For=@(() => model.Password) />
+                </div>
+            </label>
+            <div class="flex justify-center">
+                <button
+                    class="px-2 py-1 border rounded-xl text-violet-500 border-violet-500 hover:bg-violet-200 active:bg-violet-400"
+                    type="submit">Submit</button>
             </div>
-            <InputText class="w-64 px-2 py-1 ml-2 bg-gray-100 rounded-lg text-slate-800" type="password"
-                @bind-Value=model.Password />
-            <div class="h-2 text-rose-500">
-                <ValidationMessage For=@(() => model.Password) />
-            </div>
-        </label>
-        <div class="flex justify-center">
-            <button
-                class="px-2 py-1 border rounded-xl text-violet-500 border-violet-500 hover:bg-violet-200 active:bg-violet-400"
-                type="submit">Submit</button>
-        </div>
-        <DataAnnotationsValidator />
-    </EditForm>
-    <div>
+            <DataAnnotationsValidator />
+        </EditForm>
+    }
+    <div class="h-2 text-rose-500">
         @error
     </div>
-
 </div>
-
 
 @code {
     [CascadingParameter]
@@ -52,7 +59,6 @@
     public string? ReturnUrl { get; set; }
     private string? error;
     private LoginModel model = new();
-
     bool submitted;
     private async Task SubmitAsync()
     {
@@ -82,12 +88,26 @@
         }
 
         submitted = false;
-        await InvokeAsync(StateHasChanged);
+
+        NavigationManager.NavigateTo(ReturnUrl ?? "/dashboard");
     }
 
     private class LoginModel
     {
         public string Email { get; set; } = string.Empty;
         public string Password { get; set; } = string.Empty;
+    }
+
+
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        if (!firstRender)
+            return;
+        var authState = await AuthenticationStateProvider.GetAuthenticationStateAsync();
+        var authenticated = authState.User.Identity?.IsAuthenticated ?? false;
+        if (!authenticated)
+            return;
+        var res = await JSRuntime.InvokeAsync<int>("post", "htau/logout");
+        NavigationManager.NavigateTo(NavigationManager.Uri, true);
     }
 }

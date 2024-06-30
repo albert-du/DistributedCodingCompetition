@@ -65,16 +65,16 @@
     }
     else if (!otcValid)
     {
-        <EditForm class="flex flex-col items-center gap-y-2">
+        <EditForm Model="otcModel" class="flex flex-col items-center gap-y-2">
             <h3>Enter the verification code sent to your email</h3>
             <p class="italic">@model.Email</p>
             <InputText pattern="[0-9]{6}" placeholder="000000"
-                class="w-20 px-2 py-1 my-2 ml-2 text-center bg-gray-100 rounded-lg text-slate-800" @bind-Value=otcREAL />
+                class="w-20 px-2 py-1 my-2 ml-2 text-center bg-gray-100 rounded-lg text-slate-800"
+                @bind-Value=otcModel.OTC />
             <div class="flex justify-center py-3">
                 <button
                     class="px-2 py-1 border rounded-xl text-violet-500 border-violet-500 hover:bg-violet-200 active:bg-violet-400"
-                    type="submit"
-                    @onclick=SubmitAsync2>Submit</button>
+                    type="submit" @onclick=SubmitAsync2>Submit</button>
             </div>
             @if (resendEnabled)
             {
@@ -127,18 +127,16 @@
     [CascadingParameter]
     public ConnectionDetails? ConnectionDetails { get; set; }
 
-
     [Parameter]
     public string? ReturnUrl { get; set; }
 
     private RegisterModel model = new();
     private RegisterModel2 model2 = new();
+    private OTCModel otcModel = new();
 
     string? otc = null;
-    DateTime otcGenTime;
-    string otcREAL = string.Empty;
     bool otcValid;
-    bool resendEnabled;
+    bool resendEnabled = true;
     string? error = null;
 
     private bool loading;
@@ -188,7 +186,7 @@
         await InvokeAsync(StateHasChanged);
         await Task.Delay(1000); // avoid spam
         loading = false;
-        otcValid = otc is not null && otc == otcREAL;
+        otcValid = otc is not null && otc == otcModel.OTC;
         if (!otcValid)
             error = "Invalid Code.";
         await InvokeAsync(StateHasChanged);
@@ -240,10 +238,8 @@
                 return;
             }
 
-            if (ReturnUrl is not null)
-                NavigationManager.NavigateTo(ReturnUrl);
-            else
-                NavigationManager.NavigateTo("/");
+            NavigationManager.NavigateTo(ReturnUrl ?? "/dashboard");
+
         }
         finally
         {
@@ -258,6 +254,7 @@
             return;
         resendEnabled = false;
         otc = Utils.RandomOTC();
+        await InvokeAsync(StateHasChanged);
         await EmailService.SendEmailAsync(model.Email, "Verify your email", $"Your verification code is {otc}");
         _ = Wait30ThenEnableResend();
     }
@@ -292,5 +289,24 @@
         public string Username { get; set; } = "";
 
         public DateTime Birthday { get; set; } = DateTime.UtcNow;
+    }
+
+    private class OTCModel
+    {
+        [Required]
+        [Length(6, 6)]
+        public string OTC { get; set; } = "";
+    }
+
+    [CascadingParameter]
+    public Task<AuthenticationState?>? AuthState { get; set; }
+
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        if (!firstRender || (AuthState is null) || (await AuthState)?.User.Identity?.IsAuthenticated is not true)
+            return;
+
+        var res = await JSRuntime.InvokeAsync<int>("post", "htau/logout");
+        NavigationManager.NavigateTo(NavigationManager.Uri, true);
     }
 }

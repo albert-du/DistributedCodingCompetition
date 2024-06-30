@@ -5,7 +5,10 @@
         </div>
         <AuthorizeView>
             <Authorized>
-                <a href="dashboard">Dashboard</a>
+                <div class="flex py-3 align-middle gap-x-1">
+                    <a href="dashboard">Dashboard</a>
+                    <LogoutButton />
+                </div>
             </Authorized>
             <NotAuthorized>
                 <div class="flex py-3 align-middle gap-x-1">

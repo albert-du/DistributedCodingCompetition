@@ -18,7 +18,6 @@
 </div>
 
 <div>
-    <p>@message</p>
     @if (executing)
     {
         <div>Executing</div>   
@@ -46,7 +45,6 @@
     }
 
     bool executing;
-    string? message;
     string? result;
     private async Task RunAsync()
     {
