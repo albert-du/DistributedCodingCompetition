@@ -12,7 +12,6 @@ public class UserAuth
     /// Id of the user.
     /// </summary>
     [BsonId]
-    [BsonRepresentation(BsonType.ObjectId)]
     public Guid Id { get; set; }
 
     /// <summary>
@@ -23,11 +22,13 @@ public class UserAuth
     /// <summary>
     /// Last changed password time.
     /// </summary>
+    [BsonDateTimeOptions(Kind = DateTimeKind.Utc)]
     public DateTime PasswordChangeTime { get; set; } = DateTime.UtcNow;
     
     /// <summary>
     /// Do not validate any token from before this time.
     /// </summary>
+    [BsonDateTimeOptions(Kind = DateTimeKind.Utc)]
     public DateTime MinTokenTime { get; private set; } = DateTime.UtcNow;
     
     /// <summary>

@@ -16,7 +16,7 @@ public class AuthController(IPasswordService passwordService, IMongoClient mongo
     private readonly IMongoCollection<UserAuth> collection = mongoClient.GetDatabase("authdb").GetCollection<UserAuth>(nameof(UserAuth));
 
     // POST /register
-    [HttpPost]
+    [HttpPost("register")]
     public async Task<ActionResult<RegisterResult>> Register(string password, bool admin = false)
     {
         if (password.Length < 8)

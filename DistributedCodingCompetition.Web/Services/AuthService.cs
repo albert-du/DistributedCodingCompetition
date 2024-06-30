@@ -1,7 +1,9 @@
 ﻿namespace DistributedCodingCompetition.Web.Services;
 
+using System.Net;
 using Microsoft.Extensions.Logging;
 using DistributedCodingCompetition.AuthService.Models;
+using System.Web;
 
 public class AuthService(HttpClient httpClient, ILogger<AuthService> logger, IModalService modalService, IApiService apiService) : IAuthService
 {
@@ -18,13 +20,15 @@ public class AuthService(HttpClient httpClient, ILogger<AuthService> logger, IMo
                 modalService.ShowError("Cannot register", "Email already in use");
                 return null;
             }
-            var resp = await httpClient.PostAsync("/register?password=" + password, null);
+            var encodedPassword = Uri.EscapeDataString(password);
+            var resp = await httpClient.PostAsync("api/auth/register?password=" + encodedPassword, null);
             resp.EnsureSuccessStatusCode();
-            return await resp.Content.ReadFromJsonAsync<Guid>();
+            var res = await resp.Content.ReadFromJsonAsync<RegisterResult>();
+            return res?.Id;
         }
         catch (Exception ex)
         {
-            modalService.ShowError("Failed to register", ex.Message);
+            modalService.ShowError("Failed to register", "An error occurred while trying to register");
             logger.LogError(ex, "Failed to register");
             return null;
         }

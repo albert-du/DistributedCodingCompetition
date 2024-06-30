@@ -6,7 +6,7 @@ using DistributedCodingCompetition.ApiService.Models;
 
 [Route("api/[controller]")]
 [ApiController]
-internal class ProblemsController(ContestContext context) : ControllerBase
+public class ProblemsController(ContestContext context) : ControllerBase
 {
     // GET: api/Problems
     [HttpGet]

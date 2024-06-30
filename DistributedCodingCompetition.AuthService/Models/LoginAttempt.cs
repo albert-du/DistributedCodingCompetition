@@ -1,4 +1,6 @@
-﻿namespace DistributedCodingCompetition.AuthService.Models;
+﻿using MongoDB.Bson.Serialization.Attributes;
+
+namespace DistributedCodingCompetition.AuthService.Models;
 
 /// <summary>
 /// One login attempt, successful or not.
@@ -18,6 +20,7 @@ public record LoginAttempt
     /// <summary>
     /// Time of the login attempt.
     /// </summary>
+    [BsonDateTimeOptions(Kind = DateTimeKind.Utc)]
     public required DateTime Time { get; init; }
     
     /// <summary>

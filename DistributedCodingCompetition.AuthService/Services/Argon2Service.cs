@@ -7,13 +7,13 @@ using Konscious.Security.Cryptography;
 using DistributedCodingCompetition.AuthService.Models;
 
 // Format:
-// argon2id:<parrallelism>;<memory>;<iterations>;<salt>;<key>
+// argon2id:<parallelism>;<memory>;<iterations>;<salt>;<key>
 
 /// <summary>
 /// Service for hashing and verifying passwords using Argon2 algorithm.
 /// </summary>
 /// <param name="options"></param>
-public class Argon2(IOptions<ArgonOptions> options) : IPasswordService
+public class Argon2Service(IOptions<ArgonOptions> options) : IPasswordService
 {
     // options filled from environment, default is fine
     private readonly ArgonOptions _options = options.Value;
