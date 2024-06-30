@@ -14,11 +14,14 @@ public class ContestContext(DbContextOptions<ContestContext> options) : DbContex
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
-        modelBuilder.Entity<Contest>()
-            .HasMany(c => c.Administrators).WithMany(u => u.AdministeredContests);
+        modelBuilder.Entity<User>()
+            .HasIndex(u => u.Email).IsUnique();
 
-        modelBuilder.Entity<Contest>()
-            .HasMany(c => c.Participants).WithMany(u => u.EnteredContests);
+        // modelBuilder.Entity<Contest>()
+        //     .HasMany(c => c.Administrators).WithMany(u => u.AdministeredContests);
+
+        // modelBuilder.Entity<Contest>()
+        //     .HasMany(c => c.Participants).WithMany(u => u.EnteredContests);
 
         modelBuilder.Entity<JoinCode>()
             .HasIndex(j => j.Code).IsUnique();

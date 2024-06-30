@@ -195,7 +195,7 @@
         // login
         var token = await AuthService.TryLoginAsync(id.Value, model.Password, ConnectionDetails?.UserAgent ?? "Unknown",
         ConnectionDetails?.IpAddress ?? "Unknown");
-        var res = await JSRuntime.InvokeAsync<int>("post", "/api/auth/login", token);
+        var res = await JSRuntime.InvokeAsync<int>("post", "htau/login", token);
 
         if (res != 200)
         {

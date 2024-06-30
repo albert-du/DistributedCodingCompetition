@@ -10,6 +10,7 @@ builder.AddServiceDefaults();
 builder.AddRedisOutputCache("cache");
 
 // Add services to the container.
+builder.Services.AddControllers();
 builder.Services.AddRazorComponents()
     .AddInteractiveServerComponents();
 
@@ -17,7 +18,6 @@ builder.Services.AddAuthentication()
     .AddCookie();
 
 builder.Services.AddHttpContextAccessor();
-
 
 builder.Services.AddSingleton<IEmailService, EmailService>();
 builder.Services.AddSingleton<CodeExecutionClient>();
@@ -52,5 +52,7 @@ app.MapRazorComponents<App>()
     .AddInteractiveServerRenderMode();
 
 app.MapDefaultEndpoints();
+
+app.MapControllers();
 
 app.Run();

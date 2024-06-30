@@ -61,10 +61,11 @@ public class UsersController(ContestContext context) : ControllerBase
     [HttpPost]
     public async Task<ActionResult<User>> PostUser(User user)
     {
+        Console.WriteLine("POSTING USER\n\n\n\n\nPOSTING USER");
         context.Users.Add(user);
         await context.SaveChangesAsync();
 
-        return CreatedAtAction("user", new { id = user.Id }, user);
+        return CreatedAtAction(nameof(GetUser), new { id = user.Id }, user);
     }
 
     // DELETE: api/Users/5

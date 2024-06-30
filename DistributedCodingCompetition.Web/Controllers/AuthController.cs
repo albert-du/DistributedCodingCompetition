@@ -7,14 +7,14 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Authentication.Cookies;
 
-[Route("api/[controller]")]
+[Route("htau")]
 [ApiController]
 public class AuthController(IAuthService authService) : ControllerBase
 {
     [HttpPost("login")]
     public async Task<IActionResult> LoginAsync(string token)
     {
-        var result = await authService.ValidateToken(token);
+        var result = await authService.ValidateTokenAsync(token);
         if (result is null)
             return Unauthorized();
 

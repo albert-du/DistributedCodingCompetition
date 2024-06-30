@@ -47,7 +47,7 @@ public class AuthService(HttpClient httpClient, ILogger<AuthService> logger, IMo
         var queryString = await urlEncoded.ReadAsStringAsync();
         try
         {
-            var resp = await httpClient.PostAsync($"/login?{queryString}", null);
+            var resp = await httpClient.PostAsync($"api/auth/login?{queryString}", null);
             resp.EnsureSuccessStatusCode();
             return await resp.Content.ReadFromJsonAsync<LoginResult>();
         }
@@ -59,11 +59,11 @@ public class AuthService(HttpClient httpClient, ILogger<AuthService> logger, IMo
         }
     }
 
-    public async Task<Guid?> ValidateToken(string token)
+    public async Task<Guid?> ValidateTokenAsync(string token)
     {
         try
         {
-            var resp = await httpClient.PostAsync($"/validate?token={token}", null);
+            var resp = await httpClient.PostAsync($"api/auth/validate?token={token}", null);
             resp.EnsureSuccessStatusCode();
             return await resp.Content.ReadFromJsonAsync<Guid>();
         }

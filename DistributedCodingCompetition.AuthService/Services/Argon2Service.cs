@@ -41,12 +41,11 @@ public class Argon2Service(IOptions<ArgonOptions> options) : IPasswordService
         var key = argon2.GetBytes(_options.KeySize);
         
         // encode
-        return $"{_options.DegreeOfParallelism}:{_options.MemorySize}:{_options.Iterations}:{Convert.ToBase64String(salt)}:{Convert.ToBase64String(key)}";
+        return $"argon2id:{_options.DegreeOfParallelism};{_options.MemorySize};{_options.Iterations};{Convert.ToBase64String(salt)};{Convert.ToBase64String(key)}";
     }
 
     public (bool, string?) VerifyPassword(string password, string hash)
     {
-        // parse hash
         var parts = hash.Split(':');
         if (parts[0] != "argon2id")
             throw new ArgumentException("Invalid hash format, expected \"argon2id\"");

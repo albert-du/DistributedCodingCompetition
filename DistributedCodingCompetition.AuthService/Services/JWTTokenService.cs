@@ -17,7 +17,8 @@ public class JWTTokenService(IConfiguration configuration, ILogger<JWTTokenServi
     private readonly IMongoCollection<UserAuth> collection = mongoClient.GetDatabase("authdb").GetCollection<UserAuth>(nameof(UserAuth));
 
     // key for signing tokens
-    private readonly byte[] key = Encoding.ASCII.GetBytes(configuration["Jwt:Key"] ?? "CHANGEKEYNOW");
+    // min size 512 bits
+    private readonly byte[] key = Encoding.ASCII.GetBytes(configuration["Jwt:Key"] ?? "CHANGE ME SERIOUSLY CHANGE ME CHANGE ME SERIOUSLY CHANGE ME CHANGE ME SERIOUSLY CHANGE ME");
 
     /// <summary>
     /// Generate a JWT token.
