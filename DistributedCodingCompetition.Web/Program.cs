@@ -30,7 +30,7 @@ builder.Services.AddHttpClient<CodeExecutionClient>(client => client.BaseAddress
 builder.Services.AddHttpClient<IAuthService, AuthService>(client => client.BaseAddress = new("https+http://authentication"));
 builder.Services.AddHttpClient<IApiService, ApiService>(client => client.BaseAddress = new("https+http://apiservice"));
 
-builder.Services.Configure<SMTPOptions>(builder.Configuration.GetSection("SMTP"));
+builder.Services.Configure<SMTPOptions>(builder.Configuration.GetSection(nameof(SMTPOptions)));
 
 var app = builder.Build();
 
