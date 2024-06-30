@@ -1,2 +1,22 @@
 @page "/contest/new"
+@inject IOptions<ContestOptions> ContestOptions
+@inject UserStateService UserStateService
+@inject NavigationManager NavigationManager
+
 <RedirectToLogin/>
+
+
+@code {
+    protected override async Task OnInitializedAsync()
+    {
+        var user = await UserStateService.UserAsync();
+        if (user is null)
+        {
+            // shouldn't really happen but just in case
+            NavigationManager.NavigateTo($"/auth/login?returnUrl={Uri.EscapeDataString(_navigationManager.ToBaseRelativePath(_navigationManager.Uri))}");
+
+            return;
+        }
+        if (ContestOptions.Value.OpenCreation)
+    }
+}

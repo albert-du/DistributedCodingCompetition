@@ -21,7 +21,7 @@ public class AuthController(IAuthService authService) : ControllerBase
         List<Claim> claims = [
             new (ClaimTypes.NameIdentifier, result.Value.ToString()),
         ];
-        //if (result.Admin)
+        // if (result.Admin)
         //    claims.Add(new Claim(ClaimTypes.Role, "Admin"));
 
         // cookie auth

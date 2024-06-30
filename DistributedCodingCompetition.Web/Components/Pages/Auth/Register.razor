@@ -127,7 +127,7 @@
             <DataAnnotationsValidator />
         </EditForm>
     }
-    <div class="text-rose-500">
+    <div class="flex justify-center text-rose-500">
         @error
     </div>
 </div>
@@ -180,7 +180,6 @@
             loading = false;
             await InvokeAsync(StateHasChanged);
         }
-
     }
 
     private async Task SubmitAsync2()
@@ -227,15 +226,13 @@
                 error = "Failed to register.";
                 return;
             }
-            User user = new()
+            if (!await ApiService.TryCreateUserAsync(new()
                 {
                     Id = id.Value,
                     Email = model.Email,
                     Username = model2.Username,
                     Birthday = model2.Birthday.ToUniversalTime()
-                };
-            success = await ApiService.TryCreateUserAsync(user);
-            if (!success)
+                }))
             {
                 error = "Failed to create user.";
                 return;
@@ -259,7 +256,6 @@
             }
 
             NavigationManager.NavigateTo(ReturnUrl ?? "/dashboard", true);
-
         }
         finally
         {

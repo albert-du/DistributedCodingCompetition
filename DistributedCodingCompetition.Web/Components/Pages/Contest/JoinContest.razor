@@ -1,1 +1,12 @@
 @page "/contest/join/{code}"
+
+
+@code {
+    [Parameter]
+    public string Code { get; set; }
+    private Contest? contest;
+
+    protected override async Task OnInitializedAsync()
+    {
+    }
+}
