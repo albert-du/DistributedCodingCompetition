@@ -69,9 +69,6 @@
         await InvokeAsync(StateHasChanged);
         await Task.Delay(1000);
 
-        Console.WriteLine("\n\n\n\n" + model.Email + "\n\n\n\n");
-        Console.WriteLine("\n\n\n\n" + model.Password + "\n\n\n\n");
-
         (var success, var user) = await ApiService.TryReadUserByEmailAsync(model.Email);
         if (!success || user is null)
         {
@@ -100,7 +97,7 @@
 
         submitted = false;
 
-        NavigationManager.NavigateTo(ReturnUrl ?? "/dashboard");
+        NavigationManager.NavigateTo(ReturnUrl ?? "/dashboard", true);
     }
 
     private class LoginModel

@@ -102,7 +102,7 @@
             <label class="flex flex-col">
                 <div class="pl-2">
                     Username
-                    <div class="text-xs text-gray-500">5-25 characters</div>
+                    <div class="text-xs text-gray-500">5-25 characters <span class="italic">[a-z0-9_-]</span> </div>
                 </div>
                 <InputText placeholder="cool_hckr-23" class="w-64 px-2 py-1 ml-2 bg-gray-100 rounded-lg text-slate-800"
                     @bind-Value=model2.Username />
@@ -116,6 +116,14 @@
                 <InputDate class="w-64 px-2 py-1 ml-2 bg-gray-100 rounded-lg text-slate-800" @bind-Value=model2.Birthday />
                 <ValidationMessage For=@(() => model2.Birthday) />
             </label>
+            <div class="flex justify-center w-64 py-2">
+                Your full name and username will be visible to other users.
+            </div>
+            <div class="flex justify-center py-3">
+                <button
+                    class="px-2 py-1 border rounded-xl text-violet-500 border-violet-500 hover:bg-violet-200 active:bg-violet-400"
+                    type="submit" @onclick=SubmitAsync3>Submit</button>
+            </div>
             <DataAnnotationsValidator />
         </EditForm>
     }
@@ -200,7 +208,7 @@
         try
         {
             // make sure user doesn't exist
-            (var success, var existing) = await ApiService.TryReadUserByEmailAsync(model.Email);
+            (var success, var existing) = await ApiService.TryReadUserByUsername(model2.Username);
             if (!success)
             {
                 error = "Failed to check if user exists.";
@@ -224,7 +232,7 @@
                     Id = id.Value,
                     Email = model.Email,
                     Username = model2.Username,
-                    Birthday = model2.Birthday
+                    Birthday = model2.Birthday.ToUniversalTime()
                 };
             success = await ApiService.TryCreateUserAsync(user);
             if (!success)
@@ -250,7 +258,7 @@
                 return;
             }
 
-            NavigationManager.NavigateTo(ReturnUrl ?? "/dashboard");
+            NavigationManager.NavigateTo(ReturnUrl ?? "/dashboard", true);
 
         }
         finally
@@ -299,7 +307,7 @@
     {
         [Required(AllowEmptyStrings = false)]
         [Length(5, 25)]
-        [RegularExpression(@"^[a-zA-Z0-9_\-]+$")]
+        [RegularExpression(@"^[a-z0-9_-]+$")]
         public string Username { get; set; } = "";
 
         [Required(AllowEmptyStrings = false)]

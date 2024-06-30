@@ -5,13 +5,13 @@ using System.Net;
 
 public class ApiService(HttpClient httpClient, ILogger<ApiService> logger) : IApiService
 {
-    public async Task<(bool,User?)> TryReadUserByEmailAsync(string email)
+    public async Task<(bool, User?)> TryReadUserByEmailAsync(string email)
     {
         try
         {
             var response = await httpClient.GetAsync($"api/users/email/{email}");
             if (response.StatusCode == HttpStatusCode.NotFound)
-                return (true ,null);
+                return (true, null);
             response.EnsureSuccessStatusCode();
             return (true, await response.Content.ReadFromJsonAsync<User>());
         }
@@ -66,6 +66,23 @@ public class ApiService(HttpClient httpClient, ILogger<ApiService> logger) : IAp
         {
             logger.LogError(ex, "Failed to update user");
             return false;
+        }
+    }
+
+    public async Task<(bool, User?)> TryReadUserByUsername(string username)
+    {
+        try
+        {
+            var response = await httpClient.GetAsync($"api/users/username/{username}");
+            if (response.StatusCode == HttpStatusCode.NotFound)
+                return (true, null);
+            response.EnsureSuccessStatusCode();
+            return (true, await response.Content.ReadFromJsonAsync<User>());
+        }
+        catch (Exception ex)
+        {
+            logger.LogError(ex, "Failed to fetch user by email");
+            return (false, null);
         }
     }
 }

@@ -31,6 +31,15 @@ public class UsersController(ContestContext context) : ControllerBase
         return user is null ? NotFound() : user;
     }
 
+    // GET: api/Users/username/asdas
+    [HttpGet("username/{username}")]
+    public async Task<ActionResult<User>> GetUser(string username)
+    {
+        var user = await context.Users.Where(user => user.Username == username).FirstOrDefaultAsync();
+
+        return user is null ? NotFound() : user;
+    }
+
     // PUT: api/Users/5
     // To protect from overposting attacks, see https://go.microsoft.com/fwlink/?linkid=2123754
     [HttpPut("{id}")]
