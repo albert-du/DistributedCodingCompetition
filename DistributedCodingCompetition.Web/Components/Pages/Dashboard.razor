@@ -1,1 +1,28 @@
 @page "/dashboard"
+@rendermode InteractiveServer
+@inject AuthenticationStateProvider AuthenticationStateProvider
+
+
+<AuthorizeView>
+    <Authorized>
+        You are logged in
+    </Authorized>
+    <NotAuthorized>
+        You are not logged in
+    </NotAuthorized>
+</AuthorizeView>
+
+@username
+
+@code {
+
+    string username = "test";
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        if (!firstRender)
+            return;
+        var authState = await AuthenticationStateProvider.GetAuthenticationStateAsync();
+        username = authState.User?.Identity?.IsAuthenticated is true ? "logged in" : "not logged in";
+        await InvokeAsync(StateHasChanged);
+    }
+}

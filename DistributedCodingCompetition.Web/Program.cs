@@ -2,6 +2,7 @@ using DistributedCodingCompetition.Web;
 using DistributedCodingCompetition.Web.Services;
 using DistributedCodingCompetition.Web.Components;
 using DistributedCodingCompetition.Web.Models;
+using Microsoft.AspNetCore.Authentication.Cookies;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -13,8 +14,9 @@ builder.AddRedisOutputCache("cache");
 builder.Services.AddControllers();
 builder.Services.AddRazorComponents()
     .AddInteractiveServerComponents();
+builder.Services.AddCascadingAuthenticationState();
 
-builder.Services.AddAuthentication()
+builder.Services.AddAuthentication(CookieAuthenticationDefaults.AuthenticationScheme)
     .AddCookie();
 
 builder.Services.AddHttpContextAccessor();
@@ -31,7 +33,6 @@ builder.Services.AddHttpClient<IAuthService, AuthService>(client => client.BaseA
 builder.Services.AddHttpClient<IApiService, ApiService>(client => client.BaseAddress = new("https+http://apiservice"));
 
 builder.Services.Configure<SMTPOptions>(builder.Configuration.GetSection(nameof(SMTPOptions)));
-
 var app = builder.Build();
 
 if (!app.Environment.IsDevelopment())
@@ -47,6 +48,9 @@ app.UseStaticFiles();
 app.UseAntiforgery();
 
 app.UseOutputCache();
+
+app.UseAuthentication();
+app.UseAuthorization();
 
 app.MapRazorComponents<App>()
     .AddInteractiveServerRenderMode();

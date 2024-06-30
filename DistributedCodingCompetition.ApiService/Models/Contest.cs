@@ -8,6 +8,7 @@ public class Contest
     public DateTime StartTime { get; set; }
     public DateTime EndTime { get; set; }
     public bool Active { get; set; } = true;
+    public User Owner { get; set; } = null!;
     public ICollection<Problem> Problems { get; set; } = [];
     public ICollection<User> Participants { get; set; } = [];
     public ICollection<User> Administrators { get; set; } = [];

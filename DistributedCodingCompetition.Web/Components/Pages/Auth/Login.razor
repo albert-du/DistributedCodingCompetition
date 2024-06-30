@@ -4,6 +4,7 @@
 @inject IJSRuntime JSRuntime
 @inject NavigationManager NavigationManager
 @inject AuthenticationStateProvider AuthenticationStateProvider
+@rendermode InteractiveServer
 
 <PageTitle>Login</PageTitle>
 <div class="py-2 mx-auto align-middle border rounded-lg border-slate-200 w-96">
@@ -68,6 +69,9 @@
         await InvokeAsync(StateHasChanged);
         await Task.Delay(1000);
 
+        Console.WriteLine("\n\n\n\n" + model.Email + "\n\n\n\n");
+        Console.WriteLine("\n\n\n\n" + model.Password + "\n\n\n\n");
+
         (var success, var user) = await ApiService.TryUserByEmailAsync(model.Email);
         if (!success || user is null)
         {
@@ -76,11 +80,10 @@
             return;
         }
 
-        var token = await AuthService.TryLoginAsync(user.Id, model.Password, ConnectionDetails?.UserAgent ?? "Unknown",
-        ConnectionDetails?.IpAddress ?? "Unknown");
-        var res = await JSRuntime.InvokeAsync<int>("post", "htau/login", token);
+        var res = await AuthService.TryLoginAsync(user.Id, model.Password, ConnectionDetails?.UserAgent ?? "Unknown", ConnectionDetails?.IpAddress ?? "Unknown");
+        var code = await JSRuntime.InvokeAsync<int>("post", $"htau/login?token={Uri.EscapeDataString(res.Token)}");
 
-        if (res != 200)
+        if (code != 200)
         {
             error = $"Failed to login. Status: {res}";
             submitted = false;
@@ -94,16 +97,18 @@
 
     private class LoginModel
     {
+        [Required]
+        [EmailAddress]
         public string Email { get; set; } = string.Empty;
+        [Required]
+        [MinLength(8)]
         public string Password { get; set; } = string.Empty;
     }
 
-
     protected override async Task OnAfterRenderAsync(bool firstRender)
     {
-        if (!firstRender)
-            return;
         var authState = await AuthenticationStateProvider.GetAuthenticationStateAsync();
+        Console.WriteLine(authState.User.Identity?.IsAuthenticated);
         var authenticated = authState.User.Identity?.IsAuthenticated ?? false;
         if (!authenticated)
             return;

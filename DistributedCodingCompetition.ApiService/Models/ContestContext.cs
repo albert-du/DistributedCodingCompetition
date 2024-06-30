@@ -18,6 +18,9 @@ public class ContestContext(DbContextOptions<ContestContext> options) : DbContex
             .HasIndex(u => u.Email).IsUnique();
 
         modelBuilder.Entity<Contest>()
+            .HasOne(c => c.Owner).WithMany(u => u.OwnedContests);
+
+        modelBuilder.Entity<Contest>()
             .HasMany(c => c.Administrators).WithMany(u => u.AdministeredContests);
 
         modelBuilder.Entity<Contest>()
