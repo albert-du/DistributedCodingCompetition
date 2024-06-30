@@ -10,71 +10,76 @@
 
 <PageTitle>Register</PageTitle>
 
-@if (loading)
-{
-    @*TODO show spinner or something in future*@
-    <h3>Loading...</h3>
-}
-else if (otc is null)
-{
+<div class="mx-auto align-middle border rounded-2xl border-slate-200 w-96">
+    <h2 class="pb-2 text-2xl text-center">Register</h2>
 
-    <EditForm Model=model OnValidSubmit=SubmitAsync FormName="Registration">
-        <label>
-            Email
-            <InputText id="username" type="email" @bind-Value=model.Email />
-            <ValidationMessage For=@(() => model.Email) />
-        </label>
+    @if (loading)
+    {
+        @*TODO show spinner or something in future*@
+        <h3>Loading...</h3>
+    }
+    else if (otc is null)
+    {
+        <EditForm class="flex flex-col gap-y-5" Model=model OnValidSubmit=SubmitAsync FormName="Registration">
+            <label class="flex justify-center">
+                Email
+                <InputText class="px-2 py-1 ml-2 bg-gray-100 rounded-lg text-slate-800" id="username" type="email" @bind-Value=model.Email />
+                <ValidationMessage For=@(() => model.Email) />
+            </label>
 
-        <label>
-            Password
-            <InputText type="password" @bind-Value=model.Password />
-            <ValidationMessage For=@(() => model.Password) />
-        </label>
+            <label class="flex justify-center">
+                Password
+                <InputText class="px-2 py-1 ml-2 bg-gray-100 rounded-lg text-slate-800" type="password" @bind-Value=model.Password />
+                <ValidationMessage For=@(() => model.Password) />
+            </label>
 
-        <label>
-            Confirm Password
-            <InputText type="password" @bind-Value=model.ConfirmPassword />
-            <ValidationMessage For=@(() => model.ConfirmPassword) />
-        </label>
+            <label class="flex justify-center">
+                Confirm Password
+                <InputText class="px-2 py-1 ml-2 bg-gray-100 rounded-lg text-slate-800" type="password" @bind-Value=model.ConfirmPassword />
+                <ValidationMessage For=@(() => model.ConfirmPassword) />
+            </label>
+            <div class="flex justify-center">
+                <button class="px-2 py-1 border rounded-xl text-violet-500 border-violet-500 " type="submit">Submit</button>
+            </div>
 
-        <button type="submit">Submit</button>
+            <div class="text-rose-500">
+                <DataAnnotationsValidator />
+                <ValidationSummary />
+            </div>
+        </EditForm>
+    }
+    else if (!otcValid)
+    {
+        <h3>Enter the verification code sent to your email</h3>
+        <InputText @bind-Value=otcREAL />
+        <button @onclick=SubmitAsync2>Submit</button>
+    }
+    else
+    {
+        // otc is correct
+        <EditForm Model=model2 OnValidSubmit=SubmitAsync3 FormName="UserDetails">
+            <label>
+                Name
+                <InputText class="px-2 py-1 ml-2 bg-gray-100 rounded-lg text-slate-800" @bind-Value=model2.Username />
+                <ValidationMessage For=@(() => model2.Username) />
+            </label>
 
-        <div class="text-rose-500">
-            <DataAnnotationsValidator />
-            <ValidationSummary />
-        </div>
-    </EditForm>
-}
-else if (!otcValid)
-{
-    <h3>Enter the verification code sent to your email</h3>
-    <InputText @bind-Value=otcREAL />
-    <button @onclick=SubmitAsync2>Submit</button>
-}
-else
-{
-    // otc is correct
-    <EditForm Model=model2 OnValidSubmit=SubmitAsync3 FormName="UserDetails">
-        <label>
-            Name
-            <InputText @bind-Value=model2.Username />
-            <ValidationMessage For=@(() => model2.Username) />
-        </label>
+            <label>
+                Birthday
+                <InputDate class="px-2 py-1 ml-2 bg-gray-100 rounded-lg text-slate-800" @bind-Value=model2.Birthday />
+                <ValidationMessage For=@(() => model2.Birthday) />
+            </label>
 
-        <label>
-            Birthday
-            <InputDate @bind-Value=model2.Birthday />
-            <ValidationMessage For=@(() => model2.Birthday) />
-        </label>
+            <button type="submit">Submit</button>
 
-        <button type="submit">Submit</button>
+            <div class="text-rose-500">
+                <DataAnnotationsValidator />
+                <ValidationSummary />
+            </div>
+        </EditForm>
+    }
+</div>
 
-        <div class="text-rose-500">
-            <DataAnnotationsValidator />
-            <ValidationSummary />
-        </div>
-    </EditForm>
-}
 
 @code {
     [CascadingParameter]
@@ -141,12 +146,12 @@ else
             return;
         }
         User user = new()
-        {
-            Id = id.Value,
-            Email = model.Email,
-            Username = model2.Username,
-            Birthday = model2.Birthday
-        };
+            {
+                Id = id.Value,
+                Email = model.Email,
+                Username = model2.Username,
+                Birthday = model2.Birthday
+            };
         var success = await ApiService.TryCreateUserAsync(user);
         if (!success)
         {
@@ -155,7 +160,8 @@ else
         }
 
         // login
-        var token = await AuthService.TryLoginAsync(id.Value, model.Password, ConnectionDetails?.UserAgent ?? "Unknown", ConnectionDetails?.IpAddress ?? "Unknown");
+        var token = await AuthService.TryLoginAsync(id.Value, model.Password, ConnectionDetails?.UserAgent ?? "Unknown",
+        ConnectionDetails?.IpAddress ?? "Unknown");
         var res = await JSRuntime.InvokeAsync<int>("post", "/api/auth/login", token);
 
         if (res != 200)
@@ -211,13 +217,13 @@ else
 }
 
 @*
-    Registration Steps:
-    1. Check email is not in use
-    2. Validate email
-    3. Get user profile information
-    3. Create auth record in db
-    4. Create user record in db
-    5. Fetch login token
-    6. Update login state
-    7. Redirect to page
+Registration Steps:
+1. Check email is not in use
+2. Validate email
+3. Get user profile information
+3. Create auth record in db
+4. Create user record in db
+5. Fetch login token
+6. Update login state
+7. Redirect to page
 *@
