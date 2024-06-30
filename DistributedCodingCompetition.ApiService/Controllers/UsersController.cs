@@ -61,7 +61,6 @@ public class UsersController(ContestContext context) : ControllerBase
     [HttpPost]
     public async Task<ActionResult<User>> PostUser(User user)
     {
-        Console.WriteLine("POSTING USER\n\n\n\n\nPOSTING USER");
         context.Users.Add(user);
         await context.SaveChangesAsync();
 

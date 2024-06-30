@@ -15,7 +15,7 @@ builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 
 builder.Services.AddSingleton<IPasswordService, Argon2Service>();
-builder.Services.AddSingleton<ITokenService, JWTTokenService>();
+builder.Services.AddTransient<ITokenService, JWTTokenService>();
 builder.Services.Configure<ArgonOptions>(builder.Configuration.GetSection(nameof(ArgonOptions)));
 
 var app = builder.Build();

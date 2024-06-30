@@ -67,17 +67,13 @@ public class JWTTokenService(IConfiguration configuration, ILogger<JWTTokenServi
             var jwtToken = (JwtSecurityToken)validatedToken;
 
             var id = Guid.Parse(jwtToken.Claims.First(x => x.Type == ClaimTypes.NameIdentifier).Value);
-            Console.WriteLine("\n\n\n1\n\n\n");
             // check user not invalid
             var user = collection.Find(x => x.Id == id).FirstOrDefault();
             if (user is null)
                 return null;
-            Console.WriteLine("\n\n\n2\n\n\n");
 
             if (jwtToken.ValidFrom < user.MinTokenTime)
                 return null;
-                
-            Console.WriteLine("\n\n\n3\n\n\n");
 
             return id;
         }
