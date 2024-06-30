@@ -193,11 +193,16 @@
         }
 
         // login
-        var token = await AuthService.TryLoginAsync(id.Value, model.Password, ConnectionDetails?.UserAgent ?? "Unknown",
-        ConnectionDetails?.IpAddress ?? "Unknown");
-        var res = await JSRuntime.InvokeAsync<int>("post", "htau/login", token);
+        var res = await AuthService.TryLoginAsync(id.Value, model.Password, ConnectionDetails?.UserAgent ?? "Unknown", ConnectionDetails?.IpAddress ?? "Unknown");
+        if (res is null)
+        {
+            error = "Failed to login.";
+            return;
+        }
 
-        if (res != 200)
+        var code = await JSRuntime.InvokeAsync<int>("post", $"htau/login?token={Uri.EscapeDataString(res.Token)}");
+
+        if (code != 200)
         {
             error = "Failed to login.";
             return;

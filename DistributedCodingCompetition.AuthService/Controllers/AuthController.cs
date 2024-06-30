@@ -70,7 +70,7 @@ public class AuthController(IPasswordService passwordService, IMongoClient mongo
         return new LoginResult { Token = tokenService.GenerateToken(user), Admin = user.Admin };
     }
 
-    [HttpGet("validate")]
+    [HttpPost("validate")]
     public ActionResult<Guid> ValidateToken(string token)
     {
         var id = tokenService.ValidateToken(token);
