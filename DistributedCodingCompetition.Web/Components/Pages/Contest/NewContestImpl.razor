@@ -1,5 +1,8 @@
+@* This is enclosed in NewContest.razor which provides the routing *@
+
 @inject ITimeZoneProvider TimeZoneProvider
 @inject IUserStateService UserStateService
+@inject IMarkdownRenderService MarkdownRenderService
 
 <div class="sm:w-4/5 md:w-2/3 lg:w-1/2">
     <h1>New Contest</h1>
@@ -16,6 +19,13 @@
                 Description (<a href="https://www.markdownguide.org/" class="italic hover:underline">markdown</a> enabled)
             </div>
             <InputTextArea class="w-64 px-2 py-1 ml-2 bg-gray-100 rounded-lg text-slate-800" id="Description" @bind-Value=model.Description />
+        </label>
+        
+        <label class="flex flex-col">
+            <div class="pl-2">
+                Minimim Age
+            </div>
+            <InputNumber class="w-64 px-2 py-1 ml-2 bg-gray-100 rounded-lg text-slate-800" id="MinAge" @bind-Value=model.MinAge />
         </label>
 
         <label class="flex flex-col">
@@ -45,6 +55,8 @@
             </div>
             <InputDate class="w-64 px-2 py-1 ml-2 bg-gray-100 rounded-lg text-slate-800" Type="InputDateType.Time" id="StartTime" @bind-Value=model.EndTime />
         </label>
+
+
 
         <div class="flex flex-col">
             <div class="pl-2">
@@ -110,6 +122,8 @@
         public DateTime Start => StartDate.ToDateTime(StartTime);
         public DateTime End => EndDate.ToDateTime(EndTime);
         public TimeSpan Duration => End - Start;
+
+        public int MinAge { get; set; } = 13;
     }
 
     private async Task SubmitAsync()
@@ -122,6 +136,7 @@
         {
             Name = model.Name,
             Description = model.Description,
+            RenderedDescription = MarkdownRenderService.Render(model.Description),
             StartTime = StartUTC,
             EndTime = EndUTC,
             Owner = user,

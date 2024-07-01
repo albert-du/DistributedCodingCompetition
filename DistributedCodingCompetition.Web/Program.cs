@@ -21,9 +21,11 @@ builder.Services.AddAuthentication(CookieAuthenticationDefaults.AuthenticationSc
 
 builder.Services.AddHttpContextAccessor();
 
+builder.Services.AddSingleton<IMarkdownRenderService, MarkdownRenderService>();
 builder.Services.AddSingleton<IEmailService, EmailService>();
 builder.Services.AddSingleton<CodeExecutionClient>();
 builder.Services.AddSingleton<IApiService, ApiService>();
+
 builder.Services.AddScoped<IModalService, ModalService>();
 builder.Services.AddScoped<IAuthService, AuthService>();
 builder.Services.AddScoped<IUserStateService, UserStateService>();
@@ -33,6 +35,13 @@ builder.Services.AddScoped<ITimeZoneProvider, TimeZoneProvider>();
 builder.Services.AddHttpClient<CodeExecutionClient>(client => client.BaseAddress = new("https+http://codeexecution"));
 builder.Services.AddHttpClient<IAuthService, AuthService>(client => client.BaseAddress = new("https+http://authentication"));
 builder.Services.AddHttpClient<IApiService, ApiService>(client => client.BaseAddress = new("https+http://apiservice"));
+
+builder.Services.AddSingleton(_ =>
+{
+    Ganss.Xss.HtmlSanitizer sanitizer = new();
+    sanitizer.AllowedAttributes.Add("class");
+    return sanitizer;
+});
 
 builder.Services.Configure<SMTPOptions>(builder.Configuration.GetSection(nameof(SMTPOptions)));
 builder.Services.Configure<ContestOptions>(builder.Configuration.GetSection(nameof(ContestOptions)));

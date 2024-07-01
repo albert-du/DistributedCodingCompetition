@@ -1,6 +1,12 @@
 namespace DistributedCodingCompetition.Web.Services;
 
+/// <summary>
+/// Service to render markdown to HTML.
+/// </summary>
 public interface IMarkdownRenderService
 {
-    Task<string> RenderAsync(string markdown);
+    /// <summary>
+    /// Renders markdown to HTML.
+    /// </summary>
+    string Render(string markdown);
 }

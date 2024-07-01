@@ -1,2 +1,193 @@
+@*
+    public Guid Id { get; set; }
+    public string Name { get; set; } = string.Empty;
+    public string Description { get; set; } = string.Empty;
+    public string RenderedDescription { get; set; } = string.Empty;
+    public DateTime StartTime { get; set; }
+    public DateTime EndTime { get; set; }
+    public bool Active { get; set; } = true;
+    public User Owner { get; set; } = null!;
+    public ICollection<Problem> Problems { get; set; } = [];
+    public ICollection<User> Participants { get; set; } = [];
+    public ICollection<User> Administrators { get; set; } = [];
+    public ICollection<User> Banned { get; set; } = [];
+    public ICollection<Submission> Submissions { get; set; } = [];
+    public ICollection<JoinCode> JoinCodes { get; set; } = [];
+    public bool Public { get; set; }
+    public bool Open { get; set; }
+    public int MinimumAge { get; set; }
+*@
+
+
 @page "/contest/{id:guid}/manage"
+@inject ITimeZoneProvider TimeZoneProvider
+@inject IUserStateService UserStateService
+@inject IApiService ApiService
+@inject IMarkdownRenderService MarkdownRenderService
 <AuthCheck/>
+
+<div class="sm:w-4/5 md:w-2/3 lg:w-1/2">
+    <h1>@model?.Name</h1>
+    <EditForm Model=model OnValidSubmit="SubmitAsync">
+        <label class="flex flex-col">
+            <div class="pl-2">
+                Name
+            </div>
+            <InputText class="w-64 px-2 py-1 ml-2 bg-gray-100 rounded-lg text-slate-800" id="Name" @bind-Value=model.Name />
+        </label>
+
+        <label class="flex flex-col">
+            <div class="pl-2">
+                Description (<a href="https://www.markdownguide.org/" class="italic hover:underline">markdown</a> enabled)
+            </div>
+            <InputTextArea class="w-64 px-2 py-1 ml-2 bg-gray-100 rounded-lg text-slate-800" id="Description" @bind-Value=model.Description />
+        </label>
+
+        <label class="flex flex-col">
+            <div class="pl-2">
+                Start Date
+            </div>
+            <InputDate class="w-64 px-2 py-1 ml-2 bg-gray-100 rounded-lg text-slate-800" Type="InputDateType.Date" id="StartTime" @bind-Value=model.StartDate />
+        </label>
+
+        <label class="flex flex-col">
+            <div class="pl-2">
+                Start Time
+            </div>
+            <InputDate class="w-64 px-2 py-1 ml-2 bg-gray-100 rounded-lg text-slate-800" Type="InputDateType.Time" id="StartTime" @bind-Value=model.StartTime />
+        </label>
+
+        <label class="flex flex-col">
+            <div class="pl-2">
+                End Date
+            </div>
+            <InputDate class="w-64 px-2 py-1 ml-2 bg-gray-100 rounded-lg text-slate-800" Type="InputDateType.Date" id="StartTime" @bind-Value=model.EndDate />
+        </label>
+
+        <label class="flex flex-col">
+            <div class="pl-2">
+                End Time
+            </div>
+            <InputDate class="w-64 px-2 py-1 ml-2 bg-gray-100 rounded-lg text-slate-800" Type="InputDateType.Time" id="StartTime" @bind-Value=model.EndTime />
+        </label>
+
+        <div class="flex flex-col">
+            <div class="pl-2">
+                Duration
+            </div>
+            <div class="w-64 px-2 py-1 ml-2 bg-gray-100 rounded-lg text-slate-800">
+                @model.Duration
+            </div>
+        </div>
+
+        <div class="flex flex-col">
+            <div class="pl-2">
+                Starts in
+            </div>
+            <div class="w-64 px-2 py-1 ml-2 bg-gray-100 rounded-lg text-slate-800">
+                @Remaining
+            </div>
+
+            <div>
+                From @StartUTC UTC to @EndUTC UTC
+            </div>
+        </div>
+
+        <button type="submit" class="px-4 py-2 mt-4 text-white bg-blue-500 rounded-lg">Submit</button>
+        <DataAnnotationsValidator />
+    </EditForm>
+</div>
+
+@code {
+    ContestModel? model;
+
+    TimeSpan offset;
+
+    private DateTime StartUTC => model.Start - offset;
+    private DateTime EndUTC => model.End - offset;
+    private TimeSpan Remaining => StartUTC - DateTime.UtcNow;
+
+    protected override async Task OnInitializedAsync()
+    {
+        var user = await UserStateService.UserAsync();
+        if (user is null)
+            return;
+
+        var contest = await ApiService.GetContestAsync(Id);
+        if (contest is null || contest.Owner.Id != user.Id)
+        {
+            NavigationManager.NavigateTo("/");
+            return;
+        }
+
+        model = new ContestModel
+        {
+            Name = contest.Name,
+            Description = contest.Description,
+            StartDate = contest.StartTime.Date,
+            EndDate = contest.EndTime.Date,
+            StartTime = contest.StartTime.TimeOfDay,
+            EndTime = contest.EndTime.TimeOfDay,
+        };
+    }
+
+
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        if (!firstRender)
+            return;
+        offset = await TimeZoneProvider.GetTimeZoneOffsetAsync();
+        await InvokeAsync(StateHasChanged);
+    }
+
+    class ContestModel
+    {
+        [Required(AllowEmptyStrings = false)]
+        public string Name { get; set; } = string.Empty;
+
+        public string Description { get; set; } = "# Description\n\n## Rules\n\n## Prizes\n\n## Scoring\n\n## Submission\n\n## Judging\n\n## FAQ\n\n";
+        
+        [Required]
+        public DateOnly StartDate { get; set; }
+        [Required]
+        public DateOnly EndDate { get; set; }
+        [Required]
+        public TimeOnly StartTime { get; set; }
+        [Required]
+        public TimeOnly EndTime { get; set; }
+
+        public int MinimumAge { get; set; }
+
+        public List<string> Administrators { get; set; } = new();
+
+        public List<string> Banned { get; set; } = new();
+
+        public List<string> Participants { get; set; } = new();
+
+        public List<Problem> Problems { get; set; } = new();
+
+        public DateTime Start => StartDate.ToDateTime(StartTime);
+        public DateTime End => EndDate.ToDateTime(EndTime);
+        public TimeSpan Duration => End - Start;
+    }
+
+    private async Task SubmitAsync()
+    {
+        var user = await UserStateService.UserAsync();
+        if (user is null)
+            return;
+
+        Contest contest = new()
+        {
+            Name = model.Name,
+            Description = model.Description,
+            RenderedDescription = MarkdownRenderService.Render(model.Description),
+            StartTime = StartUTC,
+            EndTime = EndUTC,
+            Owner = user,
+            Active = false,
+            Open = false,
+            Public = false,
+        };
+    }
+}
