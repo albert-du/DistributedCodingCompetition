@@ -7,7 +7,8 @@
 @page "/contest/{id:guid}/manage/submissions"
 @inject IApiService ApiService
 @inject IModalService ModalService
-<AuthCheck />
+@inject IUserStateService UserStateService
+<AuthCheck Contest=Id Admin />
 
 <PageTitle>Contest Submissions</PageTitle>
 
@@ -16,20 +17,42 @@
     [Parameter]
     public Guid Id { get; set; }
 
-    public List<User> Submissions { get; set; } = [];
+    List<Submission> Submissions = [];
+    Contest? contest;
 
     protected override async Task OnInitializedAsync()
     {
         await LoadAsync();
+        // make sure the user is a contest admin
+        var user = await UserStateService.UserAsync();
+        var userId = user?.Id;
     }
 
     private async Task LoadAsync()
     {
-        (var success, var submissions) = await ApiService.TryReadContestSubmissionsAsync(Id);
+        var sub = ApiService.TryReadContestSubmissionsAsync(Id);
+        var cont = ApiService.TryReadContestAsync(Id);
+        (var success, var submissions) = await sub;
         if (!success)
         {
             ModalService.ShowError("Failed to load submissions", "Internal error");
             return;
         }
+        (success, var contest) = await cont;
+
+        if (!success)
+        {
+            ModalService.ShowError("Failed to load contest", "Internal error");
+            return;
+        }
+
+        if (contest is null)
+        {
+            ModalService.ShowError("Contest not found", "");
+            return;
+        }
+
+        Submissions = [.. submissions];
+
     }
 }

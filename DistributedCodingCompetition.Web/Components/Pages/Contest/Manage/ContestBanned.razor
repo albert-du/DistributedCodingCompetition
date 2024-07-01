@@ -3,6 +3,12 @@
 *@
 
 @page "/contest/{id:guid}/manage/participants/banned"
-<AuthCheck/>
+<AuthCheck Contest=Id Admin />
 
 <PageTitle>Banned Users</PageTitle>
+
+
+@code {
+    [Parameter]
+    public Guid Id { get; set; }
+}

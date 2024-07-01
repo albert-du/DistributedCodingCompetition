@@ -9,8 +9,7 @@
 @inject IModalService ModalService
 @inject IUserStateService UserStateService
 @inject NavigationManager NavigationManager
-
-<AuthCheck />
+<AuthCheck Contest=Id Admin />
 
 <PageTitle>Transfer Contest Ownership</PageTitle>
 
@@ -85,7 +84,7 @@
             NavigationManager.NavigateTo("dashboard");
             return;
         }
-        (_, var admins) = await ApiService.TryReadContestAdminAsync(Id);
+        (_, var admins) = await ApiService.TryReadContestAdminsAsync(Id);
         administrators = [.. admins];
     }
 

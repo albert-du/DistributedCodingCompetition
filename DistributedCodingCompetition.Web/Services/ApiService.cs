@@ -97,17 +97,28 @@ public class ApiService(HttpClient httpClient, ILogger<ApiService> logger) : IAp
         throw new NotImplementedException();
     }
 
-    public Task<(bool, Contest?)> TryReadJoinCodesAsync(Guid contestId)
+
+    public Task<(bool, IReadOnlyList<User>?)> TryReadContestAdminsAsync(Guid contestId)
     {
         throw new NotImplementedException();
     }
 
-    public Task<(bool, IReadOnlyList<User>?)> TryReadContestAdminAsync(Guid contestId)
+    public Task<(bool, IReadOnlyList<JoinCode>?)> TryReadJoinCodesAsync(Guid contestId)
     {
         throw new NotImplementedException();
     }
 
-    Task<(bool, IReadOnlyList<JoinCode>?)> IApiService.TryReadJoinCodesAsync(Guid contestId)
+    public Task<(bool, Contest?)> TryUpdateContestAsync(Contest contest)
+    {
+        throw new NotImplementedException();
+    }
+
+    public Task<(bool, IReadOnlyList<Submission>?)> TryReadContestSubmissionsAsync(Guid contestId)
+    {
+        throw new NotImplementedException();
+    }
+
+    public Task<(bool, ContestRole?)> TryReadUserContestRoleAsync(Guid contestId, Guid userId)
     {
         throw new NotImplementedException();
     }

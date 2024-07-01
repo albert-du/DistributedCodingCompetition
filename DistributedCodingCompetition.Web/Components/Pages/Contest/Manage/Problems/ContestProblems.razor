@@ -4,7 +4,7 @@
 
 @page "/contest/{id:guid}/manage/problems"
 @inject IApiService ApiService
-<AuthCheck />
+<AuthCheck Contest=Id Admin />
 
 <PageTitle>Contest Problems</PageTitle>
 

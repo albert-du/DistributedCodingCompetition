@@ -17,7 +17,8 @@ public interface IApiService
 
     Task<(bool, Contest?)> TryReadContestAsync(Guid id);
     Task<(bool, IReadOnlyList<JoinCode>?)> TryReadJoinCodesAsync(Guid contestId);
-    Task<(bool, IReadOnlyList<User>?)> TryReadContestAdminAsync(Guid contestId);
+    Task<(bool, IReadOnlyList<User>?)> TryReadContestAdminsAsync(Guid contestId);
     Task<(bool, Contest?)> TryUpdateContestAsync(Contest contest);
     Task<(bool, IReadOnlyList<Submission>?)> TryReadContestSubmissionsAsync(Guid contestId);
+    Task<(bool, ContestRole?)> TryReadUserContestRoleAsync(Guid contestId, Guid userId);
 }

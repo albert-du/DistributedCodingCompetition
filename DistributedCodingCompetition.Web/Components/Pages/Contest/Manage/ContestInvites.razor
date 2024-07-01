@@ -4,7 +4,7 @@ public ICollection<JoinCode> JoinCodes { get; set; } = [];
 
 @page "/contest/{id:guid}/manage/invites"
 @inject IApiService ApiService
-<AuthCheck />
+<AuthCheck Contest=Id Admin />
 
 <PageTitle>Contest Invites</PageTitle>
 

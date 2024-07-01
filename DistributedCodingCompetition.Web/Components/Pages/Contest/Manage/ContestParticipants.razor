@@ -3,6 +3,11 @@
 *@
 
 @page "/contest/{id:guid}/manage/participants"
-<AuthCheck/>
+<AuthCheck Contest=Id Admin />
 
 <PageTitle>Contest Participants</PageTitle>
+
+@code {
+    [Parameter]
+    public Guid Id { get; set; }
+}

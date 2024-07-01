@@ -1,19 +1,64 @@
+@*
+    Usage:
+    <AuthCheck /> // Authenticated Users
+    <AuthCheck Admin /> // Only System Admins
+    <AuthCheck Contest="GUID" /> // Contest Participants/Admins
+    <AuthCheck Contest="GUID" Admin /> // Contest Admins
+
+*@
 @inject NavigationManager NavigationManager
+@inject IApiService ApiService
+@inject IUserStateService UserStateService
 @code {
     [Parameter]
     public bool Admin { get; set; }
 
+    [Parameter]
+    public Guid? Contest { get; set; }
+
     [CascadingParameter]
     private Task<AuthenticationState> authenticationStateTask { get; set; } = default!;
 
-    protected override void OnInitialized()
+    //  if (Admin && )
+    //         NavigationManager.NavigateTo("dashboard");
+
+    protected override async Task OnParametersSetAsync()
     {
         var authed = authenticationStateTask.Result.User?.Identity?.IsAuthenticated is true;
         if (!authed)
+        {
             NavigationManager.NavigateTo($"auth/login?returnUrl={Uri.EscapeDataString(NavigationManager.ToBaseRelativePath(NavigationManager.Uri))}");
-
-        else if (Admin && authenticationStateTask.Result.User?.IsInRole("Admin") is not true)
-            NavigationManager.NavigateTo("dashboard");
-
+        }
+        else if (Admin)
+        {
+            if (Contest is Guid contest)
+            {
+                // Contest Admin
+                var user = (await UserStateService.UserAsync())?.Id;
+                (var success, var role) = await ApiService.TryReadUserContestRoleAsync(contest, user!.Value);
+                if (!success || role is not ContestRole.Admin)
+                    NavigationManager.NavigateTo("dashboard");
+            }
+            else
+            {
+                if (authenticationStateTask.Result.User?.IsInRole("Admin") is not true)
+                    NavigationManager.NavigateTo("dashboard");
+            }
+        }
+        else
+        {
+            if (Contest is Guid contest)
+            {
+                var user = (await UserStateService.UserAsync())?.Id;
+                (var success, var role) = await ApiService.TryReadUserContestRoleAsync(contest, user!.Value);
+                if (!success || role is null)
+                    NavigationManager.NavigateTo("dashboard");
+            }
+            else
+            {
+                // Authenticated User
+                // don't need to do anything
+            }
+        }
     }
 }

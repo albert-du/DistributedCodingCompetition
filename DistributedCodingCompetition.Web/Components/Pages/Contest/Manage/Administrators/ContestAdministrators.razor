@@ -4,7 +4,7 @@ public ICollection<User> Administrators { get; set; } = [];
 
 @page "/contest/{id:guid}/manage/administrators"
 @inject IApiService ApiService
-<AuthCheck />
+<AuthCheck Contest=Id Admin />
 
 <PageTitle>Contest Administrators</PageTitle>
 
@@ -21,7 +21,7 @@ public ICollection<User> Administrators { get; set; } = [];
         if (!success)
             return;
 
-        (_, var admins) = await ApiService.TryReadContestAdminAsync(Id);
+        (_, var admins) = await ApiService.TryReadContestAdminsAsync(Id);
         administrators = [.. admins];
     }
 }
