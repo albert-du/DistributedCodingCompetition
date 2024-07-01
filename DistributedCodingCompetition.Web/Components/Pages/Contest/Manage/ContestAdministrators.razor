@@ -1,3 +1,7 @@
+@*
+        public ICollection<User> Administrators { get; set; } = [];
+*@
+
 @page "/contest/{id:guid}/manage/administrators"
 @inject IApiService ApiService
 <AuthCheck />
@@ -13,7 +17,7 @@
 
     protected override async Task OnInitializedAsync()
     {
-        contest = await ApiService.GetContest(Id);
-        administrators = await ApiService.GetContestAdministrators(Id);
+        contest = await ApiService.TryReadContestAsync(Id);
+        administrators = await ApiService.TryReadContestAdminAsync(Id);
     }    
 }

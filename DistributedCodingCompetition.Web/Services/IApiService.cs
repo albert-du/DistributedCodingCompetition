@@ -14,4 +14,6 @@ public interface IApiService
     Task<bool> TryUpdateUserAsync(User user);
 
     Task<(bool, Contest?)> TryReadContestByJoinCodeAsync(string code);
+
+    Task<(bool, Contest?)> TryReadContestAsync(Guid id);
 }

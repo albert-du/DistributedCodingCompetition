@@ -90,4 +90,9 @@ public class ApiService(HttpClient httpClient, ILogger<ApiService> logger) : IAp
     {
         throw new NotImplementedException();
     }
+
+    public Task<(bool, Contest?)> TryReadContestAsync(Guid id)
+    {
+        throw new NotImplementedException();
+    }
 }

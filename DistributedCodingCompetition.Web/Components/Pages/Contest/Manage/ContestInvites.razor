@@ -1,0 +1,20 @@
+@*
+        public ICollection<JoinCode> JoinCodes { get; set; } = [];
+*@
+
+@page "/contest/{id:guid}/manage/invites"
+
+<AuthCheck/>
+
+<PageTitle>Contest Invites</PageTitle>
+
+@code {
+    [Parameter] public Guid Id { get; set; }
+
+    public ICollection<JoinCode> JoinCodes { get; set; } = [];
+
+    protected override async Task OnInitializedAsync()
+    {
+        JoinCodes = await ApiService.GetJoinCodes(Id);
+    }
+}
