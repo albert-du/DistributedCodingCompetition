@@ -3,6 +3,7 @@ using System;
 using DistributedCodingCompetition.ApiService.Models;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 
@@ -11,9 +12,11 @@ using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 namespace DistributedCodingCompetition.ApiService.Migrations
 {
     [DbContext(typeof(ContestContext))]
-    partial class ContestContextModelSnapshot : ModelSnapshot
+    [Migration("20240701010620_UserBan")]
+    partial class UserBan
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -166,12 +169,6 @@ namespace DistributedCodingCompetition.ApiService.Migrations
                     b.Property<Guid>("ContestId")
                         .HasColumnType("uuid");
 
-                    b.Property<DateTime>("Creation")
-                        .HasColumnType("timestamp with time zone");
-
-                    b.Property<Guid?>("CreatorId")
-                        .HasColumnType("uuid");
-
                     b.Property<DateTime>("Expiration")
                         .HasColumnType("timestamp with time zone");
 
@@ -179,14 +176,15 @@ namespace DistributedCodingCompetition.ApiService.Migrations
                         .IsRequired()
                         .HasColumnType("text");
 
+                    b.Property<int>("Uses")
+                        .HasColumnType("integer");
+
                     b.HasKey("Id");
 
                     b.HasIndex("Code")
                         .IsUnique();
 
                     b.HasIndex("ContestId");
-
-                    b.HasIndex("CreatorId");
 
                     b.ToTable("JoinCodes");
                 });
@@ -354,9 +352,6 @@ namespace DistributedCodingCompetition.ApiService.Migrations
                         .IsRequired()
                         .HasColumnType("text");
 
-                    b.Property<Guid?>("JoinCodeId")
-                        .HasColumnType("uuid");
-
                     b.Property<string>("Username")
                         .IsRequired()
                         .HasColumnType("text");
@@ -365,8 +360,6 @@ namespace DistributedCodingCompetition.ApiService.Migrations
 
                     b.HasIndex("Email")
                         .IsUnique();
-
-                    b.HasIndex("JoinCodeId");
 
                     b.HasIndex("Username")
                         .IsUnique();
@@ -455,13 +448,7 @@ namespace DistributedCodingCompetition.ApiService.Migrations
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
-                    b.HasOne("DistributedCodingCompetition.ApiService.Models.User", "Creator")
-                        .WithMany()
-                        .HasForeignKey("CreatorId");
-
                     b.Navigation("Contest");
-
-                    b.Navigation("Creator");
                 });
 
             modelBuilder.Entity("DistributedCodingCompetition.ApiService.Models.Problem", b =>
@@ -532,13 +519,6 @@ namespace DistributedCodingCompetition.ApiService.Migrations
                     b.Navigation("TestCase");
                 });
 
-            modelBuilder.Entity("DistributedCodingCompetition.ApiService.Models.User", b =>
-                {
-                    b.HasOne("DistributedCodingCompetition.ApiService.Models.JoinCode", null)
-                        .WithMany("Users")
-                        .HasForeignKey("JoinCodeId");
-                });
-
             modelBuilder.Entity("DistributedCodingCompetition.ApiService.Models.Contest", b =>
                 {
                     b.Navigation("JoinCodes");
@@ -546,11 +526,6 @@ namespace DistributedCodingCompetition.ApiService.Migrations
                     b.Navigation("Problems");
 
                     b.Navigation("Submissions");
-                });
-
-            modelBuilder.Entity("DistributedCodingCompetition.ApiService.Models.JoinCode", b =>
-                {
-                    b.Navigation("Users");
                 });
 
             modelBuilder.Entity("DistributedCodingCompetition.ApiService.Models.Problem", b =>

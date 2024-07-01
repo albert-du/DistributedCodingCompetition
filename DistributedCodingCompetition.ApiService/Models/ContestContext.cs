@@ -20,6 +20,9 @@ public class ContestContext(DbContextOptions<ContestContext> options) : DbContex
         modelBuilder.Entity<User>()
             .HasIndex(u => u.Username).IsUnique();
 
+        modelBuilder.Entity<User>()
+            .HasOne(u => u.Ban).WithOne(b => b.User).HasForeignKey<Ban>(b => b.UserId);
+
         modelBuilder.Entity<Contest>()
             .HasOne(c => c.Owner).WithMany(u => u.OwnedContests);
 
@@ -28,6 +31,9 @@ public class ContestContext(DbContextOptions<ContestContext> options) : DbContex
 
         modelBuilder.Entity<Contest>()
             .HasMany(c => c.Participants).WithMany(u => u.EnteredContests);
+
+        modelBuilder.Entity<Contest>()
+            .HasMany(c => c.Banned).WithMany(u => u.BannedContests);
 
         modelBuilder.Entity<JoinCode>()
             .HasIndex(j => j.Code).IsUnique();

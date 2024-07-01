@@ -12,6 +12,7 @@ public class Contest
     public ICollection<Problem> Problems { get; set; } = [];
     public ICollection<User> Participants { get; set; } = [];
     public ICollection<User> Administrators { get; set; } = [];
+    public ICollection<User> Banned { get; set; } = [];
     public ICollection<Submission> Submissions { get; set; } = [];
     public ICollection<JoinCode> JoinCodes { get; set; } = [];
     public bool Public { get; set; }
