@@ -7,6 +7,8 @@
 @page "/contest/{id:guid}/manage/transfer"
 @inject IApiService ApiService
 @inject IModalService ModalService
+@inject IUserStateService UserStateService
+@inject NavigationManager NavigationManager
 
 <AuthCheck />
 
@@ -18,9 +20,34 @@
     <div>Confirm this the contest you want to transfer, type the name of the contest</div>
     <input type="text" @bind="sanity" />
 
+    <h2>Select New Owner</h2>
+    <ul class="flex flex-col gap-y-2">
+        @foreach (var admin in administrators)
+        {
+            <button @onclick="() => SelectAdmin(admin)" class="flex bg-">
+                <div>
+                    @($"@{admin.Username}")
+                </div>
+                <div>
+                    @admin.FullName
+                </div>
+            </button>
+        }
+    </ul>
+    @if (newOwner is not null && sanity.Equals(contest.Name, StringComparison.OrdinalIgnoreCase))
+    {
+        <div class="flex flex-col gap-y-4">
+            <div>The new owner of @contest.Name will be @newOwner.Username</div>
+            <button @onclick=TransferOwnershipAsync>Transfer Ownership</button>
+        </div>
+    }
+    else
+    {
+        <div>select a new owner above</div>
+    }
 
 
-    <button class="btn btn-primary" @onclick="TransferOwnershipAsync" disabled="@(!string.Equals(sanity, contest.Name, StringComparison.OrdinalIgnoreCase))">Transfer Ownership</button>
+
 }
 
 
@@ -31,6 +58,10 @@
     Contest? contest;
 
     string sanity = string.Empty;
+
+    List<User> administrators = [];
+
+    User? newOwner;
 
     protected override async Task OnInitializedAsync()
     {
@@ -45,10 +76,37 @@
             ModalService.ShowError("Contest not found", "");
             return;
         }
+        var thisUser = await UserStateService.UserAsync();
+        if (thisUser is null)
+        {
+            ModalService.ShowError("User not found", "");
+            return;
+        }
+        if (contest.OwnerId != thisUser.Id)
+        {
+            ModalService.ShowError("You are not the owner of this contest", "");
+            NavigationManager.NavigateTo("dashboard");
+            return;
+        }
+        (_, var admins) = await ApiService.TryReadContestAdminAsync(Id);
+        administrators = [.. admins];
     }
 
+    void SelectAdmin(User admin)
+    {
+        newOwner = admin;
+    }
+
+    bool submitted;
     async Task TransferOwnershipAsync()
     {
-        
+        if (submitted)
+            return;
+        submitted = true;
+        var oldOwner = contest!.Owner;
+        contest.OwnerId = newOwner!.Id;
+        contest.Administrators.Add(oldOwner);
+        contest.Administrators.Remove(newOwner);
+        var success = await ApiService.TryUpdateContestAsync(contest);
     }
 }
