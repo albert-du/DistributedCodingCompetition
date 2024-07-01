@@ -28,17 +28,21 @@
 @inject IUserStateService UserStateService
 @inject IApiService ApiService
 @inject IMarkdownRenderService MarkdownRenderService
-<AuthCheck/>
+@inject IModalService ModalService
+@inject NavigationManager NavigationManager
+@inject ITimeZoneProvider TimeZoneProvider
+<AuthCheck />
 
-<div class="sm:w-4/5 md:w-2/3 lg:w-1/2">
-    <h1>@(model?.Name)</h1>
-    @* <h2>@(model?.Id)</h2> *@
+@if (contest is not null && model is not null)
+{
+    <h1>@(model.Name)</h1>
+    <h2>@(contest.Id)</h2>
     <EditForm Model=model OnValidSubmit="SubmitAsync">
         <label class="flex flex-col">
             <div class="pl-2">
                 Name
             </div>
-            <InputText class="w-64 px-2 py-1 ml-2 bg-gray-100 rounded-lg text-slate-800" id="Name" @bind-Value=model.Name />
+            <InputText class="w-64 px-2 py-1 ml-2 bg-gray-100 rounded-lg text-slate-800" id="Name" @bind-Value=(model.Name) />
         </label>
 
         <label class="flex flex-col">
@@ -141,26 +145,70 @@
             }
         </div>
 
-        <a href="/contest/@Id/manage/administrators" class="italic hover:underline">@model.Administrators.Count administrators</a>
-        <a href="/contest/@Id/manage/participants" class="italic hover:underline">@model.Participants.Count participants</a>
-        <a href="/contest/@Id/manage/problems" class="italic hover:underline">@model.Problems.Count problems</a>
+        <a href="/contest/@Id/manage/administrators" class="italic hover:underline">@model.Administrators administrators</a>
+        <a href="/contest/@Id/manage/participants" class="italic hover:underline">@model.Participants participants</a>
+        <a href="/contest/@Id/manage/banned" class="italic hover:underline">@model.Banned users banned</a>
+        <a href="/contest/@Id/manage/problems" class="italic hover:underline">@model.Problems problems</a>
+        <a href="/contest/@Id/manage/submissions" class="italic hover:underline">@model.Submissions submissions</a>
+        <a href="/contest/@Id/manage/invites" class="italic hover:underline">@model.JoinCodes invites</a>
 
         <button type="submit" class="px-4 py-2 mt-4 text-white bg-blue-500 rounded-lg">Submit</button>
         <DataAnnotationsValidator />
     </EditForm>
-</div>
-
+}
+else
+{
+    <div>
+        Loading...
+    </div>
+}
 @code {
-    [Parameter]
-    public Guid Id { get; set; }
-
-    ContestModel? model;
-
-    TimeSpan offset;
-
     private DateTime StartUTC => model.Start - offset;
     private DateTime EndUTC => model.End - offset;
     private TimeSpan Remaining => StartUTC - DateTime.UtcNow;
+    [Parameter]
+    public Guid Id { get; set; }
+
+    ContestModel model = new();
+    Contest? contest;
+
+    TimeSpan offset;
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        if (!firstRender)
+            return;
+
+        if (contest is null)
+            (var success, contest) = await ApiService.TryReadContestAsync(Id);
+
+        if (contest is null)
+        {
+            ModalService.ShowError("Internal error", "could not find contest");
+            NavigationManager.NavigateTo("/");
+            return;
+        }
+
+        offset = await TimeZoneProvider.GetTimeZoneOffsetAsync();
+
+
+        model = new()
+            {
+                Name = contest.Name,
+                Description = contest.Description,
+                StartDate = DateOnly.FromDateTime((await TimeZoneProvider.GetLocalDateTimeAsync(contest.StartTime)).UtcDateTime),
+                EndDate = DateOnly.FromDateTime((await TimeZoneProvider.GetLocalDateTimeAsync(contest.EndTime)).UtcDateTime),
+                StartTime = TimeOnly.FromDateTime((await TimeZoneProvider.GetLocalDateTimeAsync(contest.StartTime)).UtcDateTime),
+                EndTime = TimeOnly.FromDateTime((await TimeZoneProvider.GetLocalDateTimeAsync(contest.EndTime)).UtcDateTime),
+                MinimumAge = contest.MinimumAge,
+                Administrators = contest.AdministratorsCount,
+                Participants = contest.ParticipantsCount,
+                Banned = contest.BannedCount,
+                Submissions = contest.SubmissionsCount,
+                Problems = contest.ProblemsCount,
+                JoinCodes = contest.JoinCodesCount
+            };
+        await InvokeAsync(StateHasChanged);
+    }
 
     protected override async Task OnInitializedAsync()
     {
@@ -168,62 +216,19 @@
         if (user is null)
             return;
 
-        var contest = await ApiService.GetContestAsync(Id);
+        (var success, contest) = await ApiService.TryReadContestAsync(Id);
+        if (!success)
+        {
+            ModalService.ShowError("Internal error", "could not find contest");
+            NavigationManager.NavigateTo("/");
+            return;
+        }
+
         if (contest is null || contest.Owner.Id != user.Id)
         {
             NavigationManager.NavigateTo("/");
             return;
         }
-
-        model = new ContestModel
-        {
-            Name = contest.Name,
-            Description = contest.Description,
-            StartDate = contest.StartTime.Date,
-            EndDate = contest.EndTime.Date,
-            StartTime = contest.StartTime.TimeOfDay,
-            EndTime = contest.EndTime.TimeOfDay,
-        };
-    }
-
-
-    protected override async Task OnAfterRenderAsync(bool firstRender)
-    {
-        if (!firstRender)
-            return;
-        offset = await TimeZoneProvider.GetTimeZoneOffsetAsync();
-        await InvokeAsync(StateHasChanged);
-    }
-
-    class ContestModel
-    {
-        [Required(AllowEmptyStrings = false)]
-        public string Name { get; set; } = string.Empty;
-
-        public string Description { get; set; } = "# Description\n\n## Rules\n\n## Prizes\n\n## Scoring\n\n## Submission\n\n## Judging\n\n## FAQ\n\n";
-        
-        [Required]
-        public DateOnly StartDate { get; set; }
-        [Required]
-        public DateOnly EndDate { get; set; }
-        [Required]
-        public TimeOnly StartTime { get; set; }
-        [Required]
-        public TimeOnly EndTime { get; set; }
-
-        public int MinimumAge { get; set; }
-
-        public List<string> Administrators { get; set; } = new();
-
-        public List<string> Banned { get; set; } = new();
-
-        public List<string> Participants { get; set; } = new();
-
-        public List<Problem> Problems { get; set; } = new();
-
-        public DateTime Start => StartDate.ToDateTime(StartTime);
-        public DateTime End => EndDate.ToDateTime(EndTime);
-        public TimeSpan Duration => End - Start;
     }
 
     private async Task SubmitAsync()
@@ -232,17 +237,61 @@
         if (user is null)
             return;
 
-        Contest contest = new()
-        {
-            Name = model.Name,
-            Description = model.Description,
-            RenderedDescription = MarkdownRenderService.Render(model.Description),
-            StartTime = StartUTC,
-            EndTime = EndUTC,
-            Owner = user,
-            Active = false,
-            Open = false,
-            Public = false,
-        };
+        if (model is null || contest is null)
+            return;
+
+        contest.Name = model.Name;
+        contest.Description = model.Description;
+        contest.StartTime = (await TimeZoneProvider.GetUtcDateTimeAsync(model.StartDate.ToDateTime(model.StartTime))).UtcDateTime;
+        contest.EndTime = (await TimeZoneProvider.GetUtcDateTimeAsync(model.EndDate.ToDateTime(model.EndTime))).UtcDateTime;
     }
+
+    class ContestModel
+    {
+        [Required(AllowEmptyStrings = false)]
+        public string Name { get; set; } = string.Empty;
+
+        public string Description { get; set; } = "# Description\n\n## Rules\n\n## Prizes\n\n## Scoring\n\n## Submission\n\n## Judging\n\n## FAQ\n\n";
+
+        /// <summary>
+        /// Local start date
+        /// </summary>
+        [Required]
+        public DateOnly StartDate { get; set; }
+
+        /// <summary>
+        /// Local end date
+        /// </summary>
+        [Required]
+        public DateOnly EndDate { get; set; }
+
+        /// <summary>
+        /// Local start time
+        /// </summary>
+        [Required]
+        public TimeOnly StartTime { get; set; }
+
+        /// <summary>
+        /// Local end time
+        /// </summary>
+        [Required]
+        public TimeOnly EndTime { get; set; }
+
+        public int MinimumAge { get; set; }
+
+        public int Administrators { get; set; }
+        public int Participants { get; set; }
+        public int Banned { get; set; }
+        public int Submissions { get; set; }
+
+        public int Problems { get; set; }
+        public int JoinCodes { get; set; }
+
+        public DateTime Start => StartDate.ToDateTime(StartTime);
+        public DateTime End => EndDate.ToDateTime(EndTime);
+        public TimeSpan Duration => End - Start;
+    }
+
+    record UserModel(string Username, Guid id);
+
 }

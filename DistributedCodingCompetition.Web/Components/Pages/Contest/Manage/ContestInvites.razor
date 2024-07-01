@@ -1,20 +1,25 @@
 @*
-        public ICollection<JoinCode> JoinCodes { get; set; } = [];
+public ICollection<JoinCode> JoinCodes { get; set; } = [];
 *@
 
 @page "/contest/{id:guid}/manage/invites"
-
-<AuthCheck/>
+@inject IApiService ApiService
+<AuthCheck />
 
 <PageTitle>Contest Invites</PageTitle>
 
 @code {
     [Parameter] public Guid Id { get; set; }
 
-    public ICollection<JoinCode> JoinCodes { get; set; } = [];
+    public List<JoinCode>? JoinCodes { get; set; }
 
     protected override async Task OnInitializedAsync()
     {
-        JoinCodes = await ApiService.GetJoinCodes(Id);
+        (var success, var codes) = await ApiService.TryReadJoinCodesAsync(Id);
+        if (!success)
+            return;
+        if (codes is null)
+            return;
+        JoinCodes = [.. codes];
     }
 }

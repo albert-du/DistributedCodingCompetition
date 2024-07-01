@@ -1,0 +1,27 @@
+﻿@*
+public ICollection<User> Administrators { get; set; } = [];
+*@
+
+@page "/contest/{id:guid}/manage/administrators/add"
+@inject IApiService ApiService
+<AuthCheck />
+
+<PageTitle>Add Contest Administrators</PageTitle>
+
+@code {
+    Contest? contest;
+    List<User> administrators = new List<User>();
+
+    [Parameter]
+    public Guid Id { get; set; }
+
+    protected override async Task OnInitializedAsync()
+    {
+        (var success, contest) = await ApiService.TryReadContestAsync(Id);
+        if (!success)
+            return;
+
+        (_, var admins) = await ApiService.TryReadContestAdminAsync(Id);
+        administrators = [.. admins];
+    }
+}

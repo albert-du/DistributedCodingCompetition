@@ -1,5 +1,5 @@
 @*
-        public ICollection<User> Administrators { get; set; } = [];
+public ICollection<User> Administrators { get; set; } = [];
 *@
 
 @page "/contest/{id:guid}/manage/administrators"
@@ -9,7 +9,7 @@
 <PageTitle>Contest Administrators</PageTitle>
 
 @code {
-    Contest? contest
+    Contest? contest;
     List<User> administrators = new List<User>();
 
     [Parameter]
@@ -17,7 +17,11 @@
 
     protected override async Task OnInitializedAsync()
     {
-        contest = await ApiService.TryReadContestAsync(Id);
-        administrators = await ApiService.TryReadContestAdminAsync(Id);
-    }    
+        (var success, contest) = await ApiService.TryReadContestAsync(Id);
+        if (!success)
+            return;
+
+        (_, var admins) = await ApiService.TryReadContestAdminAsync(Id);
+        administrators = [.. admins];
+    }
 }

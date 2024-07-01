@@ -1,6 +1,7 @@
 ﻿namespace DistributedCodingCompetition.Web.Services;
 
 using DistributedCodingCompetition.ApiService.Models;
+using System.Collections.Generic;
 using System.Net;
 
 public class ApiService(HttpClient httpClient, ILogger<ApiService> logger) : IApiService
@@ -92,6 +93,21 @@ public class ApiService(HttpClient httpClient, ILogger<ApiService> logger) : IAp
     }
 
     public Task<(bool, Contest?)> TryReadContestAsync(Guid id)
+    {
+        throw new NotImplementedException();
+    }
+
+    public Task<(bool, Contest?)> TryReadJoinCodesAsync(Guid contestId)
+    {
+        throw new NotImplementedException();
+    }
+
+    public Task<(bool, IReadOnlyList<User>?)> TryReadContestAdminAsync(Guid contestId)
+    {
+        throw new NotImplementedException();
+    }
+
+    Task<(bool, IReadOnlyList<JoinCode>?)> IApiService.TryReadJoinCodesAsync(Guid contestId)
     {
         throw new NotImplementedException();
     }
