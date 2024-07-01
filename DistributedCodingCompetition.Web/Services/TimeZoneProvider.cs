@@ -16,6 +16,17 @@ public class TimeZoneProvider(IJSRuntime jsRuntime) : ITimeZoneProvider
         return dateTime.ToOffset(_userOffset.Value);
     }
 
+    public async Task<TimeSpan> GetTimeZoneOffsetAsync()
+    {
+        if (_userOffset is null)
+        {
+            int offsetInMinutes = await jsRuntime.InvokeAsync<int>("getTimezoneOffset");
+            _userOffset = TimeSpan.FromMinutes(-offsetInMinutes);
+        }
+
+        return _userOffset.Value;
+    }
+
     public async Task<DateTimeOffset> GetUtcDateTimeAsync(DateTimeOffset dateTime)
     {
         if (_userOffset is null)

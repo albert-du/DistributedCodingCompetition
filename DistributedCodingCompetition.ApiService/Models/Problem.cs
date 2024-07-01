@@ -1,4 +1,6 @@
-﻿namespace DistributedCodingCompetition.ApiService.Models;
+﻿using System.ComponentModel;
+
+namespace DistributedCodingCompetition.ApiService.Models;
 
 public class Problem
 {
@@ -16,6 +18,8 @@ public class Problem
     /// Markdown formatted description of the problem.
     /// </summary>
     public string Description { get; set; } = string.Empty;
+
+    public string RenderedDescription { get; set; } = string.Empty;
 
     /// <summary>
     /// Difficulty of the problem.
