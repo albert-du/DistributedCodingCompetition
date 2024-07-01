@@ -1,4 +1,5 @@
 @inject ITimeZoneProvider TimeZoneProvider
+@inject IUserStateService UserStateService
 
 <div class="sm:w-4/5 md:w-2/3 lg:w-1/2">
     <h1>New Contest</h1>
@@ -12,9 +13,9 @@
 
         <label class="flex flex-col">
             <div class="pl-2">
-                Description
+                Description (<a href="https://www.markdownguide.org/" class="italic hover:underline">markdown</a> enabled)
             </div>
-            <InputText class="w-64 px-2 py-1 ml-2 bg-gray-100 rounded-lg text-slate-800" id="Description" @bind-Value=model.Description />
+            <InputTextArea class="w-64 px-2 py-1 ml-2 bg-gray-100 rounded-lg text-slate-800" id="Description" @bind-Value=model.Description />
         </label>
 
         <label class="flex flex-col">
@@ -59,11 +60,11 @@
                 Starts in
             </div>
             <div class="w-64 px-2 py-1 ml-2 bg-gray-100 rounded-lg text-slate-800">
-                @model.Remaining
+                @Remaining
             </div>
 
             <div>
-                From @model.StartUTC UTC to @model.EndUTC UTC
+                From @StartUTC UTC to @EndUTC UTC
             </div>
         </div>
 
@@ -74,6 +75,21 @@
 
 @code {
     ContestModel model = new();
+
+    TimeSpan offset;
+
+    private DateTime StartUTC => model.Start - offset;
+    private DateTime EndUTC => model.End - offset;
+    private TimeSpan Remaining => StartUTC - DateTime.UtcNow;
+
+
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        if (!firstRender)
+            return;
+        offset = await TimeZoneProvider.GetTimeZoneOffsetAsync();
+        await InvokeAsync(StateHasChanged);
+    }
 
     class ContestModel
     {
@@ -91,20 +107,27 @@
         [Required]
         public TimeOnly EndTime { get; set; }
 
-        public DateTime StartUTC => TimeZoneProvider.GetUtcDateTimeAsync(StartDate.ToDateTime(StartTime));
-        public DateTime EndUTC => TimeZoneProvider.GetUtcDateTimeAsync(EndDate.ToDateTime(EndTime));
+        public DateTime Start => StartDate.ToDateTime(StartTime);
+        public DateTime End => EndDate.ToDateTime(EndTime);
         public TimeSpan Duration => End - Start;
-        public TimeSpan Remaining => Start - DateTime.UtcNow;
     }
 
     private async Task SubmitAsync()
     {
+        var user = await UserStateService.UserAsync();
+        if (user is null)
+            return;
+
         Contest contest = new()
         {
             Name = model.Name,
             Description = model.Description,
-            Start = model.StartUTC,
-            End = model.EndUTC
+            StartTime = StartUTC,
+            EndTime = EndUTC,
+            Owner = user,
+            Active = false,
+            Open = false,
+            Public = false,
         };
     }
 }

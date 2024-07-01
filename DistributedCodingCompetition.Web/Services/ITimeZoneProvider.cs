@@ -18,4 +18,6 @@ public interface ITimeZoneProvider
     /// <param name="dateTime"></param>
     /// <returns></returns>
     Task<DateTimeOffset> GetUtcDateTimeAsync(DateTimeOffset dateTime);
+
+    Task<TimeSpan> GetTimeZoneOffsetAsync();
 }
