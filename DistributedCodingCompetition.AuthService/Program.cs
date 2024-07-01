@@ -28,6 +28,18 @@ if (app.Environment.IsDevelopment())
 {
     app.UseSwagger();
     app.UseSwaggerUI();
+    // seed
+    _ = Task.Run(async () =>
+    {
+        Console.WriteLine("Seeding data");
+        await Task.Delay(3000);
+        using var scope = app.Services.CreateScope();
+        var client = scope.ServiceProvider.GetRequiredService<IMongoClient>();
+        var collection = client.GetDatabase("authdb").GetCollection<UserAuth>(nameof(UserAuth));
+        var passwordService = scope.ServiceProvider.GetRequiredService<IPasswordService>();
+        await Seeding.SeedDataAsync(collection, passwordService);
+        Console.WriteLine("Seeded data");
+    });
 }
 
 app.UseHttpsRedirection();
@@ -35,17 +47,5 @@ app.UseHttpsRedirection();
 app.UseAuthorization();
 
 app.MapControllers();
-
-// seed
-_ = Task.Run(async () =>
-{
-    await Task.Delay(3000);
-    using var scope = app.Services.CreateScope();
-    var context = scope.ServiceProvider.GetRequiredService<MongoClient>();
-    var db = context.GetDatabase("authdb");
-    var collection = db.GetCollection<UserAuth>(nameof(UserAuth));
-    var passwordService = scope.ServiceProvider.GetRequiredService<IPasswordService>();
-    await Seeding.SeedDataAsync(collection, passwordService);
-});
 
 app.Run();

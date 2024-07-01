@@ -1,0 +1,22 @@
+@page "/test/timezone"
+@inject ITimeZoneProvider TimeZoneProvider
+@rendermode InteractiveServer
+
+<h1>Time Zone</h1>
+
+<p>Local: @l</p>
+<p>UTC: @u</p>
+
+@code {
+    private string l = string.Empty;
+    private string u = string.Empty;
+
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        if (!firstRender) return;
+        var local = await TimeZoneProvider.GetLocalDateTimeAsync(DateTimeOffset.UtcNow);
+        l = local.ToString();
+        u = DateTimeOffset.UtcNow.ToString();
+        await InvokeAsync(StateHasChanged);
+    }
+}

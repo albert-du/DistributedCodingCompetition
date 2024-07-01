@@ -27,6 +27,7 @@ builder.Services.AddSingleton<IApiService, ApiService>();
 builder.Services.AddScoped<IModalService, ModalService>();
 builder.Services.AddScoped<IAuthService, AuthService>();
 builder.Services.AddScoped<IUserStateService, UserStateService>();
+builder.Services.AddScoped<ITimeZoneProvider, TimeZoneProvider>();
 
 // MUST BE AFTER
 builder.Services.AddHttpClient<CodeExecutionClient>(client => client.BaseAddress = new("https+http://codeexecution"));
