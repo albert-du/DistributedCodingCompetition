@@ -1,2 +1,19 @@
 @page "/contest/{id:guid}/manage/administrators"
-<AuthCheck Admin/>
+@inject IApiService ApiService
+<AuthCheck />
+
+<PageTitle>Contest Administrators</PageTitle>
+
+@code {
+    Contest? contest
+    List<User> administrators = new List<User>();
+
+    [Parameter]
+    public Guid Id { get; set; }
+
+    protected override async Task OnInitializedAsync()
+    {
+        contest = await ApiService.GetContest(Id);
+        administrators = await ApiService.GetContestAdministrators(Id);
+    }    
+}
