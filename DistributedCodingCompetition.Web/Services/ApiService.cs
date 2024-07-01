@@ -85,4 +85,9 @@ public class ApiService(HttpClient httpClient, ILogger<ApiService> logger) : IAp
             return (false, null);
         }
     }
+
+    public Task<(bool, Contest?)> TryReadContestByJoinCodeAsync(string code)
+    {
+        throw new NotImplementedException();
+    }
 }

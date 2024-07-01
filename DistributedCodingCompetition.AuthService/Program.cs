@@ -1,6 +1,7 @@
 using DistributedCodingCompetition.AuthService.Models;
 using DistributedCodingCompetition.AuthService.Services;
-using Microsoft.Extensions.DependencyInjection;
+using DistributedCodingCompetition.AuthService;
+using MongoDB.Driver;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -34,5 +35,17 @@ app.UseHttpsRedirection();
 app.UseAuthorization();
 
 app.MapControllers();
+
+// seed
+_ = Task.Run(async () =>
+{
+    await Task.Delay(3000);
+    using var scope = app.Services.CreateScope();
+    var context = scope.ServiceProvider.GetRequiredService<MongoClient>();
+    var db = context.GetDatabase("authdb");
+    var collection = db.GetCollection<UserAuth>(nameof(UserAuth));
+    var passwordService = scope.ServiceProvider.GetRequiredService<IPasswordService>();
+    await Seeding.SeedDataAsync(collection, passwordService);
+});
 
 app.Run();
