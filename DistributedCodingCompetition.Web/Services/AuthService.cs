@@ -59,13 +59,13 @@ public class AuthService(HttpClient httpClient, ILogger<AuthService> logger, IMo
         }
     }
 
-    public async Task<Guid?> ValidateTokenAsync(string token)
+    public async Task<ValidationResult?> ValidateTokenAsync(string token)
     {
         try
         {
             var resp = await httpClient.PostAsync($"api/auth/validate?token={token}", null);
             resp.EnsureSuccessStatusCode();
-            return await resp.Content.ReadFromJsonAsync<Guid>();
+            return await resp.Content.ReadFromJsonAsync<ValidationResult>();
         }
         catch (Exception ex)
         {

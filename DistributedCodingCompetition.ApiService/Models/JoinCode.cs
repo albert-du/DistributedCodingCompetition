@@ -11,4 +11,5 @@ public class JoinCode
     public DateTime Expiration { get; set; }
     public bool CloseAfterUse { get; set; }
     public int Uses { get; set; }
+    public bool Admin { get; set; }
 }

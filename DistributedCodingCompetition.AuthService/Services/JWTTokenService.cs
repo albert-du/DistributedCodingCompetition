@@ -50,7 +50,7 @@ public class JWTTokenService(IConfiguration configuration, ILogger<JWTTokenServi
     /// </summary>
     /// <param name="token"></param>
     /// <returns>null if invalid</returns>
-    public Guid? ValidateToken(string token)
+    public ValidationResult? ValidateToken(string token)
     {
         JwtSecurityTokenHandler tokenHandler = new();
         try
@@ -75,7 +75,11 @@ public class JWTTokenService(IConfiguration configuration, ILogger<JWTTokenServi
             if (jwtToken.ValidFrom < user.MinTokenTime)
                 return null;
 
-            return id;
+            // check if Admin role present
+            if (user.Admin && jwtToken.Claims.Any(x => x.Type == ClaimTypes.Role && x.Value == "Admin"))
+                return new ValidationResult { Id = id, Admin = true };
+
+            return new ValidationResult { Id = id };
         }
         catch
         {

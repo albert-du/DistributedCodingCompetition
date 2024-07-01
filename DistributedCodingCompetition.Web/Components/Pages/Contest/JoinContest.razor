@@ -1,12 +1,24 @@
 @page "/contest/join/{code}"
+@inject IApiService ApiService
 
+@if (contest is not null)
+{
+    <h1>Join Contest</h1>
+    <p>You've been invited to join @contest.Name</p>
+}
+else
+{
+    <h1>Join Contest</h1>
+    <p>Invalid join code</p>
+}
 
 @code {
     [Parameter]
-    public string Code { get; set; }
+    public string Code { get; set; } = string.Empty;
     private Contest? contest;
 
     protected override async Task OnInitializedAsync()
     {
+        (_, contest) = await ApiService.TryReadContestByJoinCodeAsync(Code);
     }
 }

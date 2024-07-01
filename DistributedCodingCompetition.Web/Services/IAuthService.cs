@@ -8,5 +8,5 @@ public interface IAuthService
 
     Task<LoginResult?> TryLoginAsync(Guid id, string password, string userAgent, string ipAddress);
 
-    Task<Guid?> ValidateTokenAsync(string token);
+    Task<ValidationResult?> ValidateTokenAsync(string token);
 }

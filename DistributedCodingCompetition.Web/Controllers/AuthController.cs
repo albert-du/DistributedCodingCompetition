@@ -18,11 +18,10 @@ public class AuthController(IAuthService authService) : ControllerBase
         if (result is null)
             return Unauthorized();
 
-        List<Claim> claims = [
-            new (ClaimTypes.NameIdentifier, result.Value.ToString()),
-        ];
-        // if (result.Admin)
-        //    claims.Add(new Claim(ClaimTypes.Role, "Admin"));
+        List<Claim> claims = [new(ClaimTypes.NameIdentifier, result.Id.ToString())];
+
+        if (result.Admin)
+            claims.Add(new Claim(ClaimTypes.Role, "Admin"));
 
         // cookie auth
         var claimsIdentity = new ClaimsIdentity(claims, CookieAuthenticationDefaults.AuthenticationScheme);

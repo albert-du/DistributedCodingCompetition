@@ -71,9 +71,9 @@ public class AuthController(IPasswordService passwordService, IMongoClient mongo
     }
 
     [HttpPost("validate")]
-    public ActionResult<Guid> ValidateToken(string token)
+    public ActionResult<ValidationResult> ValidateToken(string token)
     {
-        var id = tokenService.ValidateToken(token);
-        return id is null ? Unauthorized() : id;
+        var res = tokenService.ValidateToken(token);
+        return res is null ? Unauthorized() : res;
     }
 }

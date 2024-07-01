@@ -12,4 +12,6 @@ public interface IApiService
     Task<(bool,User?)> TryReadUserByEmailAsync(string email);
     Task<(bool,User?)> TryReadUserByUsername(string username);
     Task<bool> TryUpdateUserAsync(User user);
+
+    Task<(bool, Contest?)> TryReadContestByJoinCodeAsync(string code);
 }

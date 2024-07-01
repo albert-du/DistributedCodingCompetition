@@ -1,0 +1,18 @@
+@inject NavigationManager NavigationManager
+@code {
+    [Parameter]
+    public bool Admin { get; set; }
+
+    [CascadingParameter]
+    private Task<AuthenticationState> authenticationStateTask { get; set; } = default!;
+
+    protected override void OnInitialized()
+    {
+        var authed = authenticationStateTask.Result.User?.Identity?.IsAuthenticated is true;
+        if (!authed)
+            NavigationManager.NavigateTo($"auth/login?returnUrl={Uri.EscapeDataString(NavigationManager.ToBaseRelativePath(NavigationManager.Uri))}");
+
+        else if (Admin && authenticationStateTask.Result.User?.IsInRole("Admin") is not true)
+            NavigationManager.NavigateTo("dashboard");
+    }
+}
