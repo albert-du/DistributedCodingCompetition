@@ -6,24 +6,26 @@
 
 <AuthCheck />
 
-<h1>Dashboard</h1>
+<h1 class="text-2xl">Dashboard</h1>
 
 @if (user is not null)
 {
-    <p>Welcome, @user.Username</p>
+    <p class="italic">Welcome, @user.Username</p>
 
     <div>
-        <h2>Entrered Contests</h2>
+        <h2 class="text-lg">Entrered Contests</h2>
         @if (user.EnteredContests.Count == 0)
         {
-            <p>You are not in any contests</p>
+            <p>You are not in any contests.</p>
         }
         else
         {
-            <ul>
+            <ul class="flex flex-col gap-y-3">
                 @foreach (var contest in user.EnteredContests)
                 {
-                    <li>@contest.Name</li>
+                    <li>
+                        <a href="contest/@contest.Id">@contest.Name</a>
+                    </li>
                 }
             </ul>
         }
@@ -31,12 +33,12 @@
 
     @if (ContestOptions.Value.OpenCreation)
     {
-        <a href="contest/new">Start Contest</a>
+        <a class="hover:underline" href="contest/new">Start Contest</a>
     }
     else
     {
         <AuthorizeView Roles="Admin">
-            <a href="contest/new">Start Contest</a>
+            <a class="hover:underline" href="contest/new">Start Contest</a>
         </AuthorizeView>
     }
 

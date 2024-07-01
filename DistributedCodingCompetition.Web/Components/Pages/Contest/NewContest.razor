@@ -1,9 +1,5 @@
 @page "/contest/new"
 @inject IOptions<ContestOptions> ContestOptions
-@inject UserStateService UserStateService
-@inject IAuthService AuthService
-@inject NavigationManager NavigationManager
-@inject AuthenticationStateProvider AuthenticationStateProvider
 
 @if (ContestOptions.Value.OpenCreation)
 {
