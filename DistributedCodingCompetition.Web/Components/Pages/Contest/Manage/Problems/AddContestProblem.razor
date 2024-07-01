@@ -1,0 +1,14 @@
+﻿@*
+        public ICollection<Problem> Problems { get; set; } = [];
+*@
+
+@page "/contest/{id:guid}/manage/problems/add"
+@inject IApiService ApiService
+<AuthCheck />
+
+<PageTitle>Add Contest Problem</PageTitle>
+
+@code {
+    [Parameter]
+    public Guid Id { get; set; }
+}

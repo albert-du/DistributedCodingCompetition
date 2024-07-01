@@ -5,7 +5,50 @@
 *@
 
 @page "/contest/{id:guid}/manage/transfer"
+@inject IApiService ApiService
+@inject IModalService ModalService
 
-<AuthCheck/>
+<AuthCheck />
 
 <PageTitle>Transfer Contest Ownership</PageTitle>
+
+<h1 class="">Transfer Ownership of @(contest?.Name ?? "Unknown")</h1>
+@if (contest is not null)
+{
+    <div>Confirm this the contest you want to transfer, type the name of the contest</div>
+    <input type="text" @bind="sanity" />
+
+
+
+    <button class="btn btn-primary" @onclick="TransferOwnershipAsync" disabled="@(!string.Equals(sanity, contest.Name, StringComparison.OrdinalIgnoreCase))">Transfer Ownership</button>
+}
+
+
+@code {
+    [Parameter]
+    public Guid Id { get; set; }
+
+    Contest? contest;
+
+    string sanity = string.Empty;
+
+    protected override async Task OnInitializedAsync()
+    {
+        (var success, contest) = await ApiService.TryReadContestAsync(Id);
+        if (!success)
+        {
+            ModalService.ShowError("Failed to load contest", "");
+            return;
+        }
+        if (contest is null)
+        {
+            ModalService.ShowError("Contest not found", "");
+            return;
+        }
+    }
+
+    async Task TransferOwnershipAsync()
+    {
+        
+    }
+}
