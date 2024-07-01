@@ -15,7 +15,7 @@ public static class Seeding
             Username = "user1",
             FullName = "User One",
             Email = "user1@example.com",
-            Birthday = new DateTime(2000, 1, 1),
+            Birthday = new DateTime(2000, 1, 1).ToUniversalTime(),
             Creation = DateTime.UtcNow,
         });
 

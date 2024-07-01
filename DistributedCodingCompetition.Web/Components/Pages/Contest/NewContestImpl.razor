@@ -1,0 +1,52 @@
+
+<div class="sm:w-4/5 md:w-2/3 lg:w-1/2">
+    <h1>New Contest</h1>
+    <EditForm Model=model>
+        <label class="flex flex-col">
+            <div class="pl-2">
+                Name
+            </div>
+            <InputText class="w-64 px-2 py-1 ml-2 bg-gray-100 rounded-lg text-slate-800" id="Name" @bind-Value=model.Name />
+        </label>
+        <label class="flex flex-col">
+            <div class="pl-2">
+                Description
+            </div>
+            <InputText class="w-64 px-2 py-1 ml-2 bg-gray-100 rounded-lg text-slate-800" id="Description" @bind-Value=model.Description />
+        </label>
+        <label class="flex flex-col">
+            <div class="pl-2">
+                Start Time
+            </div>
+            <InputDate min=@(DateTime.UtcNow.AddDays(-1).ToString("yyyy-MM-dd")) class="w-64 px-2 py-1 ml-2 bg-gray-100 rounded-lg text-slate-800" id="StartTime" @bind-Value=model.StartTime />
+        </label>
+        <label class="flex flex-col">
+            <div class="pl-2">
+                End Time
+            </div>
+            <InputDate min=@(DateTime.UtcNow.AddDays(-1).ToString("yyyy-MM-dd")) class="w-64 px-2 py-1 ml-2 bg-gray-100 rounded-lg text-slate-800" id="EndTime" @bind-Value=model.EndTime />
+        </label>
+        <InputText @bind-Value="model.Name" id="Name" />
+        <InputText @bind-Value="model.Description" id="Description" />
+        <InputDate @bind-Value="model.StartTime" id="StartTime" />
+        <InputDate @bind-Value="model.EndTime" id="EndTime" />
+
+        <DataAnnotationsValidator />
+        <button type="submit">Create</button>
+    </EditForm>
+</div>
+
+@code {
+    ContestModel model = new();
+    class ContestModel
+    {
+        public string Name { get; set; } = string.Empty;
+        public string Description { get; set; } = string.Empty;
+        public DateTime StartTime { get; set; } = DateTime.Now;
+        public DateTime EndTime { get; set; } = DateTime.Now;
+    }
+}    using MongoDB.Driver.Linq;
+
+#line default
+#line hidden
+#nullable disable

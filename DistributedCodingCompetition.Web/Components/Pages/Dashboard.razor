@@ -2,7 +2,8 @@
 @rendermode InteractiveServer
 @inject AuthenticationStateProvider AuthenticationStateProvider
 @inject IUserStateService UserStateService
-@using DistributedCodingCompetition.ApiService.Models
+@inject IOptions<ContestOptions> ContestOptions
+
 <AuthCheck />
 
 <h1>Dashboard</h1>
@@ -10,7 +11,52 @@
 @if (user is not null)
 {
     <p>Welcome, @user.Username</p>
-    <p>Your email is: @user.Email</p>
+
+    <div>
+        <h2>Entrered Contests</h2>
+        @if (user.EnteredContests.Count == 0)
+        {
+            <p>You are not in any contests</p>
+        }
+        else
+        {
+            <ul>
+                @foreach (var contest in user.EnteredContests)
+                {
+                    <li>@contest.Name</li>
+                }
+            </ul>
+        }
+    </div>
+
+    @if (ContestOptions.Value.OpenCreation)
+    {
+        <a href="contest/new">Start Contest</a>
+    }
+    else
+    {
+        <AuthorizeView Roles="Admin">
+            <a href="contest/new">Start Contest</a>
+        </AuthorizeView>
+    }
+
+    <div>
+        @if (user.AdministeredContests.Count > 0)
+        {
+            <h2>Administered Contests</h2>
+            <ul>
+                @foreach (var contest in user.AdministeredContests)
+                {
+                    <li>@contest.Name</li>
+                }
+            </ul>
+        }
+    </div>
+
+}
+else
+{
+    <p>Loading...</p>
 }
 
 @code {
@@ -20,4 +66,4 @@
     {
         user = await UserStateService.UserAsync();
     }
-}
+} using Microsoft.CodeAnalysis.Options;
