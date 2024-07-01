@@ -42,7 +42,7 @@
             <div class="pl-2">
                 Name
             </div>
-            <InputText class="w-64 px-2 py-1 ml-2 bg-gray-100 rounded-lg text-slate-800" id="Name" @bind-Value=(model.Name) />
+            <InputText class="w-64 px-2 py-1 ml-2 bg-gray-100 rounded-lg text-slate-800" id="Name" @bind-Value=model.Name />
         </label>
 
         <label class="flex flex-col">
@@ -50,6 +50,43 @@
                 Description (<a href="https://www.markdownguide.org/" class="italic hover:underline">markdown</a> enabled)
             </div>
             <InputTextArea class="w-64 px-2 py-1 ml-2 bg-gray-100 rounded-lg text-slate-800" id="Description" @bind-Value=model.Description />
+        </label>
+
+        <label>
+            <div class="pl-2">
+                Minimum Age
+            </div>
+            <InputNumber class="w-64 px-2 py-1 ml-2 bg-gray-100 rounded-lg text-slate-800" id="MinimumAge" @bind-Value=model.MinimumAge />
+        </label>
+
+        <label>
+            <div class="pl-2">
+                Public
+            </div>
+            <div class="text-xs">
+                show on homepage, opens registration without invitation
+            </div>
+            <InputCheckbox class="w-64 px-2 py-1 ml-2 bg-gray-100 rounded-lg text-slate-800" id="Public" @bind-Value=model.Public />
+        </label>
+
+        <label>
+            <div class="pl-2">
+                Open
+            </div>
+            <div class="text-xs">
+                Accepting new participants
+            </div>
+            <InputCheckbox class="w-64 px-2 py-1 ml-2 bg-gray-100 rounded-lg text-slate-800" id="Open" @bind-Value=model.Open />
+        </label>
+
+        <label>
+            <div class="pl-2">
+                Active
+            </div>
+            <div class="text-xs">
+                Uncheck to archive contest.
+            </div>
+            <InputCheckbox class="w-64 px-2 py-1 ml-2 bg-gray-100 rounded-lg text-slate-800" id="Active" @bind-Value=model.Active />
         </label>
 
         <label class="flex flex-col">
@@ -145,6 +182,8 @@
             }
         </div>
 
+
+
         <a href="/contest/@Id/manage/administrators" class="italic hover:underline">@model.Administrators administrators</a>
         <a href="/contest/@Id/manage/participants" class="italic hover:underline">@model.Participants participants</a>
         <a href="/contest/@Id/manage/participants/banned" class="italic hover:underline">@model.Banned users banned</a>
@@ -205,7 +244,10 @@ else
                 Banned = contest.BannedCount,
                 Submissions = contest.SubmissionsCount,
                 Problems = contest.ProblemsCount,
-                JoinCodes = contest.JoinCodesCount
+                JoinCodes = contest.JoinCodesCount,
+                Active = contest.Active,
+                Public = contest.Public,
+                Open = contest.Open
             };
         await InvokeAsync(StateHasChanged);
     }
@@ -244,6 +286,10 @@ else
         contest.Description = model.Description;
         contest.StartTime = (await TimeZoneProvider.GetUtcDateTimeAsync(model.StartDate.ToDateTime(model.StartTime))).UtcDateTime;
         contest.EndTime = (await TimeZoneProvider.GetUtcDateTimeAsync(model.EndDate.ToDateTime(model.EndTime))).UtcDateTime;
+        contest.MinimumAge = model.MinimumAge;
+        contest.Public = model.Public;
+        contest.Open = model.Open;
+
     }
 
     class ContestModel
@@ -286,6 +332,10 @@ else
 
         public int Problems { get; set; }
         public int JoinCodes { get; set; }
+
+        public bool Active { get; set; }
+        public bool Public { get; set; }
+        public bool Open { get; set; }
 
         public DateTime Start => StartDate.ToDateTime(StartTime);
         public DateTime End => EndDate.ToDateTime(EndTime);

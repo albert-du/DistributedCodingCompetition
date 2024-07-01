@@ -1,8 +1,35 @@
 @*
         public ICollection<User> Submissions { get; set; } = [];
+
+        view, and delete contest submissions
 *@
 
 @page "/contest/{id:guid}/manage/submissions"
-<AuthCheck/>
+@inject IApiService ApiService
+@inject IModalService ModalService
+<AuthCheck />
 
 <PageTitle>Contest Submissions</PageTitle>
+
+
+@code {
+    [Parameter]
+    public Guid Id { get; set; }
+
+    public List<User> Submissions { get; set; } = [];
+
+    protected override async Task OnInitializedAsync()
+    {
+        await LoadAsync();
+    }
+
+    private async Task LoadAsync()
+    {
+        (var success, var submissions) = await ApiService.TryReadContestSubmissionsAsync(Id);
+        if (!success)
+        {
+            ModalService.ShowError("Failed to load submissions", "Internal error");
+            return;
+        }
+    }
+}

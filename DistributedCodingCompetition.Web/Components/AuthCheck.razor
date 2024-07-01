@@ -14,5 +14,6 @@
 
         else if (Admin && authenticationStateTask.Result.User?.IsInRole("Admin") is not true)
             NavigationManager.NavigateTo("dashboard");
+
     }
 }
