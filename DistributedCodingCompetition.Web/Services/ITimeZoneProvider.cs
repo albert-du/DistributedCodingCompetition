@@ -11,4 +11,11 @@ public interface ITimeZoneProvider
     /// <param name="dateTime"></param>
     /// <returns></returns>
     Task<DateTimeOffset> GetLocalDateTimeAsync(DateTimeOffset dateTime);
+
+    /// <summary>
+    /// Gets the UTC date and time from the provided date and time.
+    /// </summary>
+    /// <param name="dateTime"></param>
+    /// <returns></returns>
+    Task<DateTimeOffset> GetUtcDateTimeAsync(DateTimeOffset dateTime);
 }

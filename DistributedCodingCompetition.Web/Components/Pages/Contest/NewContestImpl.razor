@@ -1,7 +1,8 @@
+@inject ITimeZoneProvider TimeZoneProvider
 
 <div class="sm:w-4/5 md:w-2/3 lg:w-1/2">
     <h1>New Contest</h1>
-    <EditForm Model=model>
+    <EditForm Model=model OnValidSubmit="SubmitAsync">
         <label class="flex flex-col">
             <div class="pl-2">
                 Name
@@ -30,25 +31,80 @@
             <InputDate class="w-64 px-2 py-1 ml-2 bg-gray-100 rounded-lg text-slate-800" Type="InputDateType.Time" id="StartTime" @bind-Value=model.StartTime />
         </label>
 
-        <InputDate Type="InputDateType.Date" @bind-Value="model.EndDate" id="StartTime" />
-        <InputDate Type="InputDateType.Time" @bind-Value="model.EndTime" id="EndTime" />
-        <InputDate Type="InputDateType.Time" @bind-Value="model.EndTime" id="EndTime" />
+        <label class="flex flex-col">
+            <div class="pl-2">
+                End Date
+            </div>
+            <InputDate class="w-64 px-2 py-1 ml-2 bg-gray-100 rounded-lg text-slate-800" Type="InputDateType.Date" id="StartTime" @bind-Value=model.EndDate />
+        </label>
 
+        <label class="flex flex-col">
+            <div class="pl-2">
+                End Time
+            </div>
+            <InputDate class="w-64 px-2 py-1 ml-2 bg-gray-100 rounded-lg text-slate-800" Type="InputDateType.Time" id="StartTime" @bind-Value=model.EndTime />
+        </label>
+
+        <div class="flex flex-col">
+            <div class="pl-2">
+                Duration
+            </div>
+            <div class="w-64 px-2 py-1 ml-2 bg-gray-100 rounded-lg text-slate-800">
+                @model.Duration
+            </div>
+        </div>
+
+        <div class="flex flex-col">
+            <div class="pl-2">
+                Starts in
+            </div>
+            <div class="w-64 px-2 py-1 ml-2 bg-gray-100 rounded-lg text-slate-800">
+                @model.Remaining
+            </div>
+
+            <div>
+                From @model.StartUTC UTC to @model.EndUTC UTC
+            </div>
+        </div>
+
+        <button type="submit" class="px-4 py-2 mt-4 text-white bg-blue-500 rounded-lg">Submit</button>
         <DataAnnotationsValidator />
-        <button type="submit">Create</button>
     </EditForm>
 </div>
 
 @code {
     ContestModel model = new();
+
     class ContestModel
     {
+        [Required(AllowEmptyStrings = false)]
         public string Name { get; set; } = string.Empty;
-        public string Description { get; set; } = string.Empty;
+
+        public string Description { get; set; } = "# Description\n\n## Rules\n\n## Prizes\n\n## Scoring\n\n## Submission\n\n## Judging\n\n## FAQ\n\n";
+        
+        [Required]
         public DateOnly StartDate { get; set; }
+        [Required]
         public DateOnly EndDate { get; set; }
+        [Required]
         public TimeOnly StartTime { get; set; }
+        [Required]
         public TimeOnly EndTime { get; set; }
 
+        public DateTime StartUTC => TimeZoneProvider.GetUtcDateTimeAsync(StartDate.ToDateTime(StartTime));
+        public DateTime EndUTC => TimeZoneProvider.GetUtcDateTimeAsync(EndDate.ToDateTime(EndTime));
+        public TimeSpan Duration => End - Start;
+        public TimeSpan Remaining => Start - DateTime.UtcNow;
+    }
+
+    private async Task SubmitAsync()
+    {
+        Contest contest = new()
+        {
+            Name = model.Name,
+            Description = model.Description,
+            Start = model.StartUTC,
+            End = model.EndUTC
+        };
     }
 }
