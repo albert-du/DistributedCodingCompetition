@@ -19,7 +19,14 @@ public interface IApiService
     Task<(bool, IReadOnlyList<JoinCode>?)> TryReadJoinCodesAsync(Guid contestId);
     Task<(bool, IReadOnlyList<User>?)> TryReadContestAdminsAsync(Guid contestId);
     Task<(bool, Contest?)> TryUpdateContestAsync(Contest contest);
+    /// <summary>
+    /// 
+    /// </summary>
+    /// <param name="contestId"></param>
+    /// <param name="count"></param>
+    /// <param name="page">start at 0</param>
+    /// <returns></returns>
     Task<(bool, IReadOnlyList<Submission>?)> TryReadContestSubmissionsAsync(Guid contestId, int count, int page);
     Task<(bool, ContestRole?)> TryReadUserContestRoleAsync(Guid contestId, Guid userId);
-    Task<bool> TryCreateProblemAsync(Problem problem);
+    Task<(bool,Guid?)> TryCreateProblemAsync(Problem problem);
 }

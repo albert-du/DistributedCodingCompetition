@@ -87,9 +87,19 @@ public class ApiService(HttpClient httpClient, ILogger<ApiService> logger) : IAp
         }
     }
 
-    public Task<bool> TryCreateProblemAsync(Problem problem)
+    public async Task<(bool, Guid?)> TryCreateProblemAsync(Problem problem)
     {
-        throw new NotImplementedException();
+        try
+        {
+            var response = await httpClient.PostAsJsonAsync("api/problems", problem);
+            response.EnsureSuccessStatusCode();
+            return (true, problem.Id);
+        }
+        catch (Exception ex)
+        {
+            logger.LogError(ex, "Failed to create problem");
+            return (false, null);
+        }
     }
 
     public async Task<(bool, Contest?)> TryReadContestByJoinCodeAsync(string code)
@@ -164,7 +174,7 @@ public class ApiService(HttpClient httpClient, ILogger<ApiService> logger) : IAp
     {
         try
         {
-            var response = await httpClient.GetAsync($"api/contests/{contestId}/submissions?count={count}&page={page}");
+            var response = await httpClient.GetAsync($"api/contests/{contestId}/submissions?count={count}&page={page - 1}");
             response.EnsureSuccessStatusCode();
             return (true, await response.Content.ReadFromJsonAsync<IReadOnlyList<Submission>>());
         }
@@ -175,9 +185,21 @@ public class ApiService(HttpClient httpClient, ILogger<ApiService> logger) : IAp
         }
     }
 
-    public Task<(bool, ContestRole?)> TryReadUserContestRoleAsync(Guid contestId, Guid userId)
+    public async Task<(bool, ContestRole?)> TryReadUserContestRoleAsync(Guid contestId, Guid userId)
     {
-        throw new NotImplementedException();
+        try
+        {
+            var response = await httpClient.GetAsync($"api/contests/{contestId}/role/{userId}");
+            if (response.StatusCode == HttpStatusCode.NotFound)
+                return (true, null);
+            response.EnsureSuccessStatusCode();
+            return (true, await response.Content.ReadFromJsonAsync<ContestRole>());
+        }
+        catch (Exception ex)
+        {
+            logger.LogError(ex, "Failed to fetch user contest role");
+            return (false, null);
+        }
     }
 
     public async Task<(bool, Contest?)> TryUpdateContestAsync(Contest contest)

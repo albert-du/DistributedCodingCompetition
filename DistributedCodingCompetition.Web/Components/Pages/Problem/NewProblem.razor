@@ -1,8 +1,28 @@
+@*
+    public Guid Id { get; set; }
+    public string Name { get; set; } = string.Empty;
+
+    public Guid OwnerId { get; set; }
+    public User Owner { get; set; } = null!;
+
+    public string Description { get; set; } = string.Empty;
+
+    public string RenderedDescription { get; set; } = string.Empty;
+
+    public string? Difficulty { get; set; }
+    public ICollection<TestCase> TestCases { get; set; } = [];
+
+*@
+
 @page "/problem/new"
 @inject IApiService ApiService
+@inject IMarkdownRenderService MarkdownRenderService
+@inject IUserStateService UserStateService
+@inject IModalService ModalService
+@inject NavigationManager NavigationManager
 <AuthCheck />
 
-<EditForm>
+<EditForm OnValidSubmit="SubmitAsync">
 
     <div class="form-group">
         <label for="Name">Name</label>
@@ -14,6 +34,11 @@
         <InputText id="Description" class="form-control" @bind-Value="Model.Description" />
     </div>
 
+    <div class="form-group">
+        <label for="Difficulty">Difficulty</label>
+        <InputText id="Difficulty" class="form-control" @bind-Value="Model.Difficulty" />
+    </div>
+    <div>You will create test cases on the next step.</div>
     <button type="submit" class="btn btn-primary">Create</button>
     <DataAnnotationsValidator />
     <ValidationSummary />
@@ -22,11 +47,24 @@
 @code {
     async Task SubmitAsync()
     {
-        await ApiService.TryCreateProblemAsync(new()
+        var user = await UserStateService.UserAsync();
+        if (user is null)
+        {
+            return;
+        }
+        (var success, var probid) = await ApiService.TryCreateProblemAsync(new()
             {
                 Name = Model.Name,
-                Description = Model.Description
+                Description = Model.Description,
+                Difficulty = string.IsNullOrWhiteSpace(Model.Difficulty) ? null : Model.Difficulty,
+                OwnerId = user.Id
             });
+        if (!success)
+        {
+            ModalService.ShowError("Failed to create problem", "Internal error");
+            return;
+        }
+        NavigationManager.NavigateTo($"problem/{probid}");
     }
 
     ProblemModel Model = new();
@@ -36,6 +74,7 @@
         [Required(ErrorMessage = "Name is required")]
         public string Name { get; set; } = string.Empty;
         public string Description { get; set; } = "# Title\n## Description\n## Input\n## Output\n## Explanation\n## Constraints";
+        public string Difficulty { get; set; } = string.Empty;
     }
 
 

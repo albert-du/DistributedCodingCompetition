@@ -53,8 +53,7 @@ public class ProblemsController(ContestContext context) : ControllerBase
     {
         context.Problems.Add(problem);
         await context.SaveChangesAsync();
-
-        return CreatedAtAction("GetProblem", new { id = problem.Id }, problem);
+        return CreatedAtAction(nameof(GetProblem), new { id = problem.Id }, problem);
     }
 
     // DELETE: api/Problems/5

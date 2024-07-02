@@ -60,6 +60,18 @@ public class ContestsController(ContestContext context) : ControllerBase
         return joinCodes is null ? NotFound() : joinCodes.ToList();
     }
 
+    [HttpGet("{contestId}/role/{userId}")]
+    public async Task<ActionResult<ContestRole?>> GetUserContestRole(Guid contestId, Guid userId)
+    {
+        if (await context.Contests.Where(c => c.Id == contestId).SelectMany(c => c.Administrators).AnyAsync(a => a.Id == userId))
+            return ContestRole.Admin;
+
+        if (await context.Contests.Where(c => c.Id == contestId).SelectMany(c => c.Participants).AnyAsync(a => a.Id == userId))
+            return ContestRole.Participant;
+
+        return NotFound();
+    }
+
     // PUT: api/Contests/5
     // To protect from overposting attacks, see https://go.microsoft.com/fwlink/?linkid=2123754
     [HttpPut("{id}")]

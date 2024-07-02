@@ -11,7 +11,7 @@ public class Problem
     /// </summary>
     public string Name { get; set; } = string.Empty;
 
-    public Guid OwnerId { get; set; }
+    public Guid OwnerId { get; set; } = Guid.NewGuid();
     public User Owner { get; set; } = null!;
 
     /// <summary>

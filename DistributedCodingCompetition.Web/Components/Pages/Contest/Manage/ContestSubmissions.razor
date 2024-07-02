@@ -17,6 +17,11 @@
     [Parameter]
     public Guid Id { get; set; }
 
+    [SupplyParameterFromQuery]
+    public int Page { get; set; } = 1;
+    [SupplyParameterFromQuery]
+    public int PageSize { get; set; } = 10;
+
     List<Submission> Submissions = [];
     Contest? contest;
 
@@ -30,7 +35,7 @@
 
     private async Task LoadAsync()
     {
-        var sub = ApiService.TryReadContestSubmissionsAsync(Id);
+        var sub = ApiService.TryReadContestSubmissionsAsync(Id, Page, PageSize);
         var cont = ApiService.TryReadContestAsync(Id);
         (var success, var submissions) = await sub;
         if (!success)
