@@ -122,7 +122,7 @@ public interface IApiService
     Task<(bool, Problem?)> TryReadProblemAsync(Guid id);
 
     /// <summary>
-    /// 
+    /// Read a problem by its name.
     /// </summary>
     /// <param name="problemId"></param>
     /// <returns></returns>

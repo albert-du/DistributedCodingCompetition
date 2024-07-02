@@ -8,21 +8,21 @@
 @inject NavigationManager NavigationManager
 @rendermode InteractiveServer
 
-<div class="sm:w-4/5 md:w-2/3 lg:w-1/2">
-    <h1>New Contest</h1>
+<div class="pb-24">
+    <h1 class="text-3xl">New Contest</h1>
     <EditForm Model=model OnValidSubmit="SubmitAsync">
         <label class="flex flex-col">
             <div class="pl-2">
                 Name
             </div>
-            <InputText class="w-64 px-2 py-1 ml-2 bg-gray-100 rounded-lg text-slate-800" id="Name" @bind-Value=model.Name />
+            <InputText class="w-1/2 px-2 py-1 ml-2 bg-gray-100 rounded-lg text-slate-800" id="Name" @bind-Value=model.Name />
         </label>
 
         <label class="flex flex-col">
             <div class="pl-2">
                 Description (<a href="https://www.markdownguide.org/" class="italic hover:underline">markdown</a> enabled)
             </div>
-            <InputTextArea class="w-64 px-2 py-1 ml-2 bg-gray-100 rounded-lg text-slate-800" id="Description" @bind-Value=model.Description />
+            <InputTextArea class="w-3/4 px-2 py-1 ml-2 bg-gray-100 rounded-lg min-h-96 text-slate-800" id="Description" @bind-Value=model.Description />
         </label>
 
         <label class="flex flex-col">
@@ -60,23 +60,21 @@
             <InputDate class="w-64 px-2 py-1 ml-2 bg-gray-100 rounded-lg text-slate-800" Type="InputDateType.Time" id="StartTime" @bind-Value=model.EndTime />
         </label>
 
-
-
         <div class="flex flex-col">
             <div class="pl-2">
                 Duration
             </div>
-            <div class="w-64 px-2 py-1 ml-2 bg-gray-100 rounded-lg text-slate-800">
-                @model.Duration
+            <div class="w-64 px-2 py-1 ml-2 rounded-lg bg-gray-50 text-slate-800">
+                @model.Duration.Days days, @model.Duration.Hours hours, @model.Duration.Minutes minutes
             </div>
         </div>
 
         <div class="flex flex-col">
             <div class="pl-2">
-                Starts in
+                Would starts in about
             </div>
-            <div class="w-64 px-2 py-1 ml-2 bg-gray-100 rounded-lg text-slate-800">
-                @Remaining
+            <div class="w-64 px-2 py-1 ml-2 rounded-lg bg-gray-50 text-slate-800">
+                @Remaining.Days days, @Remaining.Hours hours, @Remaining.Minutes minutes
             </div>
 
             <div>
@@ -86,6 +84,9 @@
 
         <button type="submit" class="px-4 py-2 mt-4 text-white bg-blue-500 rounded-lg">Submit</button>
         <DataAnnotationsValidator />
+        <div class="text-rose-500">
+            <ValidationSummary />
+        </div>
     </EditForm>
 </div>
 
@@ -98,13 +99,25 @@
     private DateTime EndUTC => model.End - offset;
     private TimeSpan Remaining => StartUTC - DateTime.UtcNow;
 
-
     protected override async Task OnAfterRenderAsync(bool firstRender)
     {
         if (!firstRender)
             return;
         offset = await TimeZoneProvider.GetTimeZoneOffsetAsync();
+        var adjusted = DateTime.UtcNow.Add(offset);
+        // zero out the seconds and milliseconds
+        adjusted = adjusted.AddSeconds(-adjusted.Second).AddMilliseconds(-adjusted.Millisecond);
+        model.StartDate = DateOnly.FromDateTime(adjusted);
+        model.StartTime = TimeOnly.FromDateTime(adjusted.AddHours(1));
+        model.EndDate = DateOnly.FromDateTime(adjusted.AddDays(1));
+        model.EndTime = TimeOnly.FromDateTime(adjusted.AddHours(1));
         await InvokeAsync(StateHasChanged);
+
+        using PeriodicTimer periodicTimer = new(TimeSpan.FromMinutes(1));
+        while (await periodicTimer.WaitForNextTickAsync())
+        {
+            await InvokeAsync(StateHasChanged);
+        }
     }
 
     class ContestModel
@@ -141,9 +154,9 @@
                 Name = model.Name,
                 Description = model.Description,
                 RenderedDescription = MarkdownRenderService.Render(model.Description),
-                StartTime = StartUTC,
-                EndTime = EndUTC,
-                Owner = user,
+                StartTime = StartUTC.ToUniversalTime(),
+                EndTime = EndUTC.ToUniversalTime(),
+                OwnerId = user.Id,
                 Active = true,
                 Open = false,
                 Public = false,

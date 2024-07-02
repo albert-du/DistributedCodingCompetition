@@ -17,7 +17,7 @@ public class ContestsController(ContestContext context) : ControllerBase
     [HttpGet("{id}")]
     public async Task<ActionResult<Contest>> GetContest(Guid id)
     {
-        var contest = await context.Contests.FindAsync(id);
+        var contest = await context.Contests.Include(c => c.Owner).FindAsync(id);
 
         return contest is null ? NotFound() : contest;
     }
@@ -103,10 +103,15 @@ public class ContestsController(ContestContext context) : ControllerBase
     [HttpPost]
     public async Task<ActionResult<Contest>> PostContest(Contest contest)
     {
+        // fill in owner with the current user based on the id from tracking
+        // var owner = await context.Users.FindAsync(contest.OwnerId);
+        // if (owner is null)
+        //     return BadRequest("Owner not found");
+        // contest.Owner = owner;
         context.Contests.Add(contest);
         await context.SaveChangesAsync();
 
-        return CreatedAtAction("GetContest", new { id = contest.Id }, contest);
+        return CreatedAtAction(nameof(GetContest), new { id = contest.Id }, contest);
     }
 
     // DELETE: api/Contests/5

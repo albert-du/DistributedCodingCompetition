@@ -42,7 +42,7 @@ public class Contest
     /// <summary>
     /// Owner of the contest
     /// </summary>
-    public User Owner { get; set; } = default!;
+    public User? Owner { get; set; }
 
     public Guid OwnerId { get; set; }
 

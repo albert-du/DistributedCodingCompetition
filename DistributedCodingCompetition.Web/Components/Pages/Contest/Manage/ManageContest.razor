@@ -267,7 +267,7 @@ else
             return;
         }
 
-        if (contest is null || contest.Owner.Id != user.Id)
+        if (contest is null || contest.OwnerId != user.Id)
         {
             NavigationManager.NavigateTo("/");
             return;

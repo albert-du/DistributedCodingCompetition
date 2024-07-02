@@ -89,16 +89,22 @@
             return;
         }
 
+        problem.Name = model.Name;
+        problem.Description = model.Description;
+        problem.Difficulty = model.Difficulty;
+        problem.TestCases = [..model.Testcases.Select(tc => new TestCase
+        {
+            Id = tc.Id,
+            Input = tc.Input,
+            Output = tc.Output,
+            Description = tc.Description,
+            Sample = tc.Sample,
+            Active = tc.Active,
+            Weight = tc.Weight
+        })];
 
+        (var success, _) = await ApiService.TryUpdateProblemAsync(problem);
 
-
-        // (var success, var probid) = await ApiService.TryUp(new()
-        //     {
-        //         Name = model.Name,
-        //         Description = model.Description,
-        //         Difficulty = string.IsNullOrWhiteSpace(model.Difficulty) ? null : model.Difficulty,
-        //         OwnerId = user.Id
-        //     });
         if (!success)
         {
             ModalService.ShowError("Failed to create problem", "Internal error");
@@ -137,6 +143,7 @@
                 Difficulty = prob.Difficulty ?? string.Empty,
                 Testcases = [..prob.TestCases.Select(tc => new TestcaseModel
                 {
+                    Id = tc.Id,
                     Input = tc.Input,
                     Output = tc.Output,
                     Description = tc.Description,
@@ -158,6 +165,7 @@
 
     class TestcaseModel
     {
+        public Guid Id { get; set; } = Guid.NewGuid();
         [Required(ErrorMessage = "Input is required")]
         public string Input { get; set; } = string.Empty;
         [Required(ErrorMessage = "Output is required")]

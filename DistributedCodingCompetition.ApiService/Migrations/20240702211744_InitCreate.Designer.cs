@@ -12,7 +12,7 @@ using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 namespace DistributedCodingCompetition.ApiService.Migrations
 {
     [DbContext(typeof(ContestContext))]
-    [Migration("20240702190823_InitCreate")]
+    [Migration("20240702211744_InitCreate")]
     partial class InitCreate
     {
         /// <inheritdoc />
