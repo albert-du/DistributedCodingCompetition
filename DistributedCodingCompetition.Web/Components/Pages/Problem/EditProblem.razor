@@ -15,15 +15,60 @@
 
 @page "/problem/{id:guid}/edit"
 @inject IUserStateService UserStateService
-<AuthCheck/>
+@inject NavigationManager NavigationManager
+@inject IModalService ModalService
+@inject IApiService ApiService
+@rendermode InteractiveServer
+<AuthCheck />
 
 
+<EditForm OnValidSubmit="SubmitAsync">
+
+    <div class="form-group">
+        <label for="Name">Name</label>
+        <InputText id="Name" class="form-control" @bind-Value="Model.Name" />
+    </div>
+
+    <div class="form-group">
+        <label for="Description">Description</label>
+        <InputText id="Description" class="form-control" @bind-Value="Model.Description" />
+    </div>
+
+    <div class="form-group">
+        <label for="Difficulty">Difficulty</label>
+        <InputText id="Difficulty" class="form-control" @bind-Value="Model.Difficulty" />
+    </div>
+    <div>You will create test cases on the next step.</div>
+    <button type="submit" class="btn btn-primary">Save</button>
+    <DataAnnotationsValidator />
+    <ValidationSummary />
+</EditForm>
 @code {
     [Parameter]
     public Guid Id { get; set; }
 
     ProblemModel Model = new();
-
+    async Task SubmitAsync()
+    {
+        var user = await UserStateService.UserAsync();
+        if (user is null)
+        {
+            return;
+        }
+        (var success, var probid) = await ApiService.TryCreateProblemAsync(new()
+            {
+                Name = Model.Name,
+                Description = Model.Description,
+                Difficulty = string.IsNullOrWhiteSpace(Model.Difficulty) ? null : Model.Difficulty,
+                OwnerId = user.Id
+            });
+        if (!success)
+        {
+            ModalService.ShowError("Failed to create problem", "Internal error");
+            return;
+        }
+        NavigationManager.NavigateTo($"problem/{probid}/edit");
+    }
     class ProblemModel
     {
         [Required(ErrorMessage = "Name is required")]
