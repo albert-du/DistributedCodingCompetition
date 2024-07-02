@@ -217,5 +217,18 @@ public class ApiService(HttpClient httpClient, ILogger<ApiService> logger) : IAp
         }
     }
 
-
+    public async Task<(bool, Guid?)> TryCreateContestAsync(Contest contest)
+    { 
+        try 
+        {
+            var response = await httpClient.PostAsJsonAsync("api/contests", contest);
+            response.EnsureSuccessStatusCode();
+            return (true, contest.Id);
+        }
+        catch (Exception ex)
+        {
+            logger.LogError(ex, "Failed to create contest");
+            return (false, null);
+        }
+    }
 }

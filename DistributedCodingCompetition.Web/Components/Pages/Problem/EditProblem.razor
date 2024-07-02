@@ -21,35 +21,54 @@
 @rendermode InteractiveServer
 <AuthCheck />
 
+@if (model is not null)
+{
+    <EditForm OnValidSubmit="SubmitAsync">
 
-<EditForm OnValidSubmit="SubmitAsync">
+        <div class="form-group">
+            <label for="Name">Name</label>
+            <InputText id="Name" class="form-control" @bind-Value="model.Name" />
+        </div>
 
-    <div class="form-group">
-        <label for="Name">Name</label>
-        <InputText id="Name" class="form-control" @bind-Value="Model.Name" />
-    </div>
+        <div class="form-group">
+            <label for="Description">Description</label>
+            <InputText id="Description" class="form-control" @bind-Value="model.Description" />
+        </div>
 
-    <div class="form-group">
-        <label for="Description">Description</label>
-        <InputText id="Description" class="form-control" @bind-Value="Model.Description" />
-    </div>
+        <div class="form-group">
+            <label for="Difficulty">Difficulty</label>
+            <InputText id="Difficulty" class="form-control" @bind-Value="model.Difficulty" />
+        </div>
+        @foreach (var testcase in TestCases)
+        {
+            <div class="form-group">
+                <label for="Input">Input</label>
+                <InputText id="Input" class="form-control" @bind-Value="testcase.Input" />
+            </div>
+            <div class="form-group">
+                <label for="Output">Output</label>
+                <InputText id="Output" class="form-control" @bind-Value="testcase.Output" />
+            </div>
 
-    <div class="form-group">
-        <label for="Difficulty">Difficulty</label>
-        <InputText id="Difficulty" class="form-control" @bind-Value="Model.Difficulty" />
-    </div>
-    <div>You will create test cases on the next step.</div>
-    <button type="submit" class="btn btn-primary">Save</button>
-    <DataAnnotationsValidator />
-    <ValidationSummary />
-</EditForm>
+        }
+
+        <button type="submit" class="btn btn-primary">Save</button>
+        <DataAnnotationsValidator />
+        <ValidationSummary />
+    </EditForm>
+}
 @code {
     [Parameter]
     public Guid Id { get; set; }
 
-    ProblemModel Model = new();
+    ProblemModel? model;
+    List<TestCase> TestCases = new();
     async Task SubmitAsync()
     {
+        if (model is null)
+        {
+            return;
+        }
         var user = await UserStateService.UserAsync();
         if (user is null)
         {
@@ -57,9 +76,9 @@
         }
         (var success, var probid) = await ApiService.TryCreateProblemAsync(new()
             {
-                Name = Model.Name,
-                Description = Model.Description,
-                Difficulty = string.IsNullOrWhiteSpace(Model.Difficulty) ? null : Model.Difficulty,
+                Name = model.Name,
+                Description = model.Description,
+                Difficulty = string.IsNullOrWhiteSpace(model.Difficulty) ? null : model.Difficulty,
                 OwnerId = user.Id
             });
         if (!success)
@@ -67,7 +86,7 @@
             ModalService.ShowError("Failed to create problem", "Internal error");
             return;
         }
-        NavigationManager.NavigateTo($"problem/{probid}/edit");
+        ModalService.ShowInfo("Problem saved", "");
     }
     class ProblemModel
     {
@@ -84,5 +103,9 @@
         public string Input { get; set; } = string.Empty;
         [Required(ErrorMessage = "Output is required")]
         public string Output { get; set; } = string.Empty;
+        public string Description { get; set; } = string.Empty;
+        public bool Sample { get; set; }
+        public bool Active { get; set; } = true;
+        public int Weight { get; set; } = 1;
     }
 }
