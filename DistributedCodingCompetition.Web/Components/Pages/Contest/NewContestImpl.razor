@@ -3,6 +3,9 @@
 @inject ITimeZoneProvider TimeZoneProvider
 @inject IUserStateService UserStateService
 @inject IMarkdownRenderService MarkdownRenderService
+@inject IApiService ApiService
+@inject IModalService ModalService
+@inject NavigationManager NavigationManager
 
 <div class="sm:w-4/5 md:w-2/3 lg:w-1/2">
     <h1>New Contest</h1>
@@ -20,7 +23,7 @@
             </div>
             <InputTextArea class="w-64 px-2 py-1 ml-2 bg-gray-100 rounded-lg text-slate-800" id="Description" @bind-Value=model.Description />
         </label>
-        
+
         <label class="flex flex-col">
             <div class="pl-2">
                 Minimim Age
@@ -109,7 +112,7 @@
         public string Name { get; set; } = string.Empty;
 
         public string Description { get; set; } = "# Description\n\n## Rules\n\n## Prizes\n\n## Scoring\n\n## Submission\n\n## Judging\n\n## FAQ\n\n";
-        
+
         [Required]
         public DateOnly StartDate { get; set; }
         [Required]
@@ -132,17 +135,25 @@
         if (user is null)
             return;
 
-        Contest contest = new()
+        (var success, var id) = await ApiService.TryCreateContestAsync(new()
+            {
+                Name = model.Name,
+                Description = model.Description,
+                RenderedDescription = MarkdownRenderService.Render(model.Description),
+                StartTime = StartUTC,
+                EndTime = EndUTC,
+                Owner = user,
+                Active = true,
+                Open = false,
+                Public = false,
+            });
+
+        if (!success)
         {
-            Name = model.Name,
-            Description = model.Description,
-            RenderedDescription = MarkdownRenderService.Render(model.Description),
-            StartTime = StartUTC,
-            EndTime = EndUTC,
-            Owner = user,
-            Active = true,
-            Open = false,
-            Public = false,
-        };
+            ModalService.ShowError("Failed to create contest", "Internal error");
+            return;
+        }
+
+        NavigationManager.NavigateTo($"contest/{id}/manage");
     }
 }

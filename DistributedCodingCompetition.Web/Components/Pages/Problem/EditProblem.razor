@@ -1,0 +1,43 @@
+@*
+    public Guid Id { get; set; }
+    public string Name { get; set; } = string.Empty;
+
+    public Guid OwnerId { get; set; }
+    public User Owner { get; set; } = null!;
+
+    public string Description { get; set; } = string.Empty;
+
+    public string RenderedDescription { get; set; } = string.Empty;
+
+    public string? Difficulty { get; set; }
+    public ICollection<TestCase> TestCases { get; set; } = [];
+*@
+
+@page "/problem/{id:guid}/edit"
+@inject IUserStateService UserStateService
+<AuthCheck/>
+
+
+@code {
+    [Parameter]
+    public Guid Id { get; set; }
+
+    ProblemModel Model = new();
+
+    class ProblemModel
+    {
+        [Required(ErrorMessage = "Name is required")]
+        public string Name { get; set; } = string.Empty;
+        public string Description { get; set; } = "# Title\n## Description\n## Input\n## Output\n## Explanation\n## Constraints";
+        public string Difficulty { get; set; } = string.Empty;
+        public List<TestcaseModel> Testcases { get; set; } = new();
+    }
+
+    class TestcaseModel
+    {
+        [Required(ErrorMessage = "Input is required")]
+        public string Input { get; set; } = string.Empty;
+        [Required(ErrorMessage = "Output is required")]
+        public string Output { get; set; } = string.Empty;
+    }
+}

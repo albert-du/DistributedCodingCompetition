@@ -1,11 +1,14 @@
 ﻿namespace DistributedCodingCompetition.ApiService.Models;
 
+/// <summary>
+/// Contest model
+/// </summary>
 public class Contest
 {
     /// <summary>
     /// Id of the contest
     /// </summary>
-    public Guid Id { get; set; }
+    public Guid Id { get; set; } = Guid.NewGuid();
     /// <summary>
     /// Name of the contest
     /// </summary>

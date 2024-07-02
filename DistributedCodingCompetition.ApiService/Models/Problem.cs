@@ -1,6 +1,4 @@
-﻿using System.ComponentModel;
-
-namespace DistributedCodingCompetition.ApiService.Models;
+﻿namespace DistributedCodingCompetition.ApiService.Models;
 
 public class Problem
 {
