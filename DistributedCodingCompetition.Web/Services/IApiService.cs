@@ -98,7 +98,7 @@ public interface IApiService
     /// </summary>
     /// <param name="problem"></param>
     /// <returns>success in reaching endpoint; null if doesn't exist</returns>
-    Task<(bool,Guid?)> TryCreateProblemAsync(Problem problem);
+    Task<(bool, Guid?)> TryCreateProblemAsync(Problem problem);
 
     /// <summary>
     /// Create a new contest
@@ -107,5 +107,24 @@ public interface IApiService
     /// <returns>success in reaching endpoint; null if doesn't exist</returns>
     Task<(bool, Guid?)> TryCreateContestAsync(Contest contest);
 
+    /// <summary>
+    /// Update Problem
+    /// </summary>
+    /// <param name="contest"></param>
+    /// <returns>success in reaching endpoint; null if doesn't exist></returns>
+    Task<(bool, Problem?)> TryUpdateProblemAsync(Problem contest);
 
+    /// <summary>
+    /// Read a problem by its ID.
+    /// </summary>
+    /// <param name="id"></param>
+    /// <returns></returns>
+    Task<(bool, Problem?)> TryReadProblemAsync(Guid id);
+
+    /// <summary>
+    /// 
+    /// </summary>
+    /// <param name="problemId"></param>
+    /// <returns></returns>
+    Task<(bool, IReadOnlyList<TestCase>?)> TryReadProblemTestCases(Guid problemId);
 }

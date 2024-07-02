@@ -22,6 +22,15 @@ public class ProblemsController(ContestContext context) : ControllerBase
         return problem == null ? NotFound() : problem;
     }
 
+    // GET: api/Problems/5/testcases
+    [HttpGet("{id}/testcases")]
+    public async Task<ActionResult<IReadOnlyList<TestCase>>> GetTestCases(Guid id) =>
+        await context.Problems
+            .Include(p => p.TestCases)
+            .Where(p => p.Id == id)
+            .SelectMany(p => p.TestCases)
+            .ToListAsync();
+
     // PUT: api/Problems/5
     // To protect from overposting attacks, see https://go.microsoft.com/fwlink/?linkid=2123754
     [HttpPut("{id}")]

@@ -218,8 +218,8 @@ public class ApiService(HttpClient httpClient, ILogger<ApiService> logger) : IAp
     }
 
     public async Task<(bool, Guid?)> TryCreateContestAsync(Contest contest)
-    { 
-        try 
+    {
+        try
         {
             var response = await httpClient.PostAsJsonAsync("api/contests", contest);
             response.EnsureSuccessStatusCode();
@@ -228,6 +228,55 @@ public class ApiService(HttpClient httpClient, ILogger<ApiService> logger) : IAp
         catch (Exception ex)
         {
             logger.LogError(ex, "Failed to create contest");
+            return (false, null);
+        }
+    }
+
+    public async Task<(bool, Problem?)> TryUpdateProblemAsync(Problem contest)
+    {
+        try
+        {
+            var response = await httpClient.PutAsJsonAsync($"api/problems/{contest.Id}", contest);
+            response.EnsureSuccessStatusCode();
+            return (true, contest);
+        }
+        catch (Exception ex)
+        {
+            logger.LogError(ex, "Failed to update problem");
+            return (false, null);
+        }
+    }
+
+    public async Task<(bool, Problem?)> TryReadProblemAsync(Guid id)
+    {
+        try
+        {
+            var response = await httpClient.GetAsync($"api/problems/{id}");
+            if (response.StatusCode == HttpStatusCode.NotFound)
+                return (true, null);
+            response.EnsureSuccessStatusCode();
+            return (true, await response.Content.ReadFromJsonAsync<Problem>());
+        }
+        catch (Exception ex)
+        {
+            logger.LogError(ex, "Failed to fetch problem by id");
+            return (false, null);
+        }
+    }
+
+    public async Task<(bool, IReadOnlyList<TestCase>?)> TryReadProblemTestCases(Guid problemId)
+    {
+        try
+        {
+            var response = await httpClient.GetAsync($"api/problems/{problemId}/testcases");
+            if (response.StatusCode == HttpStatusCode.NotFound)
+                return (true, null);
+            response.EnsureSuccessStatusCode();
+            return (true, await response.Content.ReadFromJsonAsync<IReadOnlyList<TestCase>>());
+        }
+        catch (Exception ex)
+        {
+            logger.LogError(ex, "Failed to fetch problem test cases");
             return (false, null);
         }
     }

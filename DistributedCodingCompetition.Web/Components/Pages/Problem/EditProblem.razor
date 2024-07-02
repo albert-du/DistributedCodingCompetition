@@ -18,6 +18,7 @@
 @inject NavigationManager NavigationManager
 @inject IModalService ModalService
 @inject IApiService ApiService
+@inject IMarkdownRenderService MarkdownRenderService
 @rendermode InteractiveServer
 <AuthCheck />
 
@@ -78,27 +79,26 @@
 @code {
     [Parameter]
     public Guid Id { get; set; }
-
+    Problem? problem;
     ProblemModel? model;
     List<TestCase> TestCases = new();
     async Task SubmitAsync()
     {
-        if (model is null)
+        if (model is null || problem is null)
         {
             return;
         }
-        var user = await UserStateService.UserAsync();
-        if (user is null)
-        {
-            return;
-        }
-        (var success, var probid) = await ApiService.TryCreateProblemAsync(new()
-            {
-                Name = model.Name,
-                Description = model.Description,
-                Difficulty = string.IsNullOrWhiteSpace(model.Difficulty) ? null : model.Difficulty,
-                OwnerId = user.Id
-            });
+
+
+
+
+        // (var success, var probid) = await ApiService.TryUp(new()
+        //     {
+        //         Name = model.Name,
+        //         Description = model.Description,
+        //         Difficulty = string.IsNullOrWhiteSpace(model.Difficulty) ? null : model.Difficulty,
+        //         OwnerId = user.Id
+        //     });
         if (!success)
         {
             ModalService.ShowError("Failed to create problem", "Internal error");
@@ -106,6 +106,47 @@
         }
         ModalService.ShowInfo("Problem saved", "");
     }
+
+    protected override async Task OnInitializedAsync()
+    {
+        var user = await UserStateService.UserAsync();
+        if (user is null)
+        {
+            return;
+        }
+        (var success, var prob) = await ApiService.TryReadProblemAsync(Id);
+        if (!success)
+        {
+            ModalService.ShowError("Failed to load problem", "Internal error");
+            return;
+        }
+
+        if (prob is null)
+        {
+            ModalService.ShowError("Problem not found", "404");
+            return;
+        }
+
+        (success, var cases) = await ApiService.TryReadProblemTestCases(Id);
+
+        problem = prob;
+        model = new()
+            {
+                Name = prob.Name,
+                Description = prob.Description,
+                Difficulty = prob.Difficulty ?? string.Empty,
+                Testcases = [..prob.TestCases.Select(tc => new TestcaseModel
+                {
+                    Input = tc.Input,
+                    Output = tc.Output,
+                    Description = tc.Description,
+                    Sample = tc.Sample,
+                    Active = tc.Active,
+                    Weight = tc.Weight
+                })]
+            };
+    }
+
     class ProblemModel
     {
         [Required(ErrorMessage = "Name is required")]
