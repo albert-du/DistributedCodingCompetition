@@ -37,6 +37,8 @@
 {
     <h1>@(model.Name)</h1>
     <h2>@(contest.Id)</h2>
+    <div>Owner: @contest.Owner.Username</div>
+
     <EditForm Model=model OnValidSubmit="SubmitAsync">
         <label class="flex flex-col">
             <div class="pl-2">
