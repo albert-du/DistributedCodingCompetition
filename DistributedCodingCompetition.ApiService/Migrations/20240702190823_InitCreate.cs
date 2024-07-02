@@ -12,7 +12,7 @@ namespace DistributedCodingCompetition.ApiService.Migrations
         protected override void Up(MigrationBuilder migrationBuilder)
         {
             migrationBuilder.CreateTable(
-                name: "Ban",
+                name: "Bans",
                 columns: table => new
                 {
                     Id = table.Column<Guid>(type: "uuid", nullable: false),
@@ -25,7 +25,7 @@ namespace DistributedCodingCompetition.ApiService.Migrations
                 },
                 constraints: table =>
                 {
-                    table.PrimaryKey("PK_Ban", x => x.Id);
+                    table.PrimaryKey("PK_Bans", x => x.Id);
                 });
 
             migrationBuilder.CreateTable(
@@ -42,11 +42,31 @@ namespace DistributedCodingCompetition.ApiService.Migrations
                     OwnerId = table.Column<Guid>(type: "uuid", nullable: false),
                     Public = table.Column<bool>(type: "boolean", nullable: false),
                     Open = table.Column<bool>(type: "boolean", nullable: false),
-                    MinimumAge = table.Column<int>(type: "integer", nullable: false)
+                    MinimumAge = table.Column<int>(type: "integer", nullable: false),
+                    DefaultPointsForProblem = table.Column<int>(type: "integer", nullable: false)
                 },
                 constraints: table =>
                 {
                     table.PrimaryKey("PK_Contests", x => x.Id);
+                });
+
+            migrationBuilder.CreateTable(
+                name: "ProblemPointValue",
+                columns: table => new
+                {
+                    Id = table.Column<Guid>(type: "uuid", nullable: false),
+                    ProblemId = table.Column<Guid>(type: "uuid", nullable: false),
+                    Points = table.Column<int>(type: "integer", nullable: false),
+                    ContestId = table.Column<Guid>(type: "uuid", nullable: true)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_ProblemPointValue", x => x.Id);
+                    table.ForeignKey(
+                        name: "FK_ProblemPointValue_Contests_ContestId",
+                        column: x => x.ContestId,
+                        principalTable: "Contests",
+                        principalColumn: "Id");
                 });
 
             migrationBuilder.CreateTable(
@@ -268,13 +288,13 @@ namespace DistributedCodingCompetition.ApiService.Migrations
                 });
 
             migrationBuilder.CreateIndex(
-                name: "IX_Ban_IssuerId",
-                table: "Ban",
+                name: "IX_Bans_IssuerId",
+                table: "Bans",
                 column: "IssuerId");
 
             migrationBuilder.CreateIndex(
-                name: "IX_Ban_UserId",
-                table: "Ban",
+                name: "IX_Bans_UserId",
+                table: "Bans",
                 column: "UserId",
                 unique: true);
 
@@ -313,6 +333,11 @@ namespace DistributedCodingCompetition.ApiService.Migrations
                 name: "IX_JoinCodes_CreatorId",
                 table: "JoinCodes",
                 column: "CreatorId");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_ProblemPointValue_ContestId",
+                table: "ProblemPointValue",
+                column: "ContestId");
 
             migrationBuilder.CreateIndex(
                 name: "IX_Problems_ContestId",
@@ -372,15 +397,15 @@ namespace DistributedCodingCompetition.ApiService.Migrations
                 unique: true);
 
             migrationBuilder.AddForeignKey(
-                name: "FK_Ban_Users_IssuerId",
-                table: "Ban",
+                name: "FK_Bans_Users_IssuerId",
+                table: "Bans",
                 column: "IssuerId",
                 principalTable: "Users",
                 principalColumn: "Id");
 
             migrationBuilder.AddForeignKey(
-                name: "FK_Ban_Users_UserId",
-                table: "Ban",
+                name: "FK_Bans_Users_UserId",
+                table: "Bans",
                 column: "UserId",
                 principalTable: "Users",
                 principalColumn: "Id",
@@ -438,7 +463,7 @@ namespace DistributedCodingCompetition.ApiService.Migrations
                 table: "JoinCodes");
 
             migrationBuilder.DropTable(
-                name: "Ban");
+                name: "Bans");
 
             migrationBuilder.DropTable(
                 name: "ContestUser");
@@ -448,6 +473,9 @@ namespace DistributedCodingCompetition.ApiService.Migrations
 
             migrationBuilder.DropTable(
                 name: "ContestUser2");
+
+            migrationBuilder.DropTable(
+                name: "ProblemPointValue");
 
             migrationBuilder.DropTable(
                 name: "TestCaseResults");

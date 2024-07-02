@@ -41,13 +41,31 @@
         </div>
         @foreach (var testcase in TestCases)
         {
-            <div class="form-group">
-                <label for="Input">Input</label>
-                <InputText id="Input" class="form-control" @bind-Value="testcase.Input" />
-            </div>
-            <div class="form-group">
-                <label for="Output">Output</label>
-                <InputText id="Output" class="form-control" @bind-Value="testcase.Output" />
+            <div class="flex justify-between">
+                <div class="form-group">
+                    <label for="Input">Input</label>
+                    <InputTextArea id="Input" class="form-control" @bind-Value="testcase.Input" />
+                </div>
+                <div class="form-group">
+                    <label for="Output">Output</label>
+                    <InputTextArea id="Output" class="form-control" @bind-Value="testcase.Output" />
+                </div>
+                <div class="form-group">
+                    <label for="Output">Description (not shown to participants)</label>
+                    <InputText id="Output" class="form-control" @bind-Value="testcase.Description" />
+                </div>
+                <div>
+                    <label for="Sample">Sample</label>
+                    <InputCheckbox id="Sample" class="form-control" @bind-Value="testcase.Sample" />
+                </div>
+                <div>
+                    <label for="Active">Active</label>
+                    <InputCheckbox id="Active" class="form-control" @bind-Value="testcase.Active" />
+                </div>
+                <div>
+                    <label for="Weight">Weight</label>
+                    <InputNumber id="Weight" class="form-control" @bind-Value="testcase.Weight" />
+                </div>
             </div>
 
         }

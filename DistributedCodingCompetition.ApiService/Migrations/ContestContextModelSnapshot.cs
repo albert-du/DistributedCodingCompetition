@@ -99,7 +99,7 @@ namespace DistributedCodingCompetition.ApiService.Migrations
                     b.HasIndex("UserId")
                         .IsUnique();
 
-                    b.ToTable("Ban");
+                    b.ToTable("Bans");
                 });
 
             modelBuilder.Entity("DistributedCodingCompetition.ApiService.Models.Contest", b =>
@@ -110,6 +110,9 @@ namespace DistributedCodingCompetition.ApiService.Migrations
 
                     b.Property<bool>("Active")
                         .HasColumnType("boolean");
+
+                    b.Property<int>("DefaultPointsForProblem")
+                        .HasColumnType("integer");
 
                     b.Property<string>("Description")
                         .IsRequired()
@@ -229,6 +232,28 @@ namespace DistributedCodingCompetition.ApiService.Migrations
                     b.HasIndex("OwnerId");
 
                     b.ToTable("Problems");
+                });
+
+            modelBuilder.Entity("DistributedCodingCompetition.ApiService.Models.ProblemPointValue", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uuid");
+
+                    b.Property<Guid?>("ContestId")
+                        .HasColumnType("uuid");
+
+                    b.Property<int>("Points")
+                        .HasColumnType("integer");
+
+                    b.Property<Guid>("ProblemId")
+                        .HasColumnType("uuid");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("ContestId");
+
+                    b.ToTable("ProblemPointValue");
                 });
 
             modelBuilder.Entity("DistributedCodingCompetition.ApiService.Models.Submission", b =>
@@ -487,6 +512,13 @@ namespace DistributedCodingCompetition.ApiService.Migrations
                     b.Navigation("Owner");
                 });
 
+            modelBuilder.Entity("DistributedCodingCompetition.ApiService.Models.ProblemPointValue", b =>
+                {
+                    b.HasOne("DistributedCodingCompetition.ApiService.Models.Contest", null)
+                        .WithMany("CustomProblemPointValues")
+                        .HasForeignKey("ContestId");
+                });
+
             modelBuilder.Entity("DistributedCodingCompetition.ApiService.Models.Submission", b =>
                 {
                     b.HasOne("DistributedCodingCompetition.ApiService.Models.Contest", null)
@@ -549,6 +581,8 @@ namespace DistributedCodingCompetition.ApiService.Migrations
 
             modelBuilder.Entity("DistributedCodingCompetition.ApiService.Models.Contest", b =>
                 {
+                    b.Navigation("CustomProblemPointValues");
+
                     b.Navigation("JoinCodes");
 
                     b.Navigation("Problems");

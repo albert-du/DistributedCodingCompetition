@@ -1,6 +1,7 @@
 ﻿namespace DistributedCodingCompetition.ApiService.Models;
 
 using Microsoft.EntityFrameworkCore;
+using System.Text.Json;
 
 public class ContestContext(DbContextOptions<ContestContext> options) : DbContext(options)
 {
@@ -11,6 +12,8 @@ public class ContestContext(DbContextOptions<ContestContext> options) : DbContex
     public DbSet<JoinCode> JoinCodes => Set<JoinCode>();
     public DbSet<TestCase> TestCases => Set<TestCase>();
     public DbSet<TestCaseResult> TestCaseResults => Set<TestCaseResult>();
+    public DbSet<Ban> Bans => Set<Ban>();
+    public ProblemPointValue ProblemPointValues { get; set; }
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {

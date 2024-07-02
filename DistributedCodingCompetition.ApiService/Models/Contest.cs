@@ -13,7 +13,7 @@ public class Contest
     /// Name of the contest
     /// </summary>
     public string Name { get; set; } = string.Empty;
-    
+
     /// <summary>
     /// Description of the contest in markdown
     /// </summary>
@@ -50,17 +50,17 @@ public class Contest
     /// Problems in the contest
     /// </summary>
     public ICollection<Problem> Problems { get; set; } = [];
-    
+
     /// <summary>
     /// Problem count
     /// </summary>
     public int ProblemsCount => Problems.Count;
-    
+
     /// <summary>
     /// Participants in the contest
     /// </summary>
     public ICollection<User> Participants { get; set; } = [];
-    
+
     /// <summary>
     /// Number of participants
     /// </summary>
@@ -70,7 +70,7 @@ public class Contest
     /// Administrators of the contest
     /// </summary>
     public ICollection<User> Administrators { get; set; } = [];
-    
+
     /// <summary>
     /// Number of administrators
     /// </summary>
@@ -80,7 +80,7 @@ public class Contest
     /// Banned users from the contest
     /// </summary>
     public ICollection<User> Banned { get; set; } = [];
-    
+
     /// <summary>
     /// Number of banned users
     /// </summary>
@@ -90,7 +90,7 @@ public class Contest
     /// Submissions in the contest
     /// </summary>
     public ICollection<Submission> Submissions { get; set; } = [];
-    
+
     /// <summary>
     /// Number of submissions
     /// </summary>
@@ -100,7 +100,7 @@ public class Contest
     /// Join codes for the contest
     /// </summary>
     public ICollection<JoinCode> JoinCodes { get; set; } = [];
-    
+
     /// <summary>
     /// Number of join codes
     /// </summary>
@@ -120,4 +120,14 @@ public class Contest
     /// Minimum age to participate in the contest Age <= MinimumAge
     /// </summary>
     public int MinimumAge { get; set; }
+
+    /// <summary>
+    /// The default number of points to assign for a problem.
+    /// </summary>
+    public int DefaultPointsForProblem { get; set; } = 100;
+
+    /// <summary>
+    /// The number of points to assign for a problem
+    /// </summary>
+    public ICollection<ProblemPointValue> CustomProblemPointValues { get; set; } = [];
 }
