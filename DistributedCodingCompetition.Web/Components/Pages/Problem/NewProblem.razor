@@ -3,8 +3,6 @@
 <AuthCheck />
 
 <EditForm>
-    <DataAnnotationsValidator />
-    <ValidationSummary />
 
     <div class="form-group">
         <label for="Name">Name</label>
@@ -17,18 +15,21 @@
     </div>
 
     <button type="submit" class="btn btn-primary">Create</button>
+    <DataAnnotationsValidator />
+    <ValidationSummary />
 </EditForm>
 
 @code {
-    asycn Task SubmitAsync()
+    async Task SubmitAsync()
     {
-        Problem problem = new Problem
-        {
-            Name = Model.Name,
-            Description = Model.Description
-        };
-        ApiService.Create
+        await ApiService.TryCreateProblemAsync(new()
+            {
+                Name = Model.Name,
+                Description = Model.Description
+            });
     }
+
+    ProblemModel Model = new();
 
     class ProblemModel
     {

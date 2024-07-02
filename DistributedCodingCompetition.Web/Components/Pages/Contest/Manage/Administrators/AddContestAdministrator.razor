@@ -4,7 +4,7 @@ public ICollection<User> Administrators { get; set; } = [];
 
 @page "/contest/{id:guid}/manage/administrators/add"
 @inject IApiService ApiService
-<AuthCheck />
+<AuthCheck Contest=Id Admin />
 
 <PageTitle>Add Contest Administrator</PageTitle>
 

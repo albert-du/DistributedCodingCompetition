@@ -22,6 +22,44 @@ public class ContestsController(ContestContext context) : ControllerBase
         return contest is null ? NotFound() : contest;
     }
 
+    // GET: api/contests/joincode/{code}
+    [HttpGet("joincode/{code}")]
+    public async Task<ActionResult<Contest>> GetContestByJoinCode(string code)
+    {
+        var contest = await context.JoinCodes
+            .Where(jc => jc.Code == code)
+            .Select(jc => jc.Contest)
+            .FirstOrDefaultAsync();
+
+        return contest is null ? NotFound() : contest;
+    }
+
+    [HttpGet("{contestId}/admins")]
+    public async Task<ActionResult<IReadOnlyList<User>>> GetContestAdmins(Guid contestId)
+    {
+        var contest = await context.Contests
+            .Include(c => c.Administrators)
+            .Where(c => c.Id == contestId)
+            .FirstOrDefaultAsync();
+
+        var admins = contest?.Administrators;
+
+        return admins is null ? NotFound() : admins.ToList();
+    }
+
+    [HttpGet("{contestId}/joincodes")]
+    public async Task<ActionResult<IReadOnlyList<JoinCode>>> GetJoinCodes(Guid contestId)
+    {
+        var contest = await context.Contests
+            .Include(c => c.JoinCodes)
+            .Where(c => c.Id == contestId)
+            .FirstOrDefaultAsync();
+
+        var joinCodes = contest?.JoinCodes;
+
+        return joinCodes is null ? NotFound() : joinCodes.ToList();
+    }
+
     // PUT: api/Contests/5
     // To protect from overposting attacks, see https://go.microsoft.com/fwlink/?linkid=2123754
     [HttpPut("{id}")]
@@ -47,6 +85,7 @@ public class ContestsController(ContestContext context) : ControllerBase
         return NoContent();
     }
 
+
     // POST: api/Contests
     // To protect from overposting attacks, see https://go.microsoft.com/fwlink/?linkid=2123754
     [HttpPost]
@@ -71,6 +110,16 @@ public class ContestsController(ContestContext context) : ControllerBase
 
         return NoContent();
     }
+
+    // GET api/contests/{contestId}/submissions
+    [HttpGet("{contestId}/submissions")]
+    public async Task<ActionResult<IReadOnlyList<Submission>>> GetContestSubmissions(Guid contestId, int count, int page) =>
+        await context.Submissions
+            .Where(s => s.ContestId == contestId)
+            .OrderByDescending(s => s.SubmissionTime)
+            .Skip(count * page)
+            .Take(count)
+            .ToListAsync();
 
     private bool ContestExists(Guid id) =>
         context.Contests.Any(e => e.Id == id);

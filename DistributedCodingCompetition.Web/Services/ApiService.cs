@@ -87,39 +87,113 @@ public class ApiService(HttpClient httpClient, ILogger<ApiService> logger) : IAp
         }
     }
 
-    public Task<(bool, Contest?)> TryReadContestByJoinCodeAsync(string code)
+    public Task<bool> TryCreateProblemAsync(Problem problem)
     {
         throw new NotImplementedException();
     }
 
-    public Task<(bool, Contest?)> TryReadContestAsync(Guid id)
+    public async Task<(bool, Contest?)> TryReadContestByJoinCodeAsync(string code)
     {
-        throw new NotImplementedException();
+        try
+        {
+            var response = await httpClient.GetAsync($"api/contests/joincode/{code}");
+            if (response.StatusCode == HttpStatusCode.NotFound)
+                return (true, null);
+            response.EnsureSuccessStatusCode();
+            return (true, await response.Content.ReadFromJsonAsync<Contest>());
+        }
+        catch (Exception ex)
+        {
+            logger.LogError(ex, "Failed to fetch contest by join code");
+            return (false, null);
+        }
     }
 
-
-    public Task<(bool, IReadOnlyList<User>?)> TryReadContestAdminsAsync(Guid contestId)
+    public async Task<(bool, Contest?)> TryReadContestAsync(Guid id)
     {
-        throw new NotImplementedException();
+        try
+        {
+            var response = await httpClient.GetAsync($"api/contests/{id}");
+            if (response.StatusCode == HttpStatusCode.NotFound)
+                return (true, null);
+            response.EnsureSuccessStatusCode();
+            return (true, await response.Content.ReadFromJsonAsync<Contest>());
+        }
+        catch (Exception ex)
+        {
+            logger.LogError(ex, "Failed to fetch contest by id");
+            return (false, null);
+        }
     }
 
-    public Task<(bool, IReadOnlyList<JoinCode>?)> TryReadJoinCodesAsync(Guid contestId)
+    public async Task<(bool, IReadOnlyList<User>?)> TryReadContestAdminsAsync(Guid contestId)
     {
-        throw new NotImplementedException();
+        try
+        {
+            var response = await httpClient.GetAsync($"api/contests/{contestId}/admins");
+            if (response.StatusCode == HttpStatusCode.NotFound)
+                return (true, null);
+            response.EnsureSuccessStatusCode();
+            return (true, await response.Content.ReadFromJsonAsync<IReadOnlyList<User>>());
+        }
+        catch (Exception ex)
+        {
+            logger.LogError(ex, "Failed to fetch contest admins");
+            return (false, null);
+        }
     }
 
-    public Task<(bool, Contest?)> TryUpdateContestAsync(Contest contest)
+    public async Task<(bool, IReadOnlyList<JoinCode>?)> TryReadJoinCodesAsync(Guid contestId)
     {
-        throw new NotImplementedException();
+        try
+        {
+            var response = await httpClient.GetAsync($"api/contests/{contestId}/joincodes");
+            if (response.StatusCode == HttpStatusCode.NotFound)
+                return (true, null);
+            response.EnsureSuccessStatusCode();
+            return (true, await response.Content.ReadFromJsonAsync<IReadOnlyList<JoinCode>>());
+        }
+        catch (Exception ex)
+        {
+            logger.LogError(ex, "Failed to fetch join codes");
+            return (false, null);
+        }
     }
 
-    public Task<(bool, IReadOnlyList<Submission>?)> TryReadContestSubmissionsAsync(Guid contestId)
+    public async Task<(bool, IReadOnlyList<Submission>?)> TryReadContestSubmissionsAsync(Guid contestId, int count, int page)
     {
-        throw new NotImplementedException();
+        try
+        {
+            var response = await httpClient.GetAsync($"api/contests/{contestId}/submissions?count={count}&page={page}");
+            response.EnsureSuccessStatusCode();
+            return (true, await response.Content.ReadFromJsonAsync<IReadOnlyList<Submission>>());
+        }
+        catch (Exception ex)
+        {
+            logger.LogError(ex, "Failed to fetch contest submissions");
+            return (false, null);
+        }
     }
 
     public Task<(bool, ContestRole?)> TryReadUserContestRoleAsync(Guid contestId, Guid userId)
     {
         throw new NotImplementedException();
     }
+
+    public async Task<(bool, Contest?)> TryUpdateContestAsync(Contest contest)
+    {
+        try
+        {
+            var response = await httpClient.PutAsJsonAsync($"api/contests/{contest.Id}", contest);
+            response.EnsureSuccessStatusCode();
+            return (true, contest);
+        }
+        catch (Exception ex)
+        {
+            logger.LogError(ex, "Failed to update contest");
+            return (false, null);
+        }
+    }
+
+
 }

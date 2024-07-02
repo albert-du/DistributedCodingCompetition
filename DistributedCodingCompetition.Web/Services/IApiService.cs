@@ -3,7 +3,7 @@
 using DistributedCodingCompetition.ApiService.Models;
 
 /// <summary>
-/// 
+/// API service for interacting with the contest API service.
 /// </summary>
 public interface IApiService
 {
@@ -19,6 +19,7 @@ public interface IApiService
     Task<(bool, IReadOnlyList<JoinCode>?)> TryReadJoinCodesAsync(Guid contestId);
     Task<(bool, IReadOnlyList<User>?)> TryReadContestAdminsAsync(Guid contestId);
     Task<(bool, Contest?)> TryUpdateContestAsync(Contest contest);
-    Task<(bool, IReadOnlyList<Submission>?)> TryReadContestSubmissionsAsync(Guid contestId);
+    Task<(bool, IReadOnlyList<Submission>?)> TryReadContestSubmissionsAsync(Guid contestId, int count, int page);
     Task<(bool, ContestRole?)> TryReadUserContestRoleAsync(Guid contestId, Guid userId);
+    Task<bool> TryCreateProblemAsync(Problem problem);
 }

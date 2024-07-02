@@ -1,2 +1,8 @@
 @page "/problem/{id:guid}/edit"
 <AuthCheck/>
+
+
+@code {
+    [Parameter]
+    public Guid Id { get; set; }
+}
