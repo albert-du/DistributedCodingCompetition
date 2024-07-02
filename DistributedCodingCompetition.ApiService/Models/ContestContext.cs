@@ -13,7 +13,7 @@ public class ContestContext(DbContextOptions<ContestContext> options) : DbContex
     public DbSet<TestCase> TestCases => Set<TestCase>();
     public DbSet<TestCaseResult> TestCaseResults => Set<TestCaseResult>();
     public DbSet<Ban> Bans => Set<Ban>();
-    public ProblemPointValue ProblemPointValues { get; set; }
+    public DbSet<ProblemPointValue> ProblemPointValues => Set<ProblemPointValue>();
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {

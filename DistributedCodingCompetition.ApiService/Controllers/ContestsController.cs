@@ -72,6 +72,26 @@ public class ContestsController(ContestContext context) : ControllerBase
         return NotFound();
     }
 
+    // GET api/contests/{contestId}/banned?count={count}&page={page}
+    [HttpGet("{contestId}/banned")]
+    public async Task<ActionResult<IReadOnlyList<User>>> GetContestBannedUsers(Guid contestId, int count, int page) =>
+        await context.Contests
+            .Where(c => c.Id == contestId)
+            .SelectMany(c => c.Banned)
+            .Skip(count * page)
+            .Take(count)
+            .ToListAsync();
+
+    // GET api/contests/{contestId}/participants?count={count}&page={page}
+    [HttpGet("{contestId}/participants")]
+    public async Task<ActionResult<IReadOnlyList<User>>> GetContestParticipants(Guid contestId, int count, int page) =>
+        await context.Contests
+            .Where(c => c.Id == contestId)
+            .SelectMany(c => c.Participants)
+            .Skip(count * page)
+            .Take(count)
+            .ToListAsync();
+
     [HttpPut("{contestId}/role/{userId}")]
     public async Task<IActionResult> UpdateUserContestRole(Guid contestId, Guid userId, ContestRole role)
     {

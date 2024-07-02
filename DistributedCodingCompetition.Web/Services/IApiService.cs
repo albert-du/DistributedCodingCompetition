@@ -128,5 +128,32 @@ public interface IApiService
     /// <returns></returns>
     Task<(bool, IReadOnlyList<TestCase>?)> TryReadProblemTestCases(Guid problemId);
 
+    /// <summary>
+    /// Updates a user's status within a contest
+    /// </summary>
+    /// <param name="contestId"></param>
+    /// <param name="userId"></param>
+    /// <param name="role"></param>
+    /// <returns></returns>
     Task<bool> TryUpdateUserContestRoleAsync(Guid contestId, Guid userId, ContestRole role);
+
+    /// <summary>
+    /// Read a contest's participants.
+    /// </summary>
+    /// <param name="contestId"></param>
+    /// <param name="count"></param>
+    /// <param name="page">start at 1</param>
+    /// <returns></returns>
+    Task<(bool, IReadOnlyList<User>?) > TryReadContestParticipantsAsync(Guid contestId, int count, int page);
+    
+    /// <summary>
+    /// Read a contest's banned users.
+    /// </summary>
+    /// <param name="contestId"></param>
+    /// <param name="count"></param>
+    /// <param name="page"></param>
+    /// <returns></returns>
+    Task<(bool, IReadOnlyList<User>?) > TryReadContestBannedAsync(Guid contestId, int count, int page);
+
+    Task<(bool, IReadOnlyList<Contest>?)> TryReadUserAdministratedContestsAsync(Guid userId, int count, int page);
 }

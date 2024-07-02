@@ -40,6 +40,16 @@ public class UsersController(ContestContext context) : ControllerBase
         return user is null ? NotFound() : user;
     }
 
+    // GET: api/users/{userId}/administered?count={count}&page={page}
+    [HttpGet("{userId}/administered")]
+    public async Task<ActionResult<IEnumerable<Contest>>> GetAdministeredContests(Guid userId, int count = 10, int page = 1) =>
+        await context.Users.Where(user => user.Id == userId)
+            .SelectMany(user => user.AdministeredContests)
+            .OrderByDescending(contest => contest.StartTime)
+            .Skip(count * (page - 1))
+            .Take(count)
+            .ToListAsync();
+
     // PUT: api/Users/5
     // To protect from overposting attacks, see https://go.microsoft.com/fwlink/?linkid=2123754
     [HttpPut("{id}")]

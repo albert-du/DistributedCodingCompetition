@@ -1,6 +1,8 @@
 @page "/contest/new"
 @inject IOptions<ContestOptions> ContestOptions
 
+<PageTitle>New Contest</PageTitle>
+
 @if (ContestOptions.Value.OpenCreation)
 {
     <AuthCheck />

@@ -163,7 +163,7 @@
                 MinimumAge = model.MinAge
             });
 
-        if (!success)
+        if (!success || id is null)
         {
             ModalService.ShowError("Failed to create contest", "Internal error");
             return;
