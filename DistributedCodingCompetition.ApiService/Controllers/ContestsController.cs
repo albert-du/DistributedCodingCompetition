@@ -17,7 +17,7 @@ public class ContestsController(ContestContext context) : ControllerBase
     [HttpGet("{id}")]
     public async Task<ActionResult<Contest>> GetContest(Guid id)
     {
-        var contest = await context.Contests.Include(c => c.Owner).FindAsync(id);
+        var contest = await context.Contests.FindAsync(id);
 
         return contest is null ? NotFound() : contest;
     }
@@ -70,6 +70,36 @@ public class ContestsController(ContestContext context) : ControllerBase
             return ContestRole.Participant;
 
         return NotFound();
+    }
+
+    [HttpPut("{contestId}/role/{userId}")]
+    public async Task<IActionResult> UpdateUserContestRole(Guid contestId, Guid userId, ContestRole role)
+    {
+        var contest = await context.Contests.FindAsync(contestId);
+        if (contest is null)
+            return NotFound();
+
+        var user = await context.Users.FindAsync(userId);
+        if (user is null)
+            return NotFound();
+
+        switch (role)
+        {
+            case ContestRole.Admin:
+                contest.Administrators.Add(user);
+                contest.Participants.Remove(user);
+                break;
+            case ContestRole.Participant:
+                contest.Participants.Add(user);
+                contest.Administrators.Remove(user);
+                break;
+            default:
+                return BadRequest();
+        }
+
+        await context.SaveChangesAsync();
+
+        return NoContent();
     }
 
     // PUT: api/Contests/5

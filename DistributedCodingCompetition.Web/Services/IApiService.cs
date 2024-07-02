@@ -127,4 +127,6 @@ public interface IApiService
     /// <param name="problemId"></param>
     /// <returns></returns>
     Task<(bool, IReadOnlyList<TestCase>?)> TryReadProblemTestCases(Guid problemId);
+
+    Task<bool> TryUpdateUserContestRoleAsync(Guid contestId, Guid userId, ContestRole role);
 }

@@ -102,8 +102,6 @@
         submitted = true;
         var oldOwner = contest!.Owner;
         contest.OwnerId = newOwner!.Id;
-        contest.Administrators.Add(oldOwner);
-        contest.Administrators.Remove(newOwner);
         var success = await ApiService.TryUpdateContestAsync(contest);
     }
 }

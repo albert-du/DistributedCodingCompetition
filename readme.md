@@ -55,3 +55,14 @@ dotnet run
 cd ./DistributedCodingCompetition/DistributedCodingCompetition.AppHost/
 dotnet run
 ```
+
+
+## TODO
+
+- [x] User registration
+- [x] User login
+- [x] User logout
+- [ ] User change password
+- [ ] User delete account
+- [x] Create Contest
+- [ ] Edit Contest

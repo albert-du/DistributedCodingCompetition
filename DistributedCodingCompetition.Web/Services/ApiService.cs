@@ -280,4 +280,19 @@ public class ApiService(HttpClient httpClient, ILogger<ApiService> logger) : IAp
             return (false, null);
         }
     }
+
+    public async Task<bool> TryUpdateUserContestRoleAsync(Guid contestId, Guid userId, ContestRole role)
+    {
+        try
+        {
+            var response = await httpClient.PutAsJsonAsync($"api/contests/{contestId}/role/{userId}", role);
+            response.EnsureSuccessStatusCode();
+            return true;
+        }
+        catch (Exception ex)
+        {
+            logger.LogError(ex, "Failed to update user contest role");
+            return false;
+        }
+    }
 }

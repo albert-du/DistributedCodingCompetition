@@ -82,7 +82,7 @@
             </div>
         </div>
 
-        <button type="submit" class="px-4 py-2 mt-4 text-white bg-blue-500 rounded-lg">Submit</button>
+        <button type="submit" class="px-4 py-2 mt-4 text-white bg-blue-500 rounded-lg">Create</button>
         <DataAnnotationsValidator />
         <div class="text-rose-500">
             <ValidationSummary />
@@ -160,6 +160,7 @@
                 Active = true,
                 Open = false,
                 Public = false,
+                MinimumAge = model.MinAge
             });
 
         if (!success)
@@ -167,6 +168,12 @@
             ModalService.ShowError("Failed to create contest", "Internal error");
             return;
         }
+
+        if (!await ApiService.TryUpdateUserContestRoleAsync(id.Value, user.Id, ContestRole.Admin))
+        {
+            ModalService.ShowError("Failed to add owner to admin list", "Internal error");
+            return;
+        }        
 
         NavigationManager.NavigateTo($"contest/{id}/manage");
     }

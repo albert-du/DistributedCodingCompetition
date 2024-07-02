@@ -36,165 +36,178 @@
 
 @if (contest is not null && model is not null)
 {
-    <h1>@(model.Name)</h1>
-    <h2>@(contest.Id)</h2>
-    <div>Owner: @contest.Owner.Username</div>
+    <h1 class="text-3xl">@(model.Name)</h1>
+    <h2 class="font-mono">@(contest.Id)</h2>
+    <div>Owner: @ownerName</div>
 
-    <EditForm Model=model OnValidSubmit="SubmitAsync">
-        <label class="flex flex-col">
-            <div class="pl-2">
-                Name
-            </div>
-            <InputText class="w-64 px-2 py-1 ml-2 bg-gray-100 rounded-lg text-slate-800" id="Name" @bind-Value=model.Name />
-        </label>
+    <div class="flex justify-between">
+        <EditForm Model=model OnValidSubmit="SubmitAsync" class="flex flex-col w-1/2 gap-y-2">
+            <label class="flex flex-col">
+                <div class="pl-2">
+                    Name
+                </div>
+                <InputText class="w-4/5 px-2 py-1 ml-2 bg-gray-100 rounded-lg text-slate-800" id="Name" @bind-Value=model.Name />
+            </label>
 
-        <label class="flex flex-col">
-            <div class="pl-2">
-                Description (<a href="https://www.markdownguide.org/" class="italic hover:underline">markdown</a> enabled)
-            </div>
-            <InputTextArea class="w-64 px-2 py-1 ml-2 bg-gray-100 rounded-lg text-slate-800" id="Description" @bind-Value=model.Description />
-        </label>
+            <label class="flex flex-col">
+                <div class="pl-2">
+                    Description (<a href="https://www.markdownguide.org/" class="italic hover:underline">markdown</a> enabled)
+                </div>
+                <InputTextArea class="w-4/5 px-2 py-1 ml-2 bg-gray-100 rounded-lg min-h-96 text-slate-800" id="Description" @bind-Value=model.Description />
+            </label>
 
-        <label>
-            <div class="pl-2">
-                Minimum Age
-            </div>
-            <InputNumber class="w-64 px-2 py-1 ml-2 bg-gray-100 rounded-lg text-slate-800" id="MinimumAge" @bind-Value=model.MinimumAge />
-        </label>
+            <label>
+                <div class="pl-2">
+                    Minimum Age
+                </div>
+                <InputNumber class="w-64 px-2 py-1 ml-2 bg-gray-100 rounded-lg text-slate-800" id="MinimumAge" @bind-Value=model.MinimumAge />
+            </label>
 
-        <label>
-            <div class="pl-2">
-                Public
-            </div>
-            <div class="text-xs">
-                show on homepage, opens registration without invitation
-            </div>
-            <InputCheckbox class="w-64 px-2 py-1 ml-2 bg-gray-100 rounded-lg text-slate-800" id="Public" @bind-Value=model.Public />
-        </label>
+            <label>
+                <div class="pl-2">
+                    Public
+                    <div class="text-xs">
+                        show on homepage, opens registration without invitation
+                    </div>
+                </div>
+                <InputCheckbox class="w-64 px-2 py-1 ml-2 bg-gray-100 rounded-lg text-slate-800" id="Public" @bind-Value=model.Public />
+            </label>
 
-        <label>
-            <div class="pl-2">
-                Open
-            </div>
-            <div class="text-xs">
-                Accepting new participants
-            </div>
-            <InputCheckbox class="w-64 px-2 py-1 ml-2 bg-gray-100 rounded-lg text-slate-800" id="Open" @bind-Value=model.Open />
-        </label>
+            <label>
+                <div class="pl-2">
+                    Open
+                    <div class="text-xs">
+                        Accepting new participants
+                    </div>
+                </div>
+                <InputCheckbox class="w-64 px-2 py-1 ml-2 bg-gray-100 rounded-lg text-slate-800" id="Open" @bind-Value=model.Open />
+            </label>
 
-        <label>
-            <div class="pl-2">
-                Active
-            </div>
-            <div class="text-xs">
-                Uncheck to archive contest.
-            </div>
-            <InputCheckbox class="w-64 px-2 py-1 ml-2 bg-gray-100 rounded-lg text-slate-800" id="Active" @bind-Value=model.Active />
-        </label>
+            <label>
+                <div class="pl-2">
+                    Active
+                    <div class="text-xs">
+                        Uncheck to archive contest.
+                    </div>
+                </div>
+                <InputCheckbox class="w-64 px-2 py-1 ml-2 bg-gray-100 rounded-lg text-slate-800" id="Active" @bind-Value=model.Active />
+            </label>
 
-        <label class="flex flex-col">
-            <div class="pl-2">
-                Start Date
-            </div>
-            <InputDate class="w-64 px-2 py-1 ml-2 bg-gray-100 rounded-lg text-slate-800" Type="InputDateType.Date" id="StartTime" @bind-Value=model.StartDate />
-        </label>
+            <div class="flex justify-between">
+                <label class="flex flex-col w-1/2">
+                    <div class="pl-2">
+                        Start Date
+                    </div>
+                    <InputDate class="w-48 px-2 py-1 ml-2 bg-gray-100 rounded-lg text-slate-800" Type="InputDateType.Date" id="StartTime" @bind-Value=model.StartDate />
+                </label>
 
-        <label class="flex flex-col">
-            <div class="pl-2">
-                Start Time
+                <label class="flex flex-col w-1/2">
+                    <div class="pl-2">
+                        Start Time
+                    </div>
+                    <InputDate class="w-48 px-2 py-1 ml-2 bg-gray-100 rounded-lg text-slate-800" Type="InputDateType.Time" id="StartTime" @bind-Value=model.StartTime />
+                </label>
             </div>
-            <InputDate class="w-64 px-2 py-1 ml-2 bg-gray-100 rounded-lg text-slate-800" Type="InputDateType.Time" id="StartTime" @bind-Value=model.StartTime />
-        </label>
 
-        <label class="flex flex-col">
-            <div class="pl-2">
-                End Date
+            <label class="flex flex-col">
+                <div class="pl-2">
+                    End Date
+                </div>
+                <InputDate class="w-64 px-2 py-1 ml-2 bg-gray-100 rounded-lg text-slate-800" Type="InputDateType.Date" id="StartTime" @bind-Value=model.EndDate />
+            </label>
+
+            <label class="flex flex-col">
+                <div class="pl-2">
+                    End Time
+                </div>
+                <InputDate class="w-64 px-2 py-1 ml-2 bg-gray-100 rounded-lg text-slate-800" Type="InputDateType.Time" id="StartTime" @bind-Value=model.EndTime />
+            </label>
+
+            <div class="flex flex-col">
+                <div class="pl-2">
+                    Duration
+                </div>
+                <div class="w-64 px-2 py-1 ml-2 rounded-lg bg-gray-50 text-slate-800">
+                    @model.Duration.Days days, @model.Duration.Hours hours, @model.Duration.Minutes minutes
+                </div>
             </div>
-            <InputDate class="w-64 px-2 py-1 ml-2 bg-gray-100 rounded-lg text-slate-800" Type="InputDateType.Date" id="StartTime" @bind-Value=model.EndDate />
-        </label>
 
-        <label class="flex flex-col">
-            <div class="pl-2">
-                End Time
+            <div class="flex flex-col">
+                <div class="pl-2">
+                    Starts in
+                </div>
+                <div class="w-64 px-2 py-1 ml-2 rounded-lg bg-gray-50 text-slate-800">
+                    @Remaining.Days days, @Remaining.Hours hours, @Remaining.Minutes minutes
+                </div>
+
+                <div>
+                    From @StartUTC UTC to @EndUTC UTC
+                </div>
             </div>
-            <InputDate class="w-64 px-2 py-1 ml-2 bg-gray-100 rounded-lg text-slate-800" Type="InputDateType.Time" id="StartTime" @bind-Value=model.EndTime />
-        </label>
 
+            <div class="flex flex-col">
+                @if (Remaining < TimeSpan.Zero)
+                {
+                    <div class="text-red-500">
+                        Contest has already started
+                    </div>
+                }
+                else if (Remaining < TimeSpan.FromHours(1))
+                {
+                    <div class="text-red-500">
+                        Contest starts soon
+                    </div>
+                }
+                else if (Remaining < TimeSpan.FromDays(1))
+                {
+                    <div class="text-yellow-500">
+                        Contest starts tomorrow
+                    </div>
+                }
+                else if (Remaining < TimeSpan.FromDays(7))
+                {
+                    <div class="text-yellow-500">
+                        Contest starts in a week
+                    </div>
+                }
+                else if (Remaining < TimeSpan.FromDays(30))
+                {
+                    <div class="text-yellow-500">
+                        Contest starts in a month
+                    </div>
+                }
+                else if (Remaining < TimeSpan.FromDays(365))
+                {
+                    <div class="text-yellow-500">
+                        Contest starts in a year
+                    </div>
+                }
+                else
+                {
+                    <div class="text-green-500">
+                        Contest starts in more than a year
+                    </div>
+                }
+            </div>
+
+
+            <button type="submit" class="px-4 py-2 mt-4 text-white bg-blue-500 rounded-lg hover:bg-blue-600 active:bg-blue-700">Save</button>
+            <DataAnnotationsValidator />
+            <div class="text-rose-500">
+                <ValidationSummary />
+            </div>
+        </EditForm>
         <div class="flex flex-col">
-            <div class="pl-2">
-                Duration
-            </div>
-            <div class="w-64 px-2 py-1 ml-2 bg-gray-100 rounded-lg text-slate-800">
-                @model.Duration
-            </div>
+            <a href="/contest/@Id/manage/administrators" class="italic hover:underline">@model.Administrators administrators</a>
+            <a href="/contest/@Id/manage/participants" class="italic hover:underline">@model.Participants participants</a>
+            <a href="/contest/@Id/manage/participants/banned" class="italic hover:underline">@model.Banned users banned</a>
         </div>
-
-        <div class="flex flex-col">
-            <div class="pl-2">
-                Starts in
-            </div>
-            <div class="w-64 px-2 py-1 ml-2 bg-gray-100 rounded-lg text-slate-800">
-                @Remaining
-            </div>
-
-            <div>
-                From @StartUTC UTC to @EndUTC UTC
-            </div>
-
-            @if (Remaining < TimeSpan.Zero)
-            {
-                <div class="text-red-500">
-                    Contest has already started
-                </div>
-            }
-            else if (Remaining < TimeSpan.FromHours(1))
-            {
-                <div class="text-red-500">
-                    Contest starts soon
-                </div>
-            }
-            else if (Remaining < TimeSpan.FromDays(1))
-            {
-                <div class="text-yellow-500">
-                    Contest starts tomorrow
-                </div>
-            }
-            else if (Remaining < TimeSpan.FromDays(7))
-            {
-                <div class="text-yellow-500">
-                    Contest starts in a week
-                </div>
-            }
-            else if (Remaining < TimeSpan.FromDays(30))
-            {
-                <div class="text-yellow-500">
-                    Contest starts in a month
-                </div>
-            }
-            else if (Remaining < TimeSpan.FromDays(365))
-            {
-                <div class="text-yellow-500">
-                    Contest starts in a year
-                </div>
-            }
-            else
-            {
-                <div class="text-green-500">
-                    Contest starts in more than a year
-                </div>
-            }
-        </div>
-
-        <a href="/contest/@Id/manage/administrators" class="italic hover:underline">@model.Administrators administrators</a>
-        <a href="/contest/@Id/manage/participants" class="italic hover:underline">@model.Participants participants</a>
-        <a href="/contest/@Id/manage/participants/banned" class="italic hover:underline">@model.Banned users banned</a>
+    </div>
+    <div>
+        <a href="/contest/@Id/manage/invites" class="italic hover:underline">@model.JoinCodes invites</a>
         <a href="/contest/@Id/manage/problems" class="italic hover:underline">@model.Problems problems</a>
         <a href="/contest/@Id/manage/submissions" class="italic hover:underline">@model.Submissions submissions</a>
-        <a href="/contest/@Id/manage/invites" class="italic hover:underline">@model.JoinCodes invites</a>
-
-        <button type="submit" class="px-4 py-2 mt-4 text-white bg-blue-500 rounded-lg">Submit</button>
-        <DataAnnotationsValidator />
-    </EditForm>
+    </div>
 }
 else
 {
@@ -209,6 +222,7 @@ else
     [Parameter]
     public Guid Id { get; set; }
 
+    string ownerName = string.Empty;
     ContestModel model = new();
     Contest? contest;
 
@@ -251,6 +265,12 @@ else
                 Open = contest.Open
             };
         await InvokeAsync(StateHasChanged);
+        
+        using PeriodicTimer periodicTimer = new(TimeSpan.FromMinutes(1));
+        while (await periodicTimer.WaitForNextTickAsync())
+        {
+            await InvokeAsync(StateHasChanged);
+        }
     }
 
     protected override async Task OnInitializedAsync()
@@ -272,6 +292,11 @@ else
             NavigationManager.NavigateTo("/");
             return;
         }
+
+        (success, var owner) = await ApiService.TryReadUserAsync(contest.OwnerId);
+
+        if (success && owner is not null)
+            ownerName = owner.Username;
     }
 
     private async Task SubmitAsync()
@@ -291,6 +316,13 @@ else
         contest.Public = model.Public;
         contest.Open = model.Open;
 
+        // update contest
+
+        (var success, _) = await ApiService.TryUpdateContestAsync(contest);
+        if (!success)
+            ModalService.ShowError("Failed to update contest", "Internal error");
+        else
+            ModalService.ShowInfo("Contest saved", "Success");
     }
 
     class ContestModel
