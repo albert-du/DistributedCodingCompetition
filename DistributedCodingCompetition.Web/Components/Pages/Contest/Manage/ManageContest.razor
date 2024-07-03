@@ -224,19 +224,20 @@ else
     private TimeSpan Remaining => StartUTC - DateTime.UtcNow;
     [Parameter]
     public Guid Id { get; set; }
-
+    int participantsPage = 1;
+    int bannedPage = 1;
     string ownerName = string.Empty;
     ContestModel model = new();
     Contest? contest;
+    IReadOnlyList<User> administrators = [];
+    IReadOnlyList<User> participants = [];
+    IReadOnlyList<User> banned = [];
 
     TimeSpan offset;
     protected override async Task OnAfterRenderAsync(bool firstRender)
     {
         if (!firstRender)
             return;
-
-        if (contest is null)
-            (var success, contest) = await ApiService.TryReadContestAsync(Id);
 
         if (contest is null)
         {
@@ -300,6 +301,11 @@ else
 
         if (success && owner is not null)
             ownerName = owner.Username;
+
+        (success, administrators) = await ApiService.TryReadContestAdminsAsync(Id);
+        (success, participants) = await ApiService.TryReadContestParticipantsAsync(Id, 10, participantsPage);
+        (success, banned) = await ApiService.TryReadContestBannedAsync(Id, 10, bannedPage);
+
     }
 
     private async Task SubmitAsync()

@@ -156,4 +156,8 @@ public interface IApiService
     Task<(bool, IReadOnlyList<User>?) > TryReadContestBannedAsync(Guid contestId, int count, int page);
 
     Task<(bool, IReadOnlyList<Contest>?)> TryReadUserAdministratedContestsAsync(Guid userId, int count, int page);
+
+    Task<(bool, IReadOnlyList<Contest>?)> TryReadUserEnteredContestsAsync(Guid userId, int count, int page);
+    
+    Task<(bool, IReadOnlyList<Contest>?)> TryReadPublicContestsAsync(int count, int page);
 }

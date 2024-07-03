@@ -92,6 +92,16 @@ public class ContestsController(ContestContext context) : ControllerBase
             .Take(count)
             .ToListAsync();
 
+    // GET api/contests/public?count={count}&page={page}
+    [HttpGet("public")]
+    public async Task<ActionResult<IReadOnlyList<Contest>>> GetPublicContests(int count, int page) =>
+        await context.Contests
+            .Where(c => c.Public)
+            .OrderByDescending(c => c.StartTime)
+            .Skip(count * page)
+            .Take(count)
+            .ToListAsync();
+
     [HttpPut("{contestId}/role/{userId}")]
     public async Task<IActionResult> UpdateUserContestRole(Guid contestId, Guid userId, ContestRole role)
     {

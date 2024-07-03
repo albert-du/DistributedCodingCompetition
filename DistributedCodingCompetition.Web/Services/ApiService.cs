@@ -296,11 +296,11 @@ public class ApiService(HttpClient httpClient, ILogger<ApiService> logger) : IAp
         }
     }
 
-    public async Task<(bool, IReadOnlyList<User>?) > TryReadContestParticipantsAsync(Guid contestId, int count, int page)
+    public async Task<(bool, IReadOnlyList<User>?)> TryReadContestParticipantsAsync(Guid contestId, int count, int page)
     {
         try
         {
-            var response = await httpClient.GetAsync($"api/contests/{contestId}/participants?count={count}&page={page - 1}");
+            var response = await httpClient.GetAsync($"api/contests/{contestId}/participants?count={count}&page={page}");
             response.EnsureSuccessStatusCode();
             return (true, await response.Content.ReadFromJsonAsync<IReadOnlyList<User>>());
         }
@@ -311,11 +311,11 @@ public class ApiService(HttpClient httpClient, ILogger<ApiService> logger) : IAp
         }
     }
 
-    public async Task<(bool, IReadOnlyList<User>?) > TryReadContestBannedAsync(Guid contestId, int count, int page)
+    public async Task<(bool, IReadOnlyList<User>?)> TryReadContestBannedAsync(Guid contestId, int count, int page)
     {
         try
         {
-            var response = await httpClient.GetAsync($"api/contests/{contestId}/banned?count={count}&page={page - 1}");
+            var response = await httpClient.GetAsync($"api/contests/{contestId}/banned?count={count}&page={page}");
             response.EnsureSuccessStatusCode();
             return (true, await response.Content.ReadFromJsonAsync<IReadOnlyList<User>>());
         }
@@ -330,7 +330,7 @@ public class ApiService(HttpClient httpClient, ILogger<ApiService> logger) : IAp
     {
         try
         {
-            var response = await httpClient.GetAsync($"api/users/{userId}/administered?count={count}&page={page - 1}");
+            var response = await httpClient.GetAsync($"api/users/{userId}/administered?count={count}&page={page}");
             response.EnsureSuccessStatusCode();
             return (true, await response.Content.ReadFromJsonAsync<IReadOnlyList<Contest>>());
         }
@@ -341,4 +341,33 @@ public class ApiService(HttpClient httpClient, ILogger<ApiService> logger) : IAp
         }
     }
 
+    public async Task<(bool, IReadOnlyList<Contest>?)> TryReadUserEnteredContestsAsync(Guid userId, int count, int page)
+    {
+        try
+        {
+            var response = await httpClient.GetAsync($"api/users/{userId}/entered?count={count}&page={page}");
+            response.EnsureSuccessStatusCode();
+            return (true, await response.Content.ReadFromJsonAsync<IReadOnlyList<Contest>>());
+        }
+        catch (Exception ex)
+        {
+            logger.LogError(ex, "Failed to fetch user entered contests");
+            return (false, null);
+        }
+    }
+
+    public async Task<(bool, IReadOnlyList<Contest>?)> TryReadPublicContestsAsync(int count, int page)
+    {
+        try
+        {
+            var response = await httpClient.GetAsync($"api/contests/public?count={count}&page={page}");
+            response.EnsureSuccessStatusCode();
+            return (true, await response.Content.ReadFromJsonAsync<IReadOnlyList<Contest>>());
+        }
+        catch (Exception ex)
+        {
+            logger.LogError(ex, "Failed to fetch public contests");
+            return (false, null);
+        }
+    }
 }

@@ -8,14 +8,14 @@
 
 <AuthCheck />
 
-<h1 class="text-2xl">Dashboard</h1>
+<h1 class="text-3xl">Dashboard</h1>
 
 @if (user is not null)
 {
     <p class="italic">Welcome, @user.Username</p>
 
-    <div>
-        <h2 class="text-lg">Entrered Contests</h2>
+    <div class="mb-4">
+        <h2 class="text-xl">Entered Contests</h2>
         @if (user.EnteredContests.Count == 0)
         {
             <p>You are not in any contests.</p>
@@ -35,24 +35,26 @@
 
     @if (ContestOptions.Value.OpenCreation)
     {
-        <a class="hover:underline" href="contest/new">Start Contest</a>
+        <a class="text-lg font-semibold hover:underline text-violet-600" href="contest/new">Start Contest</a>
     }
     else
     {
         <AuthorizeView Roles="Admin">
-            <a class="hover:underline" href="contest/new">Start Contest</a>
+            <a class="text-lg font-semibold hover:underline text-violet-600" href="contest/new">Start Contest</a>
         </AuthorizeView>
     }
 
     @if (administered.Count > 0)
     {
         <div>
-            <h2>Administered Contests</h2>
-            <ul>
+            <h2 class="text-xl">Administered Contests</h2>
+            <ul class="flex flex-col gap-y-2">
                 @foreach (var contest in administered)
                 {
-                    <li>
-                        <a href="contest/@contest.Id/Manage">@contest.Name</a>
+                    <li class="flex p-2 border rounded-md border-violet-300 gap-x-3">
+                        <a class="text-xl hover:underline text-slate-700" href="contest/@contest.Id/manage">@contest.Name</a>
+                        <div>Starts @contest.StartTime UTC</div>
+                        <div>Ends @contest.EndTime UTC</div>
                     </li>
                 }
             </ul>

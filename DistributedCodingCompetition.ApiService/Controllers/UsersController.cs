@@ -50,6 +50,16 @@ public class UsersController(ContestContext context) : ControllerBase
             .Take(count)
             .ToListAsync();
 
+    // GET: api/users/{userId}/entered?count={count}&page={page}
+    [HttpGet("{userId}/entered")]
+    public async Task<ActionResult<IEnumerable<Contest>>> GetEnteredContests(Guid userId, int count = 10, int page = 1) =>
+        await context.Users.Where(user => user.Id == userId)
+            .SelectMany(user => user.EnteredContests)
+            .OrderByDescending(contest => contest.StartTime)
+            .Skip(count * (page - 1))
+            .Take(count)
+            .ToListAsync();
+
     // PUT: api/Users/5
     // To protect from overposting attacks, see https://go.microsoft.com/fwlink/?linkid=2123754
     [HttpPut("{id}")]
