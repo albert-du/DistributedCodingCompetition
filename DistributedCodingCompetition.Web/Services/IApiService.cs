@@ -160,4 +160,6 @@ public interface IApiService
     Task<(bool, IReadOnlyList<Contest>?)> TryReadUserEnteredContestsAsync(Guid userId, int count, int page);
     
     Task<(bool, IReadOnlyList<Contest>?)> TryReadPublicContestsAsync(int count, int page);
+
+    Task<(bool, IReadOnlyList<JoinCode>?)> TryReadContestJoinCodesAsync(Guid id);
 }

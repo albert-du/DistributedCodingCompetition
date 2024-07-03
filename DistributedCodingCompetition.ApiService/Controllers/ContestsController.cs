@@ -42,17 +42,11 @@ public class ContestsController(ContestContext context) : ControllerBase
             .ToListAsync();
 
     [HttpGet("{contestId}/joincodes")]
-    public async Task<ActionResult<IReadOnlyList<JoinCode>>> GetJoinCodes(Guid contestId)
-    {
-        var contest = await context.Contests
-            .Include(c => c.JoinCodes)
+    public async Task<ActionResult<IReadOnlyList<JoinCode>>> GetJoinCodes(Guid contestId) =>
+        await context.Contests
             .Where(c => c.Id == contestId)
-            .FirstOrDefaultAsync();
-
-        var joinCodes = contest?.JoinCodes;
-
-        return joinCodes is null ? NotFound() : joinCodes.ToList();
-    }
+            .SelectMany(c => c.JoinCodes)
+            .ToListAsync();
 
     [HttpGet("{contestId}/role/{userId}")]
     public async Task<ActionResult<ContestRole?>> GetUserContestRole(Guid contestId, Guid userId)

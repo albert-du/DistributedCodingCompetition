@@ -370,4 +370,21 @@ public class ApiService(HttpClient httpClient, ILogger<ApiService> logger) : IAp
             return (false, null);
         }
     }
+
+    public async Task<(bool, IReadOnlyList<JoinCode>?)> TryReadContestJoinCodesAsync(Guid id)
+    {
+        try
+        {
+            var response = await httpClient.GetAsync($"api/contests/{id}/joincodes");
+            if (response.StatusCode == HttpStatusCode.NotFound)
+                return (true, null);
+            response.EnsureSuccessStatusCode();
+            return (true, await response.Content.ReadFromJsonAsync<IReadOnlyList<JoinCode>>());
+        }
+        catch (Exception ex)
+        {
+            logger.LogError(ex, "Failed to fetch contest join codes");
+            return (false, null);
+        }
+    }
 }
