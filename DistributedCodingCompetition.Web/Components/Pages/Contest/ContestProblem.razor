@@ -1,0 +1,73 @@
+@page "/contest/{contestId:guid}/problem/{problemId:guid}"
+
+<AuthCheck/>
+
+<PageTitle>Problem</PageTitle>
+
+<h1 class="text-2xl">Problem</h1>
+
+@if (problem is null)
+{
+    <div>No problem</div>
+}
+else
+{
+    <h2>@problem.Name</h2>
+    <p>@problem.Description</p>
+    <div>
+        <h3>Input</h3>
+        <p>@problem.Input</p>
+
+        <h3>Output</h3>
+        <p>@problem.Output</p>
+    </div>
+    <div>
+        <h3>Examples</h3>
+        @foreach (var example in problem.Examples)
+        {
+            <div>
+                <h4>Input</h4>
+                <pre>@example.Input</pre>
+                <h4>Output</h4>
+                <pre>@example.Output</pre>
+            </div>
+        }
+}
+
+
+
+@code {
+    [Parameter]
+    public Guid ContestId { get; set; }
+
+    [Parameter]
+    public Guid ProblemId { get; set; }
+
+    string contestName = "";
+
+    Problem? problem;
+
+    protected override async Task OnInitializedAsync()
+    {
+        (var success, var contest) = await ApiService.TryReadContestAsync(ContestId);
+        if (!success || contest is null)
+        {
+            ModalService.ShowError("Failed to load contest", "Internal error");
+            return;
+        }
+        contestName = contest.Name;
+
+        (success, problem) = await ApiService.TryReadProblemAsync(ProblemId);
+        if (!success || problem is null)
+        {
+            ModalService.ShowError("Failed to load problem", "Internal error");
+            return;
+        }
+    }
+
+    class Solution
+    {
+        public string Code { get; set; } = "";
+        public string Language { get; set; } = "";
+    }
+}
