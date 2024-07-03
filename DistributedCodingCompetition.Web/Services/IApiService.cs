@@ -145,8 +145,8 @@ public interface IApiService
     /// <param name="count"></param>
     /// <param name="page">start at 1</param>
     /// <returns></returns>
-    Task<(bool, IReadOnlyList<User>?) > TryReadContestParticipantsAsync(Guid contestId, int count, int page);
-    
+    Task<(bool, IReadOnlyList<User>?)> TryReadContestParticipantsAsync(Guid contestId, int count, int page);
+
     /// <summary>
     /// Read a contest's banned users.
     /// </summary>
@@ -154,12 +154,12 @@ public interface IApiService
     /// <param name="count"></param>
     /// <param name="page"></param>
     /// <returns></returns>
-    Task<(bool, IReadOnlyList<User>?) > TryReadContestBannedAsync(Guid contestId, int count, int page);
+    Task<(bool, IReadOnlyList<User>?)> TryReadContestBannedAsync(Guid contestId, int count, int page);
 
     Task<(bool, IReadOnlyList<Contest>?)> TryReadUserAdministratedContestsAsync(Guid userId, int count, int page);
 
     Task<(bool, IReadOnlyList<Contest>?)> TryReadUserEnteredContestsAsync(Guid userId, int count, int page);
-    
+
     Task<(bool, IReadOnlyList<Contest>?)> TryReadPublicContestsAsync(int count, int page);
 
     Task<(bool, IReadOnlyList<JoinCode>?)> TryReadContestJoinCodesAsync(Guid id);
@@ -171,4 +171,6 @@ public interface IApiService
     Task<(bool, Guid?)> TryCreateJoinCodeAsync(JoinCode joinCode);
 
     Task<bool> TryAddProblemToContestAsync(Guid contestId, Guid problemId);
+
+    Task<(bool, Guid?)> TryCreateProblemTestCaseAsync(TestCase testCase);
 }

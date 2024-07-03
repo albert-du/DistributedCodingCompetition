@@ -449,4 +449,34 @@ public class ApiService(HttpClient httpClient, ILogger<ApiService> logger) : IAp
             return (false, null);
         }
     }
+
+    public async Task<bool> TryAddProblemToContestAsync(Guid contestId, Guid problemId)
+    {
+        try
+        {
+            var response = await httpClient.PostAsync($"api/contests/{contestId}/problems/{problemId}", null);
+            response.EnsureSuccessStatusCode();
+            return true;
+        }
+        catch (Exception ex)
+        {
+            logger.LogError(ex, "Failed to add problem to contest");
+            return false;
+        }
+    }
+    public async Task<(bool, Guid?)> TryCreateProblemTestCaseAsync(TestCase testCase)
+    {
+        try
+        {
+            var response = await httpClient.PostAsJsonAsync("api/testcases", testCase);
+            response.EnsureSuccessStatusCode();
+            return (true, testCase.Id);
+        }
+        catch (Exception ex)
+        {
+            logger.LogError(ex, "Failed to create test case");
+            return (false, null);
+        }
+    }
+
 }

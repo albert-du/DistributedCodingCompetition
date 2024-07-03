@@ -69,7 +69,7 @@
                 </div>
             </div>
         }
-        <button @onclick="AddTestCaseAsync">Add New Test case</button>
+        <a href="/problem/@Id/testcase/new">Add New Test case</a>
 
         <button type="submit" class="btn btn-primary">Save</button>
         <DataAnnotationsValidator />
@@ -162,11 +162,6 @@
                     Weight = tc.Weight
                 })]
             };
-    }
-
-    async Task AddTestCaseAsync()
-    {
-        
     }
 
     class ProblemModel

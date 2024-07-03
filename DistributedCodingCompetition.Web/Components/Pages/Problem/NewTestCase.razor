@@ -1,0 +1,90 @@
+﻿@page "/problem/{id:guid}/testcase/new"
+@inject IModalService ModalService
+@inject IApiService ApiService
+@inject NavigationManager NavigationManager
+@inject IUserStateService UserStateService
+@inject IMarkdownRenderService MarkdownRenderService
+@rendermode InteractiveServer
+
+<AuthCheck />
+<PageTitle>New Test Case</PageTitle>
+
+<EditForm OnValidSubmit="SubmitAsync">
+    <div class="form-group">
+        <label for="Input">Input</label>
+        <InputTextArea id="Input" class="form-control" @bind-Value="Model.Input" />
+    </div>
+
+    <div class="form-group">
+        <label for="Output">Output</label>
+        <InputTextArea id="Output" class="form-control" @bind-Value="Model.Output" />
+    </div>
+
+    <div class="form-group">
+        <label for="Description">Description</label>
+        <InputText id="Description" class="form-control" @bind-Value="Model.Description" />
+    </div>
+
+    <div class="form-group">
+        <label for="Sample">Sample</label>
+        <InputCheckbox id="Sample" class="form-control" @bind-Value="Model.Sample" />
+    </div>
+
+    <div class="form-group">
+        <label for="Active">Active</label>
+        <InputCheckbox id="Active" class="form-control" @bind-Value="Model.Active" />
+    </div>
+
+    <div class="form-group">
+        <label for="Weight">Weight</label>
+        <InputNumber id="Weight" class="form-control" @bind-Value="Model.Weight" />
+    </div>
+
+    <button type="submit" class="btn btn-primary">Create</button>
+    <DataAnnotationsValidator />
+    <ValidationSummary />
+
+</EditForm>
+
+@code {
+    [Parameter]
+    public Guid Id { get; set; }
+
+    ProblemTestCaseModel Model { get; set; } = new();
+
+    async Task SubmitAsync()
+    {
+        var user = await UserStateService.UserAsync();
+        if (user is null)
+        {
+            return;
+        }
+        (var success, var testCaseId) = await ApiService.TryCreateProblemTestCaseAsync(new()
+            {
+                Input = Model.Input,
+                Output = Model.Output,
+                Description = Model.Description,
+                Sample = Model.Sample,
+                Active = Model.Active,
+                Weight = Model.Weight,
+                ProblemId = Id
+            });
+        if (!success || !testCaseId.HasValue)
+        {
+            ModalService.ShowError("Failed to create test case", "Internal error");
+            return;
+        }
+        NavigationManager.NavigateTo($"/problem/{Id}");
+    }
+
+    class ProblemTestCaseModel
+    {
+        public string Input { get; set; } = "";
+        public string Output { get; set; } = "";
+        public string Description { get; set; } = "";
+        public bool Sample { get; set; }
+        public bool Active { get; set; }
+        public int Weight { get; set; }
+    }
+}
+

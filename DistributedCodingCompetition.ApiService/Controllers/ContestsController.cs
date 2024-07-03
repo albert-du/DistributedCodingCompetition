@@ -162,6 +162,24 @@ public class ContestsController(ContestContext context) : ControllerBase
         return CreatedAtAction(nameof(GetContest), new { id = contest.Id }, contest);
     }
 
+    // POST: api/contests/{contestId}/problems/{problemId}
+    [HttpPost("{contestId}/problems/{problemId}")]
+    public async Task<IActionResult> AddProblemToContest(Guid contestId, Guid problemId)
+    {
+        var contest = await context.Contests.FindAsync(contestId);
+        if (contest is null)
+            return NotFound();
+
+        var problem = await context.Problems.FindAsync(problemId);
+        if (problem is null)
+            return NotFound();
+
+        contest.Problems.Add(problem);
+        await context.SaveChangesAsync();
+
+        return NoContent();
+    }
+
     // DELETE: api/Contests/5
     [HttpDelete("{id}")]
     public async Task<IActionResult> DeleteContest(Guid id)
