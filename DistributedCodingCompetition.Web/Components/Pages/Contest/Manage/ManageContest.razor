@@ -3,13 +3,12 @@
     public Guid Id { get; set; }
     public User Owner { get; set; } = null!;
 
-    counts:
-        public ICollection<Problem> Problems { get; set; } = [];
-        public ICollection<User> Participants { get; set; } = [];
-        public ICollection<User> Administrators { get; set; } = [];
-        public ICollection<User> Banned { get; set; } = [];
-        public ICollection<Submission> Submissions { get; set; } = [];
-        public ICollection<JoinCode> JoinCodes { get; set; } = [];
+    public ICollection<Problem> Problems { get; set; } = [];
+    public ICollection<User> Participants { get; set; } = [];
+    public ICollection<User> Administrators { get; set; } = [];
+    public ICollection<User> Banned { get; set; } = [];
+    public ICollection<Submission> Submissions { get; set; } = [];
+    public ICollection<JoinCode> JoinCodes { get; set; } = [];
 
 // edit
     public string Name { get; set; } = string.Empty;
@@ -200,10 +199,52 @@
                 <ValidationSummary />
             </div>
         </EditForm>
-        <div class="flex flex-col">
-            <a href="/contest/@Id/manage/administrators" class="italic hover:underline">@model.Administrators administrators</a>
-            <a href="/contest/@Id/manage/participants" class="italic hover:underline">@model.Participants participants</a>
-            <a href="/contest/@Id/manage/participants/banned" class="italic hover:underline">@model.Banned users banned</a>
+        <div class="flex flex-col gap-y-1">
+            <div class="px-2 py-4">
+                <h3 class="text-semibold">Administrators</h3>
+                <div class="flex flex-col gap-y-1">
+                    @foreach (var admin in administrators)
+                    {
+                        <div>@($"@{admin.Username} {admin.FullName}")</div>
+                    }
+                </div>
+                <a href="/contest/@Id/manage/administrators" class="italic hover:underline">Edit administrators</a>
+            </div>
+            <div>
+                <h3 class="text-semibold">Participants</h3>
+                <div>
+                    Showing @participants.Count participants<br />page @participantsPage
+                </div>
+                <div class="flex flex-col gap-y-1">
+                    @foreach (var participant in participants)
+                    {
+                        <div>@($"@{participant.Username} {participant.FullName}")</div>
+                    }
+                </div>
+                <div class="flex w-32">
+                    <button class="px-2 py-1 text-white bg-blue-500 rounded-lg hover:bg-blue-600 active:bg-blue-700" @onclick="LastParticipantAsync">Previous</button>
+                    <button class="px-2 py-1 text-white bg-blue-500 rounded-lg hover:bg-blue-600 active:bg-blue-700" @onclick="NextParticipantAsync">Next</button>
+                </div>
+                <a href="/contest/@Id/manage/administrators" class="italic hover:underline">Edit participants</a>
+            </div>
+
+            <div>
+                <h3 class="text-semibold">Banned</h3>
+                <div>
+                    Showing @banned.Count banned users<br />page @bannedPage
+                </div>
+                <div class="flex flex-col gap-y-1">
+                    @foreach (var ban in banned)
+                    {
+                        <div>@($"@{ban.Username} {ban.FullName}")</div>
+                    }
+                </div>
+                <div class="flex w-32">
+                    <button class="px-2 py-1 text-white bg-blue-500 rounded-lg hover:bg-blue-600 active:bg-blue-700" @onclick="LastBannedAsync">Previous</button>
+                    <button class="px-2 py-1 text-white bg-blue-500 rounded-lg hover:bg-blue-600 active:bg-blue-700" @onclick="NextBannedAsync">Next</button>
+                </div>
+                <a href="/contest/@Id/manage/participants/banned" class="italic hover:underline">Banned users</a>
+            </div>
         </div>
     </div>
     <div>
@@ -234,6 +275,32 @@ else
     IReadOnlyList<User> banned = [];
 
     TimeSpan offset;
+
+    private async Task LastParticipantAsync()
+    {
+        if (participantsPage > 1)
+            participantsPage--;
+        (var success, participants) = await ApiService.TryReadContestParticipantsAsync(Id, 10, participantsPage);
+    }
+
+    private async Task NextParticipantAsync()
+    {
+        participantsPage++;
+        (var success, participants) = await ApiService.TryReadContestParticipantsAsync(Id, 10, participantsPage);
+    }
+
+    private async Task LastBannedAsync()
+    {
+        if (bannedPage > 1)
+            bannedPage--;
+        (var success, banned) = await ApiService.TryReadContestBannedAsync(Id, 10, bannedPage);
+    }
+
+    private async Task NextBannedAsync()
+    {
+        bannedPage++;
+        (var success, banned) = await ApiService.TryReadContestBannedAsync(Id, 10, bannedPage);
+    }
     protected override async Task OnAfterRenderAsync(bool firstRender)
     {
         if (!firstRender)
