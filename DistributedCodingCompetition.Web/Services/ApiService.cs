@@ -507,4 +507,19 @@ public class ApiService(HttpClient httpClient, ILogger<ApiService> logger) : IAp
             return false;
         }
     }
+
+    public async Task<bool> TryAddTestCaseToProblemAsync(Guid problemId, TestCase testCase)
+    {
+        try
+        {
+            var response = await httpClient.PostAsJsonAsync($"api/problems/{problemId}/testcases", testCase);
+            response.EnsureSuccessStatusCode();
+            return true;
+        }
+        catch (Exception ex)
+        {
+            logger.LogError(ex, "Failed to add test case to problem");
+            return false;
+        }
+    }
 }

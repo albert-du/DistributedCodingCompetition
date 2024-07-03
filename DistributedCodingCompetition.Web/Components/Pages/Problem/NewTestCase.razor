@@ -83,7 +83,7 @@
         {
             return;
         }
-        (var success, var testCaseId) = await ApiService.TryCreateProblemTestCaseAsync(new()
+        TestCase testCase = new()
             {
                 Input = model.Input,
                 Output = model.Output,
@@ -92,12 +92,23 @@
                 Active = model.Active,
                 Weight = model.Weight,
                 ProblemId = Id
-            });
+            };
+
+        (var success, var testCaseId) = await ApiService.TryCreateProblemTestCaseAsync(testCase);
         if (!success || !testCaseId.HasValue)
         {
             ModalService.ShowError("Failed to create test case", "Internal error");
             return;
         }
+
+        // add to prob
+        // if(!await ApiService.TryAddTestCaseToProblemAsync(Id, testCase))
+        // {
+        //     ModalService.ShowError("Failed to add test case to problem", "Internal error");
+        //     return;
+        // }
+
+
         NavigationManager.NavigateTo($"/problem/{Id}/edit");
     }
 

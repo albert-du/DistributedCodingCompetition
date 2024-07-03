@@ -3,6 +3,8 @@
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using DistributedCodingCompetition.ApiService.Models;
+using Microsoft.EntityFrameworkCore.ChangeTracking;
+using System.Runtime.Intrinsics.Arm;
 
 [Route("api/[controller]")]
 [ApiController]
@@ -21,15 +23,6 @@ public class ProblemsController(ContestContext context) : ControllerBase
 
         return problem == null ? NotFound() : problem;
     }
-
-    // GET: api/Problems/5/testcases
-    [HttpGet("{id}/testcases")]
-    public async Task<ActionResult<IReadOnlyList<TestCase>>> GetTestCases(Guid id) =>
-        await context.Problems
-            .Include(p => p.TestCases)
-            .Where(p => p.Id == id)
-            .SelectMany(p => p.TestCases)
-            .ToListAsync();
 
     // PUT: api/Problems/5
     // To protect from overposting attacks, see https://go.microsoft.com/fwlink/?linkid=2123754
@@ -74,6 +67,34 @@ public class ProblemsController(ContestContext context) : ControllerBase
             return NotFound();
 
         context.Problems.Remove(problem);
+        await context.SaveChangesAsync();
+
+        return NoContent();
+    }
+
+
+    // GET: api/problems/{problemId}/testcases
+    [HttpGet("{problemId}/testcases")]
+    public async Task<ActionResult<IReadOnlyList<TestCase>>> GetTestCasesForProblem(Guid problemId)
+    { 
+
+        var problem = await context.Problems.Include(p => p.TestCases).FirstOrDefaultAsync(p => p.Id == problemId);
+        var all = await context.TestCases.ToListAsync();
+        return await context.TestCases.Where(p => p.ProblemId == problemId).ToListAsync();
+    }
+
+    // POST: api/problems/{problemId}/testcases
+    [HttpPost("{problemId}/testcases")]
+    public async Task<IActionResult> AddTestCaseToProblem(Guid problemId, TestCase testCase)
+    {
+        var problem = await context.Problems.FindAsync(problemId);
+        if (problem is null)
+            return NotFound();
+        problem.TestCases.Add(testCase);
+
+        var entry = context.Entry(problem);
+        entry.State = EntityState.Modified;
+
         await context.SaveChangesAsync();
 
         return NoContent();

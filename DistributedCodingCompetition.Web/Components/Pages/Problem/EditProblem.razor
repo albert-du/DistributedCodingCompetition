@@ -142,16 +142,19 @@
             return;
         }
 
-
         (success, var cases) = await ApiService.TryReadProblemTestCases(Id);
-
+        if (!success || cases is null)
+        {
+            ModalService.ShowError("Failed to load test cases", "Internal error");
+            return;
+        }
         problem = prob;
         model = new()
             {
                 Name = prob.Name,
                 Description = prob.Description,
                 Difficulty = prob.Difficulty ?? string.Empty,
-                Testcases = [..prob.TestCases.Select(tc => new TestcaseModel
+                Testcases = [..cases.Select(tc => new TestcaseModel
                 {
                     Id = tc.Id,
                     Input = tc.Input,

@@ -54,10 +54,19 @@ public class TestCasesController(ContestContext context) : ControllerBase
     [HttpPost]
     public async Task<ActionResult<TestCase>> PostTestCase(TestCase testCase)
     {
-        context.TestCases.Add(testCase);
+
+        // add testcase to problem
+        var problem = await context.Problems.FindAsync(testCase.ProblemId);
+        if (problem is null)
+            return NotFound();
+        
+        //context.TestCases.Add(testCase);
+
+        problem.TestCases.Add(testCase);
+
         await context.SaveChangesAsync();
 
-        return CreatedAtAction("GetTestCase", new { id = testCase.Id }, testCase);
+        return CreatedAtAction(nameof(GetTestCase), new { id = testCase.Id }, testCase);
     }
 
     // DELETE: api/TestCases/5
