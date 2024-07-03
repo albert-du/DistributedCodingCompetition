@@ -11,7 +11,7 @@
 @rendermode InteractiveServer
 <AuthCheck Contest=Id Admin />
 
-<PageTitle>Contest Submissions</PageTitle>
+<PageTitle>@contest?.Name Submissions</PageTitle>
 
 
 @code {
@@ -32,6 +32,13 @@
         // make sure the user is a contest admin
         var user = await UserStateService.UserAsync();
         var userId = user?.Id;
+
+        (var success, var c) = await ApiService.TryReadContestAsync(Id);
+        if (!success)
+        {
+            ModalService.ShowError("Failed to load contest", "Internal error");
+            return;
+        }
     }
 
     private async Task LoadAsync()

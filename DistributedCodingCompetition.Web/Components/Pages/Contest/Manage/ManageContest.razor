@@ -280,35 +280,53 @@ else
     {
         if (participantsPage > 1)
             participantsPage--;
-        (var success, participants) = await ApiService.TryReadContestParticipantsAsync(Id, 10, participantsPage);
+        (var success, var p) = await ApiService.TryReadContestParticipantsAsync(Id, 10, participantsPage);
+        participants = p ?? [];
+        if (!success)
+            ModalService.ShowError("Failed to load participants", "Internal error");
     }
 
     private async Task NextParticipantAsync()
     {
         participantsPage++;
-        (var success, participants) = await ApiService.TryReadContestParticipantsAsync(Id, 10, participantsPage);
+        (var success, var p) = await ApiService.TryReadContestParticipantsAsync(Id, 10, participantsPage);
+        participants = p ?? [];
+        if (!success)
+            ModalService.ShowError("Failed to load participants", "Internal error");
     }
 
     private async Task LastBannedAsync()
     {
         if (bannedPage > 1)
             bannedPage--;
-        (var success, banned) = await ApiService.TryReadContestBannedAsync(Id, 10, bannedPage);
+        (var success, var b) = await ApiService.TryReadContestBannedAsync(Id, 10, bannedPage);
+        banned = b ?? [];
+        if (!success)
+            ModalService.ShowError("Failed to load participants", "Internal error");
     }
 
     private async Task NextBannedAsync()
     {
         bannedPage++;
-        (var success, banned) = await ApiService.TryReadContestBannedAsync(Id, 10, bannedPage);
+        (var success, var b) = await ApiService.TryReadContestBannedAsync(Id, 10, bannedPage);
+        banned = b ?? [];
+        if (!success)
+            ModalService.ShowError("Failed to load participants", "Internal error");
     }
     protected override async Task OnAfterRenderAsync(bool firstRender)
     {
         if (!firstRender)
             return;
-
-        if (contest is null)
+        (var success, contest) = await ApiService.TryReadContestAsync(Id);
+        if (!success)
         {
             ModalService.ShowError("Internal error", "could not find contest");
+            NavigationManager.NavigateTo("/");
+            return;
+        }
+        if (contest is null)
+        {
+            ModalService.ShowError("Internal error", "uh oh could not find contest");
             NavigationManager.NavigateTo("/");
             return;
         }
@@ -350,29 +368,25 @@ else
         if (user is null)
             return;
 
-        (var success, contest) = await ApiService.TryReadContestAsync(Id);
-        if (!success)
-        {
-            ModalService.ShowError("Internal error", "could not find contest");
-            NavigationManager.NavigateTo("/");
-            return;
-        }
-
-        if (contest is null || contest.OwnerId != user.Id)
-        {
-            NavigationManager.NavigateTo("/");
-            return;
-        }
-
-        (success, var owner) = await ApiService.TryReadUserAsync(contest.OwnerId);
+        (var success, var owner) = await ApiService.TryReadUserAsync(contest.OwnerId);
 
         if (success && owner is not null)
             ownerName = owner.Username;
+@* 
+        var a = ApiService.TryReadContestAdminsAsync(Id);
+        var p = ApiService.TryReadContestParticipantsAsync(Id, 10, participantsPage);
+        var b = ApiService.TryReadContestBannedAsync(Id, 10, bannedPage);
 
-        (success, administrators) = await ApiService.TryReadContestAdminsAsync(Id);
-        (success, participants) = await ApiService.TryReadContestParticipantsAsync(Id, 10, participantsPage);
-        (success, banned) = await ApiService.TryReadContestBannedAsync(Id, 10, bannedPage);
+        (success, var aa) = await ApiService.TryReadContestAdminsAsync(Id);
+        if (!success) ModalService.ShowError("Failed to load administrators", "Internal error");
+        (success, var pp) = await ApiService.TryReadContestParticipantsAsync(Id, 10, participantsPage);
+        if (!success) ModalService.ShowError("Failed to load participants", "Internal error");
+        (success, var bb) = await ApiService.TryReadContestBannedAsync(Id, 10, bannedPage);
+        if (!success) ModalService.ShowError("Failed to load banned participants", "Internal error");
 
+        administrators = aa ?? [];
+        participants = pp ?? [];
+        banned = bb ?? []; *@
     }
 
     private async Task SubmitAsync()
@@ -386,6 +400,7 @@ else
 
         contest.Name = model.Name;
         contest.Description = model.Description;
+        contest.RenderedDescription = MarkdownRenderService.Render(model.Description);
         contest.StartTime = (await TimeZoneProvider.GetUtcDateTimeAsync(model.StartDate.ToDateTime(model.StartTime))).UtcDateTime;
         contest.EndTime = (await TimeZoneProvider.GetUtcDateTimeAsync(model.EndDate.ToDateTime(model.EndTime))).UtcDateTime;
         contest.MinimumAge = model.MinimumAge;
