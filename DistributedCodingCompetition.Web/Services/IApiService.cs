@@ -173,4 +173,8 @@ public interface IApiService
     Task<bool> TryAddProblemToContestAsync(Guid contestId, Guid problemId);
 
     Task<(bool, Guid?)> TryCreateProblemTestCaseAsync(TestCase testCase);
+
+    Task<(bool, IReadOnlyList<Problem>?)> TryReadContestProblemsAsync(Guid contestId);
+
+    Task<bool> TryDeleteProblemAsync(Guid problemId);
 }

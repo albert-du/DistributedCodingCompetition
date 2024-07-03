@@ -4,11 +4,61 @@
 
 @page "/contest/{id:guid}/manage/problems"
 @inject IApiService ApiService
+@inject IModalService ModalService
+@inject NavigationManager NavigationManager
 <AuthCheck Contest=Id Admin />
 
 <PageTitle>Contest Problems</PageTitle>
 
+
+<div>
+    @foreach (var problem in problems)
+    {
+        <div class="flex">
+            <div class="flex-grow">
+                <a href="problem/@problem.Id/edit">@problem.Name</a>
+                <p>@problem.Description</p>
+            </div>
+            <div>
+                <button class="btn btn-danger" @onclick="() => DeleteProblemAsync(problem.Id)">Delete</button>
+            </div>
+        </div>
+    }
+</div>
+
+<div>
+    <a href="problem/new?contestId=@Id">Add New Problem</a>
+</div>
+
 @code {
     [Parameter]
     public Guid Id { get; set; }
+
+    IReadOnlyList<Problem> problems = [];
+
+    protected override async Task OnInitializedAsync()
+    {
+        (var success, var p) = await ApiService.TryReadContestProblemsAsync(Id);
+        if (!success || p is null)
+        {
+            ModalService.ShowError("Failed to load problems", "Internal Error");
+            NavigationManager.NavigateTo("dashboard");
+            return;
+        }
+
+        problems = p;
+    }
+
+    async Task DeleteProblemAsync(Guid id)
+    {
+        var success = await ApiService.TryDeleteProblemAsync(id);
+        if (!success)
+        {
+            ModalService.ShowError("Failed to delete problem", "Internal Error");
+        }
+        else
+        {
+            problems = problems.Where(p => p.Id != id).ToList();
+        }
+    }
 }

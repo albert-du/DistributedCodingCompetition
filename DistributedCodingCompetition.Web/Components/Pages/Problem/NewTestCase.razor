@@ -52,6 +52,30 @@
 
     ProblemTestCaseModel Model { get; set; } = new();
 
+    protected override async Task OnInitializedAsync()
+    {
+        var (success, problem) = await ApiService.TryReadProblemAsync(Id);
+        if (problem is null || !success)
+        {
+            ModalService.ShowError("Failed to load problem", "Internal error");
+            NavigationManager.NavigateTo("/dashboard");
+            return;
+        }
+
+        var user = await UserStateService.UserAsync();
+        if (user is null)
+        {
+            ModalService.ShowError("Failed to load user", "Internal error");
+            return;
+        }
+        if (user.Id != problem.OwnerId)
+        {
+            ModalService.ShowError("You are not the owner of this problem", "Unauthorized");
+            NavigationManager.NavigateTo("/dashboard");
+            return;
+        }
+    }
+
     async Task SubmitAsync()
     {
         var user = await UserStateService.UserAsync();
@@ -74,7 +98,7 @@
             ModalService.ShowError("Failed to create test case", "Internal error");
             return;
         }
-        NavigationManager.NavigateTo($"/problem/{Id}");
+        NavigationManager.NavigateTo($"/problem/{Id}/edit");
     }
 
     class ProblemTestCaseModel

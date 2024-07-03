@@ -204,6 +204,16 @@ public class ContestsController(ContestContext context) : ControllerBase
             .Take(count)
             .ToListAsync();
 
+    // GET api/contests/{contestId}/problems
+    [HttpGet("{contestId}/problems")]
+    public async Task<ActionResult<IReadOnlyList<Problem>>> GetContestProblems(Guid contestId) =>
+        await context.Contests
+            .Where(c => c.Id == contestId)
+            .SelectMany(c => c.Problems)
+            .OrderBy(c => c.Name)
+            .ToListAsync();
+
     private bool ContestExists(Guid id) =>
         context.Contests.Any(e => e.Id == id);
+
 }

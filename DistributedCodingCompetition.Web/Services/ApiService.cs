@@ -479,4 +479,32 @@ public class ApiService(HttpClient httpClient, ILogger<ApiService> logger) : IAp
         }
     }
 
+    public async Task<(bool, IReadOnlyList<Problem>?)> TryReadContestProblemsAsync(Guid contestId)
+    {
+        try
+        {
+            var response = await httpClient.GetFromJsonAsync<IReadOnlyList<Problem>>("api/contests/{contestId}/problems");
+            return (true, response);
+        }
+        catch (Exception ex)
+        {
+            logger.LogError(ex, "Failed to fetch contest problems");
+            return (false, null);
+        }
+    }
+
+    public async Task<bool> TryDeleteProblemAsync(Guid problemId)
+    {
+        try
+        {
+            var response = await httpClient.DeleteAsync($"api/problems/{problemId}");
+            response.EnsureSuccessStatusCode();
+            return true;
+        }
+        catch (Exception ex)
+        {
+            logger.LogError(ex, "Failed to delete problem");
+            return false;
+        }
+    }
 }
