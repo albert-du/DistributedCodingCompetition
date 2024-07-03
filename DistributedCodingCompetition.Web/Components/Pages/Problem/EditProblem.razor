@@ -68,8 +68,8 @@
                     <InputNumber id="Weight" class="form-control" @bind-Value="testcase.Weight" />
                 </div>
             </div>
-
         }
+        <button @onclick="AddTestCaseAsync">Add New Test case</button>
 
         <button type="submit" class="btn btn-primary">Save</button>
         <DataAnnotationsValidator />
@@ -91,6 +91,7 @@
 
         problem.Name = model.Name;
         problem.Description = model.Description;
+        problem.RenderedDescription = MarkdownRenderService.Render(model.Description);
         problem.Difficulty = model.Difficulty;
         problem.TestCases = [..model.Testcases.Select(tc => new TestCase
         {
@@ -120,6 +121,7 @@
         {
             return;
         }
+
         (var success, var prob) = await ApiService.TryReadProblemAsync(Id);
         if (!success)
         {
@@ -132,6 +134,14 @@
             ModalService.ShowError("Problem not found", "404");
             return;
         }
+        // ensure user is owner of problem
+        if (prob.OwnerId != user.Id)
+        {
+            ModalService.ShowError("You are not the owner of this problem", "");
+            NavigationManager.NavigateTo("dashboard");
+            return;
+        }
+
 
         (success, var cases) = await ApiService.TryReadProblemTestCases(Id);
 
@@ -152,6 +162,11 @@
                     Weight = tc.Weight
                 })]
             };
+    }
+
+    async Task AddTestCaseAsync()
+    {
+        
     }
 
     class ProblemModel

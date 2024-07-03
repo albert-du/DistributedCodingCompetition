@@ -434,4 +434,19 @@ public class ApiService(HttpClient httpClient, ILogger<ApiService> logger) : IAp
             return false;
         }
     }
+
+    public async Task<(bool, Guid?)> TryCreateJoinCodeAsync(JoinCode joinCode)
+    {
+        try
+        {
+            var response = await httpClient.PostAsJsonAsync("api/joincodes", joinCode);
+            response.EnsureSuccessStatusCode();
+            return (true, joinCode.Id);
+        }
+        catch (Exception ex)
+        {
+            logger.LogError(ex, "Failed to create join code");
+            return (false, null);
+        }
+    }
 }

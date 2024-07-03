@@ -4,9 +4,17 @@
 @inject IUserStateService UserStateService
 @inject IModalService ModalService
 @inject NavigationManager NavigationManager
+@inject IMarkdownRenderService MarkdownRenderService
 @rendermode InteractiveServer
-<AuthCheck />
 
+@if (ContestId.HasValue)
+{
+    <AuthCheck Contest="ContestId" Admin />
+}
+else
+{
+    <AuthCheck />
+}
 
 <EditForm OnValidSubmit="SubmitAsync">
 
@@ -31,6 +39,9 @@
 </EditForm>
 
 @code {
+    [SupplyParameterFromQuery]
+    public Guid? ContestId { get; set; }
+
     async Task SubmitAsync()
     {
         var user = await UserStateService.UserAsync();
@@ -42,12 +53,19 @@
             {
                 Name = Model.Name,
                 Description = Model.Description,
+                RenderedDescription = MarkdownRenderService.Render(Model.Description),
                 Difficulty = string.IsNullOrWhiteSpace(Model.Difficulty) ? null : Model.Difficulty,
                 OwnerId = user.Id
             });
-        if (!success)
+        if (!success || !probid.HasValue)
         {
             ModalService.ShowError("Failed to create problem", "Internal error");
+            return;
+        }
+
+        if (ContestId.HasValue && !await ApiService.TryAddProblemToContestAsync(ContestId.Value, probid.Value))
+        {
+            ModalService.ShowError("Failed to add problem to contest", "Internal error");
             return;
         }
         NavigationManager.NavigateTo($"problem/{probid}/edit");

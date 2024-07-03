@@ -265,7 +265,7 @@
 
     </div>
     <div>
-        <div>
+        <div class="flex flex-col gap-y-1">
             <h2 class="text-2xl" id="invites">Invites</h2>
             <div class="flex flex-wrap gap-1 bg-purple-200 rounded-lg px-1 text-slate-600 my-2 w-full">
                 @if (joinCodes.Count == 0)
@@ -288,10 +288,15 @@
                     }
                 }
             </div>
-            <a href="/contest/@Id/manage/invites" class="italic hover:underline">Manage invites</a>
+            <a href="contest/@Id/manage/invites" class="italic hover:underline">Manage invites</a>
         </div>
-        <a href="/contest/@Id/manage/problems" class="italic hover:underline">@model.Problems problems</a>
-        <a href="/contest/@Id/manage/submissions" class="italic hover:underline">@model.Submissions submissions</a>
+        <div class="flex flex-col gap-y-1">
+            <h2 class="text-2xl">Problems</h2>
+
+
+            <a href="contest/@Id/manage/problems" class="italic hover:underline">Manage problems</a>
+        </div>
+        <a href="contest/@Id/manage/submissions" class="italic hover:underline">@model.Submissions submissions</a>
     </div>
 }
 else

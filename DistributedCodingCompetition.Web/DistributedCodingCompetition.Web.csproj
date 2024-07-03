@@ -7,6 +7,10 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <Content Remove="Components\Pages\Contest\ContestProblem.razor" />
+  </ItemGroup>
+
+  <ItemGroup>
     <ProjectReference Include="..\DistributedCodingCompetition.ApiService\DistributedCodingCompetition.ApiService.csproj" />
     <ProjectReference Include="..\DistributedCodingCompetition.AuthService\DistributedCodingCompetition.AuthService.csproj" />
     <ProjectReference Include="..\DistributedCodingCompetition.ExecutionShared\DistributedCodingCompetition.ExecutionShared.csproj" />
@@ -23,6 +27,10 @@
 
   <ItemGroup>
     <Folder Include="Components\Pages\NewFolder\" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <None Include="Components\Pages\Contest\ContestProblem.razor" />
   </ItemGroup>
 
 </Project>

@@ -1,40 +1,41 @@
 @page "/contest/{contestId:guid}/problem/{problemId:guid}"
 
-<AuthCheck/>
+<AuthCheck />
 
 <PageTitle>Problem</PageTitle>
 
 <h1 class="text-2xl">Problem</h1>
+@*
 
-@if (problem is null)
-{
-    <div>No problem</div>
-}
-else
-{
-    <h2>@problem.Name</h2>
-    <p>@problem.Description</p>
-    <div>
-        <h3>Input</h3>
-        <p>@problem.Input</p>
+ @if (problem is null)
+ {
+     <div>No problem</div>
+ }
+ else
+ {
+     <h2>@problem.Name</h2>
+     <p>@problem.Description</p>
+     <div>
+         <h3>Input</h3>
+         <p>@problem.Input</p>
 
-        <h3>Output</h3>
-        <p>@problem.Output</p>
-    </div>
-    <div>
-        <h3>Examples</h3>
-        @foreach (var example in problem.Examples)
-        {
-            <div>
-                <h4>Input</h4>
-                <pre>@example.Input</pre>
-                <h4>Output</h4>
-                <pre>@example.Output</pre>
-            </div>
-        }
-}
-
-
+         <h3>Output</h3>
+         <p>@problem.Output</p>
+     </div>
+     <div>
+         <h3>Examples</h3>
+         @foreach (var example in problem.Examples)
+         {
+             <div>
+                 <h4>Input</h4>
+                 <pre>@example.Input</pre>
+                 <h4>Output</h4>
+                 <pre>@example.Output</pre>
+             </div>
+         }
+     </div>
+ }
+*@
 
 @code {
     [Parameter]
