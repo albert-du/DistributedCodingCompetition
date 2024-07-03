@@ -8,7 +8,7 @@ public class JoinCode
     /// <summary>
     /// Unique identifier.
     /// </summary>
-    public Guid Id { get; set; }
+    public Guid Id { get; set; } = Guid.NewGuid();
 
     /// <summary>
     /// Unique identifier of the contest.
@@ -69,4 +69,5 @@ public class JoinCode
     /// Admin user who created the code.
     /// </summary>
     public User? Creator { get; set; }
+    public Guid CreatorId { get; set; }
 }

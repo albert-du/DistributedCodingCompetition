@@ -61,7 +61,7 @@ public interface IApiService
     /// </summary>
     /// <param name="contestId"></param>
     /// <returns>success in reaching endpoint; null or emtpy if doesn't exist</returns>
-    Task<(bool, IReadOnlyList<JoinCode>?)> TryReadJoinCodesAsync(Guid contestId);
+    Task<(bool, JoinCode?)> TryReadJoinCodeAsync(Guid contestId);
 
     /// <summary>
     /// success in reaching endpoint; null if doesn't exist
@@ -76,6 +76,7 @@ public interface IApiService
     /// <param name="contest"></param>
     /// <returnssuccess in reaching endpoint; null if doesn't exist></returns>
     Task<(bool, Contest?)> TryUpdateContestAsync(Contest contest);
+
     /// <summary>
     /// 
     /// </summary>
@@ -162,4 +163,10 @@ public interface IApiService
     Task<(bool, IReadOnlyList<Contest>?)> TryReadPublicContestsAsync(int count, int page);
 
     Task<(bool, IReadOnlyList<JoinCode>?)> TryReadContestJoinCodesAsync(Guid id);
+
+    Task<bool> TryDeleteJoinCodeAsync(Guid joinCodeId);
+
+    Task<bool> TryUpdateJoinCodeAsync(JoinCode joinCode);
+
+    Task<(bool, Guid?)> TryCreateJoinCodeAsync(JoinCode joinCode);
 }

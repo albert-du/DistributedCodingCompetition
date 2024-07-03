@@ -1,0 +1,85 @@
+﻿@*
+public ICollection<JoinCode> JoinCodes { get; set; } = [];
+*@
+
+@page "/contest/{contestId:guid}/manage/invites/new"
+@inject IApiService ApiService
+@inject IModalService ModalService
+@inject NavigationManager NavigationManager
+@inject IUserStateService UserStateService
+@rendermode InteractiveServer
+<AuthCheck Contest=ContestId Admin />
+
+<PageTitle>New Invite</PageTitle>
+
+<h1 class="text-2xl">Invite to @contestName</h1>
+
+<EditForm>
+
+</EditForm>
+
+@code {
+    [Parameter]
+    public Guid ContestId { get; set; }
+
+    string contestName = "";
+    JoinCodeModel model = new();
+
+    protected override async Task OnInitializedAsync()
+    {
+        (var success, var contest) = await ApiService.TryReadContestAsync(ContestId);
+        if (!success || contest is null)
+        {
+            ModalService.ShowError("Failed to load contest", "Internal error");
+            return;
+        }
+        contestName = contest.Name;
+    }
+
+    async Task SubmitAsync()
+    {
+        var user = await UserStateService.UserAsync();
+        if (user is null)
+        {
+            ModalService.ShowError("You are not logged in", "Please log in to create a join code");
+            return;
+        }
+        JoinCode joinCode = new()
+            {
+                ContestId = ContestId,
+                Code = model.Code,
+                Name = model.Name,
+                Creation = DateTime.UtcNow,
+                Expiration = DateTime.UtcNow.AddDays(model.DaysToExpire),
+                CloseAfterUse = model.CloseAfterUse,
+                CreatorId = user.Id
+            };
+
+        (var success, var id) = await ApiService.TryCreateJoinCodeAsync(joinCode);
+        if (!success || id is null)
+        {
+            ModalService.ShowError("Failed to create join code", "Internal error");
+            return;
+        }
+        ModalService.ShowInfo("Join code created", "The invite join code has been created successfully");
+        NavigationManager.NavigateTo($"/contest/{ContestId}/manage/invites");
+    }
+
+    static string RandomString(int length)
+    {
+        const string chars = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789";
+        return new string(Enumerable.Repeat(chars, length)
+            .Select(s => s[Random.Shared.Next(s.Length)]).ToArray());
+    }
+    class JoinCodeModel
+    {
+        public string Code { get; set; } = RandomString(6);
+        public string Name { get; set; } = "Unnamed Join Code";
+        public int DaysToExpire { get; set; } = 7;
+        public bool CloseAfterUse { get; set; }
+    }
+}
+
+
+
+

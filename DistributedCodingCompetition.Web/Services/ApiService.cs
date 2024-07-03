@@ -379,12 +379,59 @@ public class ApiService(HttpClient httpClient, ILogger<ApiService> logger) : IAp
             if (response.StatusCode == HttpStatusCode.NotFound)
                 return (true, null);
             response.EnsureSuccessStatusCode();
-            return (true, await response.Content.ReadFromJsonAsync<IReadOnlyList<JoinCode>>());
+            return (true, await response.Content.ReadFromJsonAsync<IReadOnlyList<JoinCode>?>());
         }
         catch (Exception ex)
         {
             logger.LogError(ex, "Failed to fetch contest join codes");
             return (false, null);
+        }
+    }
+
+    public async Task<(bool, JoinCode?)> TryReadJoinCodeAsync(Guid joinCodeId)
+    {
+        try
+        {
+            var response = await httpClient.GetAsync($"api/joincodes/{joinCodeId}");
+            if (response.StatusCode == HttpStatusCode.NotFound)
+                return (true, null);
+            response.EnsureSuccessStatusCode();
+            return (true, await response.Content.ReadFromJsonAsync<JoinCode>());
+        }
+        catch (Exception ex)
+        {
+            logger.LogError(ex, "Failed to fetch join code");
+            return (false, null);
+        }
+    }
+
+    public async Task<bool> TryDeleteJoinCodeAsync(Guid joinCodeId)
+    {
+        try
+        {
+            var response = await httpClient.DeleteAsync($"api/joincodes/{joinCodeId}");
+            response.EnsureSuccessStatusCode();
+            return true;
+        }
+        catch (Exception ex)
+        {
+            logger.LogError(ex, "Failed to delete join code");
+            return false;
+        }
+    }
+
+    public async Task<bool> TryUpdateJoinCodeAsync(JoinCode joinCode)
+    {
+        try
+        {
+            var response = await httpClient.PutAsJsonAsync($"api/joincodes/{joinCode.Id}", joinCode);
+            response.EnsureSuccessStatusCode();
+            return true;
+        }
+        catch (Exception ex)
+        {
+            logger.LogError(ex, "Failed to update join code");
+            return false;
         }
     }
 }

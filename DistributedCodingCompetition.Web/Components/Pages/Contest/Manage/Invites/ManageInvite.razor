@@ -1,0 +1,112 @@
+﻿@*
+public ICollection<JoinCode> JoinCodes { get; set; } = [];
+*@
+
+@page "/contest/{contestId:guid}/manage/invites/{joinCodeId}"
+@inject IApiService ApiService
+@inject IModalService ModalService
+@inject NavigationManager NavigationManager
+@rendermode InteractiveServer
+<AuthCheck Contest=ContestId Admin />
+
+<PageTitle>Contest Invite</PageTitle>
+
+<h1 class="text-2xl">Invite to @contestName</h1>
+
+
+@if (joinCode is null)
+{
+    <div>No invite</div>
+}
+else
+{
+    <p>Share this link: <a href="@NavigationManager.BaseUri/contest/join/@joinCode.Code">@($"{NavigationManager.BaseUri}/contest/join/${joinCode.Code}")</a></p>
+    <div class="flex flex-col gap-y-2">
+        <div class="flex bg-gray-100">
+            <div class="flex-1">@joinCode.Name</div>
+            <div class="flex-1">Code: @joinCode.Code</div>
+            <div class="flex-1">@joinCode.Uses Uses</div>
+            <div class="flex-1">Expires @joinCode.Expiration</div>
+            <div class="flex-1">@(joinCode.Active ? "Active" : "Inactive")</div>
+            <div class="flex-1">
+                <button class="btn btn-danger" @onclick="DeleteAsync">Delete</button>
+            </div>
+            <div class="flex-1">
+                <button class="btn btn-primary" @onclick="() => SetActiveAsync(!joinCode.Active)">
+                    @if (joinCode.Active)
+                    {
+                        <span>Deactivate</span>
+                    }
+                    else
+                    {
+                        <span>Activate</span>
+                    }
+                </button>
+            </div>
+        </div>
+    </div>
+}
+
+
+@code {
+    [Parameter]
+    public Guid ContestId { get; set; }
+    [Parameter]
+    public Guid JoinCodeId { get; set; }
+
+    string contestName = "";
+    JoinCode? joinCode;
+
+    protected override async Task OnInitializedAsync()
+    {
+        (var success, var code) = await ApiService.TryReadJoinCodeAsync(JoinCodeId);
+        if (!success || code is null)
+        {
+            ModalService.ShowError("Failed to load join codes", "Internal error");
+            return;
+        }
+
+        (success, var contest) = await ApiService.TryReadContestAsync(ContestId);
+        if (!success || contest is null)
+        {
+            ModalService.ShowError("Failed to load contest", "Internal error");
+            return;
+        }
+        // check join code belongs to contest
+        if (code.ContestId != ContestId)
+        {
+            ModalService.ShowError("Join code does not belong to contest", "");
+            NavigationManager.NavigateTo("dashboard");
+        }
+
+        joinCode = code;
+        contestName = contest.Name;
+    }
+
+    async Task DeleteAsync()
+    {
+        if (await ApiService.TryDeleteJoinCodeAsync(JoinCodeId))
+        {
+            ModalService.ShowInfo("Invite deleted", "");
+        }
+        else
+        {
+            ModalService.ShowError("Failed to delete invite", "Internal error");
+        }
+    }
+
+    async Task SetActiveAsync(bool active)
+    {
+        if (joinCode is null)
+            return;
+        joinCode.Active = active;
+        if (await ApiService.TryUpdateJoinCodeAsync(joinCode))
+        {
+            ModalService.ShowInfo("Invite updated", "");
+        }
+        else
+        {
+            ModalService.ShowError("Failed to update invite", "Internal error");
+        }
+    }
+}

@@ -1,0 +1,79 @@
+@*
+public ICollection<JoinCode> JoinCodes { get; set; } = [];
+*@
+
+@page "/contest/{id:guid}/manage/invites"
+@inject IApiService ApiService
+@inject IModalService ModalService
+@rendermode InteractiveServer
+<AuthCheck Contest=Id Admin />
+
+<PageTitle>Contest Invites</PageTitle>
+
+<h1 class="text-2xl">Invite to @contestName</h1>
+
+<div class="flex flex-col gap-y-2">
+    @if (joinCodes.Count == 0)
+    {
+        <div>No invites</div>
+    }
+    @foreach (var cod in joinCodes)
+    {
+        <a href="contest/@Id/invites/@cod.Id" class="flex bg-gray-100">
+            <div class="flex-1">@cod.Name</div>
+            <div class="flex-1">Code: @cod.Code</div>
+            <div class="flex-1">@cod.Uses Uses</div>
+            <div class="flex-1">Expires @cod.Expiration</div>
+            <div class="flex-1">@(cod.Active ? "Active" : "Inactive")</div>
+        </a>
+    }
+</div>
+
+<h1 class="text-2xl">Invite to administer</h1>
+
+<div class="flex flex-col gap-y-2">
+    @if (adminJoinCodes.Count == 0)
+    {
+        <div>No admin invites</div>
+    }
+    @foreach (var cod in adminJoinCodes)
+    {
+        <a href="contest/@Id/invites/@cod.Id" class="flex bg-gray-100">
+            <div class="flex-1">@cod.Name</div>
+            <div class="flex-1">Code: @cod.Code</div>
+            <div class="flex-1">@cod.Uses Uses</div>
+            <div class="flex-1">Expires @cod.Expiration</div>
+            <div class="flex-1">@(cod.Active ? "Active" : "Inactive")</div>
+        </a>
+    }
+</div>
+
+
+@code {
+    [Parameter] public Guid Id { get; set; }
+
+    IReadOnlyList<JoinCode> joinCodes = [];
+    IReadOnlyList<JoinCode> adminJoinCodes = [];
+    string contestName = "";
+
+    protected override async Task OnInitializedAsync()
+    {
+        (var success, var codes) = await ApiService.TryReadContestJoinCodesAsync(Id);
+        if (!success || codes is null)
+        {
+            ModalService.ShowError("Failed to load join codes", "Internal error");
+            return;
+        }
+        joinCodes = codes.Where(x => !x.Admin).ToArray();
+        adminJoinCodes = codes.Where(x => x.Admin).ToArray();
+
+        (success, var contest) = await ApiService.TryReadContestAsync(Id);
+        if (!success || contest is null)
+        {
+            ModalService.ShowError("Failed to load contest", "Internal error");
+            return;
+        }
+
+        contestName = contest.Name;
+    }
+}
