@@ -450,11 +450,11 @@ public class ApiService(HttpClient httpClient, ILogger<ApiService> logger) : IAp
         }
     }
 
-    public async Task<bool> TryAddProblemToContestAsync(Guid contestId, Guid problemId)
+    public async Task<bool> TryAddProblemToContestAsync(Guid contestId, Problem problem)
     {
         try
         {
-            var response = await httpClient.PostAsync($"api/contests/{contestId}/problems/{problemId}", null);
+            var response = await httpClient.PostAsJsonAsync($"api/contests/{contestId}/problems", problem);
             response.EnsureSuccessStatusCode();
             return true;
         }
@@ -483,7 +483,7 @@ public class ApiService(HttpClient httpClient, ILogger<ApiService> logger) : IAp
     {
         try
         {
-            var response = await httpClient.GetFromJsonAsync<IReadOnlyList<Problem>>("api/contests/{contestId}/problems");
+            var response = await httpClient.GetFromJsonAsync<IReadOnlyList<Problem>>($"api/contests/{contestId}/problems");
             return (true, response);
         }
         catch (Exception ex)

@@ -90,6 +90,15 @@ public class ContestsController(ContestContext context) : ControllerBase
             .Take(count)
             .ToListAsync();
 
+    // GET api/contests/{contestId}/problems
+    [HttpGet("{contestId}/problems")]
+    public async Task<ActionResult<IReadOnlyList<Problem>>> GetContestProblems(Guid contestId) =>
+        await context.Contests
+            .Where(c => c.Id == contestId)
+            .SelectMany(c => c.Problems)
+            .OrderBy(c => c.Name)
+            .ToListAsync();
+
     [HttpPut("{contestId}/role/{userId}")]
     public async Task<IActionResult> UpdateUserContestRole(Guid contestId, Guid userId, ContestRole role)
     {
@@ -162,16 +171,12 @@ public class ContestsController(ContestContext context) : ControllerBase
         return CreatedAtAction(nameof(GetContest), new { id = contest.Id }, contest);
     }
 
-    // POST: api/contests/{contestId}/problems/{problemId}
-    [HttpPost("{contestId}/problems/{problemId}")]
-    public async Task<IActionResult> AddProblemToContest(Guid contestId, Guid problemId)
+    // POST: api/contests/{contestId}/problems
+    [HttpPost("{contestId}/problems")]
+    public async Task<IActionResult> AddProblemToContest(Guid contestId, Problem problem)
     {
         var contest = await context.Contests.FindAsync(contestId);
         if (contest is null)
-            return NotFound();
-
-        var problem = await context.Problems.FindAsync(problemId);
-        if (problem is null)
             return NotFound();
 
         contest.Problems.Add(problem);
@@ -202,15 +207,6 @@ public class ContestsController(ContestContext context) : ControllerBase
             .OrderByDescending(s => s.SubmissionTime)
             .Skip(count * page)
             .Take(count)
-            .ToListAsync();
-
-    // GET api/contests/{contestId}/problems
-    [HttpGet("{contestId}/problems")]
-    public async Task<ActionResult<IReadOnlyList<Problem>>> GetContestProblems(Guid contestId) =>
-        await context.Contests
-            .Where(c => c.Id == contestId)
-            .SelectMany(c => c.Problems)
-            .OrderBy(c => c.Name)
             .ToListAsync();
 
     private bool ContestExists(Guid id) =>

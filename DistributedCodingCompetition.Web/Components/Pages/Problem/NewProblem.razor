@@ -16,21 +16,21 @@ else
     <AuthCheck />
 }
 
-<EditForm OnValidSubmit="SubmitAsync">
+<EditForm Model="model" OnValidSubmit="SubmitAsync">
 
     <div class="form-group">
         <label for="Name">Name</label>
-        <InputText id="Name" class="form-control" @bind-Value="Model.Name" />
+        <InputText id="Name" class="form-control" @bind-Value="model.Name" />
     </div>
 
     <div class="form-group">
         <label for="Description">Description</label>
-        <InputText id="Description" class="form-control" @bind-Value="Model.Description" />
+        <InputText id="Description" class="form-control" @bind-Value="model.Description" />
     </div>
 
     <div class="form-group">
         <label for="Difficulty">Difficulty</label>
-        <InputText id="Difficulty" class="form-control" @bind-Value="Model.Difficulty" />
+        <InputText id="Difficulty" class="form-control" @bind-Value="model.Difficulty" />
     </div>
     <div>You will create test cases on the next step.</div>
     <button type="submit" class="btn btn-primary">Create</button>
@@ -49,29 +49,31 @@ else
         {
             return;
         }
-        (var success, var probid) = await ApiService.TryCreateProblemAsync(new()
+        Problem problem = new()
             {
-                Name = Model.Name,
-                Description = Model.Description,
-                RenderedDescription = MarkdownRenderService.Render(Model.Description),
-                Difficulty = string.IsNullOrWhiteSpace(Model.Difficulty) ? null : Model.Difficulty,
+                Name = model.Name,
+                Description = model.Description,
+                RenderedDescription = MarkdownRenderService.Render(model.Description),
+                Difficulty = string.IsNullOrWhiteSpace(model.Difficulty) ? null : model.Difficulty,
                 OwnerId = user.Id
-            });
-        if (!success || !probid.HasValue)
+            };
+        (var success, _) = await ApiService.TryCreateProblemAsync(problem);
+        if (!success)
         {
             ModalService.ShowError("Failed to create problem", "Internal error");
             return;
         }
-
-        if (ContestId.HasValue && !await ApiService.TryAddProblemToContestAsync(ContestId.Value, probid.Value))
+        if (ContestId.HasValue)
         {
-            ModalService.ShowError("Failed to add problem to contest", "Internal error");
-            return;
+            if (!await ApiService.TryAddProblemToContestAsync(ContestId.Value, problem))
+            {
+                ModalService.ShowError("Failed to create and add problem to contest", "Internal error");
+            }
         }
-        NavigationManager.NavigateTo($"problem/{probid}/edit");
+        NavigationManager.NavigateTo($"problem/{problem.Id}/edit");
     }
 
-    ProblemModel Model = new();
+    ProblemModel model = new();
 
     class ProblemModel
     {

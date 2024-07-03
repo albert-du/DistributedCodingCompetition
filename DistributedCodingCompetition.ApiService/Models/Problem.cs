@@ -2,7 +2,7 @@
 
 public class Problem
 {
-    public Guid Id { get; set; }
+    public Guid Id { get; set; } = Guid.NewGuid();
 
     /// <summary>
     /// Short name of the problem.
@@ -10,7 +10,7 @@ public class Problem
     public string Name { get; set; } = string.Empty;
 
     public Guid OwnerId { get; set; } = Guid.NewGuid();
-    public User Owner { get; set; } = null!;
+    public User? Owner { get; set; } = null!;
 
     /// <summary>
     /// Markdown formatted description of the problem.

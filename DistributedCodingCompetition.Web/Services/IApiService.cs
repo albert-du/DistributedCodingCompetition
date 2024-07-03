@@ -170,7 +170,7 @@ public interface IApiService
 
     Task<(bool, Guid?)> TryCreateJoinCodeAsync(JoinCode joinCode);
 
-    Task<bool> TryAddProblemToContestAsync(Guid contestId, Guid problemId);
+    Task<bool> TryAddProblemToContestAsync(Guid contestId, Problem problem);
 
     Task<(bool, Guid?)> TryCreateProblemTestCaseAsync(TestCase testCase);
 

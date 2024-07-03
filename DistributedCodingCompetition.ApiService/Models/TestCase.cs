@@ -2,9 +2,9 @@
 
 public class TestCase
 {
-    public Guid Id { get; set; }
+    public Guid Id { get; set; } = Guid.NewGuid();
     public Guid ProblemId { get; set; }
-    public Problem Problem { get; set; } = null!;
+    public Problem? Problem { get; set; } = null!;
     public string Input { get; set; } = string.Empty;
     public string Output { get; set; } = string.Empty;
     public string Description { get; set; } = string.Empty;

@@ -9,35 +9,35 @@
 <AuthCheck />
 <PageTitle>New Test Case</PageTitle>
 
-<EditForm OnValidSubmit="SubmitAsync">
+<EditForm Model=model OnValidSubmit="SubmitAsync">
     <div class="form-group">
         <label for="Input">Input</label>
-        <InputTextArea id="Input" class="form-control" @bind-Value="Model.Input" />
+        <InputTextArea id="Input" class="form-control" @bind-Value="model.Input" />
     </div>
 
     <div class="form-group">
         <label for="Output">Output</label>
-        <InputTextArea id="Output" class="form-control" @bind-Value="Model.Output" />
+        <InputTextArea id="Output" class="form-control" @bind-Value="model.Output" />
     </div>
 
     <div class="form-group">
         <label for="Description">Description</label>
-        <InputText id="Description" class="form-control" @bind-Value="Model.Description" />
+        <InputText id="Description" class="form-control" @bind-Value="model.Description" />
     </div>
 
     <div class="form-group">
         <label for="Sample">Sample</label>
-        <InputCheckbox id="Sample" class="form-control" @bind-Value="Model.Sample" />
+        <InputCheckbox id="Sample" class="form-control" @bind-Value="model.Sample" />
     </div>
 
     <div class="form-group">
         <label for="Active">Active</label>
-        <InputCheckbox id="Active" class="form-control" @bind-Value="Model.Active" />
+        <InputCheckbox id="Active" class="form-control" @bind-Value="model.Active" />
     </div>
 
     <div class="form-group">
         <label for="Weight">Weight</label>
-        <InputNumber id="Weight" class="form-control" @bind-Value="Model.Weight" />
+        <InputNumber id="Weight" class="form-control" @bind-Value="model.Weight" />
     </div>
 
     <button type="submit" class="btn btn-primary">Create</button>
@@ -50,7 +50,7 @@
     [Parameter]
     public Guid Id { get; set; }
 
-    ProblemTestCaseModel Model { get; set; } = new();
+    ProblemTestCaseModel model { get; set; } = new();
 
     protected override async Task OnInitializedAsync()
     {
@@ -85,12 +85,12 @@
         }
         (var success, var testCaseId) = await ApiService.TryCreateProblemTestCaseAsync(new()
             {
-                Input = Model.Input,
-                Output = Model.Output,
-                Description = Model.Description,
-                Sample = Model.Sample,
-                Active = Model.Active,
-                Weight = Model.Weight,
+                Input = model.Input,
+                Output = model.Output,
+                Description = model.Description,
+                Sample = model.Sample,
+                Active = model.Active,
+                Weight = model.Weight,
                 ProblemId = Id
             });
         if (!success || !testCaseId.HasValue)
