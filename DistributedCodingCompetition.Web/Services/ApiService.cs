@@ -566,4 +566,35 @@ public class ApiService(HttpClient httpClient, ILogger<ApiService> logger) : IAp
         }
     }
 
+    public async Task<bool> TryJoinContestAsync(JoinCode joinCodeId, Guid userId)
+    {
+        try
+        {
+            var response = await httpClient.PostAsync($"api/joincodes/{joinCodeId}/join/{userId}", null);
+            response.EnsureSuccessStatusCode();
+            return true;
+        }
+        catch (Exception ex)
+        {
+            logger.LogError(ex, "Failed to join contest");
+            return false;
+        }
+    }
+
+    public async Task<(bool, JoinCode?)> TryReadJoinCodeAsync(string code)
+    {
+        try
+        {
+            var response = await httpClient.GetAsync($"api/joincodes/code/{code}");
+            if (response.StatusCode == HttpStatusCode.NotFound)
+                return (true, null);
+            response.EnsureSuccessStatusCode();
+            return (true, await response.Content.ReadFromJsonAsync<JoinCode>());
+        }
+        catch (Exception ex)
+        {
+            logger.LogError(ex, "Failed to fetch join code");
+            return (false, null);
+        }
+    }
 }

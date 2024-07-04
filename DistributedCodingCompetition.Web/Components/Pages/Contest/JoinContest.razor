@@ -1,7 +1,9 @@
 @page "/join/{code}"
 @inject IApiService ApiService
 @inject UserStateService UserStateService
-
+@inject IModalService ModalService
+@inject NavigationManager NavigationManager
+@rendermode InteractiveServer
 <h1>Join Contest</h1>
 
 @if (contest is null)
@@ -30,7 +32,7 @@ else if (contest.MinimumAge > age)
 }
 else
 {
-    <p>Join @contest.Name</p>
+    <h2>@contest.Name</h2>
     @if (joinCode.Admin)
     {
         <p>You have been invited to administer this contest</p>
@@ -41,24 +43,19 @@ else
     }
 
     <p>Expires @joinCode.Expiration</p>
-    @if (joinCode.CloseAfterUse || )
+    @if (joinCode.CloseAfterUse)
     {
         <p>This code will expire after use</p>
-    }
-    else
-    {
-        <p>This code will not expire after use</p>
     }
     <AuthorizeView>
         <Authorized>
             <p>By joining, the contest organizers will receive your full name and username and they may be displayed on leaderboards.</p>
-
-            <p>Join as @userName</p>
-            <button >Join</button>
+            <p>Join as @username</p>
+            <button @onclick=JoinAsync>Join</button>
         </Authorized>
         <NotAuthorized>
-            <a href="/auth/login?returnUrl=join/@Code">Sign in to join</a>
-            <a href="/auth/register?returnUrl=join/@Code">Register</a>
+            <a href="auth/login?returnUrl=join/@Code">Sign in to join</a>
+            <a href="auth/register?returnUrl=join/@Code">Register</a>
         </NotAuthorized>
     </AuthorizeView>
 }
@@ -68,18 +65,37 @@ else
     public string Code { get; set; } = string.Empty;
     private Contest? contest;
     private JoinCode? joinCode;
-    string userName = "";
+    string username = "";
     int age;
-    protected override async Task OnInitializedAsync()
+    protected override async Task OnParametersSetAsync()
     {
         (_, contest) = await ApiService.TryReadContestByJoinCodeAsync(Code);
         (_, joinCode) = await ApiService.TryReadJoinCodeAsync(Code);
         var user = await UserStateService.UserAsync();
         if (user is not null)
         {
-            userName = user.UserName;
+            username = user.Username;
         }
-        age = Age(user.BirthDate);
+        age = Age(user.Birthday);
+    }
+
+    async Task JoinAsync()
+    {
+        var user = await UserStateService.UserAsync();
+        if (user is null)
+        {
+            ModalService.ShowError("You are not logged in", "Please log in to join the contest");
+            return;
+        }
+
+        var success = await ApiService.TryJoinContestAsync(joinCode, user.Id);
+        if (!success)
+        {
+            ModalService.ShowError("Failed to join contest", "Internal error");
+            return;
+        }
+        ModalService.ShowInfo("Joined contest", "You have successfully joined the contest");
+        NavigationManager.NavigateTo($"/contest/{contest!.Id}");
     }
 
     static int Age(DateTime birthDate)

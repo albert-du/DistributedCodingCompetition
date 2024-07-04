@@ -62,6 +62,7 @@ public interface IApiService
     /// <param name="contestId"></param>
     /// <returns>success in reaching endpoint; null or emtpy if doesn't exist</returns>
     Task<(bool, JoinCode?)> TryReadJoinCodeAsync(Guid contestId);
+    Task<(bool, JoinCode?)> TryReadJoinCodeAsync(string code);
 
     /// <summary>
     /// success in reaching endpoint; null if doesn't exist
@@ -186,4 +187,5 @@ public interface IApiService
 
     Task<bool> TryUpdateTestCaseAsync(TestCase testCase);
 
+    Task<bool> TryJoinContestAsync(JoinCode joinCodeId, Guid userId);
 }

@@ -3,6 +3,7 @@
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using DistributedCodingCompetition.ApiService.Models;
+using NuGet.Protocol.Core.Types;
 
 [Route("api/[controller]")]
 [ApiController]
@@ -65,6 +66,37 @@ public class JoinCodesController(ContestContext context) : ControllerBase
         await context.SaveChangesAsync();
 
         return CreatedAtAction("GetJoinCode", new { id = joinCode.Id }, joinCode);
+    }
+
+    // POST: api/joincodes/{joinCodeId}/join/{userId}
+    [HttpPost("{joinCodeId}/join/{userId}")]
+    public async Task<ActionResult<JoinCode>> JoinContest(Guid joinCodeId, Guid userId)
+    {
+        var joinCode = await context.JoinCodes.FindAsync(joinCodeId);
+        if (joinCode is null)
+            return NotFound();
+
+        var user = await context.Users.FindAsync(userId);
+        if (user is null)
+            return NotFound();
+
+        var contest = await context.Contests.FindAsync(joinCode.ContestId);
+        if (contest is null)
+            return NotFound();
+
+        joinCode.Users.Add(user);
+        if (joinCode.CloseAfterUse)
+            joinCode.Active = false;
+
+        // add user to contest
+        if (joinCode.Admin)
+            contest.Administrators.Add(user);
+        else
+            contest.Participants.Add(user);
+
+        await context.SaveChangesAsync();
+        
+        return NoContent();
     }
 
     // DELETE: api/JoinCodes/5
