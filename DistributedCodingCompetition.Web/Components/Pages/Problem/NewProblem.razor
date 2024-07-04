@@ -7,6 +7,8 @@
 @inject IMarkdownRenderService MarkdownRenderService
 @rendermode InteractiveServer
 
+<PageTitle>New Problem</PageTitle>
+
 @if (ContestId.HasValue)
 {
     <AuthCheck Contest="ContestId" Admin />
@@ -16,31 +18,41 @@ else
     <AuthCheck />
 }
 
-<EditForm Model="model" OnValidSubmit="SubmitAsync">
+<EditForm Model="model" OnValidSubmit="SubmitAsync" class="flex flex-col gap-y-1">
 
-    <div class="form-group">
-        <label for="Name">Name</label>
-        <InputText id="Name" class="form-control" @bind-Value="model.Name" />
-    </div>
+    <label class="flex flex-col">
+        <div class="pl-2">
+            Name
+        </div>
+        <InputText id="Name" class="w-full px-2 py-1 ml-2 bg-gray-100 rounded-lg text-slate-800" @bind-Value="model.Name" />
+    </label>
 
-    <div class="form-group">
-        <label for="Description">Description</label>
-        <InputText id="Description" class="form-control" @bind-Value="model.Description" />
-    </div>
+    <label class="flex flex-col">
+        <div class="pl-2">
+            Description
+        </div>
+        <InputText id="Description" class="w-full px-2 py-1 ml-2 bg-gray-100 rounded-lg text-slate-800" @bind-Value="model.Description" />
+    </label>
 
-    <div class="form-group">
-        <label for="Difficulty">Difficulty</label>
-        <InputText id="Difficulty" class="form-control" @bind-Value="model.Difficulty" />
-    </div>
+    <label class="flex flex-col">
+        <div class="pl-2">
+            Difficulty
+        </div>
+        <InputText id="Difficulty" class="w-full px-2 py-1 ml-2 bg-gray-100 rounded-lg text-slate-800" @bind-Value="model.Difficulty" />
+    </label>
     <div>You will create test cases on the next step.</div>
-    <button type="submit" class="btn btn-primary">Create</button>
-    <DataAnnotationsValidator />
-    <ValidationSummary />
+            <button type="submit" class="px-4 py-2 mt-4 text-white bg-blue-500 rounded-lg hover:bg-blue-600 active:bg-blue-700">Save</button>
+                <DataAnnotationsValidator />
+    <div class="text-rose-500">
+        <ValidationSummary />
+    </div>
 </EditForm>
 
 @code {
     [SupplyParameterFromQuery]
     public Guid? ContestId { get; set; }
+
+    string contestName = "";
 
     async Task SubmitAsync()
     {
