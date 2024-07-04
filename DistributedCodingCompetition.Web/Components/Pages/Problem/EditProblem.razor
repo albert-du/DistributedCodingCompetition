@@ -40,7 +40,7 @@
             <label for="Difficulty">Difficulty</label>
             <InputText id="Difficulty" class="form-control" @bind-Value="model.Difficulty" />
         </div>
-        @foreach (var testcase in TestCases)
+        @foreach (var testcase in model.TestCases)
         {
             <div class="flex justify-between">
                 <div class="form-group">
@@ -81,7 +81,6 @@
     public Guid Id { get; set; }
     Problem? problem;
     ProblemModel? model;
-    List<TestCase> TestCases = new();
     async Task SubmitAsync()
     {
         if (model is null || problem is null)
@@ -93,7 +92,7 @@
         problem.Description = model.Description;
         problem.RenderedDescription = MarkdownRenderService.Render(model.Description);
         problem.Difficulty = model.Difficulty;
-        problem.TestCases = [..model.Testcases.Select(tc => new TestCase
+        problem.TestCases = [..model.TestCases.Select(tc => new TestCase
         {
             Id = tc.Id,
             Input = tc.Input,
@@ -141,7 +140,6 @@
             NavigationManager.NavigateTo("dashboard");
             return;
         }
-
         (success, var cases) = await ApiService.TryReadProblemTestCases(Id);
         if (!success || cases is null)
         {
@@ -154,7 +152,7 @@
                 Name = prob.Name,
                 Description = prob.Description,
                 Difficulty = prob.Difficulty ?? string.Empty,
-                Testcases = [..cases.Select(tc => new TestcaseModel
+                TestCases = [..cases.Select(tc => new TestcaseModel
                 {
                     Id = tc.Id,
                     Input = tc.Input,
@@ -173,7 +171,7 @@
         public string Name { get; set; } = string.Empty;
         public string Description { get; set; } = "# Title\n## Description\n## Input\n## Output\n## Explanation\n## Constraints";
         public string Difficulty { get; set; } = string.Empty;
-        public List<TestcaseModel> Testcases { get; set; } = new();
+        public List<TestcaseModel> TestCases { get; set; } = new();
     }
 
     class TestcaseModel

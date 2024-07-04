@@ -76,11 +76,22 @@ public class ProblemsController(ContestContext context) : ControllerBase
     // GET: api/problems/{problemId}/testcases
     [HttpGet("{problemId}/testcases")]
     public async Task<ActionResult<IReadOnlyList<TestCase>>> GetTestCasesForProblem(Guid problemId)
-    { 
-
-        var problem = await context.Problems.Include(p => p.TestCases).FirstOrDefaultAsync(p => p.Id == problemId);
-        var all = await context.TestCases.ToListAsync();
-        return await context.TestCases.Where(p => p.ProblemId == problemId).ToListAsync();
+    {
+        try
+        {
+            var problem = await context.Problems.Include(p => p.TestCases).FirstOrDefaultAsync(p => p.Id == problemId);
+            if (problem is null)
+                return NotFound();
+            return problem.TestCases.Select(x =>
+            {
+                x.Problem = null;
+                return x;
+            }).ToList();
+        }
+        catch
+        {
+            throw;
+        }
     }
 
     // POST: api/problems/{problemId}/testcases

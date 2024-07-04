@@ -10,6 +10,7 @@
 
 <PageTitle>Contest Problems</PageTitle>
 
+<h1 class="text-3xl">@contestName Problems</h1>
 
 <div>
     @foreach (var problem in problems)
@@ -36,6 +37,8 @@
 
     IReadOnlyList<Problem> problems = [];
 
+    string contestName = "";
+
     protected override async Task OnInitializedAsync()
     {
         (var success, var p) = await ApiService.TryReadContestProblemsAsync(Id);
@@ -45,6 +48,17 @@
             NavigationManager.NavigateTo("dashboard");
             return;
         }
+
+        (success, var c) = await ApiService.TryReadContestAsync(Id);
+
+        if (!success || c is null)
+        {
+            ModalService.ShowError("Failed to load contest", "Internal Error");
+            NavigationManager.NavigateTo("dashboard");
+            return;
+        }
+
+        contestName = c.Name;
 
         problems = p;
     }

@@ -60,12 +60,15 @@ public class TestCasesController(ContestContext context) : ControllerBase
         if (problem is null)
             return NotFound();
         
-        //context.TestCases.Add(testCase);
+        context.TestCases.Add(testCase);
 
-        problem.TestCases.Add(testCase);
+        testCase.Problem = problem;
+
+
+        //problem.TestCases.Add(testCase);
 
         await context.SaveChangesAsync();
-
+        testCase.Problem = null;
         return CreatedAtAction(nameof(GetTestCase), new { id = testCase.Id }, testCase);
     }
 

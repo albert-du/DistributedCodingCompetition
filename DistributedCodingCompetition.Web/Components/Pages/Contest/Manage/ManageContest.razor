@@ -292,7 +292,23 @@
         </div>
         <div class="flex flex-col gap-y-1">
             <h2 class="text-2xl">Problems</h2>
-
+            <div class="flex flex-wrap w-full gap-1 px-1 my-2 bg-blue-200 rounded-lg text-slate-600">
+                @if (problems.Count == 0)
+                {
+                    <div>No Problems</div>
+                }
+                else
+                {
+                    @foreach (var prob in problems)
+                    {
+                        <div class="flex gap-x-4">
+                            <div>@prob.Name</div>
+                            <div>@prob.Difficulty</div>
+                            <div>@prob.Description</div>
+                        </div>
+                    }
+                }
+            </div>
 
             <a href="contest/@Id/manage/problems" class="italic hover:underline">Manage problems</a>
         </div>
