@@ -22,6 +22,8 @@
 @rendermode InteractiveServer
 <AuthCheck />
 
+<h1 class="text-3xl">Problem: @problem?.Name</h1>
+
 @if (model is not null)
 {
     <EditForm Model=model OnValidSubmit="SubmitAsync" class="flex flex-col gap-y-1">
@@ -54,6 +56,7 @@
         @foreach (var testcase in model.TestCases)
         {
             <div class="flex justify-between">
+                <a href="problem/@Id/testcase/@testcase.Id/edit">Edit</a>
                 <div class="flex flex-col border border-gray-300 gap-y-1">
                     <label>Input</label>
                     <div>
@@ -89,7 +92,7 @@
                 </div>
             </div>
         }
-    <a class="text-lg italic hover:underline" href="/problem/@Id/testcase/new">Add New Test case</a>
+    <a class="my-20 text-lg italic hover:underline" href="/problem/@Id/testcase/new">Add New Test case</a>
 }
 @code {
     [Parameter]

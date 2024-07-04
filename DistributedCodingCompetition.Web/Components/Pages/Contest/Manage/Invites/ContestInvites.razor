@@ -5,29 +5,35 @@ public ICollection<JoinCode> JoinCodes { get; set; } = [];
 @page "/contest/{id:guid}/manage/invites"
 @inject IApiService ApiService
 @inject IModalService ModalService
+@inject IClipboardService ClipboardService
+@inject NavigationManager NavigationManager
 @rendermode InteractiveServer
 <AuthCheck Contest=Id Admin />
 
 <PageTitle>Contest Invites</PageTitle>
 
-<h1 class="text-2xl">Invite to @contestName</h1>
+<h1 class="text-3xl">Invite to @contestName</h1>
 
 <div class="flex flex-col gap-y-2">
     @if (joinCodes.Count == 0)
     {
         <div>No invites</div>
     }
+    <div>click to copy</div>
     @foreach (var cod in joinCodes)
     {
-        <a href="contest/@Id/invites/@cod.Id" class="flex bg-gray-100">
+        <button @onclick="() => CopyAsync(cod)" class="flex bg-gray-100">
             <div class="flex-1">@cod.Name</div>
             <div class="flex-1">Code: @cod.Code</div>
             <div class="flex-1">@cod.Uses Uses</div>
             <div class="flex-1">Expires @cod.Expiration</div>
-            <div class="flex-1">@(cod.Active ? "Active" : "Inactive")</div>
-        </a>
+            @* <div class="flex-1">@(cod.Active ? "Active" : "Inactive")</div> *@
+            <button class="w-16 p-1 font-bold text-center transition-colors duration-100 bg-white border-2 rounded-lg text-rose-500 border-rose-500 hover:bg-rose-500 hover:text-white" @onclick="() => DeleteAsync(cod.Id)">Delete</button>
+        </button>
     }
 </div>
+
+<a href="contest/@Id/manage/invites/new" class="italic hover:underline">New Invite</a>
 
 <h1 class="text-2xl">Invite to administer</h1>
 
@@ -75,5 +81,22 @@ public ICollection<JoinCode> JoinCodes { get; set; } = [];
         }
 
         contestName = contest.Name;
+    }
+
+    async Task DeleteAsync(Guid id)
+    {
+        var success = await ApiService.TryDeleteJoinCodeAsync(id);
+        if (!success)
+        {
+            ModalService.ShowError("Failed to delete join code", "Internal error");
+            return;
+        }
+
+        joinCodes = joinCodes.Where(x => x.Id != id).ToArray();
+    }
+
+    async Task CopyAsync(JoinCode code)
+    {
+        await ClipboardService.SetClipboardAsync($"{NavigationManager.BaseUri}contest/join/{code.Code}");
     }
 }

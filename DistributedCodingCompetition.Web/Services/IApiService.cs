@@ -179,4 +179,11 @@ public interface IApiService
     Task<bool> TryDeleteProblemAsync(Guid problemId);
 
     Task<bool> TryAddTestCaseToProblemAsync(Guid problemId, TestCase testCase);
+
+    Task<bool> TryDeleteTestCaseAsync(Guid testCaseId);
+
+    Task<(bool, TestCase?)> TryReadTestCaseAsync(Guid testCaseId);
+
+    Task<bool> TryUpdateTestCaseAsync(TestCase testCase);
+
 }

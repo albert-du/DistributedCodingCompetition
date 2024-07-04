@@ -26,7 +26,7 @@ else
             <div class="flex-1">@joinCode.Name</div>
             <div class="flex-1">Code: @joinCode.Code</div>
             <div class="flex-1">@joinCode.Uses Uses</div>
-            <div class="flex-1">Expires @joinCode.Expiration</div>
+            <div class="flex-1">Expires @joinCode.Expiration UTC</div>
             <div class="flex-1">@(joinCode.Active ? "Active" : "Inactive")</div>
             <div class="flex-1">
                 <button class="btn btn-danger" @onclick="DeleteAsync">Delete</button>

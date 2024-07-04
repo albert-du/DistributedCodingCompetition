@@ -522,4 +522,48 @@ public class ApiService(HttpClient httpClient, ILogger<ApiService> logger) : IAp
             return false;
         }
     }
+    public async Task<(bool, TestCase?)> TryReadTestCaseAsync(Guid testCaseId)
+    {
+        try
+        {
+            var response = await httpClient.GetFromJsonAsync<TestCase>($"api/testcases/{testCaseId}");
+            return (true, response);
+        }
+        catch (Exception ex)
+        {
+            logger.LogError(ex, "Failed to fetch test case");
+            return (false, null);
+        }
+    }
+
+    public async Task<bool> TryDeleteTestCaseAsync(Guid testCaseId)
+    {
+        try
+        {
+            var response = await httpClient.DeleteAsync($"api/testcases/{testCaseId}");
+            response.EnsureSuccessStatusCode();
+            return true;
+        }
+        catch (Exception ex)
+        {
+            logger.LogError(ex, "Failed to delete test case");
+            return false;
+        }
+    }
+
+    public async Task<bool> TryUpdateTestCaseAsync(TestCase testCase)
+    {
+        try
+        {
+            var response = await httpClient.PutAsJsonAsync($"api/testcases/{testCase.Id}", testCase);
+            response.EnsureSuccessStatusCode();
+            return true;
+        }
+        catch (Exception ex)
+        {
+            logger.LogError(ex, "Failed to update test case");
+            return false;
+        }
+    }
+
 }
