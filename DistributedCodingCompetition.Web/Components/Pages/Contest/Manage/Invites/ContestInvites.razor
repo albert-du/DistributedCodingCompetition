@@ -97,6 +97,6 @@ public ICollection<JoinCode> JoinCodes { get; set; } = [];
 
     async Task CopyAsync(JoinCode code)
     {
-        await ClipboardService.SetClipboardAsync($"{NavigationManager.BaseUri}contest/join/{code.Code}");
+        await ClipboardService.SetClipboardAsync($"{NavigationManager.BaseUri}join/{code.Code}");
     }
 }

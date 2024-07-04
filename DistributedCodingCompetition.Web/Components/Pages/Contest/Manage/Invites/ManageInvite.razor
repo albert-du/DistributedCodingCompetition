@@ -20,7 +20,7 @@ public ICollection<JoinCode> JoinCodes { get; set; } = [];
 }
 else
 {
-    <p>Share this link: <a href="@NavigationManager.BaseUri/contest/join/@joinCode.Code">@($"{NavigationManager.BaseUri}/contest/join/${joinCode.Code}")</a></p>
+    <p>Share this link: <a href="@NavigationManager.BaseUri/join/@joinCode.Code">@($"{NavigationManager.BaseUri}/join/${joinCode.Code}")</a></p>
     <div class="flex flex-col gap-y-2">
         <div class="flex bg-gray-100">
             <div class="flex-1">@joinCode.Name</div>

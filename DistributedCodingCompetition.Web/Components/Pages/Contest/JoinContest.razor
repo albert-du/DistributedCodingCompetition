@@ -1,24 +1,95 @@
-@page "/contest/join/{code}"
+@page "/join/{code}"
 @inject IApiService ApiService
+@inject UserStateService UserStateService
 
-@if (contest is not null)
+<h1>Join Contest</h1>
+
+@if (contest is null)
 {
-    <h1>Join Contest</h1>
-    <p>You've been invited to join @contest.Name</p>
+    <p>Couldn't find contest.</p>
+}
+else if (joinCode is null)
+{
+    <p>Invalid invitation.</p>
+}
+else if (!joinCode.Active)
+{
+    <p>Invitation is inactive.</p>
+}
+else if (DateTime.UtcNow > joinCode.Expiration)
+{
+    <p>Invitation has expired.</p>
+}
+else if (joinCode.Uses <= 0)
+{
+    <p>Invitation has been used up.</p>
+}
+else if (contest.MinimumAge > age)
+{
+    <p>You do not meet the minimum age requirement for this contest.</p>
 }
 else
 {
-    <h1>Join Contest</h1>
-    <p>Invalid join code</p>
+    <p>Join @contest.Name</p>
+    @if (joinCode.Admin)
+    {
+        <p>You have been invited to administer this contest</p>
+    }
+    else
+    {
+        <p>You have been invited to participate in this contest</p>
+    }
+
+    <p>Expires @joinCode.Expiration</p>
+    @if (joinCode.CloseAfterUse || )
+    {
+        <p>This code will expire after use</p>
+    }
+    else
+    {
+        <p>This code will not expire after use</p>
+    }
+    <AuthorizeView>
+        <Authorized>
+            <p>By joining, the contest organizers will receive your full name and username and they may be displayed on leaderboards.</p>
+
+            <p>Join as @userName</p>
+            <button >Join</button>
+        </Authorized>
+        <NotAuthorized>
+            <a href="/auth/login?returnUrl=join/@Code">Sign in to join</a>
+            <a href="/auth/register?returnUrl=join/@Code">Register</a>
+        </NotAuthorized>
+    </AuthorizeView>
 }
 
 @code {
     [Parameter]
     public string Code { get; set; } = string.Empty;
     private Contest? contest;
-
+    private JoinCode? joinCode;
+    string userName = "";
+    int age;
     protected override async Task OnInitializedAsync()
     {
         (_, contest) = await ApiService.TryReadContestByJoinCodeAsync(Code);
+        (_, joinCode) = await ApiService.TryReadJoinCodeAsync(Code);
+        var user = await UserStateService.UserAsync();
+        if (user is not null)
+        {
+            userName = user.UserName;
+        }
+        age = Age(user.BirthDate);
+    }
+
+    static int Age(DateTime birthDate)
+    {
+        var today = DateTime.Today;
+        var age = today.Year - birthDate.Year;
+        if (birthDate.Date > today.AddYears(-age))
+        {
+            age--;
+        }
+        return age;
     }
 }
