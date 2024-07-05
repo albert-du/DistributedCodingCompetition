@@ -76,6 +76,9 @@ public class JoinCodesController(ContestContext context) : ControllerBase
         if (joinCode is null)
             return NotFound();
 
+        if (!joinCode.Active)
+            return BadRequest("Join code is not active.");
+
         var user = await context.Users.FindAsync(userId);
         if (user is null)
             return NotFound();
@@ -95,7 +98,7 @@ public class JoinCodesController(ContestContext context) : ControllerBase
             contest.Participants.Add(user);
 
         await context.SaveChangesAsync();
-        
+
         return NoContent();
     }
 

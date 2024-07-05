@@ -81,7 +81,8 @@ public ICollection<JoinCode> JoinCodes { get; set; } = [];
                 Creation = DateTime.UtcNow,
                 Expiration = DateTime.UtcNow.AddDays(model.DaysToExpire),
                 CloseAfterUse = model.CloseAfterUse,
-                CreatorId = user.Id
+                CreatorId = user.Id,
+                Active = true,
             };
 
         (var success, var id) = await ApiService.TryCreateJoinCodeAsync(joinCode);

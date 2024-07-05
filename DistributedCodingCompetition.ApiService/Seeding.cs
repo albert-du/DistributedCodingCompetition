@@ -38,6 +38,19 @@ public static class Seeding
             Owner = user1,
         };
 
+        JoinCode joinCode = new()
+        {
+            Id = Guid.Parse("134904d0-9515-4ceb-84d0-2cae5bf60f9d"),
+            ContestId = Guid.Parse("134904d0-9515-4ceb-84d0-2cae5bf60f9d"),
+            Code = "12345678",
+            Name = "Join code 1",
+            Active = true,
+            Creation = DateTime.UtcNow,
+            Expiration = DateTime.UtcNow.AddDays(1),
+            CloseAfterUse = false,
+            CreatorId = user1.Id,
+        };
+
         Contest contest = new()
         {
             Id = Guid.Parse("134904d0-9515-4ceb-84d0-2cae5bf60f9d"),
@@ -49,12 +62,14 @@ public static class Seeding
             Problems = [problem],
             Public = true,
             Owner = user1,
+            JoinCodes = [joinCode],
         };
 
         context.Users.Add(user1);
         context.TestCases.Add(testCase);
         context.Problems.Add(problem);
         context.Contests.Add(contest);
+        context.JoinCodes.Add(joinCode);
 
         await context.SaveChangesAsync();
     }

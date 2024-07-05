@@ -56,7 +56,7 @@
     [CascadingParameter]
     public ConnectionDetails? ConnectionDetails { get; set; }
 
-    [Parameter]
+    [SupplyParameterFromQuery]
     public string? ReturnUrl { get; set; }
     private string? error;
     private LoginModel model = new();

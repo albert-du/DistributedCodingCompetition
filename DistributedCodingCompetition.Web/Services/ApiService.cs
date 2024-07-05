@@ -566,7 +566,7 @@ public class ApiService(HttpClient httpClient, ILogger<ApiService> logger) : IAp
         }
     }
 
-    public async Task<bool> TryJoinContestAsync(JoinCode joinCodeId, Guid userId)
+    public async Task<bool> TryJoinContestAsync(Guid joinCodeId, Guid userId)
     {
         try
         {

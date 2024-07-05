@@ -187,5 +187,5 @@ public interface IApiService
 
     Task<bool> TryUpdateTestCaseAsync(TestCase testCase);
 
-    Task<bool> TryJoinContestAsync(JoinCode joinCodeId, Guid userId);
+    Task<bool> TryJoinContestAsync(Guid joinCodeId, Guid userId);
 }

@@ -1,4 +1,6 @@
-﻿<div>
+﻿@inject NavigationManager NavigationManager
+
+<div>
     <nav class="flex justify-between w-full py-1 sm:px-4">
         <div>
             <a href="/" class="text-2xl font-semibold text-violet-500">Distributed Coding Competition</a>
@@ -6,18 +8,32 @@
         <AuthorizeView>
             <Authorized>
                 <div class="flex py-3 align-middle gap-x-3">
-                    <NavLink ActiveClass="!border-violet-500 !hover:border-violet-600" class="border-b-4 border-transparent hover:border-violet-400"  href="/dashboard">Dashboard</NavLink>
-                    <NavLink ActiveClass="!border-violet-500 !hover:border-violet-600" class="border-b-4 border-transparent hover:border-violet-400"  href="/account">Account</NavLink>
+                    <NavLink ActiveClass="!border-violet-500 !hover:border-violet-600"
+                        class="border-b-4 border-transparent hover:border-violet-400" href="/dashboard">Dashboard
+                    </NavLink>
+                    <NavLink ActiveClass="!border-violet-500 !hover:border-violet-600"
+                        class="border-b-4 border-transparent hover:border-violet-400" href="/account">Account</NavLink>
 
                     <LogoutButton />
                 </div>
             </Authorized>
             <NotAuthorized>
                 <div class="flex py-3 align-middle gap-x-1">
+                    @if (string.IsNullOrWhiteSpace(NavigationManager.ToBaseRelativePath(NavigationManager.Uri)) ||
+                    NavigationManager.Uri.Contains("auth/login") || NavigationManager.Uri.Contains("auth/register"))
+                    {
                     <a href="/auth/login"
                         class="px-2 font-semibold text-center align-middle border-2 active:bg-violet-300 text-md rounded-xl text-violet-500 hover:bg-violet-200 border-violet-500">Login</a>
                     <a href="/auth/register"
                         class="px-2 font-semibold text-center text-white align-middle border-2 active:bg-violet-600 hover:text-violet-200 text-md rounded-xl bg-violet-500 border-violet-500">Register</a>
+                    }
+                    else
+                    {
+                    <a href="/auth/login?returnUrl=@NavigationManager.ToBaseRelativePath(NavigationManager.Uri)"
+                        class="px-2 font-semibold text-center align-middle border-2 active:bg-violet-300 text-md rounded-xl text-violet-500 hover:bg-violet-200 border-violet-500">Login</a>
+                    <a href="/auth/register?returnUrl=@NavigationManager.ToBaseRelativePath(NavigationManager.Uri)"
+                        class="px-2 font-semibold text-center text-white align-middle border-2 active:bg-violet-600 hover:text-violet-200 text-md rounded-xl bg-violet-500 border-violet-500">Register</a>
+                    }
                 </div>
             </NotAuthorized>
         </AuthorizeView>

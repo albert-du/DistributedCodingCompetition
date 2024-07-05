@@ -1,10 +1,10 @@
 @page "/join/{code}"
 @inject IApiService ApiService
-@inject UserStateService UserStateService
+@inject IUserStateService UserStateService
 @inject IModalService ModalService
 @inject NavigationManager NavigationManager
 @rendermode InteractiveServer
-<h1>Join Contest</h1>
+<h1 class="text-2xl">Join Contest</h1>
 
 @if (contest is null)
 {
@@ -22,36 +22,33 @@ else if (DateTime.UtcNow > joinCode.Expiration)
 {
     <p>Invitation has expired.</p>
 }
-else if (joinCode.Uses <= 0)
-{
-    <p>Invitation has been used up.</p>
-}
 else if (contest.MinimumAge > age)
 {
     <p>You do not meet the minimum age requirement for this contest.</p>
 }
 else
 {
-    <h2>@contest.Name</h2>
+    <h2 class="text-3xl font-semibold text-center">@contest.Name</h2>
     @if (joinCode.Admin)
     {
-        <p>You have been invited to administer this contest</p>
+        <p class="text-lg font-semibold text-center">You have been invited to administer this contest</p>
     }
     else
     {
-        <p>You have been invited to participate in this contest</p>
+        <p class="text-lg text-center">You have been invited to participate in this contest</p>
     }
 
-    <p>Expires @joinCode.Expiration</p>
+    <p class="py-5 text-center">Invitation expires in @(Math.Round((joinCode.Expiration - DateTime.UtcNow).TotalDays)) Days</p>
     @if (joinCode.CloseAfterUse)
     {
         <p>This code will expire after use</p>
     }
     <AuthorizeView>
         <Authorized>
-            <p>By joining, the contest organizers will receive your full name and username and they may be displayed on leaderboards.</p>
-            <p>Join as @username</p>
-            <button @onclick=JoinAsync>Join</button>
+            <p class="text-center">By joining, the contest organizers will receive your full name and username and they may be displayed on leaderboards.</p>
+            <div class="flex justify-center py-5">
+                <button @onclick=JoinAsync class="px-3 py-1 text-center transition-colors duration-100 border-2 group text-semibold active:bg-500 hover:bg-violet-400 hover:border-violet-400 hover:text-slate-100 rounded-2xl w-fit border-violet-800">Join as <span class="font-semibold group-hover:text-white text-violet-800">@username</span> </button>
+            </div>
         </Authorized>
         <NotAuthorized>
             <a href="auth/login?returnUrl=join/@Code">Sign in to join</a>
@@ -66,7 +63,7 @@ else
     private Contest? contest;
     private JoinCode? joinCode;
     string username = "";
-    int age;
+    int age = int.MaxValue;
     protected override async Task OnParametersSetAsync()
     {
         (_, contest) = await ApiService.TryReadContestByJoinCodeAsync(Code);
@@ -75,8 +72,8 @@ else
         if (user is not null)
         {
             username = user.Username;
+            age = Age(user.Birthday);
         }
-        age = Age(user.Birthday);
     }
 
     async Task JoinAsync()
@@ -88,7 +85,7 @@ else
             return;
         }
 
-        var success = await ApiService.TryJoinContestAsync(joinCode, user.Id);
+        var success = await ApiService.TryJoinContestAsync(joinCode.Id, user.Id);
         if (!success)
         {
             ModalService.ShowError("Failed to join contest", "Internal error");
