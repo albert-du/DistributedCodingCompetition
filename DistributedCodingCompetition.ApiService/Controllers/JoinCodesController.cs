@@ -4,6 +4,7 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using DistributedCodingCompetition.ApiService.Models;
 using NuGet.Protocol.Core.Types;
+using System.Security;
 
 [Route("api/[controller]")]
 [ApiController]
@@ -86,6 +87,13 @@ public class JoinCodesController(ContestContext context) : ControllerBase
         var contest = await context.Contests.FindAsync(joinCode.ContestId);
         if (contest is null)
             return NotFound();
+
+        // check if user is already an admin
+        if (await context.Contests.Where(c => c.Id == contest.Id).AnyAsync(c => c.Administrators.Contains(user)))
+            return BadRequest("User is already an admin.");
+
+        if (!joinCode.Admin && await context.Contests.Where(c => c.Id == contest.Id).AnyAsync(c => c.Participants.Contains(user)))
+            return BadRequest("User is already a participant.");
 
         joinCode.Users.Add(user);
         if (joinCode.CloseAfterUse)

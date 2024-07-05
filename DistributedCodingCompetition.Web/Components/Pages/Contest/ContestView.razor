@@ -1,2 +1,39 @@
 @page "/contest/{id:guid}"
-<AuthCheck/>
+@inject IApiService ApiService
+@inject IModalService ModalService
+@inject NavigationManager NavigationManager
+<AuthCheck Contest=Id/>
+
+@if (contest is null)
+{
+    <div>Loading...</div>
+    return;
+}
+else
+{
+    <h1 class="text-3xl">Contest: @contest.Name</h1>
+    <article class="prose lg:prose-xl">
+        @((MarkupString)contest.RenderedDescription)
+    </article>
+}
+
+
+
+@code {
+    [Parameter] 
+    public Guid Id { get; set; }
+
+    Contest? contest;
+
+    protected override async Task OnInitializedAsync()
+    {
+        var (success, c) = await ApiService.TryReadContestAsync(Id);
+        if (!success || c is null)
+        {
+            ModalService.ShowError("Failed to load contest", "Internal error");
+            NavigationManager.NavigateTo("/dashboard");
+            return;
+        }
+        contest = c;
+    }
+}
