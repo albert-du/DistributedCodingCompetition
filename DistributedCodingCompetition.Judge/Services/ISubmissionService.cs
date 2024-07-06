@@ -5,6 +5,6 @@ using DistributedCodingCompetition.ExecutionShared;
 
 public interface ISubmissionService
 {
-    Task<Submission> ReadSubmissionAsync(Guid submissionId);
-    Task UpdateSubmissionResults(Guid submissionId, IReadOnlyList<ExecutionResult> results);
+    Task<Submission?> ReadSubmissionAsync(Guid submissionId);
+    Task UpdateSubmissionResults(Guid submissionId, IReadOnlyList<TestCaseResult> results);
 }

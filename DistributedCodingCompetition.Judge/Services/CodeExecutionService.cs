@@ -17,10 +17,10 @@ public class CodeExecutionService(HttpClient httpClient) : ICodeExecutionService
         return await response.Content.ReadFromJsonAsync<IReadOnlyList<string>>() ?? throw new Exception("Failed to fetch available languages");
     }
 
-    public async Task<IEnumerable<ExecutionResult>> ExecuteBatchAsync(IEnumerable<ExecutionRequest> request)
+    public async Task<IReadOnlyList<ExecutionResult>> ExecuteBatchAsync(IEnumerable<ExecutionRequest> request)
     {
         var response = await httpClient.PostAsJsonAsync("execution/batch", request);
         response.EnsureSuccessStatusCode();
-        return await response.Content.ReadFromJsonAsync<IEnumerable<ExecutionResult>>() ?? throw new Exception("Failed to execute batch");
+        return await response.Content.ReadFromJsonAsync<IReadOnlyList<ExecutionResult>>() ?? throw new Exception("Failed to execute batch");
     }
 }

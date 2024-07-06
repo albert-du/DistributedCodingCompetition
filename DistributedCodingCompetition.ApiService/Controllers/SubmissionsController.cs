@@ -3,6 +3,7 @@
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using DistributedCodingCompetition.ApiService.Models;
+using NuGet.Packaging;
 
 [Route("api/[controller]")]
 [ApiController]
@@ -54,6 +55,25 @@ public class SubmissionsController(ContestContext context) : ControllerBase
         await context.SaveChangesAsync();
 
         return CreatedAtAction("GetSubmission", new { id = submission.Id }, submission);
+    }
+
+    // api/submissions/{submissionId}/results
+    [HttpPost("{submissionId}/results")]
+    public async Task<IActionResult> PostResults(Guid submissionId, IReadOnlyList<TestCaseResult> results)
+    {
+        var submission = await context.Submissions.FindAsync(submissionId);
+        if (submission == null)
+            return NotFound();
+
+        // clean out outdated results
+        context.TestCaseResults.RemoveRange(context.TestCaseResults.Where(x => x.SubmissionId == submissionId));
+
+        // add new results
+        submission.Results.AddRange(results);
+
+        await context.SaveChangesAsync();
+
+        return NoContent();
     }
 
     // DELETE: api/Submissions/5
