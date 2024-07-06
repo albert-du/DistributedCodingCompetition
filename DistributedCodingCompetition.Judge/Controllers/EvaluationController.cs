@@ -14,15 +14,15 @@ public class EvaluationController(ILogger<EvaluationController> logger,
                                   IProblemService problemService) : ControllerBase
 {
     [HttpPost]
-    public async Task<IActionResult> PostAsync(Guid userId, Guid submissionId)
+    public async Task<IActionResult> PostAsync(Guid submissionId)
     {
-        if (!await rateLimitService.TryLockAsync(userId, TimeSpan.FromSeconds(3)))
-            return StatusCode(429);
-
         // Get the submission from the database
         var submission = await submissionService.ReadSubmissionAsync(submissionId);
         if (submission is null)
             return NotFound("submission not found");
+
+        if (!await rateLimitService.TryLockAsync(submission.SubmitterId, TimeSpan.FromSeconds(3)))
+            return StatusCode(429);
 
         // Get the problem from the database
         var testCases = await problemService.ReadTestCasesAsync(submission.ProblemId);

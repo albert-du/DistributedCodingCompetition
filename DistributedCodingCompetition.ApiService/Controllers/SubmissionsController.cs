@@ -3,7 +3,6 @@
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using DistributedCodingCompetition.ApiService.Models;
-using NuGet.Packaging;
 
 [Route("api/[controller]")]
 [ApiController]
@@ -69,7 +68,7 @@ public class SubmissionsController(ContestContext context) : ControllerBase
         context.TestCaseResults.RemoveRange(context.TestCaseResults.Where(x => x.SubmissionId == submissionId));
 
         // add new results
-        submission.Results.AddRange(results);
+        await context.AddRangeAsync(results);
 
         await context.SaveChangesAsync();
 
