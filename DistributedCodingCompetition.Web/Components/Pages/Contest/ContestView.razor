@@ -3,13 +3,12 @@
 @inject IModalService ModalService
 @inject NavigationManager NavigationManager
 @inject ITimeZoneProvider TimeZoneProvider
-
+@rendermode InteractiveServer
 <AuthCheck Contest=Id/>
 
 @if (contest is null)
 {
     <div>Loading...</div>
-    return;
 }
 else
 {
@@ -27,9 +26,10 @@ else
 
     Contest? contest;
 
-    protected override async Task OnInitializedAsync()
+    protected override async Task OnInitializedAsync() 
     {
         var (success, c) = await ApiService.TryReadContestAsync(Id);
+        
         if (!success || c is null)
         {
             ModalService.ShowError("Failed to load contest", "Internal error");

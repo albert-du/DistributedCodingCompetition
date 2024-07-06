@@ -16,17 +16,19 @@
 
     <div class="mb-4">
         <h2 class="text-xl">Entered Contests</h2>
-        @if (user.EnteredContests.Count == 0)
+        @if (enteredContests.Count == 0)
         {
             <p>You are not in any contests.</p>
         }
         else
         {
             <ul class="flex flex-col gap-y-3">
-                @foreach (var contest in user.EnteredContests)
+                @foreach (var contest in enteredContests)
                 {
-                    <li>
-                        <a href="contest/@contest.Id">@contest.Name</a>
+                    <li class="flex p-2 border rounded-md border-violet-300 gap-x-3">
+                        <a class="text-xl hover:underline text-slate-700" href="contest/@contest.Id">@contest.Name</a>
+                        <div>Starts @contest.StartTime UTC</div>
+                        <div>Ends @contest.EndTime UTC</div>
                     </li>
                 }
             </ul>
@@ -70,20 +72,28 @@ else
 @code {
     User? user;
     IReadOnlyList<DistributedCodingCompetition.ApiService.Models.Contest> administered = [];
+    IReadOnlyList<DistributedCodingCompetition.ApiService.Models.Contest> enteredContests = [];
     int administeredPage = 1;
+    int enteredContestsPage = 1;
     protected override async Task OnInitializedAsync()
     {
         user = await UserStateService.UserAsync();
         if (user is null)
         {
             // should not happen thanks to state service and auth check
-            ModalService.ShowError("User not found", "User not found, please log in again.");
+            ModalService.ShowError("User not found", "User not found, please log in again."); 
             return;
         }
         (var success, var administra) = await ApiService.TryReadUserAdministratedContestsAsync(user.Id, 10, administeredPage);
         if (success && administra is not null)
         {
             administered = administra;
+        }
+
+        (success, var entered) = await ApiService.TryReadUserEnteredContestsAsync(user.Id, 10, enteredContestsPage);
+        if (success && entered is not null)
+        {
+            enteredContests = entered;
         }
     }
 }

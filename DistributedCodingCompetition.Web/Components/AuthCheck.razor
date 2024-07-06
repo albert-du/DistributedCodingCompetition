@@ -24,6 +24,11 @@
 
     protected override async Task OnParametersSetAsync()
     {
+        Console.WriteLine("OnParametersSetAsync\n\n\n");
+        Console.WriteLine(Admin + "\n\n\n");
+        Console.WriteLine(Contest + "\n\n\n");
+
+
         var authed = authenticationStateTask.Result.User?.Identity?.IsAuthenticated is true;
         if (!authed)
         {
@@ -31,6 +36,7 @@
         }
         else if (Admin)
         {
+            Console.WriteLine("Admin\n\n\n");
             if (Contest is Guid contest)
             {
                 // Contest Admin
@@ -47,10 +53,13 @@
         }
         else
         {
+            Console.WriteLine("NotAdmin\n\n\n");
             if (Contest is Guid contest)
             {
+                Console.WriteLine("contest");
                 var user = (await UserStateService.UserAsync())?.Id;
                 (var success, var role) = await ApiService.TryReadUserContestRoleAsync(contest, user!.Value);
+                Console.WriteLine(role + "\n\n\n\n\n");
                 if (!success || role is null)
                     NavigationManager.NavigateTo("dashboard");
             }
@@ -58,6 +67,7 @@
             {
                 // Authenticated User
                 // don't need to do anything
+                Console.WriteLine("not contest");
             }
         }
     }

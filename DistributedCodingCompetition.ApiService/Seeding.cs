@@ -18,6 +18,16 @@ public static class Seeding
             Birthday = new DateTime(2000, 1, 1).ToUniversalTime(),
             Creation = DateTime.UtcNow,
         };
+        
+        User user2 = new()
+        {
+            Id = Guid.Parse("234904d0-9515-4ceb-84d0-2cae5bf60f9e"),
+            Username = "user2",
+            FullName = "User Two",
+            Email = "user2@example.com",
+            Birthday = new DateTime(2000, 1, 1).ToUniversalTime(),
+            Creation = DateTime.UtcNow,
+        };
 
         TestCase testCase = new()
         {
@@ -67,6 +77,7 @@ public static class Seeding
         };
 
         context.Users.Add(user1);
+        context.Users.Add(user2);
         context.TestCases.Add(testCase);
         context.Problems.Add(problem);
         context.Contests.Add(contest);
