@@ -1,4 +1,4 @@
-@page "/contest/{id:guid}"
+﻿@page "/contest/{id:guid}/solve"
 @inject IApiService ApiService
 @inject IModalService ModalService
 @inject NavigationManager NavigationManager
@@ -12,10 +12,8 @@
 }
 else
 {
-    <h1 class="mb-4 text-3xl">@contest.Name</h1>
-    <article class="p-2 prose border-2 rounded-md border-slate-400 min-h-96">
-        @((MarkupString)contest.RenderedDescription)
-    </article>
+    <h1 class="mb-2 text-3xl">Problem Set</h1>
+    <h1 class="mb-4 text-2xl">@contest.Name</h1>
 
     @if (!contest.Active)
     {
@@ -23,16 +21,24 @@ else
     }
     else if (open)
     {
-        <div>This contest is now open</div>
-        <a href="contest/@Id/solve" class="w-fit p-2 rounded-xl text-emerald-500 border border-emerald-500 hover:text-white hover:bg-emerald-500 active:bg-emerald-600 transition-colors duration-100">Start Solving Problems</a>
+        <div class="grid grid-cols-1 gap-4 md:grid-cols-2 lg:grid-cols-3">
+            @foreach (var problem in contest.Problems)
+            {
+                <div class="bg-white shadow-md rounded-lg p-4">
+                    <h2 class="text-xl font-semibold">@problem.Name</h2>
+                    <p class="text-gray-600">@problem.Description</p>
+                    <div class="mt-4">
+                        <a class="text-blue-500" href="/contest/@contest.Id/solve/@problem.Id">Solve</a>
+                    </div>
+                </div>
+            }
+        </div>
     }
     else
     {
         <div>This contest is not open</div>
     }
-
 }
-
 
 
 @code {
@@ -45,15 +51,15 @@ else
 
     protected override async Task OnInitializedAsync()
     {
-        var (success, c) = await ApiService.TryReadContestAsync(Id);
+        var (success, contest) = await ApiService.TryReadContestAsync(Id);
 
-        if (!success || c is null)
+        if (!success || contest is null)
         {
             ModalService.ShowError("Failed to load contest", "Internal error");
             NavigationManager.NavigateTo("/dashboard");
             return;
         }
-        contest = c;
+
         open = contest.StartTime < DateTime.UtcNow && contest.EndTime > DateTime.UtcNow;
     }
 }

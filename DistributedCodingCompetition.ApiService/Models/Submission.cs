@@ -12,4 +12,7 @@ public class Submission
     public string Language { get; set; } = string.Empty;
     public DateTime SubmissionTime { get; set; }
     public ICollection<TestCaseResult> Results { get; set; } = [];
+    public int Score { get; set; }
+    public int MaxPossibleScore { get; set; }
+    public DateTime EvaluationTime { get; set; }
 }

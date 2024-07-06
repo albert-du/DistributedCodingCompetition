@@ -12,8 +12,8 @@ using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 namespace DistributedCodingCompetition.ApiService.Migrations
 {
     [DbContext(typeof(ContestContext))]
-    [Migration("20240702231950_ProblemPointValues")]
-    partial class ProblemPointValues
+    [Migration("20240706230327_InitCreate")]
+    partial class InitCreate
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -179,7 +179,7 @@ namespace DistributedCodingCompetition.ApiService.Migrations
                     b.Property<DateTime>("Creation")
                         .HasColumnType("timestamp with time zone");
 
-                    b.Property<Guid?>("CreatorId")
+                    b.Property<Guid>("CreatorId")
                         .HasColumnType("uuid");
 
                     b.Property<DateTime>("Expiration")
@@ -272,12 +272,21 @@ namespace DistributedCodingCompetition.ApiService.Migrations
                     b.Property<Guid?>("ContestId")
                         .HasColumnType("uuid");
 
+                    b.Property<DateTime>("EvaluationTime")
+                        .HasColumnType("timestamp with time zone");
+
                     b.Property<string>("Language")
                         .IsRequired()
                         .HasColumnType("text");
 
+                    b.Property<int>("MaxPossibleScore")
+                        .HasColumnType("integer");
+
                     b.Property<Guid>("ProblemId")
                         .HasColumnType("uuid");
+
+                    b.Property<int>("Score")
+                        .HasColumnType("integer");
 
                     b.Property<DateTime>("SubmissionTime")
                         .HasColumnType("timestamp with time zone");
@@ -493,7 +502,9 @@ namespace DistributedCodingCompetition.ApiService.Migrations
 
                     b.HasOne("DistributedCodingCompetition.ApiService.Models.User", "Creator")
                         .WithMany()
-                        .HasForeignKey("CreatorId");
+                        .HasForeignKey("CreatorId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
 
                     b.Navigation("Contest");
 

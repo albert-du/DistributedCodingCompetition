@@ -51,7 +51,7 @@ namespace DistributedCodingCompetition.ApiService.Migrations
                 });
 
             migrationBuilder.CreateTable(
-                name: "ProblemPointValue",
+                name: "ProblemPointValues",
                 columns: table => new
                 {
                     Id = table.Column<Guid>(type: "uuid", nullable: false),
@@ -61,9 +61,9 @@ namespace DistributedCodingCompetition.ApiService.Migrations
                 },
                 constraints: table =>
                 {
-                    table.PrimaryKey("PK_ProblemPointValue", x => x.Id);
+                    table.PrimaryKey("PK_ProblemPointValues", x => x.Id);
                     table.ForeignKey(
-                        name: "FK_ProblemPointValue_Contests_ContestId",
+                        name: "FK_ProblemPointValues_Contests_ContestId",
                         column: x => x.ContestId,
                         principalTable: "Contests",
                         principalColumn: "Id");
@@ -136,7 +136,7 @@ namespace DistributedCodingCompetition.ApiService.Migrations
                     Expiration = table.Column<DateTime>(type: "timestamp with time zone", nullable: false),
                     CloseAfterUse = table.Column<bool>(type: "boolean", nullable: false),
                     Admin = table.Column<bool>(type: "boolean", nullable: false),
-                    CreatorId = table.Column<Guid>(type: "uuid", nullable: true)
+                    CreatorId = table.Column<Guid>(type: "uuid", nullable: false)
                 },
                 constraints: table =>
                 {
@@ -206,11 +206,14 @@ namespace DistributedCodingCompetition.ApiService.Migrations
                 {
                     Id = table.Column<Guid>(type: "uuid", nullable: false),
                     SubmitterId = table.Column<Guid>(type: "uuid", nullable: false),
-                    ProblemId = table.Column<Guid>(type: "uuid", nullable: false),
                     ContestId = table.Column<Guid>(type: "uuid", nullable: true),
+                    ProblemId = table.Column<Guid>(type: "uuid", nullable: false),
                     Code = table.Column<string>(type: "text", nullable: false),
                     Language = table.Column<string>(type: "text", nullable: false),
-                    SubmissionTime = table.Column<DateTime>(type: "timestamp with time zone", nullable: false)
+                    SubmissionTime = table.Column<DateTime>(type: "timestamp with time zone", nullable: false),
+                    Score = table.Column<int>(type: "integer", nullable: false),
+                    MaxPossibleScore = table.Column<int>(type: "integer", nullable: false),
+                    EvaluationTime = table.Column<DateTime>(type: "timestamp with time zone", nullable: false)
                 },
                 constraints: table =>
                 {
@@ -335,8 +338,8 @@ namespace DistributedCodingCompetition.ApiService.Migrations
                 column: "CreatorId");
 
             migrationBuilder.CreateIndex(
-                name: "IX_ProblemPointValue_ContestId",
-                table: "ProblemPointValue",
+                name: "IX_ProblemPointValues_ContestId",
+                table: "ProblemPointValues",
                 column: "ContestId");
 
             migrationBuilder.CreateIndex(
@@ -448,7 +451,8 @@ namespace DistributedCodingCompetition.ApiService.Migrations
                 table: "JoinCodes",
                 column: "CreatorId",
                 principalTable: "Users",
-                principalColumn: "Id");
+                principalColumn: "Id",
+                onDelete: ReferentialAction.Cascade);
         }
 
         /// <inheritdoc />
@@ -475,7 +479,7 @@ namespace DistributedCodingCompetition.ApiService.Migrations
                 name: "ContestUser2");
 
             migrationBuilder.DropTable(
-                name: "ProblemPointValue");
+                name: "ProblemPointValues");
 
             migrationBuilder.DropTable(
                 name: "TestCaseResults");
