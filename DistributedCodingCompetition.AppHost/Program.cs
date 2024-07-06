@@ -25,6 +25,7 @@ var apiService = builder.AddProject<Projects.DistributedCodingCompetition_ApiSer
                         .WithReference(contestDatabase);
 
 var judge = builder.AddProject<Projects.DistributedCodingCompetition_Judge>("judge")
+                   .WithReference(cache)
                    .WithReference(codeExecution);
 
 builder.AddProject<Projects.DistributedCodingCompetition_Web>("webfrontend")
