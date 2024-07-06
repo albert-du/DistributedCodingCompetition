@@ -56,6 +56,7 @@ public static class Seeding
             Id = Guid.Parse("134904d0-9515-4ceb-84d0-2cae5bf60f9d"),
             Name = "Contest 1",
             Description = "First contest",
+            RenderedDescription = "First contest",
             StartTime = DateTime.UtcNow,
             EndTime = DateTime.UtcNow.AddDays(1),
             Administrators = [user1],

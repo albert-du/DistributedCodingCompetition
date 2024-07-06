@@ -2,6 +2,8 @@
 @inject IApiService ApiService
 @inject IModalService ModalService
 @inject NavigationManager NavigationManager
+@inject ITimeZoneProvider TimeZoneProvider
+
 <AuthCheck Contest=Id/>
 
 @if (contest is null)
@@ -11,8 +13,8 @@
 }
 else
 {
-    <h1 class="text-3xl">Contest: @contest.Name</h1>
-    <article class="prose lg:prose-xl">
+    <h1 class="mb-4 text-3xl">@contest.Name</h1>
+    <article class="p-2 prose border-2 rounded-md border-slate-400 min-h-96">
         @((MarkupString)contest.RenderedDescription)
     </article>
 }

@@ -63,8 +63,12 @@ else
             </div>
         </Authorized>
         <NotAuthorized>
-            <a href="auth/login?returnUrl=join/@Code">Sign in to join</a>
-            <a href="auth/register?returnUrl=join/@Code">Register</a>
+            <div class="flex flex-col items-center gap-y-1">
+                <div class="italic font-semibold">To join</div>
+                <a class="px-2 font-semibold text-center align-middle border-2 w-fit active:bg-violet-300 text-md rounded-xl text-violet-500 hover:bg-violet-200 border-violet-500" href="auth/login?returnUrl=join/@Code">Login</a>
+                <div class="italic font-semibold">or</div>
+                <a class="px-2 font-semibold text-center text-white align-middle border-2 w-fit active:bg-violet-600 hover:text-violet-200 text-md rounded-xl bg-violet-500 border-violet-500" href="auth/register?returnUrl=join/@Code">Register</a>
+            </div>
         </NotAuthorized>
     </AuthorizeView>
 }
@@ -121,7 +125,6 @@ else
             ModalService.ShowError("Failed to join contest", "Internal error");
             return;
         }
-        ModalService.ShowInfo("Joined contest", "You have successfully joined the contest");
         if (joinCode.Admin)
         {
             NavigationManager.NavigateTo($"/contest/{contest!.Id}/manage");
