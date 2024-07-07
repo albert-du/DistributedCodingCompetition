@@ -1,60 +1,113 @@
-﻿@page "/contest/{contestId:guid}/solve"
+﻿@page "/contest/{id:guid}/solve"
 @inject IApiService ApiService
 @inject IModalService ModalService
-<AuthCheck Contest=ContestId />
+@inject NavigationManager NavigationManager
+@inject ITimeZoneProvider TimeZoneProvider
+@inject IUserStateService UserStateService
+@rendermode InteractiveServer
+@using System.Collections.Frozen
+<AuthCheck Contest=Id />
 
-<PageTitle>Problems</PageTitle>
+@if (contest is null)
+{
+    <div>Loading...</div>
+}
+else
+{
+    <h1 class="mb-2 text-3xl">Problem Set</h1>
+    <h1 class="mb-4 text-2xl">@contest.Name</h1>
 
-<h1 class="text-2xl">Problem set: @contestName</h1>
-
-<div class="flex flex-col gap-y-1">
-    @foreach (var problem in problems)
+    @if (!contest.Active)
     {
-        <div class="p-4 bg-white rounded-lg shadow-md">
-            <h2 class="text-xl font-semibold">@problem.Name</h2>
-            <p class="text-gray-600">@problem.Description</p>
-            <div class="mt-4">
-                <a class="text-blue-500" href="contest/@ContestId/solve/@problem.Id">Solve</a>
-            </div>
+        <div class="">This contest is not active</div>
+    }
+    else if (open)
+    {
+        <div class="grid grid-cols-1 gap-4 md:grid-cols-2 lg:grid-cols-3">
+            @foreach (var problem in problems)
+            {
+                <div class="p-4 bg-white rounded-lg shadow-md">
+                    <h2 class="text-xl font-semibold">@problem.Name</h2>
+                    <p class="text-gray-600">@problem.Description</p>
+                    <div class="mt-4">
+                        <a class="text-blue-500" href="/contest/@Id/solve/@problem.Id">Solve</a>
+                    </div>
+                    @if (userSolveStatus.TryGetValue(problem.Id, out var status))
+                    {
+                        @if (status.Completed)
+                        {
+                            <div class="text-green">Solved</div>
+                        }
+                        else
+                        {
+                            <div class="text-red">Attempted</div>
+                            <div class="text-red">@status.Score / @status.MaxScore</div>
+                        }
+                    }
+                    else
+                    {
+                        <div>Not attempted</div>
+                    }
+                </div>
+            }
         </div>
     }
-</div>
+    else
+    {
+        <div>This contest is not open</div>
+    }
+}
 
 
 @code {
     [Parameter]
-    public Guid ContestId { get; set; }
+    public Guid Id { get; set; }
 
-    [Parameter]
-    public Guid ProblemId { get; set; }
+    Contest? contest;
 
-    string contestName = "";
-
-    Solution model = new();
     IReadOnlyList<Problem> problems = [];
+
+    IReadOnlyDictionary<Guid, ProblemUserSolveStatus> userSolveStatus = new Dictionary<Guid, ProblemUserSolveStatus>();
+
+    bool open;
 
     protected override async Task OnInitializedAsync()
     {
-        (var success, var contest) = await ApiService.TryReadContestAsync(ContestId);
+        (var success, contest) = await ApiService.TryReadContestAsync(Id);
+
         if (!success || contest is null)
         {
             ModalService.ShowError("Failed to load contest", "Internal error");
+            NavigationManager.NavigateTo("dashboard");
             return;
         }
-        contestName = contest.Name;
-        (success, var p) = await ApiService.TryReadContestProblemsAsync(ContestId);
+
+        open = contest.StartTime < DateTime.UtcNow && contest.EndTime > DateTime.UtcNow;
+
+        (success, var p) = await ApiService.TryReadContestProblemsAsync(Id);
         if (!success || p is null)
         {
-            ModalService.ShowError("Failed to load problems", "Internal error");
+            ModalService.ShowError("Failed to load contest problems", "Internal error");
+            NavigationManager.NavigateTo("dashboard");
             return;
         }
         problems = p;
 
-    }
+        var user = await UserStateService.UserAsync();
+        if (user is null)
+        {
+            ModalService.ShowError("Failed to load user", "Internal error");
+            NavigationManager.NavigateTo("dashboard");
+            return;
+        }
 
-    class Solution
-    {
-        public string Code { get; set; } = "";
-        public string Language { get; set; } = "";
+        (success, var s) = await ApiService.TryReadUserSolveStatusForContestAsync(Id, user.Id);
+        if (!success || s is null)
+        {
+            ModalService.ShowError("Failed to load user solve status", "Internal error");
+            NavigationManager.NavigateTo("dashboard");
+            return;
+        }
+        userSolveStatus = s.ToFrozenDictionary(x => x.Problem, x => x);
     }
 }

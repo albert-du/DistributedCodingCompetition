@@ -1,0 +1,61 @@
+﻿@page "/contest/{contestId:guid}/solve/{problemId:guid}"
+@inject IApiService ApiService
+@inject IModalService ModalService
+@inject NavigationManager NavigationManager
+@rendermode InteractiveServer
+
+@if (problem is null)
+{
+    <div>loading</div>
+}
+else
+{
+    <h1 class="text-3xl">@problem.Name</h1>
+    <div class="text-xl">@contestName</div>
+
+    <div class="px-5">
+        @((MarkupString)problem.RenderedDescription)
+    </div>
+}
+
+<CodeEditor Code=code Language="language" CodeChanged="OnCodeChanged" />
+
+@code {
+    [Parameter]
+    public Guid ContestId { get; set; }
+
+    [Parameter]
+    public Guid ProblemId { get; set; }
+
+    string contestName = "";
+
+    Problem? problem;
+
+    string language = "";
+    string code = "";
+
+    public void OnCodeChanged(string newCode)
+    {
+        code = newCode;
+    }
+
+    protected override async Task OnInitializedAsync()
+    {
+        (var success, var contest) = await ApiService.TryReadContestAsync(ContestId);
+        if (!success || contest is null)
+        {
+            ModalService.ShowError("Failed to load contest", "Internal error");
+            NavigationManager.NavigateTo("/dashboard");
+            return;
+        }
+        contestName = contest.Name;
+
+        (success, problem) = await ApiService.TryReadProblemAsync(ProblemId);
+        if (!success || problem is null)
+        {
+            ModalService.ShowError("Failed to load problem", "Internal error");
+            NavigationManager.NavigateTo($"/contest/{ContestId}/solve");
+            return;
+        }
+    }
+}

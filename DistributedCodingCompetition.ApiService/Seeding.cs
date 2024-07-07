@@ -31,7 +31,7 @@ public static class Seeding
 
         TestCase testCase = new()
         {
-            Id = Guid.Parse("134904d0-9515-4ceb-84d0-2cae5bf60f9d"),
+            Id = Guid.Parse("82720217-26d3-4c5c-82c8-fb047b5383e1"),
             Input = "1 2",
             Output = "3",
             Description = "Add two numbers",
@@ -41,7 +41,7 @@ public static class Seeding
 
         Problem problem = new()
         {
-            Id = Guid.Parse("134904d0-9515-4ceb-84d0-2cae5bf60f9d"),
+            Id = Guid.Parse("bcd30243-b2bf-4e4f-bf84-44ff02041bc2"),
             Name = "Problem 1",
             Description = "First problem",
             TestCases = [testCase],
@@ -50,7 +50,7 @@ public static class Seeding
 
         JoinCode joinCode = new()
         {
-            Id = Guid.Parse("134904d0-9515-4ceb-84d0-2cae5bf60f9d"),
+            Id = Guid.Parse("d830da9c-c6fb-464d-89f2-869cd91082a8"),
             ContestId = Guid.Parse("134904d0-9515-4ceb-84d0-2cae5bf60f9d"),
             Code = "12345678",
             Name = "Join code 1",

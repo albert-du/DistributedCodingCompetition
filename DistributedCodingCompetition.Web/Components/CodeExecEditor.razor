@@ -1,6 +1,8 @@
 ﻿@inject IJSRuntime JSRuntime
 @inject CodeExecutionClient CodeExecutionClient
-
+@using BlazorMonaco
+@using BlazorMonaco.Editor
+@using BlazorMonaco.Languages
 <div class="flex">
     <button @onclick=RunAsync class="px-4 py-2 text-white bg-blue-500 rounded-md">Run</button>
     <p>Press the Run button to execute the code</p>

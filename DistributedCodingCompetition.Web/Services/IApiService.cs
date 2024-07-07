@@ -188,4 +188,6 @@ public interface IApiService
     Task<bool> TryUpdateTestCaseAsync(TestCase testCase);
 
     Task<bool> TryJoinContestAsync(Guid joinCodeId, Guid userId);
+
+    Task<(bool, IReadOnlyList<ProblemUserSolveStatus>?)> TryReadUserSolveStatusForContestAsync(Guid contestId, Guid userId);
 }

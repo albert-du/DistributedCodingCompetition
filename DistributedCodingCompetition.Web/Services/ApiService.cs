@@ -597,4 +597,17 @@ public class ApiService(HttpClient httpClient, ILogger<ApiService> logger) : IAp
             return (false, null);
         }
     }
+    public async Task<(bool, IReadOnlyList<ProblemUserSolveStatus>?)> TryReadUserSolveStatusForContestAsync(Guid contestId, Guid userId)
+    { 
+        try
+        {
+            return (true, await httpClient.GetFromJsonAsync<IReadOnlyList<ProblemUserSolveStatus>>($"api/contests/{contestId}/user/{userId}/solve"));
+        }
+        catch (Exception ex)
+        {
+            logger.LogError(ex, "Failed to fetch user solve status for contest");
+            return (false, null);
+        }
+    }
+
 }

@@ -99,6 +99,16 @@ public class ContestsController(ContestContext context) : ControllerBase
             .OrderBy(c => c.Name)
             .ToListAsync();
 
+    // GET api/contests/{contestId}/user/{userId}/solve
+    [HttpGet("{contestId}/user/{userId}/solve")]
+    public async Task<ActionResult<IReadOnlyList<ProblemUserSolveStatus>>> GetUserSolveStatusForContest(Guid contestId, Guid userId)
+    {
+        var submissions = await context.Submissions
+            .Where(c => c.ContestId == contestId && c.SubmitterId == userId)
+            .Select(s => new { s.ProblemId, s.Points, s.Score, s.MaxPossibleScore }).ToListAsync();
+        return submissions.Select(s => new ProblemUserSolveStatus(s.ProblemId, s.Points, s.Score, s.MaxPossibleScore)).ToList();
+    }
+
     [HttpPut("{contestId}/role/{userId}")]
     public async Task<IActionResult> UpdateUserContestRole(Guid contestId, Guid userId, ContestRole role)
     {
