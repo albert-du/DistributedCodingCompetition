@@ -120,7 +120,7 @@
     async Task SubmitAsync()
     {
         var user = await UserStateService.UserAsync();
-        if (user is null)
+        if (user is null || testCase is null)
         {
             return;
         }

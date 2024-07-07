@@ -118,6 +118,11 @@ else
             ModalService.ShowError("You are not logged in", "Please log in to join the contest");
             return;
         }
+        if (joinCode is null)
+        {
+            ModalService.ShowError("Invalid invitation", "The invitation is invalid");
+            return;
+        }
 
         var success = await ApiService.TryJoinContestAsync(joinCode.Id, user.Id);
         if (!success)

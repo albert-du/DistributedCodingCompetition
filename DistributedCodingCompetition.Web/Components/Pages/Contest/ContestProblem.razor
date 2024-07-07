@@ -1,49 +1,38 @@
 @page "/contest/{contestId:guid}/solve/{problemId:guid}"
-@inject IApiService ApiService
-@inject IModalService ModalService
-@inject IJudgeService JudgeService
-<AuthCheck Contest=contestId />
+ @inject IApiService ApiService
+ @inject IModalService ModalService
+ @inject IJudgeService JudgeService
+<AuthCheck Contest=ContestId />
 
 <PageTitle>Problem</PageTitle>
 
-<h1 class="text-2xl">@problem.Name</h1>
-
-<p>@problem.Description</p>
-
-<h2 class="text-xl mt-4">Solution</h2>
+<h2 class="mt-4 text-xl">Solution</h2>
 
 <div>
     @((MarkupString)problem.RenderedDescription))
 
-    <a class="text-blue-500" href="contest/@contestId/solve">Back to problem set</a>
+    <a class="text-blue-500" href="contest/@ContestId/solve">Back to problem set</a>
 
-    <button class="w-fit p-2 rounded-xl text-emerald-500 border border-emerald-500 hover:text-white hover:bg-emerald-500 active:bg-emerald-600 transition-colors duration-100">Submit</button>
+    <button class="p-2 transition-colors duration-100 border w-fit rounded-xl text-emerald-500 border-emerald-500 hover:text-white hover:bg-emerald-500 active:bg-emerald-600">Submit</button>
 
-    <button class="w-fit p-2 rounded-xl text-red-500 border border-red-500 hover:text-white hover:bg-red-500 active:bg-red-600 transition-colors duration-100">Cancel</button>
-
-
-
+    <button class="p-2 text-red-500 transition-colors duration-100 border border-red-500 w-fit rounded-xl hover:text-white hover:bg-red-500 active:bg-red-600">Cancel</button>
 </div>
-
 
 <EditForm Model=model class="flex flex-col">
     <label class="flex flex-col">
         <div class="pl-2">
             Language
         </div>
-        <InputText class="w-1/2 px-2 py-1 ml-2 bg-gray-100 rounded-lg text-slate-800" @bind-Value=solution.Language />
+        <InputText class="w-1/2 px-2 py-1 ml-2 bg-gray-100 rounded-lg text-slate-800" @bind-Value=model.Language />
     </label>
 
     <label class="flex flex-col">
         <div class="pl-2">
             Code
         </div>
-        <InputTextArea class="w-3/4 px-2 py-1 ml-2 bg-gray-100 rounded-lg min-h-96 text-slate-800" @bind-Value=solution.Code />
+        <InputTextArea class="w-3/4 px-2 py-1 ml-2 bg-gray-100 rounded-lg min-h-96 text-slate-800" @bind-Value=model.Code />
     </label>
 </EditForm>
-
-
-
 
 @code {
     [Parameter]
@@ -81,4 +70,4 @@
         public string Code { get; set; } = "";
         public string Language { get; set; } = "";
     }
-}
+} 

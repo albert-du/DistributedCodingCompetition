@@ -39,6 +39,7 @@
             ModalService.ShowError("Failed to load contest", "Internal error");
             return;
         }
+        contest = c;
     }
 
     private async Task LoadAsync()
@@ -51,7 +52,7 @@
             ModalService.ShowError("Failed to load submissions", "Internal error");
             return;
         }
-        (success, var contest) = await cont;
+        (success, contest) = await cont;
 
         if (!success)
         {
