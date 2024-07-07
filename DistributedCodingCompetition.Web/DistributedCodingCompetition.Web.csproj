@@ -14,10 +14,6 @@
   </ItemGroup>
 
   <ItemGroup>
-    <Content Remove="Components\Pages\Contest\ContestProblem.razor" />
-  </ItemGroup>
-
-  <ItemGroup>
     <ProjectReference Include="..\DistributedCodingCompetition.ApiService\DistributedCodingCompetition.ApiService.csproj" />
     <ProjectReference Include="..\DistributedCodingCompetition.AuthService\DistributedCodingCompetition.AuthService.csproj" />
     <ProjectReference Include="..\DistributedCodingCompetition.ExecutionShared\DistributedCodingCompetition.ExecutionShared.csproj" />
@@ -30,10 +26,6 @@
     <PackageReference Include="HtmlSanitizer" Version="8.0.865" />
     <PackageReference Include="MailKit" Version="4.6.0" />
     <PackageReference Include="Markdig" Version="0.37.0" />
-  </ItemGroup>
-
-  <ItemGroup>
-    <None Include="Components\Pages\Contest\ContestProblem.razor" />
   </ItemGroup>
 
 </Project>
