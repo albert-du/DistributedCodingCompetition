@@ -3,6 +3,7 @@ using System;
 using DistributedCodingCompetition.ApiService.Models;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 
@@ -11,9 +12,11 @@ using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 namespace DistributedCodingCompetition.ApiService.Migrations
 {
     [DbContext(typeof(ContestContext))]
-    partial class ContestContextModelSnapshot : ModelSnapshot
+    [Migration("20240706231540_Points")]
+    partial class Points
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -240,7 +243,7 @@ namespace DistributedCodingCompetition.ApiService.Migrations
                         .ValueGeneratedOnAdd()
                         .HasColumnType("uuid");
 
-                    b.Property<Guid>("ContestId")
+                    b.Property<Guid?>("ContestId")
                         .HasColumnType("uuid");
 
                     b.Property<int>("Points")
@@ -530,9 +533,7 @@ namespace DistributedCodingCompetition.ApiService.Migrations
                 {
                     b.HasOne("DistributedCodingCompetition.ApiService.Models.Contest", null)
                         .WithMany("CustomProblemPointValues")
-                        .HasForeignKey("ContestId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
+                        .HasForeignKey("ContestId");
                 });
 
             modelBuilder.Entity("DistributedCodingCompetition.ApiService.Models.Submission", b =>

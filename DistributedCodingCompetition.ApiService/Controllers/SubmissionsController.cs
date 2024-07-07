@@ -58,7 +58,7 @@ public class SubmissionsController(ContestContext context) : ControllerBase
 
     // api/submissions/{submissionId}/results
     [HttpPost("{submissionId}/results")]
-    public async Task<IActionResult> PostResults(Guid submissionId, IReadOnlyList<TestCaseResult> results)
+    public async Task<IActionResult> PostResults(Guid submissionId, int possible, int score, [FromBody] IReadOnlyList<TestCaseResult> results)
     {
         var submission = await context.Submissions.FindAsync(submissionId);
         if (submission == null)
@@ -69,6 +69,24 @@ public class SubmissionsController(ContestContext context) : ControllerBase
 
         // add new results
         await context.AddRangeAsync(results);
+
+        // find if there is a point value for this problem and contest
+        var problem = await context.ProblemPointValues.Where(x => x.ProblemId == submission.ProblemId && x.ContestId == submission.ContestId).FirstOrDefaultAsync();
+        var maxPoints = problem?.Points;
+
+        if (maxPoints == null)
+        {
+            var contest = await context.Contests.FindAsync(submission.ContestId);
+            if (contest == null)
+                return NotFound();
+            maxPoints = contest.DefaultPointsForProblem;
+        }
+
+        var points = (int)((double)maxPoints * score / possible);
+
+        submission.Points = points;
+        submission.MaxPossibleScore = possible;
+        submission.Score = score;
 
         await context.SaveChangesAsync();
 

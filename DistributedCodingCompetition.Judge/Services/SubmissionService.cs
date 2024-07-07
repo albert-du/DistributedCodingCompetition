@@ -9,8 +9,8 @@ public class SubmissionService(HttpClient httpClient) : ISubmissionService
         return await httpClient.GetFromJsonAsync<Submission>($"api/submissions/{submissionId}");
     }
 
-    public async Task UpdateSubmissionResults(Guid submissionId, IReadOnlyList<TestCaseResult> results)
+    public async Task UpdateSubmissionResults(Guid submissionId, IReadOnlyList<TestCaseResult> results, int maxScore, int score)
     {
-        await httpClient.PostAsJsonAsync($"api/submissions/{submissionId}/results", results);
+        await httpClient.PostAsJsonAsync($"api/submissions/{submissionId}/results?possible={maxScore}&score={score}", results);
     }
 }

@@ -14,5 +14,6 @@ public class Submission
     public ICollection<TestCaseResult> Results { get; set; } = [];
     public int Score { get; set; }
     public int MaxPossibleScore { get; set; }
+    public int Points { get; set; }
     public DateTime EvaluationTime { get; set; }
 }
