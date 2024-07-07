@@ -3,10 +3,8 @@
 @using BlazorMonaco.Editor
 @using BlazorMonaco.Languages
 
-<div class="border rounded-lg border-slate-700 h-96">
-    <StandaloneCodeEditor @ref=editor CssClass="h-full" ConstructionOptions=EditorConstructionOptions
-        OnDidChangeModel=EditorModelChangedAsync />
-</div>
+<StandaloneCodeEditor @ref=editor CssClass="h-full" ConstructionOptions=EditorConstructionOptions
+    OnDidChangeModel=EditorModelChangedAsync />
 
 @code {
     private StandaloneCodeEditor editor = default!;
