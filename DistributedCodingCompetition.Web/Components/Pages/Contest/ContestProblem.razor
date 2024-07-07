@@ -1,42 +1,34 @@
 @page "/contest/{contestId:guid}/solve/{problemId:guid}"
 @inject IApiService ApiService
 @inject IModalService ModalService
-<AuthCheck />
+<AuthCheck Contest=contestId />
 
 <PageTitle>Problem</PageTitle>
 
-<h1 class="text-2xl">Problem</h1>
-@*
+<h1 class="text-2xl">@problem.Name</h1>
 
- @if (problem is null)
- {
-     <div>No problem</div>
- }
- else
- {
-     <h2>@problem.Name</h2>
-     <p>@problem.Description</p>
-     <div>
-         <h3>Input</h3>
-         <p>@problem.Input</p>
+<p>@problem.Description</p>
 
-         <h3>Output</h3>
-         <p>@problem.Output</p>
-     </div>
-     <div>
-         <h3>Examples</h3>
-         @foreach (var example in problem.Examples)
-         {
-             <div>
-                 <h4>Input</h4>
-                 <pre>@example.Input</pre>
-                 <h4>Output</h4>
-                 <pre>@example.Output</pre>
-             </div>
-         }
-     </div>
- }
-*@
+<h2 class="text-xl mt-4">Solution</h2>
+
+<EditForm Model=model class="flex flex-col">
+    <label class="flex flex-col">
+        <div class="pl-2">
+            Language
+        </div>
+        <InputText class="w-1/2 px-2 py-1 ml-2 bg-gray-100 rounded-lg text-slate-800" @bind-Value=solution.Language />
+    </label>
+
+    <label class="flex flex-col">
+        <div class="pl-2">
+            Code
+        </div>
+        <InputTextArea class="w-3/4 px-2 py-1 ml-2 bg-gray-100 rounded-lg min-h-96 text-slate-800" @bind-Value=solution.Code />
+    </label>
+</EditForm>
+
+
+
 
 @code {
     [Parameter]
@@ -47,7 +39,9 @@
 
     string contestName = "";
 
-    Problem? problem;
+    Problem problem = default!;
+
+    Solution model = new();
 
     protected override async Task OnInitializedAsync()
     {
