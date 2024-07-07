@@ -1,7 +1,7 @@
 ﻿@page "/contest/{contestId:guid}/solve"
 @inject IApiService ApiService
 @inject IModalService ModalService
-<AuthCheck Contest=contestId />
+<AuthCheck Contest=ContestId />
 
 <PageTitle>Problems</PageTitle>
 
@@ -44,12 +44,13 @@
             return;
         }
         contestName = contest.Name;
-        var (success, problems) = await ApiService.GetContestProblemsAsync(ContestId);
-        if (!success || problems is null)
+        (success, var p) = await ApiService.TryReadContestProblemsAsync(ContestId);
+        if (!success || p is null)
         {
             ModalService.ShowError("Failed to load problems", "Internal error");
             return;
         }
+        problems = p;
 
     }
 
