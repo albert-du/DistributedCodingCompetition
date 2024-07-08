@@ -7,6 +7,7 @@
 @inject IJudgeService JudgeService
 @inject IUserStateService UserStateService
 @rendermode InteractiveServer
+<AuthCheck Contest=ContestId />
 
 @if (problem is null)
 {
@@ -116,33 +117,44 @@ else
             language = result.Language;
         }
     }
-
+    bool judgingInProgress;
     async Task JudgeAsync()
     {
-        if ((await UserStateService.UserAsync())?.Id is not Guid userId)
-        {
-            ModalService.ShowError("Failed to load user", "Internal error");
+        if (judgingInProgress)
             return;
-        };
-
-        // Save the submission through the api service.
-        Submission submission = new()
+        judgingInProgress = true;
+        try
+        {
+            if ((await UserStateService.UserAsync())?.Id is not Guid userId)
             {
-                SubmitterId = userId,
-                ProblemId = ProblemId,
-                ContestId = ContestId,
-                Language = Lang,
-                Code = source,
-                SubmissionTime = DateTime.UtcNow,
+                ModalService.ShowError("Failed to load user", "Internal error");
+                return;
             };
-        if (!await ApiService.TryCreateSubmissionAsync(submission))
-        {
-            ModalService.ShowError("Failed to save submission", "Internal error");
-            return;
+
+            // Save the submission through the api service.
+            Submission submission = new()
+                {
+                    SubmitterId = userId,
+                    ProblemId = ProblemId,
+                    ContestId = ContestId,
+                    Language = Lang,
+                    Code = source,
+                    SubmissionTime = DateTime.UtcNow,
+                };
+            if (!await ApiService.TryCreateSubmissionAsync(submission))
+            {
+                ModalService.ShowError("Failed to save submission", "Internal error");
+                return;
+            }
+            if (await JudgeService.JudgeAsync(submission.Id) is string error)
+            {
+                ModalService.ShowError("Failed to judge submission", error);
+            }
+            NavigationManager.NavigateTo($"/contest/{ContestId}/solve/{ProblemId}/submissions");
         }
-        if (await JudgeService.JudgeAsync(submission.Id) is string error)
+        finally
         {
-            ModalService.ShowError("Failed to judge submission", error);
+            judgingInProgress = false;
         }
     }
 }

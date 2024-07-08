@@ -1,0 +1,20 @@
+﻿@page "/contest/{contestId:guid}/solve/{problemId:guid}/submissions"
+@inject IApiService ApiService
+@inject IModalService ModalService
+@inject ITimeZoneProvider TimeZoneProvider
+@inject IUserStateService UserStateService
+
+<AuthCheck Contest=ContestId />
+
+@code {
+    [Parameter]
+    public Guid ContestId { get; set; }
+
+    [Parameter]
+    public Guid ProblemId { get; set; }
+
+    protected override async Task OnInitializedAsync()
+    {
+
+    }
+}
