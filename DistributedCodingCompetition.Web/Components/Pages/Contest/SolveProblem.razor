@@ -3,6 +3,7 @@
 @inject IModalService ModalService
 @inject NavigationManager NavigationManager
 @inject CodeExecutionClient CodeExecutionClient
+@inject ICurrentSavedCodeProvider CurrentSavedCodeProvider
 @rendermode InteractiveServer
 
 @if (problem is null)
@@ -52,8 +53,37 @@ else
     void OnCodeChanged(string newCode)
     {
         source = newCode;
+        _ = TriggerSave();
     }
 
+    bool queued;
+    bool loading;
+    async Task TriggerSave()
+    {
+        if (loading)
+        {
+            queued = true;
+            return;
+        }
+
+        do
+        {
+            loading = true;
+            queued = false;
+            if (!await CurrentSavedCodeProvider.TrySaveCurrentCodeAsync(new()
+                {
+                    Code = source,
+                    Language = language,
+                    SubmissionTime = DateTime.UtcNow,
+                }))
+            {
+                ModalService.ShowError("Failed to save code", "Internal error");
+            }
+
+            loading = false;
+        }
+        while (queued);
+    }
 
     protected override async Task OnInitializedAsync()
     {

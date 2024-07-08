@@ -2,7 +2,7 @@
 
 public record SavedCode
 {
-    public string Code { get; init; } = string.Empty;
-    public string Language { get; init; } = string.Empty;
-    public DateTime SubmissionTime { get; init; } = DateTime.UtcNow;
+    public required string Code { get; init; } = string.Empty;
+    public required string Language { get; init; } = string.Empty;
+    public required DateTime SubmissionTime { get; init; } = DateTime.UtcNow;
 }
