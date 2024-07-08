@@ -1,16 +1,20 @@
 @page "/dashboard"
-@rendermode InteractiveServer
 @inject AuthenticationStateProvider AuthenticationStateProvider
 @inject IUserStateService UserStateService
-@inject IOptions<ContestOptions> ContestOptions
 @inject IApiService ApiService
 @inject IModalService ModalService
+@inject IOptions<ContestOptions> ContestOptions
+@rendermode InteractiveServer
 
 <AuthCheck />
 
 <h1 class="text-3xl">Dashboard</h1>
 
-@if (user is not null)
+@if (user is null)
+{
+    <LoadingSpinner />
+}
+else
 {
     <p class="italic">Welcome, @user.Username</p>
 
@@ -62,11 +66,6 @@
             </ul>
         </div>
     }
-
-}
-else
-{
-    <p>Loading...</p>
 }
 
 @code {
@@ -77,23 +76,29 @@ else
     int enteredContestsPage = 1;
     protected override async Task OnInitializedAsync()
     {
-        user = await UserStateService.UserAsync();
-        if (user is null)
+        // Get current user.
+        if (await UserStateService.UserAsync() is not User user)
         {
             // should not happen thanks to state service and auth check
-            ModalService.ShowError("User not found", "User not found, please log in again."); 
+            ModalService.ShowError("User not found", "User not found, please log in again.");
             return;
         }
-        (var success, var administra) = await ApiService.TryReadUserAdministratedContestsAsync(user.Id, 10, administeredPage);
-        if (success && administra is not null)
+
+        // Get user's administered and entered contests.
+        var (success, administra) = await ApiService.TryReadUserAdministratedContestsAsync(user.Id, 10, administeredPage);
+        if (!success || administra is null)
         {
-            administered = administra;
+            ModalService.ShowError("Failed to load contests", "Internal error");
+            return;
         }
+        administered = administra;
 
         (success, var entered) = await ApiService.TryReadUserEnteredContestsAsync(user.Id, 10, enteredContestsPage);
-        if (success && entered is not null)
+        if (!success || entered is null)
         {
-            enteredContests = entered;
+            ModalService.ShowError("Failed to load contests", "Internal error");
+            return;
         }
+        enteredContests = entered;
     }
 }

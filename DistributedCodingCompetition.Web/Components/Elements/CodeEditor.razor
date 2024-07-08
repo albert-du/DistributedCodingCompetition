@@ -1,8 +1,8 @@
 @inject IJSRuntime JSRuntime
+@rendermode InteractiveServer
 @using BlazorMonaco
 @using BlazorMonaco.Editor
 @using BlazorMonaco.Languages
-@rendermode InteractiveServer
 
 <StandaloneCodeEditor @ref=editor CssClass="h-full" ConstructionOptions=EditorConstructionOptions OnKeyDown=EditorModelChangedAsync />
 
