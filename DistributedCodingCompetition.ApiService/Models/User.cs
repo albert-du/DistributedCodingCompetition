@@ -74,4 +74,6 @@ public class User
     /// Problems navigation property
     /// </summary>
     public ICollection<Problem> Problems { get; set; } = [];
+
+    public ICollection<Ban> IssuedBans { get; set; } = [];
 }

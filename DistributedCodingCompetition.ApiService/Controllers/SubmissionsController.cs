@@ -4,16 +4,29 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using DistributedCodingCompetition.ApiService.Models;
 
+/// <summary>
+/// Api controller for Submissions
+/// </summary>
+/// <param name="context"></param>
 [Route("api/[controller]")]
 [ApiController]
 public class SubmissionsController(ContestContext context) : ControllerBase
 {
     // GET: api/Submissions
+    /// <summary>
+    /// Gets all submissions
+    /// </summary>
+    /// <returns></returns>
     [HttpGet]
     public async Task<ActionResult<IEnumerable<Submission>>> GetSubmissions() =>
         await context.Submissions.ToListAsync();
 
     // GET: api/Submissions/5
+    /// <summary>
+    /// Gets a submission by id
+    /// </summary>
+    /// <param name="id"></param>
+    /// <returns></returns>
     [HttpGet("{id}")]
     public async Task<ActionResult<Submission>> GetSubmission(Guid id)
     {
@@ -22,7 +35,12 @@ public class SubmissionsController(ContestContext context) : ControllerBase
     }
 
     // PUT: api/Submissions/5
-    // To protect from overposting attacks, see https://go.microsoft.com/fwlink/?linkid=2123754
+    /// <summary>
+    /// Updates a submission
+    /// </summary>
+    /// <param name="id"></param>
+    /// <param name="submission"></param>
+    /// <returns></returns>
     [HttpPut("{id}")]
     public async Task<IActionResult> PutSubmission(Guid id, Submission submission)
     {
@@ -46,7 +64,11 @@ public class SubmissionsController(ContestContext context) : ControllerBase
     }
 
     // POST: api/Submissions
-    // To protect from overposting attacks, see https://go.microsoft.com/fwlink/?linkid=2123754
+    /// <summary>
+    /// Creates a submission
+    /// </summary>
+    /// <param name="submission"></param>
+    /// <returns></returns>
     [HttpPost]
     public async Task<ActionResult<Submission>> PostSubmission(Submission submission)
     {
@@ -57,6 +79,14 @@ public class SubmissionsController(ContestContext context) : ControllerBase
     }
 
     // api/submissions/{submissionId}/results
+    /// <summary>
+    /// Posts the results of a submission
+    /// </summary>
+    /// <param name="submissionId"></param>
+    /// <param name="possible"></param>
+    /// <param name="score"></param>
+    /// <param name="results"></param>
+    /// <returns></returns>
     [HttpPost("{submissionId}/results")]
     public async Task<IActionResult> PostResults(Guid submissionId, int possible, int score, [FromBody] IReadOnlyList<TestCaseResult> results)
     {
@@ -94,6 +124,11 @@ public class SubmissionsController(ContestContext context) : ControllerBase
     }
 
     // DELETE: api/Submissions/5
+    /// <summary>
+    /// Deletes a submission by id
+    /// </summary>
+    /// <param name="id"></param>
+    /// <returns></returns>
     [HttpDelete("{id}")]
     public async Task<IActionResult> DeleteSubmission(Guid id)
     {
@@ -106,7 +141,6 @@ public class SubmissionsController(ContestContext context) : ControllerBase
 
         return NoContent();
     }
-
     private bool SubmissionExists(Guid id) =>
         context.Submissions.Any(e => e.Id == id);
 }

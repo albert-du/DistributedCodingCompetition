@@ -4,16 +4,29 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using DistributedCodingCompetition.ApiService.Models;
 
+/// <summary>
+/// Api controller for TestCaseResults
+/// </summary>
+/// <param name="context"></param>
 [Route("api/[controller]")]
 [ApiController]
 public class TestCaseResultsController(ContestContext context) : ControllerBase
 {
     // GET: api/TestCaseResults
+    /// <summary>
+    /// Gets all test case results
+    /// </summary>
+    /// <returns></returns>
     [HttpGet]
     public async Task<ActionResult<IEnumerable<TestCaseResult>>> GetTestCaseResults() =>
          await context.TestCaseResults.ToListAsync();
 
     // GET: api/TestCaseResults/5
+    /// <summary>
+    /// Gets a test case result by id
+    /// </summary>
+    /// <param name="id"></param>
+    /// <returns></returns>
     [HttpGet("{id}")]
     public async Task<ActionResult<TestCaseResult>> GetTestCaseResult(Guid id)
     {
@@ -26,7 +39,12 @@ public class TestCaseResultsController(ContestContext context) : ControllerBase
     }
 
     // PUT: api/TestCaseResults/5
-    // To protect from overposting attacks, see https://go.microsoft.com/fwlink/?linkid=2123754
+    /// <summary>
+    /// Updates a test case result
+    /// </summary>
+    /// <param name="id"></param>
+    /// <param name="testCaseResult"></param>
+    /// <returns></returns>
     [HttpPut("{id}")]
     public async Task<IActionResult> PutTestCaseResult(Guid id, TestCaseResult testCaseResult)
     {
@@ -50,7 +68,11 @@ public class TestCaseResultsController(ContestContext context) : ControllerBase
     }
 
     // POST: api/TestCaseResults
-    // To protect from overposting attacks, see https://go.microsoft.com/fwlink/?linkid=2123754
+    /// <summary>
+    /// Creates a test case result
+    /// </summary>
+    /// <param name="testCaseResult"></param>
+    /// <returns></returns>
     [HttpPost]
     public async Task<ActionResult<TestCaseResult>> PostTestCaseResult(TestCaseResult testCaseResult)
     {
@@ -61,6 +83,11 @@ public class TestCaseResultsController(ContestContext context) : ControllerBase
     }
 
     // DELETE: api/TestCaseResults/5
+    /// <summary>
+    /// Deletes a test case result by id
+    /// </summary>
+    /// <param name="id"></param>
+    /// <returns></returns>
     [HttpDelete("{id}")]
     public async Task<IActionResult> DeleteTestCaseResult(Guid id)
     {

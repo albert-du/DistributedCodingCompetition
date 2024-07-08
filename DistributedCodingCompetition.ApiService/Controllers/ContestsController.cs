@@ -323,5 +323,4 @@ public class ContestsController(ContestContext context) : ControllerBase
     /// <returns></returns>
     private bool ContestExists(Guid id) =>
         context.Contests.Any(e => e.Id == id);
-
 }

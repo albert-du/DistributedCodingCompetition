@@ -4,16 +4,29 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using DistributedCodingCompetition.ApiService.Models;
 
+/// <summary>
+/// Api controller for Users
+/// </summary>
+/// <param name="context"></param>
 [Route("api/[controller]")]
 [ApiController]
 public class UsersController(ContestContext context) : ControllerBase
 {
     // GET: api/Users
+    /// <summary>
+    /// Gets all users
+    /// </summary>
+    /// <returns></returns>
     [HttpGet]
     public async Task<ActionResult<IEnumerable<User>>> GetUsers() =>
         await context.Users.ToListAsync();
 
     // GET: api/Users/5
+    /// <summary>
+    /// Gets a user by id
+    /// </summary>
+    /// <param name="id"></param>
+    /// <returns></returns>
     [HttpGet("{id}")]
     public async Task<ActionResult<User>> GetUser(Guid id)
     {
@@ -23,6 +36,11 @@ public class UsersController(ContestContext context) : ControllerBase
     }
 
     // GET: api/Users/Email/asdas@dasd.ds
+    /// <summary>
+    /// returns a user by email
+    /// </summary>
+    /// <param name="email"></param>
+    /// <returns></returns>
     [HttpGet("email/{email}")]
     public async Task<ActionResult<User>> GetUserByEmail(string email)
     {
@@ -32,6 +50,11 @@ public class UsersController(ContestContext context) : ControllerBase
     }
 
     // GET: api/Users/username/asdas
+    /// <summary>
+    /// Returns a user by username
+    /// </summary>
+    /// <param name="username"></param>
+    /// <returns></returns>
     [HttpGet("username/{username}")]
     public async Task<ActionResult<User>> GetUser(string username)
     {
@@ -41,6 +64,13 @@ public class UsersController(ContestContext context) : ControllerBase
     }
 
     // GET: api/users/{userId}/administered?count={count}&page={page}
+    /// <summary>
+    /// Returns the contests administered by user
+    /// </summary>
+    /// <param name="userId"></param>
+    /// <param name="count"></param>
+    /// <param name="page"></param>
+    /// <returns></returns>
     [HttpGet("{userId}/administered")]
     public async Task<ActionResult<IEnumerable<Contest>>> GetAdministeredContests(Guid userId, int count = 10, int page = 1) =>
         await context.Users.Where(user => user.Id == userId)
@@ -51,6 +81,13 @@ public class UsersController(ContestContext context) : ControllerBase
             .ToListAsync();
 
     // GET: api/users/{userId}/entered?count={count}&page={page}
+    /// <summary>
+    /// Returns the contests entered by user
+    /// </summary>
+    /// <param name="userId"></param>
+    /// <param name="count"></param>
+    /// <param name="page"></param>
+    /// <returns></returns>
     [HttpGet("{userId}/entered")]
     public async Task<ActionResult<IEnumerable<Contest>>> GetEnteredContests(Guid userId, int count = 10, int page = 1) =>
         await context.Users.Where(user => user.Id == userId)
@@ -61,7 +98,12 @@ public class UsersController(ContestContext context) : ControllerBase
             .ToListAsync();
 
     // PUT: api/Users/5
-    // To protect from overposting attacks, see https://go.microsoft.com/fwlink/?linkid=2123754
+    /// <summary>
+    /// Updates a user
+    /// </summary>
+    /// <param name="id"></param>
+    /// <param name="user"></param>
+    /// <returns></returns>
     [HttpPut("{id}")]
     public async Task<IActionResult> PutUser(Guid id, User user)
     {
@@ -86,7 +128,11 @@ public class UsersController(ContestContext context) : ControllerBase
     }
 
     // POST: api/Users
-    // To protect from overposting attacks, see https://go.microsoft.com/fwlink/?linkid=2123754
+    /// <summary>
+    /// Creates a user
+    /// </summary>
+    /// <param name="user"></param>
+    /// <returns></returns>
     [HttpPost]
     public async Task<ActionResult<User>> PostUser(User user)
     {
@@ -97,6 +143,11 @@ public class UsersController(ContestContext context) : ControllerBase
     }
 
     // DELETE: api/Users/5
+    /// <summary>
+    /// Deletes a user
+    /// </summary>
+    /// <param name="id"></param>
+    /// <returns></returns>
     [HttpDelete("{id}")]
     public async Task<IActionResult> DeleteUser(Guid id)
     {

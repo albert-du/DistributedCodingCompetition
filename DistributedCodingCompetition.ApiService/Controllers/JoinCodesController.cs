@@ -3,19 +3,30 @@
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using DistributedCodingCompetition.ApiService.Models;
-using NuGet.Protocol.Core.Types;
-using System.Security;
 
+/// <summary>
+/// Api controller for JoinCodes
+/// </summary>
+/// <param name="context"></param>
 [Route("api/[controller]")]
 [ApiController]
 public class JoinCodesController(ContestContext context) : ControllerBase
 {
     // GET: api/JoinCodes
+    /// <summary>
+    /// Get all join codes
+    /// </summary>
+    /// <returns></returns>
     [HttpGet]
     public async Task<ActionResult<IEnumerable<JoinCode>>> GetJoinCodes() =>
         await context.JoinCodes.ToListAsync();
 
     // GET: api/JoinCodes/Code/5
+    /// <summary>
+    /// Get join code by code
+    /// </summary>
+    /// <param name="code"></param>
+    /// <returns></returns>
     [HttpGet("Code/{code}")]
     public async Task<ActionResult<JoinCode>> GetJoinCode(string code)
     {
@@ -25,6 +36,11 @@ public class JoinCodesController(ContestContext context) : ControllerBase
     }
 
     // GET: api/JoinCodes/5
+    /// <summary>
+    /// Gets a join code by id
+    /// </summary>
+    /// <param name="id"></param>
+    /// <returns></returns>
     [HttpGet("{id}")]
     public async Task<ActionResult<JoinCode>> GetJoinCode(Guid id)
     {
@@ -34,7 +50,12 @@ public class JoinCodesController(ContestContext context) : ControllerBase
     }
 
     // PUT: api/JoinCodes/5
-    // To protect from overposting attacks, see https://go.microsoft.com/fwlink/?linkid=2123754
+    /// <summary>
+    /// Updates a join code
+    /// </summary>
+    /// <param name="id"></param>
+    /// <param name="joinCode"></param>
+    /// <returns></returns>
     [HttpPut("{id}")]
     public async Task<IActionResult> PutJoinCode(Guid id, JoinCode joinCode)
     {
@@ -51,15 +72,18 @@ public class JoinCodesController(ContestContext context) : ControllerBase
         {
             if (!JoinCodeExists(id))
                 return NotFound();
-            else
-                throw;
+            throw;
         }
 
         return NoContent();
     }
 
     // POST: api/JoinCodes
-    // To protect from overposting attacks, see https://go.microsoft.com/fwlink/?linkid=2123754
+    /// <summary>
+    /// Creates a new join code
+    /// </summary>
+    /// <param name="joinCode"></param>
+    /// <returns></returns>
     [HttpPost]
     public async Task<ActionResult<JoinCode>> PostJoinCode(JoinCode joinCode)
     {
@@ -70,6 +94,12 @@ public class JoinCodesController(ContestContext context) : ControllerBase
     }
 
     // POST: api/joincodes/{joinCodeId}/join/{userId}
+    /// <summary>
+    /// Join a contest using a join code
+    /// </summary>
+    /// <param name="joinCodeId"></param>
+    /// <param name="userId"></param>
+    /// <returns></returns>
     [HttpPost("{joinCodeId}/join/{userId}")]
     public async Task<ActionResult<JoinCode>> JoinContest(Guid joinCodeId, Guid userId)
     {
@@ -111,6 +141,11 @@ public class JoinCodesController(ContestContext context) : ControllerBase
     }
 
     // DELETE: api/JoinCodes/5
+    /// <summary>
+    /// Deletes a join code
+    /// </summary>
+    /// <param name="id"></param>
+    /// <returns></returns>
     [HttpDelete("{id}")]
     public async Task<IActionResult> DeleteJoinCode(Guid id)
     {

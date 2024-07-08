@@ -76,10 +76,10 @@ namespace DistributedCodingCompetition.ApiService.Migrations
                     b.Property<bool>("Active")
                         .HasColumnType("boolean");
 
-                    b.Property<DateTime>("End")
+                    b.Property<DateTime?>("End")
                         .HasColumnType("timestamp with time zone");
 
-                    b.Property<Guid?>("IssuerId")
+                    b.Property<Guid>("IssuerId")
                         .HasColumnType("uuid");
 
                     b.Property<string>("Reason")
@@ -269,7 +269,7 @@ namespace DistributedCodingCompetition.ApiService.Migrations
                     b.Property<Guid?>("ContestId")
                         .HasColumnType("uuid");
 
-                    b.Property<DateTime>("EvaluationTime")
+                    b.Property<DateTime?>("EvaluationTime")
                         .HasColumnType("timestamp with time zone");
 
                     b.Property<string>("Language")
@@ -467,8 +467,10 @@ namespace DistributedCodingCompetition.ApiService.Migrations
             modelBuilder.Entity("DistributedCodingCompetition.ApiService.Models.Ban", b =>
                 {
                     b.HasOne("DistributedCodingCompetition.ApiService.Models.User", "Issuer")
-                        .WithMany()
-                        .HasForeignKey("IssuerId");
+                        .WithMany("IssuedBans")
+                        .HasForeignKey("IssuerId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
 
                     b.HasOne("DistributedCodingCompetition.ApiService.Models.User", "User")
                         .WithOne("Ban")
@@ -624,6 +626,8 @@ namespace DistributedCodingCompetition.ApiService.Migrations
             modelBuilder.Entity("DistributedCodingCompetition.ApiService.Models.User", b =>
                 {
                     b.Navigation("Ban");
+
+                    b.Navigation("IssuedBans");
 
                     b.Navigation("OwnedContests");
 

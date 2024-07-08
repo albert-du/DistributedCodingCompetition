@@ -25,6 +25,9 @@ public class ContestContext(DbContextOptions<ContestContext> options) : DbContex
         modelBuilder.Entity<User>()
             .HasOne(u => u.Ban).WithOne(b => b.User).HasForeignKey<Ban>(b => b.UserId);
 
+        modelBuilder.Entity<User>()
+            .HasMany(u => u.IssuedBans).WithOne(b => b.Issuer);
+
         modelBuilder.Entity<Contest>()
             .HasOne(c => c.Owner).WithMany(u => u.OwnedContests);
 

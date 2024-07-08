@@ -3,19 +3,30 @@
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using DistributedCodingCompetition.ApiService.Models;
-using Microsoft.EntityFrameworkCore.ChangeTracking;
-using System.Runtime.Intrinsics.Arm;
 
+/// <summary>
+/// Api controller for Problems
+/// </summary>
+/// <param name="context"></param>
 [Route("api/[controller]")]
 [ApiController]
 public class ProblemsController(ContestContext context) : ControllerBase
 {
     // GET: api/Problems
+    /// <summary>
+    /// Gets all problems
+    /// </summary>
+    /// <returns></returns>
     [HttpGet]
     public async Task<ActionResult<IEnumerable<Problem>>> GetProblems() =>
         await context.Problems.ToListAsync();
 
     // GET: api/Problems/5
+    /// <summary>
+    /// Gets a problem by id
+    /// </summary>
+    /// <param name="id"></param>
+    /// <returns></returns>
     [HttpGet("{id}")]
     public async Task<ActionResult<Problem>> GetProblem(Guid id)
     {
@@ -25,7 +36,12 @@ public class ProblemsController(ContestContext context) : ControllerBase
     }
 
     // PUT: api/Problems/5
-    // To protect from overposting attacks, see https://go.microsoft.com/fwlink/?linkid=2123754
+    /// <summary>
+    /// Updates a problem
+    /// </summary>
+    /// <param name="id"></param>
+    /// <param name="problem"></param>
+    /// <returns></returns>
     [HttpPut("{id}")]
     public async Task<IActionResult> PutProblem(Guid id, Problem problem)
     {
@@ -49,7 +65,11 @@ public class ProblemsController(ContestContext context) : ControllerBase
     }
 
     // POST: api/Problems
-    // To protect from overposting attacks, see https://go.microsoft.com/fwlink/?linkid=2123754
+    /// <summary>
+    /// Creates a problem in the database
+    /// </summary>
+    /// <param name="problem"></param>
+    /// <returns></returns>
     [HttpPost]
     public async Task<ActionResult<Problem>> PostProblem(Problem problem)
     {
@@ -59,6 +79,11 @@ public class ProblemsController(ContestContext context) : ControllerBase
     }
 
     // DELETE: api/Problems/5
+    /// <summary>
+    /// Deletes a problem by id
+    /// </summary>
+    /// <param name="id"></param>
+    /// <returns></returns>
     [HttpDelete("{id}")]
     public async Task<IActionResult> DeleteProblem(Guid id)
     {
@@ -74,6 +99,11 @@ public class ProblemsController(ContestContext context) : ControllerBase
 
 
     // GET: api/problems/{problemId}/testcases
+    /// <summary>
+    /// Gets all test cases for a problem
+    /// </summary>
+    /// <param name="problemId"></param>
+    /// <returns></returns>
     [HttpGet("{problemId}/testcases")]
     public async Task<ActionResult<IReadOnlyList<TestCase>>> GetTestCasesForProblem(Guid problemId)
     {
@@ -96,6 +126,12 @@ public class ProblemsController(ContestContext context) : ControllerBase
 
 
     // POST: api/problems/{problemId}/testcases
+    /// <summary>
+    /// Adds a test case to a problem
+    /// </summary>
+    /// <param name="problemId"></param>
+    /// <param name="testCase"></param>
+    /// <returns></returns>
     [HttpPost("{problemId}/testcases")]
     public async Task<IActionResult> AddTestCaseToProblem(Guid problemId, TestCase testCase)
     {
