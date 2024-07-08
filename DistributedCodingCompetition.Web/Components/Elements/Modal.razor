@@ -1,4 +1,7 @@
-﻿@inject IModalService ModalService
+﻿@*
+    This component listens for modal messages and displays them in a modal dialog.
+*@
+@inject IModalService ModalService
 @implements IDisposable
 @rendermode InteractiveServer
 
@@ -16,10 +19,10 @@
 @code {
     IModalService.ModalMessage? modalMessage;
 
-    private void Close() =>
+    void Close() =>
         modalMessage = null;
 
-    public async void OnShow(IModalService.ModalMessage message)
+    async void OnShow(IModalService.ModalMessage message)
     {
         modalMessage = message;
         await InvokeAsync(StateHasChanged);

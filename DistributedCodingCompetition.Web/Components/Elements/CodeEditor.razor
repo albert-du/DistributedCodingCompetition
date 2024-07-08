@@ -1,3 +1,6 @@
+@*
+    Reusable Code editor component.
+*@
 @inject IJSRuntime JSRuntime
 @rendermode InteractiveServer
 @using BlazorMonaco
@@ -23,6 +26,7 @@
 
     private StandaloneEditorConstructionOptions EditorConstructionOptions(StandaloneCodeEditor editor)
     {
+        // Load model for Monaco VSCode Editor.
         return new StandaloneEditorConstructionOptions
             {
                 GlyphMargin = false,
@@ -35,6 +39,7 @@
 
     private async Task EditorModelChangedAsync()
     {
+        // set the model
         var model = await editor.GetModel();
         Code = string.Join('\n', await model.GetLinesContent());
         await CodeChanged.InvokeAsync(Code);

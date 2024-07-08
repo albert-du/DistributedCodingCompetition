@@ -1,12 +1,15 @@
-﻿@page "/auth/register"
-@rendermode InteractiveServer
+﻿@*
+    Registration page
+*@
+@using DistributedCodingCompetition.ApiService.Models
+@using DistributedCodingCompetition.AuthService.Models
+@page "/auth/register"
+@inject NavigationManager NavigationManager
+@inject IJSRuntime JSRuntime
+@inject IEmailService EmailService
 @inject IAuthService AuthService
 @inject IApiService ApiService
-@inject NavigationManager NavigationManager
-@inject IEmailService EmailService
-@inject IJSRuntime JSRuntime
-@using DistributedCodingCompetition.ApiService.Models
-@attribute [AllowAnonymous]
+@rendermode InteractiveServer
 
 <PageTitle>Register</PageTitle>
 
@@ -15,19 +18,17 @@
 
     @if (loading)
     {
-        @*TODO show spinner or something in future*@
-        <h3>Loading...</h3>
+        <LoadingSpinner />
     }
     else if (otc is null)
     {
-        <EditForm class="flex flex-col items-center justify-center gap-y-5" Model=model OnValidSubmit=SubmitAsync
-            FormName="Registration">
+        <EditForm class="flex flex-col items-center justify-center gap-y-5" Model=model OnValidSubmit=SubmitAsync FormName="Registration">
             <label class="flex flex-col">
                 <div class="pl-2">
                     Email
                 </div>
                 <InputText class="w-64 px-2 py-1 ml-2 bg-gray-100 rounded-lg text-slate-800" id="username" type="email"
-                    @bind-Value=model.Email placeholder="me@example.com" />
+                           @bind-Value=model.Email placeholder="me@example.com" />
                 <div class="h-2 text-rose-500">
                     <ValidationMessage For=@(() => model.Email) />
                 </div>
@@ -38,7 +39,7 @@
                     Password
                 </div>
                 <InputText class="w-64 px-2 py-1 ml-2 bg-gray-100 rounded-lg text-slate-800" type="password"
-                    @bind-Value=model.Password />
+                           @bind-Value=model.Password />
                 <div class="h-2 text-rose-500">
                     <ValidationMessage For=@(() => model.Password) />
                 </div>
@@ -48,16 +49,17 @@
                     Confirm Password
                 </div>
                 <InputText class="w-64 px-2 py-1 ml-2 bg-gray-100 rounded-lg text-slate-800" type="password"
-                    @bind-Value=model.ConfirmPassword />
+                           @bind-Value=model.ConfirmPassword />
                 <div class="h-2 text-rose-500">
                     <ValidationMessage For=@(() => model.ConfirmPassword) />
                 </div>
             </label>
 
             <div class="flex justify-center">
-                <button
-                    class="px-2 py-1 border rounded-xl text-violet-500 border-violet-500 hover:bg-violet-200 active:bg-violet-400"
-                    type="submit">Submit</button>
+                <button class="px-2 py-1 border rounded-xl text-violet-500 border-violet-500 hover:bg-violet-200 active:bg-violet-400"
+                        type="submit">
+                    Submit
+                </button>
             </div>
 
             <DataAnnotationsValidator />
@@ -69,19 +71,21 @@
             <h3>Enter the verification code sent to your email</h3>
             <p class="italic">@model.Email</p>
             <InputText pattern="[0-9]{6}" placeholder="000000"
-                class="w-20 px-2 py-1 my-2 ml-2 text-center bg-gray-100 rounded-lg text-slate-800"
-                @bind-Value=otcModel.OTC />
+                       class="w-20 px-2 py-1 my-2 ml-2 text-center bg-gray-100 rounded-lg text-slate-800"
+                       @bind-Value=otcModel.OTC />
             <div class="flex justify-center py-3">
-                <button
-                    class="px-2 py-1 border rounded-xl text-violet-500 border-violet-500 hover:bg-violet-200 active:bg-violet-400"
-                    type="submit" @onclick=SubmitAsync2>Submit</button>
+                <button class="px-2 py-1 border rounded-xl text-violet-500 border-violet-500 hover:bg-violet-200 active:bg-violet-400"
+                        type="submit" @onclick=SubmitAsync2>
+                    Submit
+                </button>
             </div>
             @if (resendEnabled)
             {
                 <div class="flex justify-center">
-                    <button
-                        class="px-2 py-1 border rounded-xl text-violet-500 border-violet-500 hover:bg-violet-200 active:bg-violet-400"
-                        @onclick=SendOTCAsync>Resend</button>
+                    <button class="px-2 py-1 border rounded-xl text-violet-500 border-violet-500 hover:bg-violet-200 active:bg-violet-400"
+                            @onclick=SendOTCAsync>
+                        Resend
+                    </button>
                 </div>
             }
         </EditForm>
@@ -90,13 +94,13 @@
     {
         // otc is correct
         <EditForm Model=model2 class="flex flex-col items-center justify-center gap-y-5" OnValidSubmit=SubmitAsync3
-            FormName="UserDetails">
+                  FormName="UserDetails">
             <label class="flex flex-col">
                 <div class="pl-2">
                     Full Name
                 </div>
                 <InputText placeholder="First Last" class="w-64 px-2 py-1 ml-2 bg-gray-100 rounded-lg text-slate-800"
-                    @bind-Value=model2.FullName />
+                           @bind-Value=model2.FullName />
                 <ValidationMessage For=@(() => model2.FullName) />
             </label>
             <label class="flex flex-col">
@@ -105,7 +109,7 @@
                     <div class="text-xs text-gray-500">5-25 characters <span class="italic">[a-z0-9_-]</span> </div>
                 </div>
                 <InputText placeholder="cool_hckr-23" class="w-64 px-2 py-1 ml-2 bg-gray-100 rounded-lg text-slate-800"
-                    @bind-Value=model2.Username />
+                           @bind-Value=model2.Username />
                 <ValidationMessage For=@(() => model2.Username) />
             </label>
 
@@ -120,9 +124,10 @@
                 Your full name and username will be visible to other users.
             </div>
             <div class="flex justify-center py-3">
-                <button
-                    class="px-2 py-1 border rounded-xl text-violet-500 border-violet-500 hover:bg-violet-200 active:bg-violet-400"
-                    type="submit" @onclick=SubmitAsync3>Submit</button>
+                <button class="px-2 py-1 border rounded-xl text-violet-500 border-violet-500 hover:bg-violet-200 active:bg-violet-400"
+                        type="submit" @onclick=SubmitAsync3>
+                    Submit
+                </button>
             </div>
             <DataAnnotationsValidator />
         </EditForm>
@@ -134,24 +139,39 @@
 
 
 @code {
+    // Connection details including user agent and IP address.
     [CascadingParameter]
     public ConnectionDetails? ConnectionDetails { get; set; }
 
+    // Redirect URL
     [SupplyParameterFromQuery]
     public string? ReturnUrl { get; set; }
 
-    private RegisterModel model = new();
-    private RegisterModel2 model2 = new();
-    private OTCModel otcModel = new();
+    [CascadingParameter]
+    public Task<AuthenticationState?>? AuthState { get; set; }
 
-    string? otc = null;
+    // Models
+    RegisterModel model = new();
+    RegisterModel2 model2 = new();
+    OTCModel otcModel = new();
+
+    string? otc = null; // generated verification code
     bool otcValid;
     bool resendEnabled = true;
     string? error = null;
 
-    private bool loading;
+    bool loading;
 
-    private async Task SubmitAsync()
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        if (!firstRender || (AuthState is null) || (await AuthState)?.User.Identity?.IsAuthenticated is not true)
+            return;
+
+        var res = await JSRuntime.InvokeAsync<int>("post", "htau/logout");
+        NavigationManager.NavigateTo(NavigationManager.Uri, true);
+    }
+
+    async Task SubmitAsync()
     {
         if (loading)
             return;
@@ -160,10 +180,12 @@
         await InvokeAsync(StateHasChanged);
         try
         {
-            (var success, var user) = await ApiService.TryReadUserByEmailAsync(model.Email);
+            var (success, user) = await ApiService.TryReadUserByEmailAsync(model.Email);
             if (!success)
-                // req failed
+                // request failed
                 return;
+
+            // At this point the user is either null or not null
 
             if (user is not null)
             {
@@ -182,32 +204,41 @@
         }
     }
 
-    private async Task SubmitAsync2()
+    async Task SubmitAsync2()
     {
         if (loading)
             return;
+
+        // block
         error = null;
         loading = true;
+
         await InvokeAsync(StateHasChanged);
         await Task.Delay(1000); // avoid spam
-        loading = false;
+
+        // OTC generated and matches
         otcValid = otc is not null && otc == otcModel.OTC;
+
         if (!otcValid)
             error = "Invalid Code.";
+
+        loading = false;
         await InvokeAsync(StateHasChanged);
     }
 
-    private async Task SubmitAsync3()
+    async Task SubmitAsync3()
     {
         if (loading)
             return;
+
         error = null;
         loading = true;
         await InvokeAsync(StateHasChanged);
+
         try
         {
             // make sure user doesn't exist
-            (var success, var existing) = await ApiService.TryReadUserByUsername(model2.Username);
+            var (success, existing) = await ApiService.TryReadUserByUsername(model2.Username);
             if (!success)
             {
                 error = "Failed to check if user exists.";
@@ -220,15 +251,15 @@
                 return;
             }
 
-            var id = await AuthService.TryRegisterAsync(model.Email, model.Password);
-            if (id is null)
+            if (await AuthService.TryRegisterAsync(model.Email, model.Password) is not Guid id)
             {
                 error = "Failed to register.";
                 return;
             }
+
             if (!await ApiService.TryCreateUserAsync(new()
                 {
-                    Id = id.Value,
+                    Id = id,
                     Email = model.Email,
                     Username = model2.Username,
                     Birthday = model2.Birthday.ToUniversalTime()
@@ -237,24 +268,24 @@
                 error = "Failed to create user.";
                 return;
             }
-            await Task.Delay(1000);
+
+            // login delay
+            await Task.Delay(500);
+
             // login
-            var res = await AuthService.TryLoginAsync(id.Value, model.Password, ConnectionDetails?.UserAgent ?? "Unknown",
-            ConnectionDetails?.IpAddress ?? "Unknown");
-            if (res is null)
+            if (await AuthService.TryLoginAsync(id, model.Password, ConnectionDetails?.UserAgent ?? "Unknown", ConnectionDetails?.IpAddress ?? "Unknown") is not LoginResult result)
             {
                 error = "Failed to login.";
                 return;
             }
 
-            var code = await JSRuntime.InvokeAsync<int>("post", $"htau/login?token={Uri.EscapeDataString(res.Token)}");
-
-            if (code != 200)
+            if (await JSRuntime.InvokeAsync<int>("post", $"htau/login?token={Uri.EscapeDataString(result.Token)}") != 200)
             {
                 error = "Failed to login.";
                 return;
             }
 
+            // force redirect
             NavigationManager.NavigateTo(ReturnUrl ?? "/dashboard", true);
         }
         finally
@@ -264,25 +295,32 @@
         }
     }
 
-    private async Task SendOTCAsync()
+    async Task SendOTCAsync()
     {
         if (!resendEnabled)
             return;
+        // block resend
         resendEnabled = false;
+
+        // generate OTC
         otc = Utils.RandomOTC();
         await InvokeAsync(StateHasChanged);
+
+        // send email
         await EmailService.SendEmailAsync(model.Email, "Verify your email", $"Your verification code is {otc}");
+
+        // enable resend after 30 seconds
         _ = Wait30ThenEnableResend();
     }
 
-    private async Task Wait30ThenEnableResend()
+    async Task Wait30ThenEnableResend()
     {
         await Task.Delay(30000);
         resendEnabled = true;
         await InvokeAsync(StateHasChanged);
     }
 
-    private class RegisterModel
+    class RegisterModel
     {
         [Required]
         [EmailAddress]
@@ -299,7 +337,7 @@
         public string ConfirmPassword { get; set; } = "";
     }
 
-    private class RegisterModel2
+    class RegisterModel2
     {
         [Required(AllowEmptyStrings = false)]
         [Length(5, 25)]
@@ -312,22 +350,10 @@
         public DateTime Birthday { get; set; } = DateTime.UtcNow;
     }
 
-    private class OTCModel
+    class OTCModel
     {
         [Required]
         [Length(6, 6)]
         public string OTC { get; set; } = "";
-    }
-
-    [CascadingParameter]
-    public Task<AuthenticationState?>? AuthState { get; set; }
-
-    protected override async Task OnAfterRenderAsync(bool firstRender)
-    {
-        if (!firstRender || (AuthState is null) || (await AuthState)?.User.Identity?.IsAuthenticated is not true)
-            return;
-
-        var res = await JSRuntime.InvokeAsync<int>("post", "htau/logout");
-        NavigationManager.NavigateTo(NavigationManager.Uri, true);
     }
 }

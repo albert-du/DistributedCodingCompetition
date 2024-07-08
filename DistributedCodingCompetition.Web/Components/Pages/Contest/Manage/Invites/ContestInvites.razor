@@ -1,13 +1,14 @@
 @*
-public ICollection<JoinCode> JoinCodes { get; set; } = [];
+    Invites for a contest
 *@
 
 @page "/contest/{id:guid}/manage/invites"
+@inject NavigationManager NavigationManager
+@inject IClipboardService ClipboardService
 @inject IApiService ApiService
 @inject IModalService ModalService
-@inject IClipboardService ClipboardService
-@inject NavigationManager NavigationManager
 @rendermode InteractiveServer
+
 <AuthCheck Contest=Id Admin />
 
 <PageTitle>Contest Invites</PageTitle>
@@ -27,7 +28,6 @@ public ICollection<JoinCode> JoinCodes { get; set; } = [];
             <div class="flex-1">Code: @cod.Code</div>
             <div class="flex-1">@cod.Uses Uses</div>
             <div class="flex-1">Expires @cod.Expiration</div>
-            @* <div class="flex-1">@(cod.Active ? "Active" : "Inactive")</div> *@
             <button class="w-16 p-1 font-bold text-center transition-colors duration-100 bg-white border-2 rounded-lg text-rose-500 border-rose-500 hover:bg-rose-500 hover:text-white" @onclick="() => DeleteAsync(cod.Id)">Delete</button>
         </button>
     }
@@ -54,9 +54,9 @@ public ICollection<JoinCode> JoinCodes { get; set; } = [];
     }
 </div>
 
-
 @code {
-    [Parameter] public Guid Id { get; set; }
+    [Parameter]
+    public Guid Id { get; set; }
 
     IReadOnlyList<JoinCode> joinCodes = [];
     IReadOnlyList<JoinCode> adminJoinCodes = [];
@@ -64,39 +64,31 @@ public ICollection<JoinCode> JoinCodes { get; set; } = [];
 
     protected override async Task OnInitializedAsync()
     {
-        (var success, var codes) = await ApiService.TryReadContestJoinCodesAsync(Id);
+        var (success, codes) = await ApiService.TryReadContestJoinCodesAsync(Id);
         if (!success || codes is null)
         {
             ModalService.ShowError("Failed to load join codes", "Internal error");
             return;
         }
+
         joinCodes = codes.Where(x => !x.Admin).ToArray();
         adminJoinCodes = codes.Where(x => x.Admin).ToArray();
 
         (success, var contest) = await ApiService.TryReadContestAsync(Id);
         if (!success || contest is null)
-        {
             ModalService.ShowError("Failed to load contest", "Internal error");
-            return;
-        }
-
-        contestName = contest.Name;
+        else
+            contestName = contest.Name;
     }
 
     async Task DeleteAsync(Guid id)
     {
-        var success = await ApiService.TryDeleteJoinCodeAsync(id);
-        if (!success)
-        {
+        if (!await ApiService.TryDeleteJoinCodeAsync(id))
             ModalService.ShowError("Failed to delete join code", "Internal error");
-            return;
-        }
-
-        joinCodes = joinCodes.Where(x => x.Id != id).ToArray();
+        else
+            joinCodes = joinCodes.Where(x => x.Id != id).ToArray();
     }
 
-    async Task CopyAsync(JoinCode code)
-    {
-        await ClipboardService.SetClipboardAsync($"{NavigationManager.BaseUri}join/{code.Code}");
-    }
+    Task CopyAsync(JoinCode code) =>
+         ClipboardService.SetClipboardAsync($"{NavigationManager.BaseUri}join/{code.Code}");
 }

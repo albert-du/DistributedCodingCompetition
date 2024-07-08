@@ -1,27 +1,6 @@
 @*
-// show
-    public Guid Id { get; set; }
-    public User Owner { get; set; } = null!;
-
-    public ICollection<Problem> Problems { get; set; } = [];
-    public ICollection<User> Participants { get; set; } = [];
-    public ICollection<User> Administrators { get; set; } = [];
-    public ICollection<User> Banned { get; set; } = [];
-    public ICollection<Submission> Submissions { get; set; } = [];
-    public ICollection<JoinCode> JoinCodes { get; set; } = [];
-
-// edit
-    public string Name { get; set; } = string.Empty;
-    public string Description { get; set; } = string.Empty;
-        public string RenderedDescription { get; set; } = string.Empty;
-    public DateTime StartTime { get; set; }
-    public DateTime EndTime { get; set; }
-    public bool Active { get; set; } = true;
-    public bool Public { get; set; }
-    public bool Open { get; set; }
-    public int MinimumAge { get; set; }
+    Manage a contest
 *@
-
 @page "/contest/{id:guid}/manage"
 @inject IUserStateService UserStateService
 @inject IApiService ApiService
@@ -30,11 +9,16 @@
 @inject NavigationManager NavigationManager
 @inject ITimeZoneProvider TimeZoneProvider
 @rendermode InteractiveServer
+
 <AuthCheck Contest=Id Admin />
 
 <PageTitle>@contest?.Name</PageTitle>
 
-@if (contest is not null && model is not null)
+@if (contest is null || model is null)
+{
+    <LoadingSpinner />
+}
+else
 {
     <h1 class="text-3xl">@(model.Name)</h1>
     <h2 class="font-mono">@(contest.Id)</h2>
@@ -314,23 +298,27 @@
         <a href="contest/@Id/manage/submissions" class="italic hover:underline">@model.Submissions submissions</a>
     </div>
 }
-else
-{
-    <div>
-        Loading...
-    </div>
-}
+
 @code {
-    private DateTime StartUTC => model.Start - offset;
-    private DateTime EndUTC => model.End - offset;
-    private TimeSpan Remaining => StartUTC - DateTime.UtcNow;
     [Parameter]
     public Guid Id { get; set; }
+
+    // datetime offset calc
+    DateTime StartUTC => model?.Start ?? DateTime.UtcNow - offset;
+    DateTime EndUTC => model?.End ?? DateTime.UtcNow - offset;
+    TimeSpan Remaining => StartUTC - DateTime.UtcNow;
+    TimeSpan offset;
+
+    // pagination values
     int participantsPage = 1;
     int bannedPage = 1;
+
+    // stored values
     string ownerName = string.Empty;
-    ContestModel model = new();
     Contest? contest;
+    ContestModel? model;
+
+    // lists
     IReadOnlyList<User> administrators = [];
     IReadOnlyList<User> participants = [];
     IReadOnlyList<User> banned = [];
@@ -338,49 +326,85 @@ else
     IReadOnlyList<JoinCode> joinCodes = [];
     IReadOnlyList<Problem> problems = [];
 
-    TimeSpan offset;
-
-    private async Task LastParticipantAsync()
+    // Pagination methods
+    async Task LastParticipantAsync()
     {
         if (participantsPage > 1)
             participantsPage--;
-        (var success, var p) = await ApiService.TryReadContestParticipantsAsync(Id, 10, participantsPage);
+
+        var (success, p) = await ApiService.TryReadContestParticipantsAsync(Id, 10, participantsPage);
         participants = p ?? [];
         if (!success)
             ModalService.ShowError("Failed to load participants", "Internal error");
     }
 
-    private async Task NextParticipantAsync()
+    async Task NextParticipantAsync()
     {
         participantsPage++;
-        (var success, var p) = await ApiService.TryReadContestParticipantsAsync(Id, 10, participantsPage);
+        var (success, p) = await ApiService.TryReadContestParticipantsAsync(Id, 10, participantsPage);
         participants = p ?? [];
         if (!success)
             ModalService.ShowError("Failed to load participants", "Internal error");
     }
 
-    private async Task LastBannedAsync()
+    async Task LastBannedAsync()
     {
         if (bannedPage > 1)
             bannedPage--;
-        (var success, var b) = await ApiService.TryReadContestBannedAsync(Id, 10, bannedPage);
+        var (success, b) = await ApiService.TryReadContestBannedAsync(Id, 10, bannedPage);
         banned = b ?? [];
         if (!success)
             ModalService.ShowError("Failed to load participants", "Internal error");
     }
 
-    private async Task NextBannedAsync()
+    async Task NextBannedAsync()
     {
         bannedPage++;
-        (var success, var b) = await ApiService.TryReadContestBannedAsync(Id, 10, bannedPage);
+        var (success, b) = await ApiService.TryReadContestBannedAsync(Id, 10, bannedPage);
         banned = b ?? [];
         if (!success)
             ModalService.ShowError("Failed to load participants", "Internal error");
     }
+
+    async Task SubmitAsync()
+    {
+        var user = await UserStateService.UserAsync();
+        if (user is null)
+        {
+            // shouldn't actually happen but just in case
+            ModalService.ShowError("You are not logged in", "Please log in to manage the contest");
+            return;
+        }
+
+        if (model is null || contest is null)
+        {
+            // Shouldn't actually happen but just in case
+            ModalService.ShowError("Internal error", "Failed to load contest");
+            return;
+        }
+
+        // Update from model.
+        contest.Name = model.Name;
+        contest.Description = model.Description;
+        contest.RenderedDescription = MarkdownRenderService.Render(model.Description);
+        contest.StartTime = (await TimeZoneProvider.GetUtcDateTimeAsync(model.StartDate.ToDateTime(model.StartTime))).UtcDateTime;
+        contest.EndTime = (await TimeZoneProvider.GetUtcDateTimeAsync(model.EndDate.ToDateTime(model.EndTime))).UtcDateTime;
+        contest.MinimumAge = model.MinimumAge;
+        contest.Public = model.Public;
+        contest.Open = model.Open;
+
+        // Update contest
+        if (!(await ApiService.TryUpdateContestAsync(contest)).Item1)
+            ModalService.ShowError("Failed to update contest", "Internal error");
+        else
+            ModalService.ShowInfo("Contest saved", "Success");
+    }
+
     protected override async Task OnAfterRenderAsync(bool firstRender)
     {
         if (!firstRender)
             return;
+
         (var success, contest) = await ApiService.TryReadContestAsync(Id);
         if (!success || contest is null)
         {
@@ -396,11 +420,12 @@ else
 
         offset = await TimeZoneProvider.GetTimeZoneOffsetAsync();
 
-
+        // set model from contest
         model = new()
             {
                 Name = contest.Name,
                 Description = contest.Description,
+                // adjust dates and times for local time
                 StartDate = DateOnly.FromDateTime((await TimeZoneProvider.GetLocalDateTimeAsync(contest.StartTime)).UtcDateTime),
                 EndDate = DateOnly.FromDateTime((await TimeZoneProvider.GetLocalDateTimeAsync(contest.EndTime)).UtcDateTime),
                 StartTime = TimeOnly.FromDateTime((await TimeZoneProvider.GetLocalDateTimeAsync(contest.StartTime)).UtcDateTime),
@@ -416,20 +441,24 @@ else
                 Public = contest.Public,
                 Open = contest.Open
             };
+
+        // send off change
         await InvokeAsync(StateHasChanged);
 
+        // start timer
         using PeriodicTimer periodicTimer = new(TimeSpan.FromMinutes(1));
         while (await periodicTimer.WaitForNextTickAsync())
-        {
             await InvokeAsync(StateHasChanged);
-        }
     }
 
     protected override async Task OnInitializedAsync()
     {
         var user = await UserStateService.UserAsync();
         if (user is null)
+        {
+            ModalService.ShowError("You are not logged in", "Please log in to manage the contest");
             return;
+        }
 
         // fire off all requests
         var a = ApiService.TryReadContestAdminsAsync(Id);
@@ -438,6 +467,7 @@ else
         var j = ApiService.TryReadContestJoinCodesAsync(Id);
         var pr = ApiService.TryReadContestProblemsAsync(Id);
 
+        // wait for all requests to finish and save
         (var success, var aa) = await ApiService.TryReadContestAdminsAsync(Id);
         if (!success) ModalService.ShowError("Failed to load administrators", "Internal error");
         (success, var pp) = await ApiService.TryReadContestParticipantsAsync(Id, 10, participantsPage);
@@ -449,38 +479,12 @@ else
         (success, var prr) = await ApiService.TryReadContestProblemsAsync(Id);
         if (!success) ModalService.ShowError("Failed to load problems", "Internal error");
 
+        // save results
         administrators = aa ?? [];
         participants = pp ?? [];
         banned = bb ?? [];
         joinCodes = jj ?? [];
         problems = prr ?? [];
-    }
-
-    private async Task SubmitAsync()
-    {
-        var user = await UserStateService.UserAsync();
-        if (user is null)
-            return;
-
-        if (model is null || contest is null)
-            return;
-
-        contest.Name = model.Name;
-        contest.Description = model.Description;
-        contest.RenderedDescription = MarkdownRenderService.Render(model.Description);
-        contest.StartTime = (await TimeZoneProvider.GetUtcDateTimeAsync(model.StartDate.ToDateTime(model.StartTime))).UtcDateTime;
-        contest.EndTime = (await TimeZoneProvider.GetUtcDateTimeAsync(model.EndDate.ToDateTime(model.EndTime))).UtcDateTime;
-        contest.MinimumAge = model.MinimumAge;
-        contest.Public = model.Public;
-        contest.Open = model.Open;
-
-        // update contest
-
-        (var success, _) = await ApiService.TryUpdateContestAsync(contest);
-        if (!success)
-            ModalService.ShowError("Failed to update contest", "Internal error");
-        else
-            ModalService.ShowInfo("Contest saved", "Success");
     }
 
     class ContestModel
@@ -534,5 +538,4 @@ else
     }
 
     record UserModel(string Username, Guid id);
-
 }

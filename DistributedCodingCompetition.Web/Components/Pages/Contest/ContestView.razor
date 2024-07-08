@@ -1,18 +1,22 @@
+@*
+    View a contest from a participant's perspective
+*@
 @page "/contest/{id:guid}"
+@inject NavigationManager NavigationManager
 @inject IApiService ApiService
 @inject IModalService ModalService
-@inject NavigationManager NavigationManager
 @inject ITimeZoneProvider TimeZoneProvider
 @rendermode InteractiveServer
 <AuthCheck Contest=Id />
 
 @if (contest is null)
 {
-    <div>Loading...</div>
+    <LoadingSpinner />
 }
 else
 {
     <h1 class="mb-4 text-3xl">@contest.Name</h1>
+    @* Render HTML *@
     <article class="p-2 prose border-2 rounded-md border-slate-400 min-h-96">
         @((MarkupString)contest.RenderedDescription)
     </article>
@@ -30,10 +34,7 @@ else
     {
         <div>This contest is not open</div>
     }
-
 }
-
-
 
 @code {
     [Parameter]

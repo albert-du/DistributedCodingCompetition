@@ -1,30 +1,25 @@
 @*
-    public Guid Id { get; set; }
-    public string Name { get; set; } = string.Empty;
-
-    public Guid OwnerId { get; set; }
-    public User Owner { get; set; } = null!;
-
-    public string Description { get; set; } = string.Empty;
-
-    public string RenderedDescription { get; set; } = string.Empty;
-
-    public string? Difficulty { get; set; }
-    public ICollection<TestCase> TestCases { get; set; } = [];
+    Edit a problem
 *@
-
 @page "/problem/{id:guid}/edit"
-@inject IUserStateService UserStateService
 @inject NavigationManager NavigationManager
+@inject IUserStateService UserStateService
 @inject IModalService ModalService
 @inject IApiService ApiService
 @inject IMarkdownRenderService MarkdownRenderService
 @rendermode InteractiveServer
-<AuthCheck />
+
+<AuthCheck Id=userId />
+
+<PageTitle>Edit Problem</PageTitle>
 
 <h1 class="text-3xl">Problem: @problem?.Name</h1>
 
-@if (model is not null)
+@if (model is null)
+{
+    <LoadingSpinner />
+}
+else
 {
     <EditForm Model=model OnValidSubmit="SubmitAsync" class="flex flex-col gap-y-1">
         <label class="flex flex-col">
@@ -47,58 +42,61 @@
             <InputText id="Difficulty" class="w-full px-2 py-1 ml-2 bg-gray-100 rounded-lg text-slate-800" @bind-Value="model.Difficulty" placeholder="Medium" />
         </label>
 
-            <button type="submit" class="px-4 py-2 mt-4 text-white bg-blue-500 rounded-lg hover:bg-blue-600 active:bg-blue-700">Save</button>
-                <DataAnnotationsValidator />
-    <div class="text-rose-500">
-        <ValidationSummary />
-    </div>
+        <button type="submit" class="px-4 py-2 mt-4 text-white bg-blue-500 rounded-lg hover:bg-blue-600 active:bg-blue-700">Save</button>
+        <DataAnnotationsValidator />
+        <div class="text-rose-500">
+            <ValidationSummary />
+        </div>
     </EditForm>
-        @foreach (var testcase in model.TestCases)
-        {
-            <div class="flex justify-between">
-                <a href="problem/@Id/testcase/@testcase.Id/edit">Edit</a>
-                <div class="flex flex-col border border-gray-300 gap-y-1">
-                    <label>Input</label>
-                    <div>
-                        @foreach (var line in testcase.Input.Split('\n'))
-                        {
-                            <div class="font-mono">@line</div>
-                        }
-                    </div>
-                </div>
-                <div class="flex flex-col border border-gray-300 gap-y-1">
-                    <label>Output</label>
-                    <div>
-                        @foreach (var line in testcase.Output.Split('\n'))
-                        {
-                            <div class="font-mono">@line</div>
-                        }
-                    </div>
-                </div>
+    @foreach (var testcase in model.TestCases)
+    {
+        <div class="flex justify-between">
+            <a href="problem/@Id/testcase/@testcase.Id/edit">Edit</a>
+            <div class="flex flex-col border border-gray-300 gap-y-1">
+                <label>Input</label>
                 <div>
-                    @testcase.Description
-                </div>
-                <div>
-                    <label>Sample</label>
-                    @testcase.Sample
-                </div>
-                <div>
-                    <label>Active</label>
-                    @testcase.Active
-                </div>
-                <div>
-                    <label>Weight</label>
-                    @testcase.Weight
+                    @foreach (var line in testcase.Input.Split('\n'))
+                    {
+                        <div class="font-mono">@line</div>
+                    }
                 </div>
             </div>
-        }
+            <div class="flex flex-col border border-gray-300 gap-y-1">
+                <label>Output</label>
+                <div>
+                    @foreach (var line in testcase.Output.Split('\n'))
+                    {
+                        <div class="font-mono">@line</div>
+                    }
+                </div>
+            </div>
+            <div>
+                @testcase.Description
+            </div>
+            <div>
+                <label>Sample</label>
+                @testcase.Sample
+            </div>
+            <div>
+                <label>Active</label>
+                @testcase.Active
+            </div>
+            <div>
+                <label>Weight</label>
+                @testcase.Weight
+            </div>
+        </div>
+    }
     <a class="my-20 text-lg italic hover:underline" href="/problem/@Id/testcase/new">Add New Test case</a>
 }
 @code {
     [Parameter]
     public Guid Id { get; set; }
+
     Problem? problem;
     ProblemModel? model;
+    Guid userId;
+
     async Task SubmitAsync()
     {
         if (model is null || problem is null)
@@ -136,10 +134,14 @@
         var user = await UserStateService.UserAsync();
         if (user is null)
         {
+            ModalService.ShowError("Failed to load user", "Internal error");
+            // redirect
+            NavigationManager.NavigateTo("dashboard");
             return;
         }
+        userId = user.Id;
 
-        (var success, var prob) = await ApiService.TryReadProblemAsync(Id);
+        var (success, prob) = await ApiService.TryReadProblemAsync(Id);
         if (!success)
         {
             ModalService.ShowError("Failed to load problem", "Internal error");
@@ -151,13 +153,7 @@
             ModalService.ShowError("Problem not found", "404");
             return;
         }
-        // ensure user is owner of problem
-        if (prob.OwnerId != user.Id)
-        {
-            ModalService.ShowError("You are not the owner of this problem", "");
-            NavigationManager.NavigateTo("dashboard");
-            return;
-        }
+
         (success, var cases) = await ApiService.TryReadProblemTestCases(Id);
         if (!success || cases is null)
         {
@@ -165,6 +161,7 @@
             return;
         }
         problem = prob;
+        // load model
         model = new()
             {
                 Name = prob.Name,
@@ -187,21 +184,31 @@
     {
         [Required(ErrorMessage = "Name is required")]
         public string Name { get; set; } = string.Empty;
+
+        [Required(ErrorMessage = "Description is required")]
         public string Description { get; set; } = "# Title\n## Description\n## Input\n## Output\n## Explanation\n## Constraints";
+
         public string Difficulty { get; set; } = string.Empty;
+
         public List<TestcaseModel> TestCases { get; set; } = new();
     }
 
     class TestcaseModel
     {
         public Guid Id { get; set; } = Guid.NewGuid();
+
         [Required(ErrorMessage = "Input is required")]
         public string Input { get; set; } = string.Empty;
+
         [Required(ErrorMessage = "Output is required")]
         public string Output { get; set; } = string.Empty;
+
         public string Description { get; set; } = string.Empty;
+
         public bool Sample { get; set; }
+
         public bool Active { get; set; } = true;
+
         public int Weight { get; set; } = 1;
     }
 }

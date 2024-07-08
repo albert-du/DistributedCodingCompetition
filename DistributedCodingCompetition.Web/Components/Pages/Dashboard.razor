@@ -1,3 +1,6 @@
+@*
+    User dashboard
+*@
 @page "/dashboard"
 @inject AuthenticationStateProvider AuthenticationStateProvider
 @inject IUserStateService UserStateService
@@ -7,6 +10,8 @@
 @rendermode InteractiveServer
 
 <AuthCheck />
+
+<PageTitle>Dashboard</PageTitle>
 
 <h1 class="text-3xl">Dashboard</h1>
 
@@ -69,11 +74,16 @@ else
 }
 
 @code {
+    // current user
     User? user;
+
     IReadOnlyList<DistributedCodingCompetition.ApiService.Models.Contest> administered = [];
     IReadOnlyList<DistributedCodingCompetition.ApiService.Models.Contest> enteredContests = [];
+
+    // pagination
     int administeredPage = 1;
     int enteredContestsPage = 1;
+
     protected override async Task OnInitializedAsync()
     {
         // Get current user.
@@ -91,14 +101,14 @@ else
             ModalService.ShowError("Failed to load contests", "Internal error");
             return;
         }
+
         administered = administra;
 
         (success, var entered) = await ApiService.TryReadUserEnteredContestsAsync(user.Id, 10, enteredContestsPage);
+
         if (!success || entered is null)
-        {
             ModalService.ShowError("Failed to load contests", "Internal error");
-            return;
-        }
-        enteredContests = entered;
+        else
+            enteredContests = entered;
     }
 }

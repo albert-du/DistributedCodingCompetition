@@ -1,18 +1,17 @@
 ﻿@*
-public ICollection<JoinCode> JoinCodes { get; set; } = [];
+    Manage a specific invite for a contest
 *@
-
 @page "/contest/{contestId:guid}/manage/invites/{joinCodeId}"
+@inject NavigationManager NavigationManager
 @inject IApiService ApiService
 @inject IModalService ModalService
-@inject NavigationManager NavigationManager
 @rendermode InteractiveServer
+
 <AuthCheck Contest=ContestId Admin />
 
 <PageTitle>Contest Invite</PageTitle>
 
 <h1 class="text-2xl">Invite to @contestName</h1>
-
 
 @if (joinCode is null)
 {
@@ -33,14 +32,7 @@ else
             </div>
             <div class="flex-1">
                 <button class="btn btn-primary" @onclick="() => SetActiveAsync(!joinCode.Active)">
-                    @if (joinCode.Active)
-                    {
-                        <span>Deactivate</span>
-                    }
-                    else
-                    {
-                        <span>Activate</span>
-                    }
+                    <span>@(joinCode.Active ? "Deactivate" : "Activate")</span>
                 </button>
             </div>
         </div>
@@ -51,10 +43,12 @@ else
 @code {
     [Parameter]
     public Guid ContestId { get; set; }
+
     [Parameter]
     public Guid JoinCodeId { get; set; }
 
     string contestName = "";
+
     JoinCode? joinCode;
 
     protected override async Task OnInitializedAsync()
@@ -77,6 +71,7 @@ else
         {
             ModalService.ShowError("Join code does not belong to contest", "");
             NavigationManager.NavigateTo("dashboard");
+            return;
         }
 
         joinCode = code;
@@ -86,27 +81,21 @@ else
     async Task DeleteAsync()
     {
         if (await ApiService.TryDeleteJoinCodeAsync(JoinCodeId))
-        {
             ModalService.ShowInfo("Invite deleted", "");
-        }
         else
-        {
             ModalService.ShowError("Failed to delete invite", "Internal error");
-        }
     }
 
     async Task SetActiveAsync(bool active)
     {
         if (joinCode is null)
             return;
+
         joinCode.Active = active;
+
         if (await ApiService.TryUpdateJoinCodeAsync(joinCode))
-        {
             ModalService.ShowInfo("Invite updated", "");
-        }
         else
-        {
             ModalService.ShowError("Failed to update invite", "Internal error");
-        }
     }
 }

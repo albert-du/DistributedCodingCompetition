@@ -1,12 +1,12 @@
 @*
-        public ICollection<Problem> Problems { get; set; } = [];
+    Manage a problems for a contest
 *@
-
 @page "/contest/{id:guid}/manage/problems"
+@inject NavigationManager NavigationManager
 @inject IApiService ApiService
 @inject IModalService ModalService
-@inject NavigationManager NavigationManager 
 @rendermode InteractiveServer
+
 <AuthCheck Contest=Id Admin />
 
 <PageTitle>Contest Problems</PageTitle>
@@ -44,7 +44,7 @@
 
     protected override async Task OnInitializedAsync()
     {
-        (var success, var p) = await ApiService.TryReadContestProblemsAsync(Id);
+        var (success, p) = await ApiService.TryReadContestProblemsAsync(Id);
         if (!success || p is null)
         {
             ModalService.ShowError("Failed to load problems", "Internal Error");
@@ -62,22 +62,14 @@
         }
 
         contestName = c.Name;
-
         problems = p;
     }
 
     async Task DeleteProblemAsync(Guid id)
     {
-        Console.WriteLine("Deleting problem with id: " + id);
-        var success = await ApiService.TryDeleteProblemAsync(id);
-
-        if (!success)
-        {
+        if (!await ApiService.TryDeleteProblemAsync(id))
             ModalService.ShowError("Failed to delete problem", "Internal Error");
-        }
         else
-        {
             problems = problems.Where(p => p.Id != id).ToList();
-        }
     }
 }

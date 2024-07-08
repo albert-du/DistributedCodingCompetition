@@ -1,13 +1,13 @@
 ﻿@*
-public ICollection<JoinCode> JoinCodes { get; set; } = [];
+    Create a new invite join code for a contest.
 *@
-
 @page "/contest/{contestId:guid}/manage/invites/new"
 @inject IApiService ApiService
 @inject IModalService ModalService
 @inject NavigationManager NavigationManager
 @inject IUserStateService UserStateService
 @rendermode InteractiveServer
+
 <AuthCheck Contest=ContestId Admin />
 
 <PageTitle>New Invite</PageTitle>
@@ -55,19 +55,16 @@ public ICollection<JoinCode> JoinCodes { get; set; } = [];
 
     protected override async Task OnInitializedAsync()
     {
-        (var success, var contest) = await ApiService.TryReadContestAsync(ContestId);
+        var (success, contest) = await ApiService.TryReadContestAsync(ContestId);
         if (!success || contest is null)
-        {
             ModalService.ShowError("Failed to load contest", "Internal error");
-            return;
-        }
-        contestName = contest.Name;
+        else
+            contestName = contest.Name;
     }
 
     async Task SubmitAsync()
     {
-        var user = await UserStateService.UserAsync();
-        if (user is null)
+        if (await UserStateService.UserAsync() is not User user)
         {
             // shouldnt actually happen because of authcheck
             ModalService.ShowError("You are not logged in", "Please log in to create a join code");
@@ -85,7 +82,7 @@ public ICollection<JoinCode> JoinCodes { get; set; } = [];
                 Active = true,
             };
 
-        (var success, var id) = await ApiService.TryCreateJoinCodeAsync(joinCode);
+        var (success, id) = await ApiService.TryCreateJoinCodeAsync(joinCode);
         if (!success || id is null)
         {
             ModalService.ShowError("Failed to create join code", "Internal error");
@@ -101,10 +98,14 @@ public ICollection<JoinCode> JoinCodes { get; set; } = [];
         return new string(Enumerable.Repeat(chars, length)
             .Select(s => s[Random.Shared.Next(s.Length)]).ToArray());
     }
+
     class JoinCodeModel
     {
+        [Required]
+        [MinLength(6)]
         public string Code { get; set; } = RandomString(6);
         public string Name { get; set; } = "Unnamed Join Code";
+        [Range(1, 365)]
         public int DaysToExpire { get; set; } = 7;
         public bool CloseAfterUse { get; set; }
     }

@@ -1,155 +1,150 @@
-@* This is enclosed in NewContest.razor which provides the routing *@
-
+@* This is enclosed in NewContest.razor which provides the routing, page title, and auth. *@
+@inject NavigationManager NavigationManager
 @inject ITimeZoneProvider TimeZoneProvider
 @inject IUserStateService UserStateService
 @inject IMarkdownRenderService MarkdownRenderService
 @inject IApiService ApiService
 @inject IModalService ModalService
-@inject NavigationManager NavigationManager
 @rendermode InteractiveServer
 
-<div class="pb-24">
-    <h1 class="text-3xl">New Contest</h1>
-    <EditForm Model=model OnValidSubmit="SubmitAsync">
-        <label class="flex flex-col">
-            <div class="pl-2">
-                Name
-            </div>
-            <InputText class="w-1/2 px-2 py-1 ml-2 bg-gray-100 rounded-lg text-slate-800" id="Name" @bind-Value=model.Name />
-        </label>
+@if (model is null)
+{
+    <LoadingSpinner />
+}
+else
+{
+    <div class="pb-24">
+        <h1 class="text-3xl">New Contest</h1>
+        <EditForm Model=model OnValidSubmit="SubmitAsync">
+            <label class="flex flex-col">
+                <div class="pl-2">
+                    Name
+                </div>
+                <InputText class="w-1/2 px-2 py-1 ml-2 bg-gray-100 rounded-lg text-slate-800" id="Name" @bind-Value=model.Name />
+            </label>
 
-        <label class="flex flex-col">
-            <div class="pl-2">
-                Description (<a target="_blank" href="https://www.markdownguide.org/" class="italic hover:underline">markdown</a> enabled)
-            </div>
-            <InputTextArea class="w-3/4 px-2 py-1 ml-2 bg-gray-100 rounded-lg min-h-96 text-slate-800" id="Description" @bind-Value=model.Description />
-        </label>
+            <label class="flex flex-col">
+                <div class="pl-2">
+                    Description (<a target="_blank" href="https://www.markdownguide.org/" class="italic hover:underline">markdown</a> enabled)
+                </div>
+                <InputTextArea class="w-3/4 px-2 py-1 ml-2 bg-gray-100 rounded-lg min-h-96 text-slate-800" id="Description" @bind-Value=model.Description />
+            </label>
 
-        <label class="flex flex-col">
-            <div class="pl-2">
-                Minimim Age
-            </div>
-            <InputNumber class="w-64 px-2 py-1 ml-2 bg-gray-100 rounded-lg text-slate-800" id="MinAge" @bind-Value=model.MinAge />
-        </label>
+            <label class="flex flex-col">
+                <div class="pl-2">
+                    Minimim Age
+                </div>
+                <InputNumber class="w-64 px-2 py-1 ml-2 bg-gray-100 rounded-lg text-slate-800" id="MinAge" @bind-Value=model.MinAge />
+            </label>
 
-        <label class="flex flex-col">
-            <div class="pl-2">
-                Start Date
-            </div>
-            <InputDate class="w-64 px-2 py-1 ml-2 bg-gray-100 rounded-lg text-slate-800" Type="InputDateType.Date" id="StartTime" @bind-Value=model.StartDate />
-        </label>
+            <label class="flex flex-col">
+                <div class="pl-2">
+                    Start Date
+                </div>
+                <InputDate class="w-64 px-2 py-1 ml-2 bg-gray-100 rounded-lg text-slate-800" Type="InputDateType.Date" id="StartTime" @bind-Value=model.StartDate />
+            </label>
 
-        <label class="flex flex-col">
-            <div class="pl-2">
-                Start Time
-            </div>
-            <InputDate class="w-64 px-2 py-1 ml-2 bg-gray-100 rounded-lg text-slate-800" Type="InputDateType.Time" id="StartTime" @bind-Value=model.StartTime />
-        </label>
+            <label class="flex flex-col">
+                <div class="pl-2">
+                    Start Time
+                </div>
+                <InputDate class="w-64 px-2 py-1 ml-2 bg-gray-100 rounded-lg text-slate-800" Type="InputDateType.Time" id="StartTime" @bind-Value=model.StartTime />
+            </label>
 
-        <label class="flex flex-col">
-            <div class="pl-2">
-                End Date
-            </div>
-            <InputDate class="w-64 px-2 py-1 ml-2 bg-gray-100 rounded-lg text-slate-800" Type="InputDateType.Date" id="StartTime" @bind-Value=model.EndDate />
-        </label>
+            <label class="flex flex-col">
+                <div class="pl-2">
+                    End Date
+                </div>
+                <InputDate class="w-64 px-2 py-1 ml-2 bg-gray-100 rounded-lg text-slate-800" Type="InputDateType.Date" id="StartTime" @bind-Value=model.EndDate />
+            </label>
 
-        <label class="flex flex-col">
-            <div class="pl-2">
-                End Time
-            </div>
-            <InputDate class="w-64 px-2 py-1 ml-2 bg-gray-100 rounded-lg text-slate-800" Type="InputDateType.Time" id="StartTime" @bind-Value=model.EndTime />
-        </label>
+            <label class="flex flex-col">
+                <div class="pl-2">
+                    End Time
+                </div>
+                <InputDate class="w-64 px-2 py-1 ml-2 bg-gray-100 rounded-lg text-slate-800" Type="InputDateType.Time" id="StartTime" @bind-Value=model.EndTime />
+            </label>
 
-        <div class="flex flex-col">
-            <div class="pl-2">
-                Duration
-            </div>
-            <div class="w-64 px-2 py-1 ml-2 rounded-lg bg-gray-50 text-slate-800">
-                @model.Duration.Days days, @model.Duration.Hours hours, @model.Duration.Minutes minutes
-            </div>
-        </div>
-
-        <div class="flex flex-col">
-            <div class="pl-2">
-                Would starts in about
-            </div>
-            <div class="w-64 px-2 py-1 ml-2 rounded-lg bg-gray-50 text-slate-800">
-                @Remaining.Days days, @Remaining.Hours hours, @Remaining.Minutes minutes
+            <div class="flex flex-col">
+                <div class="pl-2">
+                    Duration
+                </div>
+                <div class="w-64 px-2 py-1 ml-2 rounded-lg bg-gray-50 text-slate-800">
+                    @model.Duration.Days days, @model.Duration.Hours hours, @model.Duration.Minutes minutes
+                </div>
             </div>
 
-            <div>
-                From @StartUTC UTC to @EndUTC UTC
-            </div>
-        </div>
+            <div class="flex flex-col">
+                <div class="pl-2">
+                    Would starts in about
+                </div>
+                <div class="w-64 px-2 py-1 ml-2 rounded-lg bg-gray-50 text-slate-800">
+                    @Remaining.Days days, @Remaining.Hours hours, @Remaining.Minutes minutes
+                </div>
 
-        <button type="submit" class="px-4 py-2 mt-4 text-white bg-blue-500 rounded-lg">Create</button>
-        <DataAnnotationsValidator />
-        <div class="text-rose-500">
-            <ValidationSummary />
-        </div>
-    </EditForm>
-</div>
+                <div>
+                    From @StartUTC UTC to @EndUTC UTC
+                </div>
+            </div>
+
+            <button type="submit" class="px-4 py-2 mt-4 text-white bg-blue-500 rounded-lg">Create</button>
+            <DataAnnotationsValidator />
+            <div class="text-rose-500">
+                <ValidationSummary />
+            </div>
+        </EditForm>
+    </div>
+}
 
 @code {
-    ContestModel model = new();
+    ContestModel? model;
 
+    DateTime StartUTC => model?.Start ?? DateTime.UtcNow - offset;
+    DateTime EndUTC => model?.End ?? DateTime.UtcNow - offset;
+    TimeSpan Remaining => StartUTC - DateTime.UtcNow;
     TimeSpan offset;
-
-    private DateTime StartUTC => model.Start - offset;
-    private DateTime EndUTC => model.End - offset;
-    private TimeSpan Remaining => StartUTC - DateTime.UtcNow;
 
     protected override async Task OnAfterRenderAsync(bool firstRender)
     {
         if (!firstRender)
             return;
+
+        model = new();
+
         offset = await TimeZoneProvider.GetTimeZoneOffsetAsync();
+
         var adjusted = DateTime.UtcNow.Add(offset);
+
         // zero out the seconds and milliseconds
         adjusted = adjusted.AddSeconds(-adjusted.Second).AddMilliseconds(-adjusted.Millisecond);
+
         model.StartDate = DateOnly.FromDateTime(adjusted);
         model.StartTime = TimeOnly.FromDateTime(adjusted.AddHours(1));
         model.EndDate = DateOnly.FromDateTime(adjusted.AddDays(1));
         model.EndTime = TimeOnly.FromDateTime(adjusted.AddHours(1));
+
         await InvokeAsync(StateHasChanged);
 
-        using PeriodicTimer periodicTimer = new(TimeSpan.FromMinutes(1));
+        // Update times every 15 seconds
+        using PeriodicTimer periodicTimer = new(TimeSpan.FromSeconds(15));
         while (await periodicTimer.WaitForNextTickAsync())
-        {
             await InvokeAsync(StateHasChanged);
-        }
     }
 
-    class ContestModel
-    {
-        [Required(AllowEmptyStrings = false)]
-        public string Name { get; set; } = string.Empty;
-
-        public string Description { get; set; } = "# Description\n\n## Rules\n\n## Prizes\n\n## Scoring\n\n## Submission\n\n## Judging\n\n## FAQ\n\n";
-
-        [Required]
-        public DateOnly StartDate { get; set; }
-        [Required]
-        public DateOnly EndDate { get; set; }
-        [Required]
-        public TimeOnly StartTime { get; set; }
-        [Required]
-        public TimeOnly EndTime { get; set; }
-
-        public DateTime Start => StartDate.ToDateTime(StartTime);
-        public DateTime End => EndDate.ToDateTime(EndTime);
-        public TimeSpan Duration => End - Start;
-
-        public int MinAge { get; set; } = 13;
-    }
-
-    private async Task SubmitAsync()
+    async Task SubmitAsync()
     {
         var user = await UserStateService.UserAsync();
         if (user is null)
+        {
+            // shouldn't happen
+            ModalService.ShowError("You must be logged in to create a contest", "Not logged in");
+            return;
+        }
+        if (model is null)
+            // not loaded
             return;
 
-        (var success, var id) = await ApiService.TryCreateContestAsync(new()
+        var (success, id) = await ApiService.TryCreateContestAsync(new()
             {
                 Name = model.Name,
                 Description = model.Description,
@@ -170,11 +165,34 @@
         }
 
         if (!await ApiService.TryUpdateUserContestRoleAsync(id.Value, user.Id, ContestRole.Admin))
-        {
             ModalService.ShowError("Failed to add owner to admin list", "Internal error");
-            return;
-        }        
+        else
+            NavigationManager.NavigateTo($"contest/{id}/manage");
+    }
 
-        NavigationManager.NavigateTo($"contest/{id}/manage");
+    class ContestModel
+    {
+        [Required(AllowEmptyStrings = false)]
+        public string Name { get; set; } = string.Empty;
+
+        public string Description { get; set; } = "# Description\n\n## Rules\n\n## Prizes\n\n## Scoring\n\n## Submission\n\n## Judging\n\n## FAQ\n\n";
+
+        [Required]
+        public DateOnly StartDate { get; set; }
+
+        [Required]
+        public DateOnly EndDate { get; set; }
+
+        [Required]
+        public TimeOnly StartTime { get; set; }
+
+        [Required]
+        public TimeOnly EndTime { get; set; }
+
+        public DateTime Start => StartDate.ToDateTime(StartTime);
+        public DateTime End => EndDate.ToDateTime(EndTime);
+        public TimeSpan Duration => End - Start;
+
+        public int MinAge { get; set; } = 13;
     }
 }

@@ -1,16 +1,21 @@
-﻿@page "/contest/{id:guid}/solve"
+﻿@*
+    This component displays a list of problems in a contest.
+    It also shows the user's solve status for each problem.
+*@
+@using System.Collections.Frozen
+@page "/contest/{id:guid}/solve"
+@inject NavigationManager NavigationManager
 @inject IApiService ApiService
 @inject IModalService ModalService
-@inject NavigationManager NavigationManager
 @inject ITimeZoneProvider TimeZoneProvider
 @inject IUserStateService UserStateService
 @rendermode InteractiveServer
-@using System.Collections.Frozen
+
 <AuthCheck Contest=Id />
 
 @if (contest is null)
 {
-    <div>Loading...</div>
+    <LoadingSpinner />
 }
 else
 {
@@ -93,8 +98,7 @@ else
         }
         problems = p;
 
-        var user = await UserStateService.UserAsync();
-        if (user is null)
+        if (await UserStateService.UserAsync() is not User user)
         {
             ModalService.ShowError("Failed to load user", "Internal error");
             NavigationManager.NavigateTo("dashboard");
@@ -108,6 +112,8 @@ else
             NavigationManager.NavigateTo("dashboard");
             return;
         }
+
+        // Load lookup table for user solve status
         userSolveStatus = s.ToFrozenDictionary(x => x.Problem, x => x);
     }
 }

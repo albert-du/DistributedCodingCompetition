@@ -82,9 +82,7 @@ else
                     Language = language,
                     SubmissionTime = DateTime.UtcNow,
                 }))
-            {
                 ModalService.ShowError("Failed to save code", "Internal error");
-            }
 
             loading = false;
         }

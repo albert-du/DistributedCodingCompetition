@@ -1,29 +1,33 @@
-﻿@page "/auth/login"
-@inject IAuthService AuthService
-@inject IApiService ApiService
-@inject IJSRuntime JSRuntime
+﻿@*
+    Login page for the user to login to the system.
+*@
+@using DistributedCodingCompetition.AuthService.Models
+@page "/auth/login"
 @inject NavigationManager NavigationManager
 @inject AuthenticationStateProvider AuthenticationStateProvider
+@inject IJSRuntime JSRuntime
+@inject IAuthService AuthService
+@inject IApiService ApiService
 @rendermode InteractiveServer
 
 <PageTitle>Login</PageTitle>
+
 <div class="py-2 mx-auto align-middle border rounded-lg border-slate-200 w-96">
     <h2 class="py-2 text-2xl text-center">Login</h2>
     @if (submitted)
     {
-        @*TODO add spinner*@
-        <h3>Loading...</h3>
+        <LoadingSpinner />
     }
     else
     {
         <EditForm class="flex flex-col items-center justify-center gap-y-5" Model=model OnValidSubmit=SubmitAsync
-            FormName="Login">
+                  FormName="Login">
             <label class="flex flex-col">
                 <div class="pl-2">
                     Email
                 </div>
                 <InputText class="w-64 px-2 py-1 ml-2 bg-gray-100 rounded-lg text-slate-800" id="username" type="email"
-                    @bind-Value=model.Email />
+                           @bind-Value=model.Email />
                 <div class="h-2 text-rose-500">
                     <ValidationMessage For=@(() => model.Email) />
                 </div>
@@ -34,15 +38,16 @@
                     Password
                 </div>
                 <InputText class="w-64 px-2 py-1 ml-2 bg-gray-100 rounded-lg text-slate-800" type="password"
-                    @bind-Value=model.Password />
+                           @bind-Value=model.Password />
                 <div class="h-2 text-rose-500">
                     <ValidationMessage For=@(() => model.Password) />
                 </div>
             </label>
             <div class="flex justify-center">
-                <button
-                    class="px-2 py-1 border rounded-xl text-violet-500 border-violet-500 hover:bg-violet-200 active:bg-violet-400"
-                    type="submit">Submit</button>
+                <button class="px-2 py-1 border rounded-xl text-violet-500 border-violet-500 hover:bg-violet-200 active:bg-violet-400"
+                        type="submit">
+                    Submit
+                </button>
             </div>
             <DataAnnotationsValidator />
         </EditForm>
@@ -53,51 +58,75 @@
 </div>
 
 @code {
+    // Load connection details from the parent component, including the user agent and IP address.
     [CascadingParameter]
     public ConnectionDetails? ConnectionDetails { get; set; }
 
+    // Optional ReturnURL parameter to redirect the user to after login.
     [SupplyParameterFromQuery]
     public string? ReturnUrl { get; set; }
-    private string? error;
-    private LoginModel model = new();
+
+    // Error to display to the user.
+    string? error;
+
+    LoginModel model = new();
+
     bool submitted;
+
     private async Task SubmitAsync()
     {
         if (submitted)
             return;
+
         submitted = true;
+
+        // Force a re-render to show the loading spinner.
         await InvokeAsync(StateHasChanged);
-        await Task.Delay(1000);
 
-        (var success, var user) = await ApiService.TryReadUserByEmailAsync(model.Email);
-        if (!success || user is null)
+        // Delay to prevent abuse.
+        await Task.Delay(500);
+
+        try
         {
-            error = "Failed to login.";
-            submitted = false;
-            return;
+            var (success, user) = await ApiService.TryReadUserByEmailAsync(model.Email);
+            if (!success || user is null)
+            {
+                error = "Failed to login.";
+                return;
+            }
+
+            // Try to login the user.
+
+            if (await AuthService.TryLoginAsync(user.Id, model.Password, ConnectionDetails?.UserAgent ?? "Unknown", ConnectionDetails?.IpAddress ?? "Unknown") is not LoginResult result)
+            {
+                error = $"Failed to login.";
+                return;
+            }
+
+            var code = await JSRuntime.InvokeAsync<int>("post", $"htau/login?token={Uri.EscapeDataString(result.Token)}");
+
+            if (code != 200)
+            {
+                error = $"Failed to login. Status: {code}";
+                return;
+            }
+
+            NavigationManager.NavigateTo(ReturnUrl ?? "/dashboard", true);
         }
-
-        var res = await AuthService.TryLoginAsync(user.Id, model.Password, ConnectionDetails?.UserAgent ?? "Unknown", ConnectionDetails?.IpAddress ?? "Unknown");
-
-        if (res is null)
+        finally
         {
-            error = $"Failed to login. Status";
             submitted = false;
-            return;
         }
+    }
 
-        var code = await JSRuntime.InvokeAsync<int>("post", $"htau/login?token={Uri.EscapeDataString(res.Token)}");
-
-        if (code != 200)
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        if (firstRender && (await AuthenticationStateProvider.GetAuthenticationStateAsync()).User.Identity?.IsAuthenticated is true)
         {
-            error = $"Failed to login. Status: {code}";
-            submitted = false;
-            return;
+            await JSRuntime.InvokeAsync<int>("post", "htau/logout"); // logout from the server
+
+            NavigationManager.NavigateTo(NavigationManager.Uri, true); // force a refresh
         }
-
-        submitted = false;
-
-        NavigationManager.NavigateTo(ReturnUrl ?? "/dashboard", true);
     }
 
     private class LoginModel
@@ -108,16 +137,5 @@
         [Required]
         [MinLength(8)]
         public string Password { get; set; } = string.Empty;
-    }
-
-    protected override async Task OnAfterRenderAsync(bool firstRender)
-    {
-        var authState = await AuthenticationStateProvider.GetAuthenticationStateAsync();
-        Console.WriteLine(authState.User.Identity?.IsAuthenticated);
-        var authenticated = authState.User.Identity?.IsAuthenticated ?? false;
-        if (!authenticated)
-            return;
-        var res = await JSRuntime.InvokeAsync<int>("post", "htau/logout");
-        NavigationManager.NavigateTo(NavigationManager.Uri, true);
     }
 }
