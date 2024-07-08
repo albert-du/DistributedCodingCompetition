@@ -623,5 +623,18 @@ public class ApiService(HttpClient httpClient, ILogger<ApiService> logger) : IAp
             return false;
         }
     }
+    public async Task<(bool, IReadOnlyList<Submission>?)> TryReadUserProblemSubmissionsAsync(Guid contestId, Guid problemId, Guid userId)
+    {
+        try
+        {
+            return (true, await httpClient.GetFromJsonAsync<IReadOnlyList<Submission>>($"api/submissions?contest={contestId}&problem={problemId}&userId={userId}"));
+
+        }
+        catch (Exception ex)
+        {
+            logger.LogError(ex, "Failed to read submissions");
+            return (false, null);
+        }
+    }
 
 }

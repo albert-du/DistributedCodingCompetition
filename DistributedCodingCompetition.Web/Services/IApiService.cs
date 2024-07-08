@@ -192,4 +192,6 @@ public interface IApiService
     Task<(bool, IReadOnlyList<ProblemUserSolveStatus>?)> TryReadUserSolveStatusForContestAsync(Guid contestId, Guid userId);
 
     Task<bool> TryCreateSubmissionAsync(Submission submission);
+
+    Task<(bool, IReadOnlyList<Submission>?)> TryReadUserProblemSubmissionsAsync(Guid contestId, Guid problemId, Guid userId);
 }

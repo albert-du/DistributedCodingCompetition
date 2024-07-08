@@ -6,6 +6,27 @@
 
 <AuthCheck Contest=ContestId />
 
+<PageTitle>@problemName Submissions</PageTitle>
+
+<h1 class="text-3xl">@problemName Submissions</h1>
+<h2 class="text-2xl">@contestName</h2>
+<p>Submissions for @username</p>
+
+<div class="flex flex-col gap-y-1">
+    @foreach (var submission in submissions)
+    {
+        <div>
+            <div class="flex justify-between">
+                <div>@submission.Language</div>
+                <div>@submission.SubmissionTime.Add(tzOffset).ToString("yyyy-MM-dd HH:mm:ss")</div>
+            </div>
+            <a href="submission/@submission.Id" class="border p-2 h-32 overflow-clip">
+                <pre>@submission.Code</pre>
+            </a>
+        </div>
+    }
+</div>
+
 @code {
     [Parameter]
     public Guid ContestId { get; set; }
@@ -13,8 +34,55 @@
     [Parameter]
     public Guid ProblemId { get; set; }
 
+    string contestName = string.Empty;
+    string problemName = string.Empty;
+    string username = string.Empty;
+
+    TimeSpan tzOffset;
+
+    IReadOnlyList<Submission> submissions = [];
+
     protected override async Task OnInitializedAsync()
     {
+        var user = await UserStateService.UserAsync();
+        if (user is null)
+        {
+            ModalService.ShowError("Failed to load user", "Internal error");
+            return;
+        }
+        username = user.Username;
 
+        var (success, contest) = await ApiService.TryReadContestAsync(ContestId);
+        if (!success || contest is null)
+        {
+            ModalService.ShowError("Failed to load contest", "Internal error");
+            return;
+        }
+
+        contestName = contest.Name;
+
+        var (success2, problem) = await ApiService.TryReadProblemAsync(ProblemId);
+        if (!success2 || problem is null)
+        {
+            ModalService.ShowError("Failed to load problem", "Internal error");
+            return;
+        }
+        problemName = problem.Name;
+        var (success3, subs) = await ApiService.TryReadUserProblemSubmissionsAsync(ContestId, ProblemId, user.Id);
+        if (!success3 || subs is null)
+        {
+            ModalService.ShowError("Failed to load submissions", "Internal error");
+            return;
+        }
+        submissions = subs;
+    }
+
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        if (firstRender)
+        {
+            tzOffset = await TimeZoneProvider.GetTimeZoneOffsetAsync();
+            await InvokeAsync(StateHasChanged);
+        }
     }
 }
