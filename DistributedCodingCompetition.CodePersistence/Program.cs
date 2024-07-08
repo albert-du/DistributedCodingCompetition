@@ -5,7 +5,7 @@ var builder = WebApplication.CreateBuilder(args);
 
 builder.AddServiceDefaults();
 
-builder.AddMongoDBClient("codepersistence");
+builder.AddMongoDBClient("codePersistenceDB");
 
 // Add services to the container.
 // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
@@ -27,7 +27,7 @@ app.UseHttpsRedirection();
 
 app.MapGet("/{contest}/{problem}/{user}", async (Guid contest, Guid problem, Guid user, IMongoClient mongoClient) =>
 {
-    var database = mongoClient.GetDatabase("codepersistence");
+    var database = mongoClient.GetDatabase("codePersistenceDB");
     var container = database.GetCollection<PersistenceRecord>("user-code");
     var record = await container.Find($"{contest}-{problem}-{user}").FirstOrDefaultAsync();
 
@@ -46,8 +46,12 @@ app.MapGet("/{contest}/{problem}/{user}", async (Guid contest, Guid problem, Gui
 
 app.MapPost("/{contest}/{problem}/{user}", async (Guid contest, Guid problem, Guid user, IMongoClient mongoClient, [FromBody] SavedCodeDTO code) =>
 {
-    var database = mongoClient.GetDatabase("codepersistence");
+    var database = mongoClient.GetDatabase("codePersistenceB");
     var container = database.GetCollection<PersistenceRecord>("user-code");
+    var existingRecord = await container.Find($"{contest}-{problem}-{user}").FirstOrDefaultAsync();
+    if (existingRecord is not null && existingRecord.SubmissionTime > code.SubmissionTime)
+        return Results.BadRequest("Code is older than existing code");
+
     var record = new PersistenceRecord
     {
         Contest = contest,

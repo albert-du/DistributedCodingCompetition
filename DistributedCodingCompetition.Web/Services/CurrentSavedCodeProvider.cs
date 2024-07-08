@@ -33,6 +33,4 @@ public class CurrentSavedCodeProvider(IUserStateService userStateService, Naviga
             return false;
         return await codePersistenceService.TrySaveCodeAsync(contest, problem, user.Id, code);
     }
-
-    private
 }

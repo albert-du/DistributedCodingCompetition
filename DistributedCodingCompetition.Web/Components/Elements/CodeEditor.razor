@@ -2,6 +2,7 @@
 @using BlazorMonaco
 @using BlazorMonaco.Editor
 @using BlazorMonaco.Languages
+@rendermode InteractiveServer
 
 <StandaloneCodeEditor @ref=editor CssClass="h-full" ConstructionOptions=EditorConstructionOptions
     OnDidChangeModel=EditorModelChangedAsync />
@@ -14,7 +15,7 @@
 
     [Parameter]
     public string Code { get; set; } = string.Empty;
-    
+
     [Parameter]
     public string Language { get; set; } = "text";
 
@@ -31,6 +32,16 @@
                 Value = Code,
             };
     }
+
+    protected override async Task OnParametersSetAsync()
+    {
+        if (editor is not null)
+        {
+            await editor.
+        }
+    
+    }
+
     private async Task EditorModelChangedAsync()
     {
         var model = await editor.GetModel();

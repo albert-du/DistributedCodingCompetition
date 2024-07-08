@@ -12,13 +12,13 @@ var contestDatabase = postgres.AddDatabase("contestdb");
 
 var authDatabase = mongo.AddDatabase("authdb");
 
-var codePersistanceDatabase = mongo.AddDatabase("authdb");
+var codePersistanceDatabase = mongo.AddDatabase("codepersistencedb");
 
 var auth = builder.AddProject<Projects.DistributedCodingCompetition_AuthService>("authentication")
                   .WithReference(authDatabase);
 
-var codePersistance = builder.AddProject<Projects.DistributedCodingCompetition_CodePersistence>("codepersistance")
-                            .WithReference(codePersistanceDatabase);
+var codePersistence = builder.AddProject<Projects.DistributedCodingCompetition_CodePersistence>("codepersistence")
+                             .WithReference(codePersistanceDatabase);
 
 var codeExecution = builder.AddProject<Projects.DistributedCodingCompetition_CodeExecution>("codeexecution")
                            .WithExternalHttpEndpoints()
@@ -38,9 +38,7 @@ builder.AddProject<Projects.DistributedCodingCompetition_Web>("webfrontend")
        .WithReference(apiService)
        .WithReference(judge)
        .WithReference(auth)
-       .WithReference(codePersistance)
+       .WithReference(codePersistence)
        .WithReference(codeExecution);
-
-builder.AddProject<Projects.DistributedCodingCompetition_CodePersistence>("distributedcodingcompetition-codepersistence");
 
 builder.Build().Run();
