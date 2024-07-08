@@ -1,6 +1,9 @@
 namespace DistributedCodingCompetition.Web.Models;
 
-public class ContestOptions
+/// <summary>
+/// Options Pattern for Contest
+/// </summary>
+public sealed class ContestOptions
 {
     public bool OpenCreation { get; set; }
 }

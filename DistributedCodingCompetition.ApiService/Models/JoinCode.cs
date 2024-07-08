@@ -66,8 +66,12 @@ public class JoinCode
     public bool Admin { get; set; }
 
     /// <summary>
+    /// Id of the admin user who created the code.
+    /// </summary>
+    public Guid CreatorId { get; set; }
+
+    /// <summary>
     /// Admin user who created the code.
     /// </summary>
     public User? Creator { get; set; }
-    public Guid CreatorId { get; set; }
 }

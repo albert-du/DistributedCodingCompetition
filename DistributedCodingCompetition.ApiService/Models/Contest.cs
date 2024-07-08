@@ -40,11 +40,14 @@ public class Contest
     public bool Active { get; set; } = true;
 
     /// <summary>
+    /// Id of the owner of the contest
+    /// </summary>
+    public Guid OwnerId { get; set; }
+
+    /// <summary>
     /// Owner of the contest
     /// </summary>
     public User? Owner { get; set; }
-
-    public Guid OwnerId { get; set; }
 
     /// <summary>
     /// Problems in the contest

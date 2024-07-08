@@ -1,13 +1,25 @@
 ﻿namespace DistributedCodingCompetition.Web.Services;
 
-using DistributedCodingCompetition.Web.Models;
 using Microsoft.AspNetCore.Components;
 
-public class CurrentSavedCodeProvider(IUserStateService userStateService, NavigationManager navigationManager, ICodePersistenceService codePersistenceService) : ICurrentSavedCodeProvider
+/// <summary>
+/// Current saved code provider
+/// Accesses the current saved code for the current user and problem
+/// </summary>
+/// <param name="userStateService"></param>
+/// <param name="navigationManager"></param>
+/// <param name="codePersistenceService"></param>
+public sealed class CurrentSavedCodeProvider(IUserStateService userStateService, NavigationManager navigationManager, ICodePersistenceService codePersistenceService) : ICurrentSavedCodeProvider
 {
+    /// <summary>
+    /// Get the current saved code for the current user and problem
+    /// </summary>
+    /// <returns></returns>
     public async Task<SavedCode?> GetCurrentSavedCodeAsync()
     {
         var user = await userStateService.UserAsync();
+
+        // Extract the contest and problem from the URL
         var segments = navigationManager.ToBaseRelativePath(navigationManager.Uri).Split('/');
         if (user is null ||
             segments.Length != 4 ||
@@ -20,9 +32,15 @@ public class CurrentSavedCodeProvider(IUserStateService userStateService, Naviga
         return await codePersistenceService.TryReadCodeAsync(contest, problem, user.Id);
     }
 
+    /// <summary>
+    /// Try to save the current code for the current user and problem
+    /// </summary>
+    /// <param name="code"></param>
+    /// <returns></returns>
     public async Task<bool> TrySaveCurrentCodeAsync(SavedCode code)
     {
         var user = await userStateService.UserAsync();
+        // Extract the contest and problem from the URL
         var segments = navigationManager.ToBaseRelativePath(navigationManager.Uri).Split('/');
         if (user is null ||
             segments.Length != 4 ||

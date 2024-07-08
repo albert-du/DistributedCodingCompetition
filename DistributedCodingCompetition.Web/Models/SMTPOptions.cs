@@ -1,5 +1,8 @@
 ﻿namespace DistributedCodingCompetition.Web.Models;
 
+/// <summary>
+/// Option for email server client
+/// </summary>
 public class SMTPOptions
 {
     public string Host { get; set; } = default!;

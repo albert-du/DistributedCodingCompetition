@@ -192,7 +192,7 @@ else
                             <div>@($"@{admin.Username} {admin.FullName}")</div>
                         }
                     </div>
-                    <a href="/contest/@Id/manage/administrators" class="italic hover:underline">Edit administrators</a>
+                    <a href="contest/@Id/manage/administrators" class="italic hover:underline">Edit administrators</a>
                 </div>
                 <div class="px-2 py-4">
                     <h3 class="text-semibold">Participants</h3>
@@ -213,10 +213,10 @@ else
                         }
                     </div>
                     <div class="flex w-32">
-                        <button class="px-2 py-1 text-white bg-blue-500 rounded-lg hover:bg-blue-600 active:bg-blue-700" @onclick="LastParticipantAsync">Previous</button>
-                        <button class="px-2 py-1 text-white bg-blue-500 rounded-lg hover:bg-blue-600 active:bg-blue-700" @onclick="NextParticipantAsync">Next</button>
+                        <button class="px-2 py-1 text-white bg-blue-500 rounded-lg hover:bg-blue-600 active:bg-blue-700" @onclick=LastParticipantAsync>Previous</button>
+                        <button class="px-2 py-1 text-white bg-blue-500 rounded-lg hover:bg-blue-600 active:bg-blue-700" @onclick=NextParticipantAsync>Next</button>
                     </div>
-                    <a href="/contest/@Id/manage/administrators" class="italic hover:underline">Edit participants</a>
+                    <a href="contest/@Id/manage/administrators" class="italic hover:underline">Edit participants</a>
                 </div>
 
                 <div class="px-2 py-4">
@@ -238,10 +238,10 @@ else
                         }
                     </div>
                     <div class="flex w-32">
-                        <button class="px-2 py-1 text-white bg-blue-500 rounded-lg hover:bg-blue-600 active:bg-blue-700" @onclick="LastBannedAsync">Previous</button>
-                        <button class="px-2 py-1 text-white bg-blue-500 rounded-lg hover:bg-blue-600 active:bg-blue-700" @onclick="NextBannedAsync">Next</button>
+                        <button class="px-2 py-1 text-white bg-blue-500 rounded-lg hover:bg-blue-600 active:bg-blue-700" @onclick=LastBannedAsync>Previous</button>
+                        <button class="px-2 py-1 text-white bg-blue-500 rounded-lg hover:bg-blue-600 active:bg-blue-700" @onclick=NextBannedAsync>Next</button>
                     </div>
-                    <a href="/contest/@Id/manage/participants/banned" class="italic hover:underline">Banned users</a>
+                    <a href="contest/@Id/manage/participants/banned" class="italic hover:underline">Banned users</a>
                 </div>
             </div>
         </div>

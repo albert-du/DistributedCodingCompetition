@@ -1,40 +1,53 @@
 ﻿namespace DistributedCodingCompetition.Web.Controllers;
 
 using System.Security.Claims;
-using DistributedCodingCompetition.Web.Services;
-using Microsoft.AspNetCore.Http;
-using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Authentication.Cookies;
+using Microsoft.AspNetCore.Http;
+using Microsoft.AspNetCore.Mvc;
+using DistributedCodingCompetition.AuthService.Models;
 
-[Route("htau")]
+/// <summary>
+/// Controller for handling authentication
+/// </summary>
+/// <param name="authService"></param>
+[Route("htau")] // auth backwards
 [ApiController]
-public class AuthController(IAuthService authService) : ControllerBase
+public sealed class AuthController(IAuthService authService) : ControllerBase
 {
+    /// <summary>
+    /// Logs in a user
+    /// </summary>
+    /// <param name="token">token</param>
+    /// <returns>cookie</returns>
     [HttpPost("login")]
     public async Task<IActionResult> LoginAsync(string token)
     {
-        var result = await authService.ValidateTokenAsync(token);
-        if (result is null)
+        if (await authService.ValidateTokenAsync(token) is not ValidationResult result)
             return Unauthorized();
 
         List<Claim> claims = [new(ClaimTypes.NameIdentifier, result.Id.ToString())];
 
         if (result.Admin)
-            claims.Add(new Claim(ClaimTypes.Role, "Admin"));
+            claims.Add(new(ClaimTypes.Role, "Admin"));
 
         // cookie auth
-        var claimsIdentity = new ClaimsIdentity(claims, CookieAuthenticationDefaults.AuthenticationScheme);
-        var authProperties = new AuthenticationProperties
+        ClaimsIdentity claimsIdentity = new(claims, CookieAuthenticationDefaults.AuthenticationScheme);
+        AuthenticationProperties authProperties = new()
         {
             IsPersistent = true,
             ExpiresUtc = DateTimeOffset.UtcNow.AddDays(7),
         };
+
         await HttpContext.SignInAsync(CookieAuthenticationDefaults.AuthenticationScheme, new ClaimsPrincipal(claimsIdentity), authProperties);
 
         return Ok();
     }
 
+    /// <summary>
+    /// Logs out a user
+    /// </summary>
+    /// <returns></returns>
     [HttpPost("logout")]
     public async Task<IActionResult> LogoutAsync()
     {

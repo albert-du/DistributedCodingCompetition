@@ -1,7 +1,8 @@
 ﻿namespace DistributedCodingCompetition.Web.Services;
 
-using DistributedCodingCompetition.Web.Models;
-
+/// <summary>
+/// Code persistence service
+/// </summary>
 public interface ICodePersistenceService
 {
     Task<SavedCode?> TryReadCodeAsync(Guid contest, Guid problem, Guid user);

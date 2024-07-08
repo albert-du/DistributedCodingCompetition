@@ -157,41 +157,149 @@ public interface IApiService
     /// <returns></returns>
     Task<(bool, IReadOnlyList<User>?)> TryReadContestBannedAsync(Guid contestId, int count, int page);
 
+    /// <summary>
+    /// Reads the contests that a user is an admin of.
+    /// </summary>
+    /// <param name="userId"></param>
+    /// <param name="count"></param>
+    /// <param name="page"></param>
+    /// <returns></returns>
     Task<(bool, IReadOnlyList<Contest>?)> TryReadUserAdministratedContestsAsync(Guid userId, int count, int page);
 
+    /// <summary>
+    /// Reads the contests that a user is a participant of.
+    /// </summary>
+    /// <param name="userId"></param>
+    /// <param name="count"></param>
+    /// <param name="page"></param>
+    /// <returns></returns>
     Task<(bool, IReadOnlyList<Contest>?)> TryReadUserEnteredContestsAsync(Guid userId, int count, int page);
 
+    /// <summary>
+    /// Reads publically joinable contests.
+    /// </summary>
+    /// <param name="count"></param>
+    /// <param name="page"></param>
+    /// <returns></returns>
     Task<(bool, IReadOnlyList<Contest>?)> TryReadPublicContestsAsync(int count, int page);
 
+    /// <summary>
+    /// Read a contest join codes.
+    /// </summary>
+    /// <param name="id"></param>
+    /// <returns></returns>
     Task<(bool, IReadOnlyList<JoinCode>?)> TryReadContestJoinCodesAsync(Guid id);
 
+    /// <summary>
+    /// Delete a join code.
+    /// </summary>
+    /// <param name="joinCodeId"></param>
+    /// <returns></returns>
     Task<bool> TryDeleteJoinCodeAsync(Guid joinCodeId);
 
+    /// <summary>
+    /// Update a join code 
+    /// </summary>
+    /// <param name="joinCode"></param>
+    /// <returns></returns>
     Task<bool> TryUpdateJoinCodeAsync(JoinCode joinCode);
 
+    /// <summary>
+    /// Create a new join code.
+    /// </summary>
+    /// <param name="joinCode"></param>
+    /// <returns></returns>
     Task<(bool, Guid?)> TryCreateJoinCodeAsync(JoinCode joinCode);
 
+    /// <summary>
+    /// Add a problem to a contest.
+    /// </summary>
+    /// <param name="contestId"></param>
+    /// <param name="problem"></param>
+    /// <returns></returns>
     Task<bool> TryAddProblemToContestAsync(Guid contestId, Problem problem);
 
+    /// <summary>
+    /// Create a new problem test case.
+    /// </summary>
+    /// <param name="testCase"></param>
+    /// <returns></returns>
     Task<(bool, Guid?)> TryCreateProblemTestCaseAsync(TestCase testCase);
 
+    /// <summary>
+    /// Read a problem's test cases.
+    /// </summary>
+    /// <param name="contestId"></param>
+    /// <returns></returns>
     Task<(bool, IReadOnlyList<Problem>?)> TryReadContestProblemsAsync(Guid contestId);
 
+    /// <summary>
+    /// Delete a problem.
+    /// </summary>
+    /// <param name="problemId"></param>
+    /// <returns></returns>
     Task<bool> TryDeleteProblemAsync(Guid problemId);
 
+
+    /// <summary>
+    /// Add a test case to a problem.
+    /// </summary>
+    /// <param name="problemId"></param>
+    /// <param name="testCase"></param>
+    /// <returns></returns>
     Task<bool> TryAddTestCaseToProblemAsync(Guid problemId, TestCase testCase);
 
+    /// <summary>
+    /// Delete a test case.
+    /// </summary>
+    /// <param name="testCaseId"></param>
+    /// <returns></returns>
     Task<bool> TryDeleteTestCaseAsync(Guid testCaseId);
 
+    /// <summary>
+    /// Read a test case.
+    /// </summary>
+    /// <param name="testCaseId"></param>
+    /// <returns></returns>
     Task<(bool, TestCase?)> TryReadTestCaseAsync(Guid testCaseId);
 
+    /// <summary>
+    /// Update a test case.
+    /// </summary>
+    /// <param name="testCase"></param>
+    /// <returns></returns>
     Task<bool> TryUpdateTestCaseAsync(TestCase testCase);
 
+    /// <summary>
+    /// Read a contest's problems.
+    /// </summary>
+    /// <param name="joinCodeId"></param>
+    /// <param name="userId"></param>
+    /// <returns></returns>
     Task<bool> TryJoinContestAsync(Guid joinCodeId, Guid userId);
 
+    /// <summary>
+    /// Read a user's solve status for a contest.
+    /// </summary>
+    /// <param name="contestId"></param>
+    /// <param name="userId"></param>
+    /// <returns></returns>
     Task<(bool, IReadOnlyList<ProblemUserSolveStatus>?)> TryReadUserSolveStatusForContestAsync(Guid contestId, Guid userId);
 
+    /// <summary>
+    /// Create a new submission.
+    /// Does not solve automatically
+    /// </summary>
+    /// <param name="submission"></param>
+    /// <returns></returns>
     Task<bool> TryCreateSubmissionAsync(Submission submission);
 
+    /// <summary>
+    /// Read submissions from a user for a problem.
+    /// </summary>
+    /// <param name="contestId"></param>
+    /// <param name="problemId"></param>
+    /// <param name="userId"></param>
+    /// <returns></returns>
     Task<(bool, IReadOnlyList<Submission>?)> TryReadUserProblemSubmissionsAsync(Guid contestId, Guid problemId, Guid userId);
 }

@@ -2,6 +2,7 @@ global using DistributedCodingCompetition.Web;
 global using DistributedCodingCompetition.Web.Services;
 global using DistributedCodingCompetition.Web.Components;
 global using DistributedCodingCompetition.Web.Models;
+global using Microsoft.Extensions.Options;
 using Microsoft.AspNetCore.Authentication.Cookies;
 
 var builder = WebApplication.CreateBuilder(args);

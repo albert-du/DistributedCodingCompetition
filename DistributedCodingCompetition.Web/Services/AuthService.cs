@@ -1,12 +1,11 @@
 ﻿namespace DistributedCodingCompetition.Web.Services;
 
-using System.Net;
-using Microsoft.Extensions.Logging;
 using DistributedCodingCompetition.AuthService.Models;
-using System.Web;
 
-public class AuthService(HttpClient httpClient, ILogger<AuthService> logger, IModalService modalService, IApiService apiService) : IAuthService
+/// <inheritdoc/>
+public sealed class AuthService(HttpClient httpClient, ILogger<AuthService> logger, IModalService modalService, IApiService apiService) : IAuthService
 {
+    /// <inheritdoc/>
     public async Task<Guid?> TryRegisterAsync(string email, string password)
     {
         try
@@ -14,7 +13,7 @@ public class AuthService(HttpClient httpClient, ILogger<AuthService> logger, IMo
             (var success, var emailUser) = await apiService.TryReadUserByEmailAsync(email);
             if (!success)
                 return null;
-            
+
             if (emailUser != null)
             {
                 modalService.ShowError("Cannot register", "Email already in use");
@@ -34,6 +33,7 @@ public class AuthService(HttpClient httpClient, ILogger<AuthService> logger, IMo
         }
     }
 
+    /// <inheritdoc/>
     public async Task<LoginResult?> TryLoginAsync(Guid id, string password, string userAgent, string ipAddress)
     {
         Dictionary<string, string> data = new()

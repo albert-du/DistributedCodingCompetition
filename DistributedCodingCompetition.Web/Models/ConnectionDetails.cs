@@ -1,3 +1,8 @@
 ﻿namespace DistributedCodingCompetition.Web.Models;
 
-public record ConnectionDetails(string IpAddress, string UserAgent);
+/// <summary>
+/// Connection details
+/// </summary>
+/// <param name="IpAddress">Ip of user</param>
+/// <param name="UserAgent">Browser details</param>
+public sealed record ConnectionDetails(string IpAddress, string UserAgent);

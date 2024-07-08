@@ -1,11 +1,13 @@
 namespace DistributedCodingCompetition.Web.Services;
 
 using System.Security.Claims;
-using DistributedCodingCompetition.ApiService.Models;
 using Microsoft.AspNetCore.Components.Authorization;
+using DistributedCodingCompetition.ApiService.Models;
 
-public class UserStateService(IApiService apiService, AuthenticationStateProvider authenticationStateProvider, IModalService modalService) : IUserStateService
+/// <inheritdoc/>
+public sealed class UserStateService(IApiService apiService, AuthenticationStateProvider authenticationStateProvider, IModalService modalService) : IUserStateService
 {
+    /// <inheritdoc/>
     public async Task<User?> UserAsync()
     {
         var authState = await authenticationStateProvider.GetAuthenticationStateAsync();
@@ -24,6 +26,7 @@ public class UserStateService(IApiService apiService, AuthenticationStateProvide
         return user;
     }
 
+    /// <inheritdoc/>
     public async Task UpdateUserAsync(User user)
     {
         var authState = await authenticationStateProvider.GetAuthenticationStateAsync();
@@ -44,6 +47,7 @@ public class UserStateService(IApiService apiService, AuthenticationStateProvide
         else
             OnChange?.Invoke(this, user);
     }
-    
+
+    /// <inheritdoc/>
     public event EventHandler<User?>? OnChange;
 }

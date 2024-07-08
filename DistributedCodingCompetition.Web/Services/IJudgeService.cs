@@ -1,5 +1,8 @@
 ﻿namespace DistributedCodingCompetition.Web.Services;
 
+/// <summary>
+/// Interface with external judge service
+/// </summary>
 public interface IJudgeService
 {
     /// <summary>

@@ -28,7 +28,7 @@ else
             <div class="flex-1">Expires @joinCode.Expiration UTC</div>
             <div class="flex-1">@(joinCode.Active ? "Active" : "Inactive")</div>
             <div class="flex-1">
-                <button class="btn btn-danger" @onclick="DeleteAsync">Delete</button>
+                <button class="btn btn-danger" @onclick=DeleteAsync>Delete</button>
             </div>
             <div class="flex-1">
                 <button class="btn btn-primary" @onclick="() => SetActiveAsync(!joinCode.Active)">

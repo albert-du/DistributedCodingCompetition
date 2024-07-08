@@ -1,13 +1,25 @@
 ﻿namespace DistributedCodingCompetition.Web.Services;
 
-using DistributedCodingCompetition.Web.Models;
-using Microsoft.Extensions.Options;
 using MimeKit;
 using MailKit.Net.Smtp;
 using MailKit.Security;
-public class EmailService(IOptions<SMTPOptions> options, ILogger<EmailService> logger) : IEmailService
+
+/// <summary>
+/// Sends email via SMTP
+/// </summary>
+/// <param name="options"></param>
+/// <param name="logger"></param>
+public sealed class EmailService(IOptions<SMTPOptions> options, ILogger<EmailService> logger) : IEmailService
 {
     private readonly SMTPOptions emailConfig = options.Value;
+
+    /// <summary>
+    /// Sends email via SMTP
+    /// </summary>
+    /// <param name="email"></param>
+    /// <param name="subject"></param>
+    /// <param name="htmlMessage"></param>
+    /// <returns></returns>
     public async Task SendEmailAsync(string email, string subject, string htmlMessage)
     {
         var message = new MimeMessage();

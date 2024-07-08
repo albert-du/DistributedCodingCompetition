@@ -1,10 +1,10 @@
 ﻿namespace DistributedCodingCompetition.Web.Services;
 
-using DistributedCodingCompetition.ApiService.Models;
-using System.Collections.Generic;
 using System.Net;
+using DistributedCodingCompetition.ApiService.Models;
 
-public class ApiService(HttpClient httpClient, ILogger<ApiService> logger) : IApiService
+/// <inheritdoc/>
+public sealed class ApiService(HttpClient httpClient, ILogger<ApiService> logger) : IApiService
 {
     public async Task<(bool, User?)> TryReadUserByEmailAsync(string email)
     {

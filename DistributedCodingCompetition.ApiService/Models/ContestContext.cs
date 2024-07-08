@@ -1,7 +1,6 @@
 ﻿namespace DistributedCodingCompetition.ApiService.Models;
 
 using Microsoft.EntityFrameworkCore;
-using System.Text.Json;
 
 public class ContestContext(DbContextOptions<ContestContext> options) : DbContext(options)
 {
