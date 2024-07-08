@@ -4,8 +4,7 @@
 @using BlazorMonaco.Languages
 @rendermode InteractiveServer
 
-<StandaloneCodeEditor @ref=editor CssClass="h-full" ConstructionOptions=EditorConstructionOptions
-    OnDidChangeModel=EditorModelChangedAsync />
+<StandaloneCodeEditor @ref=editor CssClass="h-full" ConstructionOptions=EditorConstructionOptions OnKeyDown=EditorModelChangedAsync />
 
 @code {
     private StandaloneCodeEditor editor = default!;
@@ -26,20 +25,12 @@
     {
         return new StandaloneEditorConstructionOptions
             {
+                GlyphMargin = false,
                 ReadOnly = ReadOnly,
                 AutomaticLayout = true,
                 Language = Language,
                 Value = Code,
             };
-    }
-
-    protected override async Task OnParametersSetAsync()
-    {
-        if (editor is not null)
-        {
-            await editor.
-        }
-    
     }
 
     private async Task EditorModelChangedAsync()
