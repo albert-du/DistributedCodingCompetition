@@ -598,7 +598,7 @@ public class ApiService(HttpClient httpClient, ILogger<ApiService> logger) : IAp
         }
     }
     public async Task<(bool, IReadOnlyList<ProblemUserSolveStatus>?)> TryReadUserSolveStatusForContestAsync(Guid contestId, Guid userId)
-    { 
+    {
         try
         {
             return (true, await httpClient.GetFromJsonAsync<IReadOnlyList<ProblemUserSolveStatus>>($"api/contests/{contestId}/user/{userId}/solve"));
@@ -607,6 +607,20 @@ public class ApiService(HttpClient httpClient, ILogger<ApiService> logger) : IAp
         {
             logger.LogError(ex, "Failed to fetch user solve status for contest");
             return (false, null);
+        }
+    }
+    public async Task<bool> TryCreateSubmissionAsync(Submission submission)
+    {
+        try
+        {
+            var response = await httpClient.PostAsJsonAsync("api/submissions", submission);
+            response.EnsureSuccessStatusCode();
+            return true;
+        }
+        catch (Exception ex)
+        {
+            logger.LogError(ex, "Failed to create submission");
+            return false;
         }
     }
 

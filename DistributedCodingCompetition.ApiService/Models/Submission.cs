@@ -2,7 +2,7 @@
 
 public class Submission
 {
-    public Guid Id { get; set; }
+    public Guid Id { get; set; } = Guid.NewGuid();
     public Guid SubmitterId { get; set; }
     public User? Submitter { get; set; }
     public Guid? ContestId { get; set; }
