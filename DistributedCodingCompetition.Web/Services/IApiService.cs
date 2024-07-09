@@ -302,4 +302,11 @@ public interface IApiService
     /// <param name="userId"></param>
     /// <returns></returns>
     Task<(bool, IReadOnlyList<Submission>?)> TryReadUserProblemSubmissionsAsync(Guid contestId, Guid problemId, Guid userId);
+
+    /// <summary>
+    /// Read a submission.
+    /// </summary>
+    /// <param name="submission"></param>
+    /// <returns></returns>
+    Task<bool> TryUpdateSubmissionAsync(Submission submission);
 }

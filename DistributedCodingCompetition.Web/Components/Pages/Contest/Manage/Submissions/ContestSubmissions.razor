@@ -5,7 +5,9 @@
 @inject IApiService ApiService
 @inject IModalService ModalService
 @inject IUserStateService UserStateService
+@inject IJudgeService JudgeService
 @rendermode InteractiveServer
+
 <AuthCheck Contest=Id Admin />
 
 <PageTitle>@contest?.Name Submissions</PageTitle>
@@ -36,15 +38,22 @@
                 <td>@submission.Problem</td>
                 <td>@submission.SubmissionTime</td>
                 <td><a href="submission/@submission.Id">View</a></td>
-                <td><button @onclick=RejudgeAsync>Rejudge</button></td>
+                @if (!judging.Contains(submission.Id))
+                {
+                    <td><button @onclick="() => RejudgeAsync(submission)">Rejudge</button></td>
+                }
+                else
+                {
+                    <td><button disabled>Rejudging...</button></td>
+                }
                 @if (submission.Invalidated)
                 {
-                    <td><button @onclick=RevalidateAsync>Revalidate</button></td>
+                    <td><button @onclick="() => RevalidateAsync(submission)">Revalidate</button></td>
 
                 }
                 else
                 {
-                    <td><button @onclick=InvalidateAsync>Invalidate</button></td>
+                    <td><button @onclick="() => InvalidateAsync(submission)">Invalidate</button></td>
                 }
             </tr>
         }
@@ -58,18 +67,16 @@
 
     [SupplyParameterFromQuery]
     public int Page { get; set; } = 1;
+
     [SupplyParameterFromQuery]
     public int PageSize { get; set; } = 10;
 
     List<Submission> Submissions = [];
     Contest? contest;
+    HashSet<Guid> judging = [];
 
     protected override async Task OnInitializedAsync()
     {
-        await LoadAsync();
-        // make sure the user is a contest admin
-        var user = await UserStateService.UserAsync();
-        var userId = user?.Id;
 
         (var success, var c) = await ApiService.TryReadContestAsync(Id);
         if (!success)
@@ -78,6 +85,11 @@
             return;
         }
         contest = c;
+
+        await LoadAsync();
+        // make sure the user is a contest admin
+        var user = await UserStateService.UserAsync();
+        var userId = user?.Id;
     }
 
     private async Task LoadAsync()
@@ -108,17 +120,44 @@
 
     }
 
-    async Task RejudgeAsync()
+    async Task RejudgeAsync(Submission submission)
     {
+        if (judging.Contains(submission.Id))
+            return;
+
+        judging.Add(submission.Id);
+
+        try
+        {
+            var error = await JudgeService.JudgeAsync(submission.Id);
+            if (error is not null)
+                ModalService.ShowError(error, "Failed to judge submission");
+            else
+                await LoadAsync();
+        }
+        finally
+        {
+            judging.Remove(submission.Id);
+        }
     }
 
-    async Task InvalidateAsync()
+    async Task InvalidateAsync(Submission submission)
     {
-        
+        submission.Invalidated = true;
+        if (!await ApiService.TryUpdateSubmissionAsync(submission))
+        {
+            ModalService.ShowError("Failed to invalidate submission", "Internal error");
+            submission.Invalidated = false;
+        }
     }
 
-    async Task RevalidateAsync()
+    async Task RevalidateAsync(Submission submission)
     {
-        
+        submission.Invalidated = false;
+        if (!await ApiService.TryUpdateSubmissionAsync(submission))
+        {
+            ModalService.ShowError("Failed to revalidate submission", "Internal error");
+            submission.Invalidated = true;
+        }
     }
 }

@@ -10,6 +10,38 @@
   "secrets": {
     "salt": "dehlebrmMv1Pixj0",
     "hash": "GivMVDoEwZfGOtRt4f2An/BZTMhD\u002BGXxhRpNodwT06I=",
-    "secrets": {}
-  }
+    "secrets": {
+      "postgres-password": {
+        "value": "dehlebrmMv1Pixj0xPKUkX2u9OD2eRIbeRyUBEHtwr1apnln\u002By9A73jojSodHL1kly0="
+      },
+      "cache": {},
+      "postgres": {
+        "POSTGRES_PASSWORD": "dehlebrmMv1Pixj0xPKUkX2u9OD2eRIbeRyUBEHtwr1apnln\u002By9A73jojSodHL1kly0="
+      },
+      "mongo": {},
+      "evaluationdb": {},
+      "contestdb": {},
+      "authdb": {},
+      "codepersistencedb": {},
+      "authentication": {
+        "ConnectionStrings__authdb": "dehlebrmMv1Pixj0XzhZ2RlViFStvb5/pd0tc1rB2K1nuFoPrEhlwiG3o1gaWrgvzmhaSR4mo80="
+      },
+      "codepersistence": {
+        "ConnectionStrings__codepersistencedb": "dehlebrmMv1Pixj0mvp6CR6Q9tU6Mlncbs1YbVrB2K1nuFoPrEhlwiG3o1gaWrgvzmhYUw4rt8qI5ccnhsFWTdSbEg=="
+      },
+      "codeexecution": {
+        "ConnectionStrings__evaluationdb": "dehlebrmMv1Pixj0XVyRv\u002BoEdx9kfRtPD1QPw3/Bxb41rFdG9wB6yDzrnA1aGbUrzXQJBz89ot2U98Mxz9RXXcWYAtCDL\u002BrXqOHQtRNSRcBw6UHufHfZuqT37zK/CsbZkGyWe9K2ZoXqhfX7uhP8KbCd\u002BRz0DyPTV4Ni"
+      },
+      "apiservice": {
+        "ConnectionStrings__contestdb": "dehlebrmMv1Pixj0GdpsSFjO5gfrTZbUX6FkOX/Bxb41rFdG9wB6yDzrnA1aGbUrzXQJBz89ot2U98Mxz9RXXcWYAtCDL\u002BrXqOHQtRNSRcBw6UHufHfZuqT37zK/CsbZkGyWe9K2ZoXqhfX7uhP8L6mS4QzmDy7e"
+      },
+      "judge": {
+        "ConnectionStrings__cache": "dehlebrmMv1Pixj0dEIj4HbqAtlWToQmlASgZ1TP1aJt5g4GtF4="
+      },
+      "webfrontend": {
+        "ConnectionStrings__cache": "dehlebrmMv1Pixj0dEIj4HbqAtlWToQmlASgZ1TP1aJt5g4GtF4="
+      }
+    }
+  },
+  "processAllComponents": true
 }

@@ -1,0 +1,11 @@
+{
+  "TemplatePath": null,
+  "ContainerSettings": {
+    "Registry": null,
+    "RepositoryPrefix": "distributed-coding-competition-",
+    "Tags": [
+      "latest"
+    ],
+    "Builder": "docker"
+  }
+}

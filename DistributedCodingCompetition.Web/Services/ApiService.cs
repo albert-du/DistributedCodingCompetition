@@ -637,4 +637,18 @@ public sealed class ApiService(HttpClient httpClient, ILogger<ApiService> logger
         }
     }
 
+    public async Task<bool> TryUpdateSubmissionAsync(Submission submission)
+    {
+        try
+        {
+            var response = await httpClient.PutAsJsonAsync($"api/submissions/{submission.Id}", submission);
+            response.EnsureSuccessStatusCode();
+            return true;
+        }
+        catch (Exception ex)
+        {
+            logger.LogError(ex, "Failed to update submission");
+            return false;
+        }
+    }
 }
