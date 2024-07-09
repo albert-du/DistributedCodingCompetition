@@ -6,14 +6,26 @@ using System.Text;
 using System.Net.Http;
 using System.Text.Json.Serialization;
 
+/// <summary>
+/// Management Controller for ExecRunner
+/// </summary>
+/// <param name="configuration"></param>
+/// <param name="httpClient"></param>
 [Route("api/[controller]")]
 [ApiController]
 public class ManagementController(IConfiguration configuration, HttpClient httpClient) : ControllerBase
 {
+    private readonly static DateTime startTime = DateTime.UtcNow;
     static bool installing = false;
     static bool selfCheck = false;
+
     static bool Available => !installing && selfCheck;
 
+    /// <summary>
+    /// Get the status of the runner
+    /// </summary>
+    /// <param name="key"></param>
+    /// <returns></returns>
     [HttpGet]
     public async Task<ActionResult<RunnerStatus>> GetAsync(string key)
     {
@@ -39,12 +51,19 @@ public class ManagementController(IConfiguration configuration, HttpClient httpC
             Ready = Available,
             Message = installing ? "Installation in progress" : !selfCheck ? "Self Check Failed" : "Ready",
             Name = configuration["Name"] ?? "EXEC",
+            Uptime = DateTime.UtcNow - startTime,
             Languages = languages ?? string.Empty,
             Packages = packages,
-            SystemInfo = SystemInfo()
+            SystemInfo = SystemInfo(),
+            ExecutionCount = ExecutionController.ExecutionCount,
         };
     }
 
+    /// <summary>
+    /// Get installed packages
+    /// </summary>
+    /// <param name="key"></param>
+    /// <returns></returns>
     [HttpGet("packages")]
     public async Task<IActionResult> GetPackagesAsync(string key)
     {
@@ -56,6 +75,11 @@ public class ManagementController(IConfiguration configuration, HttpClient httpC
         return Ok(packages.Where(x => x.Installed).Select(x => $"{x.Name}={x.Version}").Where(x => !string.IsNullOrWhiteSpace(x)));
     }
 
+    /// <summary>
+    /// Get the available packages
+    /// </summary>
+    /// <param name="key"></param>
+    /// <returns></returns>
     [HttpGet("available")]
     public async Task<IActionResult> GetAvailablePackagesAsync(string key)
     {
@@ -67,6 +91,12 @@ public class ManagementController(IConfiguration configuration, HttpClient httpC
         return Ok(packages.Select(x => $"{x.Name}={x.Version}").Where(x => !string.IsNullOrWhiteSpace(x)));
     }
 
+    /// <summary>
+    /// Install packages according to a specification
+    /// </summary>
+    /// <param name="key"></param>
+    /// <param name="spec"></param>
+    /// <returns></returns>
     [HttpPost("packages")]
     public async Task<IActionResult> InstallPackagesAsync(string key, [FromBody] IReadOnlyList<string> spec)
     {
@@ -132,6 +162,10 @@ public class ManagementController(IConfiguration configuration, HttpClient httpC
         }
     }
 
+    /// <summary>
+    /// Return system information
+    /// </summary>
+    /// <returns></returns>
     private static string SystemInfo() =>
         $"OS: {System.Runtime.InteropServices.RuntimeInformation.OSDescription}\n" +
         $"Framework: {System.Runtime.InteropServices.RuntimeInformation.FrameworkDescription}\n" +
@@ -139,6 +173,10 @@ public class ManagementController(IConfiguration configuration, HttpClient httpC
         $"Runtime: {System.Runtime.InteropServices.RuntimeInformation.RuntimeIdentifier}\n" +
         $"Memory: {Environment.WorkingSet / 1024 / 1024}MB";
 
+    /// <summary>
+    /// Get the installed languages
+    /// </summary>
+    /// <returns></returns>
     private async Task<string> GetLanguages()
     {
         StringBuilder sb = new();
@@ -149,6 +187,10 @@ public class ManagementController(IConfiguration configuration, HttpClient httpC
         return string.Join('\n', languages.Select(l => $"{l.Name}={l.Version}"));
     }
 
+    /// <summary>
+    /// Get the installed packages
+    /// </summary>
+    /// <returns></returns>
     private async Task<string> GetInstalledPackages()
     {
         var packages = await httpClient.GetFromJsonAsync<IReadOnlyList<Package>>(configuration["Piston"] + "api/v2/packages");
@@ -157,6 +199,10 @@ public class ManagementController(IConfiguration configuration, HttpClient httpC
         return string.Join('\n', packages.Where(p => p.Installed).Select(p => $"{p.Name}={p.Version}"));
     }
 }
+
+/// <summary>
+/// Structure to work with the piston instance directly
+/// </summary>
 internal record Language
 {
     [JsonPropertyName("language")]
@@ -169,6 +215,9 @@ internal record Language
     public string? Runtime { get; init; }
 }
 
+/// <summary>
+/// Piston package
+/// </summary>
 internal record Package
 {
     [JsonPropertyName("language")]

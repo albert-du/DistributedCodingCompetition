@@ -97,7 +97,7 @@ else
 
     protected override async Task OnParametersSetAsync()
     {
-        var (success, contest) = await ApiService.TryReadContestByJoinCodeAsync(Code);
+        (var success, contest) = await ApiService.TryReadContestByJoinCodeAsync(Code);
         if (!success || contest is null)
             return;
 

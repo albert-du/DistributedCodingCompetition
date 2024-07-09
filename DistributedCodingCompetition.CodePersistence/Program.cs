@@ -1,4 +1,3 @@
-using Microsoft.AspNetCore.Mvc;
 using MongoDB.Driver;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -44,7 +43,7 @@ app.MapGet("/{contest}/{problem}/{user}", async (Guid contest, Guid problem, Gui
 .WithName("ReadCode")
 .WithOpenApi();
 
-app.MapPost("/{contest}/{problem}/{user}", async (Guid contest, Guid problem, Guid user, IMongoClient mongoClient, [FromBody] SavedCodeDTO code) =>
+app.MapPost("/{contest}/{problem}/{user}", async (Guid contest, Guid problem, Guid user, IMongoClient mongoClient, SavedCodeDTO code) =>
 {
     var database = mongoClient.GetDatabase("codePersistenceB");
     var container = database.GetCollection<PersistenceRecord>("user-code");

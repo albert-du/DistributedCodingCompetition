@@ -87,7 +87,8 @@ else
     protected override async Task OnInitializedAsync()
     {
         // Get current user.
-        if (await UserStateService.UserAsync() is not User user)
+        user = await UserStateService.UserAsync();
+        if (user is null)
         {
             // should not happen thanks to state service and auth check
             ModalService.ShowError("User not found", "User not found, please log in again.");

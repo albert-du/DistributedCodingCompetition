@@ -1,5 +1,8 @@
 ﻿namespace DistributedCodingCompetition.Judge.Services;
 
+/// <summary>
+/// Rate limit provider
+/// </summary>
 public interface IRateLimitService
 {
     /// <summary>
@@ -7,6 +10,12 @@ public interface IRateLimitService
     /// </summary>
     /// <param name="id"></param>
     /// <param name="duration"></param>
-    /// <returns>true if successful</returns>
-    Task<bool> TryLockAsync(Guid id, TimeSpan duration);
+    /// <returns>A lock object to be disposed to end early if successful</returns>
+    Task<IAsyncDisposable?> TryLockAsync(Guid id, TimeSpan duration);
+
+    /// <summary>
+    /// Release the lock
+    /// </summary>
+    /// <returns></returns>
+    Task ReleaseAsync(Guid id);
 }

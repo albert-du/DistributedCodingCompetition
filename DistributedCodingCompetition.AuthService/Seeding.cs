@@ -6,6 +6,12 @@ using DistributedCodingCompetition.AuthService.Services;
 
 public static class Seeding
 {
+    /// <summary>
+    /// Seeds the database with some initial data for testing purposes
+    /// </summary>
+    /// <param name="collection"></param>
+    /// <param name="passwordService"></param>
+    /// <returns></returns>
     public static async Task SeedDataAsync(IMongoCollection<UserAuth> collection, IPasswordService passwordService)
     {
         await collection.InsertOneAsync(new UserAuth

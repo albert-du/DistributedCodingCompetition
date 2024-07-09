@@ -16,6 +16,12 @@ public class AuthController(IPasswordService passwordService, IMongoClient mongo
     private readonly IMongoCollection<UserAuth> collection = mongoClient.GetDatabase("authdb").GetCollection<UserAuth>(nameof(UserAuth));
 
     // POST /register
+    /// <summary>
+    /// Registers a new user
+    /// </summary>
+    /// <param name="password"></param>
+    /// <param name="admin"></param>
+    /// <returns></returns>
     [HttpPost("register")]
     public async Task<ActionResult<RegisterResult>> Register(string password, bool admin = false)
     {
@@ -34,6 +40,14 @@ public class AuthController(IPasswordService passwordService, IMongoClient mongo
     }
 
     // POST login
+    /// <summary>
+    /// Logs in a user
+    /// </summary>
+    /// <param name="id"></param>
+    /// <param name="password"></param>
+    /// <param name="userAgent"></param>
+    /// <param name="ipAddress"></param>
+    /// <returns></returns>
     [HttpPost("login")]
     public async Task<ActionResult<LoginResult>> Login(Guid id, string password, string userAgent, string ipAddress)
     {
@@ -70,6 +84,11 @@ public class AuthController(IPasswordService passwordService, IMongoClient mongo
         return new LoginResult { Token = tokenService.GenerateToken(user), Admin = user.Admin };
     }
 
+    /// <summary>
+    /// Validates a token
+    /// </summary>
+    /// <param name="token"></param>
+    /// <returns></returns>
     [HttpPost("validate")]
     public ActionResult<ValidationResult> ValidateToken(string token)
     {

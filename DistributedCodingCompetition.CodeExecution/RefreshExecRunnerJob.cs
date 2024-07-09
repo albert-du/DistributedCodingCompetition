@@ -6,6 +6,11 @@ using DistributedCodingCompetition.CodeExecution.Models;
 
 public class RefreshExecRunnerJob(IExecRunnerService execRunnerService, IRefreshEventService refreshEventService, IServiceScopeFactory serviceScopeFactory) : IJob
 {
+    /// <summary>
+    /// Refresh the index of exec runner instances
+    /// </summary>
+    /// <param name="context"></param>
+    /// <returns></returns>
     public async Task Execute(IJobExecutionContext context)
     {
         using var scope = serviceScopeFactory.CreateScope();

@@ -2,16 +2,23 @@
 
 using Microsoft.Extensions.Caching.Distributed;
 using System.Text;
+
+/// <inheritdoc/>
 public class RateLimitService(IDistributedCache distributedCache) : IRateLimitService
 {
-    public async Task<bool> TryLockAsync(Guid id, TimeSpan duration)
+    /// <inheritdoc/>
+    public async Task<IAsyncDisposable?> TryLockAsync(Guid id, TimeSpan duration)
     {
         var key = id.ToString();
         var val = distributedCache.GetAsync(key);
         if (val != null)
-            return false;
+            return null;
         var options = new DistributedCacheEntryOptions().SetSlidingExpiration(duration);
         await distributedCache.SetAsync(key, Encoding.UTF8.GetBytes("1"), options);
-        return true;
+        return new RateLimitLock(this, id);
     }
+
+    /// <inheritdoc/>
+    public Task ReleaseAsync(Guid id) =>
+        distributedCache.RemoveAsync(id.ToString());
 }
