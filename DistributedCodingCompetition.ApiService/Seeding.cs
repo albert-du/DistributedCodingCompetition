@@ -74,6 +74,7 @@ public static class Seeding
             Public = true,
             Owner = user1,
             JoinCodes = [joinCode],
+            Participants = [user2],
         };
 
         context.Users.Add(user1);

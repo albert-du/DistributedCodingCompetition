@@ -77,4 +77,9 @@ public class Submission
     /// Time of evaluation
     /// </summary>
     public DateTime? EvaluationTime { get; set; }
+
+    /// <summary>
+    /// Whether the submission has been invalidated
+    /// </summary>
+    public bool Invalidated { get; set; }
 }

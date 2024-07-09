@@ -310,6 +310,8 @@ public class ContestsController(ContestContext context) : ControllerBase
     [HttpGet("{contestId}/submissions")]
     public async Task<ActionResult<IReadOnlyList<Submission>>> GetContestSubmissions(Guid contestId, int count, int page) =>
         await context.Submissions
+            .Include(s => s.Problem)
+            .Include(s => s.Submitter)
             .Where(s => s.ContestId == contestId)
             .OrderByDescending(s => s.SubmissionTime)
             .Skip(count * page)

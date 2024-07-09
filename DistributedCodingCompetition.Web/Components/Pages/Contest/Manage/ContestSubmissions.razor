@@ -1,7 +1,6 @@
 @*
     TODO Implement
 *@
-
 @page "/contest/{id:guid}/manage/submissions"
 @inject IApiService ApiService
 @inject IModalService ModalService
@@ -10,6 +9,47 @@
 <AuthCheck Contest=Id Admin />
 
 <PageTitle>@contest?.Name Submissions</PageTitle>
+
+<h1 class="text-3xl">@contest?.Name Submissions</h1>
+
+<table class="table-auto">
+    <thead>
+        <tr>
+            <th>Time (UTC)</th>
+            <th>Judged (UTC)</th>
+            <th>Language</th>
+            <th>Score</th>
+            <th>Problem</th>
+            <th>Problem</th>
+            <th>Participant</th>
+        </tr>
+    </thead>
+    <tbody>
+        @foreach (var submission in Submissions)
+        {
+            <tr>
+                <td>@submission.SubmissionTime</td>
+                <td>@submission.Language</td>
+                <td>@submission.Score</td>
+                <td>@submission.Problem</td>
+                <td>@submission.EvaluationTime</td>
+                <td>@submission.Problem</td>
+                <td>@submission.SubmissionTime</td>
+                <td><a href="submission/@submission.Id">View</a></td>
+                <td><button @onclick=RejudgeAsync>Rejudge</button></td>
+                @if (submission.Invalidated)
+                {
+                    <td><button @onclick=RevalidateAsync>Revalidate</button></td>
+
+                }
+                else
+                {
+                    <td><button @onclick=InvalidateAsync>Invalidate</button></td>
+                }
+            </tr>
+        }
+    </tbody>
+</table>
 
 
 @code {
@@ -66,5 +106,19 @@
 
         Submissions = [.. submissions];
 
+    }
+
+    async Task RejudgeAsync()
+    {
+    }
+
+    async Task InvalidateAsync()
+    {
+        
+    }
+
+    async Task RevalidateAsync()
+    {
+        
     }
 }
