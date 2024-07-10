@@ -3,20 +3,28 @@
 @inject IApiService ApiService
 @rendermode InteractiveServer
 
-<AuthCheck Contest=Id Admin />
+<AuthCheck Contest=ContestId Admin />
 
 <PageTitle>Manage Participant</PageTitle>
 
 <h1 class="text-3xl">@($"{participant?.FullName} @{participant?.Username}") </h1>
-<h2 class="text-2xl">Participant</h2> 
+<h2 class="text-2xl">Participant</h2>
 
 <div>This account was created: @participant?.Creation.ToShortDateString()</div>
 
 <div>
     <h2>Contests</h2>
     <ul>
-
-    </ul
+        @foreach (var submission in submissions)
+        {
+            <div>
+            </div>
+        }
+    </ul>
+    <div>
+        <button @onclick="() => page--" enabled="@(page > 1)">Last</button>
+        <button @onclick="() => page++" enabled="@(submissions.Count > 0)">Next</button>
+    </div>
 </div>
 
 @code {
@@ -30,6 +38,8 @@
     User? participant;
 
     IReadOnlyList<Submission> submissions = [];
+
+    int page = 1;
 
     protected override async Task OnInitializedAsync()
     {
@@ -47,11 +57,13 @@
             return;
         }
 
-        (success, submissions) = await ApiService.TryReadUserSubmissionsAsync(ContestId, participant.Id);
-        if (!success || submissions is null)
+        (success, var subs) = await ApiService.TryReadUserContestSubmissionsAsync(ContestId, participant.Id, page, 50);
+        if (!success || subs is null)
         {
             ModalService.ShowError("Failed to load submissions", "Internal error");
             return;
         }
+
+        submissions = subs;
     }
 }

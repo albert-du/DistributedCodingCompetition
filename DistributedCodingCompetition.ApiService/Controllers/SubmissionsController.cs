@@ -30,7 +30,7 @@ public class SubmissionsController(ContestContext context) : ControllerBase
         if (userId != null)
             query = query.Where(x => x.SubmitterId == userId);
 
-        return await query.Skip((page - 1) * pageSize).Take(pageSize).ToListAsync();
+        return await query.OrderByDescending(x => x.EvaluationTime).Skip((page - 1) * pageSize).Take(pageSize).ToListAsync();
     }
 
     // GET: api/Submissions/5
@@ -129,6 +129,8 @@ public class SubmissionsController(ContestContext context) : ControllerBase
         submission.Points = points;
         submission.MaxPossibleScore = possible;
         submission.Score = score;
+        submission.TotalTestCases = results.Count;
+        submission.PassedTestCases = results.Count(x => x.Passed);
 
         await context.SaveChangesAsync();
 

@@ -301,7 +301,7 @@ public interface IApiService
     /// <param name="problemId"></param>
     /// <param name="userId"></param>
     /// <returns></returns>
-    Task<(bool, IReadOnlyList<Submission>?)> TryReadUserProblemSubmissionsAsync(Guid contestId, Guid problemId, Guid userId);
+    Task<(bool, IReadOnlyList<Submission>?)> TryReadUserProblemSubmissionsAsync(Guid contestId, Guid problemId, Guid userId, int page, int pageSize);
 
     /// <summary>
     /// Read a submission.
@@ -334,5 +334,4 @@ public interface IApiService
     /// <param name="pageSize"></param>
     /// <returns></returns>
     Task<(bool, IReadOnlyList<Submission>?)> TryReadUserContestSubmissionsAsync(Guid contestId, Guid userId, int page, int pageSize);
-
 }

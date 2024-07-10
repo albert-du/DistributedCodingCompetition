@@ -9,7 +9,7 @@ public class Submission
     /// Id of the submission
     /// </summary>
     public Guid Id { get; set; } = Guid.NewGuid();
-    
+
     /// <summary>
     /// Id of the submitter
     /// </summary>
@@ -49,7 +49,7 @@ public class Submission
     /// UTC time of submission
     /// </summary>
     public DateTime SubmissionTime { get; set; } = DateTime.UtcNow;
-    
+
     // Filled in by judge
     //   \/  \/  \/  \/  \/  \/  \/  \/ 
 
@@ -82,4 +82,7 @@ public class Submission
     /// Whether the submission has been invalidated
     /// </summary>
     public bool Invalidated { get; set; }
+
+    public int PassedTestCases { get; set; }
+    public int TotalTestCases { get; set; }
 }

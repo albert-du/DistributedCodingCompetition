@@ -623,7 +623,7 @@ public sealed class ApiService(HttpClient httpClient, ILogger<ApiService> logger
             return false;
         }
     }
-    public async Task<(bool, IReadOnlyList<Submission>?)> TryReadUserProblemSubmissionsAsync(Guid contestId, Guid problemId, Guid userId)
+    public async Task<(bool, IReadOnlyList<Submission>?)> TryReadUserProblemSubmissionsAsync(Guid contestId, Guid problemId, Guid userId, int page, int pageSize)
     {
         try
         {

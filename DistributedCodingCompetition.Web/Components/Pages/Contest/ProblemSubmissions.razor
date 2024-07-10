@@ -68,7 +68,7 @@
             return;
         }
         problemName = problem.Name;
-        var (success3, subs) = await ApiService.TryReadUserProblemSubmissionsAsync(ContestId, ProblemId, user.Id);
+        var (success3, subs) = await ApiService.TryReadUserProblemSubmissionsAsync(ContestId, ProblemId, user.Id, 1, 50);
         if (!success3 || subs is null)
         {
             ModalService.ShowError("Failed to load submissions", "Internal error");
