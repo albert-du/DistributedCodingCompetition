@@ -2,13 +2,62 @@
     TODO Implement
 *@
 @page "/contest/{id:guid}/manage/participants"
+@inject IApiService ApiService
+@inject IModalService ModalService
 @rendermode InteractiveServer
 
 <AuthCheck Contest=Id Admin />
 
 <PageTitle>Contest Participants</PageTitle>
 
+<h1>@contest?.Name Participants</h1>
+
+@if (contest is null)
+{
+    <LoadingSpinner />
+}
+else
+{
+    <div>
+        @foreach (var participant in participants)
+        {
+            <div>
+                <p>@participant.Username</p>
+            </div>
+        }
+    </div>    
+}
+
 @code {
     [Parameter]
     public Guid Id { get; set; }
+
+    [SupplyParameterFromQuery]
+    public int Page { get; set; } = 1;
+
+    [SupplyParameterFromQuery]
+    public int PageSize { get; set; } = 10;
+
+    IReadOnlyList<User> participants = [];
+
+    Contest? contest;
+
+    protected override async Task OnInitializedAsync()
+    {
+        (var success, contest) = await ApiService.TryReadContestAsync(Id);
+        if (!success || contest is null)
+        {
+            ModalService.ShowError("Failed to load contest", "Internal error");
+            return;
+        }
+
+        (success, var users) = await ApiService.TryReadContestParticipantsAsync(Id, Page, PageSize);
+        if (!success || users is null)
+        {
+            ModalService.ShowError("Failed to load participants", "Internal error");
+            return;
+        }
+        participants = users;
+    }
+
 }

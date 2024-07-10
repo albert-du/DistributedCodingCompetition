@@ -664,3 +664,17 @@ public sealed class ApiService(HttpClient httpClient, ILogger<ApiService> logger
             return (false, null);
         }
     }
+    public async Task<(bool, IReadOnlyList<TestCaseResult>?)> TryReadTestCaseResultsAsync(Guid submissionId)
+    {
+        try
+        {
+            return (true, await httpClient.GetFromJsonAsync<IReadOnlyList<TestCaseResult>>($"api/submissions/{submissionId}/results"));
+        }
+        catch (Exception ex)
+        {
+            logger.LogError(ex, "Failed to read test case results");
+            return (false, null);
+        }
+    }
+
+}

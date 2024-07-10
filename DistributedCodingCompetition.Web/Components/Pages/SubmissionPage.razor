@@ -40,13 +40,22 @@ else
         <p>Points: @submission.Points</p>
     </div>
 
-    @if (Admin || active)
+    @if (Admin || !active)
     {
         <div>
             <h2>Test cases</h2>
             <div>
-                @foreach (var testcase in submission.Results)
+                @foreach (var testcase in results)
                 {
+                    <div class="flex">
+                        <div>
+
+                        </div>
+                        <div>
+                            @(testcase.Passed ? "Passed" : "Failed")
+                        </div>
+
+                    </div>
                 }
             </div>
         </div>
@@ -65,6 +74,8 @@ else
 
     bool active;
 
+    IReadOnlyList<TestCaseResult> results = [];
+
     protected override async Task OnInitializedAsync()
     {
         var (success, submission) = await ApiService.TryReadSubmissionAsync(Id);
@@ -73,7 +84,6 @@ else
             ModalService.ShowError("Failed to load submission", "Internal error");
             return;
         }
-        this.submission = submission;
 
         if (submission.ContestId.HasValue)
         {
@@ -81,5 +91,12 @@ else
             active = success && contest?.Active == true;
         }
 
+        (success, var res) = await ApiService.TryReadTestCaseResultsAsync(Id);
+        if (!success || res is null)
+        {
+            ModalService.ShowError("Failed to load test case results", "Internal error");
+            return;
+        }
+        results = res;
     }
 }

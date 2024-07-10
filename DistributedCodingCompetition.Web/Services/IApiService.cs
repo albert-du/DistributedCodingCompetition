@@ -316,4 +316,6 @@ public interface IApiService
     /// <param name="submissionId"></param>
     /// <returns></returns>
     Task<(bool, Submission?)> TryReadSubmissionAsync(Guid submissionId);
+
+    Task<(bool, IReadOnlyList<TestCaseResult>?)> TryReadTestCaseResultsAsync(Guid submissionId);
 }
