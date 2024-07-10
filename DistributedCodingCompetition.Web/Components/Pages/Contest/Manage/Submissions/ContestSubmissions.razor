@@ -1,5 +1,5 @@
 @*
-    TODO Implement
+    View all the submissions for a contest. This page is only accessible to contest admins.
 *@
 @page "/contest/{id:guid}/manage/submissions"
 @inject IApiService ApiService
@@ -36,7 +36,7 @@
                 <td>@submission.Problem</td>
                 <td>@submission.EvaluationTime</td>
                 <td>@submission.Problem</td>
-                <td>@submission.SubmissionTime</td>
+                <td>@(submission.Submitter?.Username ?? "?username?")</td>
                 <td><a href="submission/@submission.Id">View</a></td>
                 @if (!judging.Contains(submission.Id))
                 {

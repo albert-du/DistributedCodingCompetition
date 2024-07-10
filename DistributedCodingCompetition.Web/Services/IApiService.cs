@@ -309,4 +309,11 @@ public interface IApiService
     /// <param name="submission"></param>
     /// <returns></returns>
     Task<bool> TryUpdateSubmissionAsync(Submission submission);
+
+    /// <summary>
+    /// Read a submission.
+    /// </summary>
+    /// <param name="submissionId"></param>
+    /// <returns></returns>
+    Task<(bool, Submission?)> TryReadSubmissionAsync(Guid submissionId);
 }

@@ -1,9 +1,85 @@
-﻿@*TODO Implement*@
-
+﻿@inject IApiService ApiService
+@inject IModalService ModalService
 @page "/submission/{id:guid}"
 
+@if (submission is null)
+{
+    <p>Submission not found</p>
+}
+else
+{
+    @if (Admin)
+    {
+        <AuthCheck Contest=submission.ContestId Admin />
+    }
+    else if (submission.ContestId is null)
+    {
+        <AuthCheck Id=submission.SubmitterId />
+    }
+    else
+    {
+        <AuthCheck Contest=submission.ContestId Id=submission.SubmitterId />
+    }
+
+    <h1 class="text-2xl">Submission</h1>
+    <p>Time: @submission.SubmissionTime</p>
+    <p>Language: @submission.Language</p>
+    <p>Score: @submission.Score</p>
+    <p>Problem: @submission.Problem</p>
+    <p>Contestant: @submission.Submitter?.Username</p>
+
+    <div>
+        <h2>Code</h2>
+        <CodeEditor ReadOnly Code=@submission.Code Language=@(submission.Language.Split('=').FirstOrDefault() ?? "text") />
+    </div>
+
+    <div>
+        <h2>Results</h2>
+        <p>Contestant: @submission.EvaluationTime</p>
+        <p>Score: @submission.Score / @submission.MaxPossibleScore</p>
+        <p>Points: @submission.Points</p>
+    </div>
+
+    @if (Admin || active)
+    {
+        <div>
+            <h2>Test cases</h2>
+            <div>
+                @foreach (var testcase in submission.Results)
+                {
+                }
+            </div>
+        </div>
+
+    }
+}
 
 @code {
     [Parameter]
     public Guid Id { get; set; }
+
+    [SupplyParameterFromQuery]
+    public bool Admin { get; set; }
+
+    Submission? submission;
+
+    bool active;
+
+    protected override async Task OnInitializedAsync()
+    {
+        var (success, submission) = await ApiService.TryReadSubmissionAsync(Id);
+        if (!success || submission is null)
+        {
+            ModalService.ShowError("Failed to load submission", "Internal error");
+            return;
+        }
+        this.submission = submission;
+
+        if (submission.ContestId.HasValue)
+        {
+            (success, var contest) = await ApiService.TryReadContestAsync(submission.ContestId.Value);
+            active = success && contest?.Active == true;
+        }
+
+    }
 }

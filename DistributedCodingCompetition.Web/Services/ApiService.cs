@@ -651,4 +651,16 @@ public sealed class ApiService(HttpClient httpClient, ILogger<ApiService> logger
             return false;
         }
     }
-}
+
+    public async Task<(bool, Submission?)> TryReadSubmissionAsync(Guid submissionId)
+    {
+        try
+        {
+            return (true, await httpClient.GetFromJsonAsync<Submission>($"api/submissions/{submissionId}"));
+        }
+        catch (Exception ex)
+        {
+            logger.LogError(ex, "Failed to read submission");
+            return (false, null);
+        }
+    }
