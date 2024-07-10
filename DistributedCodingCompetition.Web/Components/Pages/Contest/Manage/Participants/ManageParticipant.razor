@@ -1,0 +1,57 @@
+﻿@page "/contest/{contestId:guid}/manage/participants/{participantId:guid}"
+@inject IModalService ModalService
+@inject IApiService ApiService
+@rendermode InteractiveServer
+
+<AuthCheck Contest=Id Admin />
+
+<PageTitle>Manage Participant</PageTitle>
+
+<h1 class="text-3xl">@($"{participant?.FullName} @{participant?.Username}") </h1>
+<h2 class="text-2xl">Participant</h2> 
+
+<div>This account was created: @participant?.Creation.ToShortDateString()</div>
+
+<div>
+    <h2>Contests</h2>
+    <ul>
+
+    </ul
+</div>
+
+@code {
+    [Parameter]
+    public Guid ContestId { get; set; }
+
+    [Parameter]
+    public Guid ParticipantId { get; set; }
+
+    Contest? contest;
+    User? participant;
+
+    IReadOnlyList<Submission> submissions = [];
+
+    protected override async Task OnInitializedAsync()
+    {
+        (var success, contest) = await ApiService.TryReadContestAsync(ContestId);
+        if (!success || contest is null)
+        {
+            ModalService.ShowError("Failed to load contest", "Internal error");
+            return;
+        }
+
+        (success, participant) = await ApiService.TryReadUserAsync(ParticipantId);
+        if (!success || participant is null)
+        {
+            ModalService.ShowError("Failed to load participant", "Internal error");
+            return;
+        }
+
+        (success, submissions) = await ApiService.TryReadUserSubmissionsAsync(ContestId, participant.Id);
+        if (!success || submissions is null)
+        {
+            ModalService.ShowError("Failed to load submissions", "Internal error");
+            return;
+        }
+    }
+}

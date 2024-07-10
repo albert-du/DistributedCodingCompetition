@@ -21,9 +21,10 @@ else
     <div>
         @foreach (var participant in participants)
         {
-            <div>
+            <a href="contest/@Id/manage/participants/@participant.Id">
                 <p>@participant.Username</p>
-            </div>
+                <p>@participant.FullName</p>
+            </a>
         }
     </div>    
 }

@@ -18,8 +18,20 @@ public class SubmissionsController(ContestContext context) : ControllerBase
     /// </summary>
     /// <returns></returns>
     [HttpGet]
-    public async Task<ActionResult<IEnumerable<Submission>>> GetSubmissions() =>
-        await context.Submissions.ToListAsync();
+    public async Task<ActionResult<IEnumerable<Submission>>> GetSubmissions(int page = 1, int pageSize = 10, Guid? contestId = null, Guid? problemId = null, Guid? userId = null)
+    {
+        IQueryable<Submission> query = context.Submissions;
+        if (contestId != null)
+            query = query.Where(x => x.ContestId == contestId);
+
+        if (problemId != null)
+            query = query.Where(x => x.ProblemId == problemId);
+
+        if (userId != null)
+            query = query.Where(x => x.SubmitterId == userId);
+
+        return await query.Skip((page - 1) * pageSize).Take(pageSize).ToListAsync();
+    }
 
     // GET: api/Submissions/5
     /// <summary>

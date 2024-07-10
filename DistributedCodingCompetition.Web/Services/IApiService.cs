@@ -317,5 +317,22 @@ public interface IApiService
     /// <returns></returns>
     Task<(bool, Submission?)> TryReadSubmissionAsync(Guid submissionId);
 
+    /// <summary>
+    /// Read a submission's test case results.
+    /// </summary>
+    /// <param name="submissionId"></param>
+    /// <returns></returns>
     Task<(bool, IReadOnlyList<TestCaseResult>?)> TryReadTestCaseResultsAsync(Guid submissionId);
+
+
+    /// <summary>
+    /// Read a user's submissions for a contest.
+    /// </summary>
+    /// <param name="contestId"></param>
+    /// <param name="userId"></param>
+    /// <param name="page"></param>
+    /// <param name="pageSize"></param>
+    /// <returns></returns>
+    Task<(bool, IReadOnlyList<Submission>?)> TryReadUserContestSubmissionsAsync(Guid contestId, Guid userId, int page, int pageSize);
+
 }

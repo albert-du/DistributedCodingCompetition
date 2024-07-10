@@ -676,5 +676,17 @@ public sealed class ApiService(HttpClient httpClient, ILogger<ApiService> logger
             return (false, null);
         }
     }
+    public async Task<(bool, IReadOnlyList<Submission>?)> TryReadUserContestSubmissionsAsync(Guid contestId, Guid userId, int page, int pageSize)
+    {
+        try
+        {
+            return (true, await httpClient.GetFromJsonAsync<IReadOnlyList<Submission>>($"api/submissions?contest={contestId}&userId={userId}&page={page}&pageSize={pageSize}"));
+        }
+        catch (Exception ex)
+        {
+            logger.LogError(ex, "Failed to read user contest submissions");
+            return (false, null);
+        }
+    }
 
 }
