@@ -11,6 +11,7 @@
 <h1 class="text-3xl">@problemName Submissions</h1>
 <h2 class="text-2xl">@contestName</h2>
 <p>Submissions for @username</p>
+<a href="/contest/@ContestId/solve/@ProblemId">Back to problem</a>
 
 <div class="flex flex-col gap-y-1">
     @foreach (var submission in submissions)
@@ -21,7 +22,7 @@
                 <div>@submission.SubmissionTime.Add(tzOffset).ToString("yyyy-MM-dd HH:mm:ss")</div>
             </div>
             <a href="submission/@submission.Id" class="border p-2 h-32 overflow-clip">
-                <pre>@submission.Code</pre>
+                <CodeEditor ReadOnly Language=@(submission.Language.Split('=').FirstOrDefault()??"text") Code=@submission.Code />
             </a>
         </div>
     }
@@ -33,6 +34,12 @@
 
     [Parameter]
     public Guid ProblemId { get; set; }
+
+    [SupplyParameterFromQuery]
+    public int Page { get; set; } = 1;
+
+    [SupplyParameterFromQuery]
+    public int PageSize { get; set; } = 50;
 
     string contestName = string.Empty;
     string problemName = string.Empty;
@@ -68,7 +75,7 @@
             return;
         }
         problemName = problem.Name;
-        var (success3, subs) = await ApiService.TryReadUserProblemSubmissionsAsync(ContestId, ProblemId, user.Id, 1, 50);
+        var (success3, subs) = await ApiService.TryReadUserProblemSubmissionsAsync(ContestId, ProblemId, user.Id, Page, PageSize);
         if (!success3 || subs is null)
         {
             ModalService.ShowError("Failed to load submissions", "Internal error");

@@ -37,6 +37,26 @@ else
     <div>
         <button @onclick=JudgeAsync>Submit</button>
     </div>
+    <div>
+        @if (judgingInProgress)
+        {
+            <div>Submitting...</div>
+            <LoadingSpinner />
+        }
+        else
+        {
+            @if (latestScore is not null)
+            {
+                <div class="flex flex-col gap-y-1 @(latestScore.Passed == latestScore.Total ? "text-emerald-500" : (latestScore.Passed > 0) ? "text-amber-500" : "text-rose-500" )">
+                    <div>Testcases: @latestScore.Passed out of @latestScore.Total</div>
+                    <div>Points: @latestScore.Points out of @latestScore.TotalPoints</div>
+                </div>
+            }
+
+            <a href="/contest/@ContestId/solve/@ProblemId/submissions">View your submissions</a>
+        }
+
+    </div>
 }
 
 @code {
@@ -61,6 +81,8 @@ else
         source = newCode;
         _ = TriggerSave();
     }
+
+    LatestScore? latestScore;
 
     bool queued;
     bool loading;
@@ -155,4 +177,6 @@ else
             judgingInProgress = false;
         }
     }
+
+    record LatestScore(int Passed, int Total, int Points, int TotalPoints);
 }

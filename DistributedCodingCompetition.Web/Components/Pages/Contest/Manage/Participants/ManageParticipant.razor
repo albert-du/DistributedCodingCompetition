@@ -1,6 +1,7 @@
 ﻿@page "/contest/{contestId:guid}/manage/participants/{participantId:guid}"
 @inject IModalService ModalService
 @inject IApiService ApiService
+@inject IJudgeService JudgeService
 @rendermode InteractiveServer
 
 <AuthCheck Contest=ContestId Admin />
@@ -17,8 +18,33 @@
     <ul>
         @foreach (var submission in submissions)
         {
-            <div>
-            </div>
+            <tr>
+                <td>@submission.SubmissionTime</td>
+                <td>@submission.Language</td>
+                <td>@submission.Score</td>
+                <td>@submission.Problem</td>
+                <td>@submission.EvaluationTime</td>
+                <td>@submission.Problem</td>
+                <td>@(submission.Submitter?.Username ?? "?username?")</td>
+                <td><a href="submission/@submission.Id">View</a></td>
+                @if (!judging.Contains(submission.Id))
+                {
+                    <td><button @onclick="() => RejudgeAsync(submission)">Rejudge</button></td>
+                }
+                else
+                {
+                    <td><button disabled>Rejudging...</button></td>
+                }
+                @if (submission.Invalidated)
+                {
+                    <td><button @onclick="() => RevalidateAsync(submission)">Revalidate</button></td>
+
+                }
+                else
+                {
+                    <td><button @onclick="() => InvalidateAsync(submission)">Invalidate</button></td>
+                }
+            </tr>
         }
     </ul>
     <div>
@@ -36,6 +62,7 @@
 
     Contest? contest;
     User? participant;
+    HashSet<Guid> judging = [];
 
     IReadOnlyList<Submission> submissions = [];
 
@@ -57,7 +84,55 @@
             return;
         }
 
-        (success, var subs) = await ApiService.TryReadUserContestSubmissionsAsync(ContestId, participant.Id, page, 50);
+        await LoadSubmissionsAsync();
+    }
+
+
+    async Task RejudgeAsync(Submission submission)
+    {
+        if (judging.Contains(submission.Id))
+            return;
+
+        judging.Add(submission.Id);
+
+        try
+        {
+            var error = await JudgeService.JudgeAsync(submission.Id);
+            if (error is not null)
+                ModalService.ShowError(error, "Failed to judge submission");
+            else
+                await LoadSubmissionsAsync();
+        }
+        finally
+        {
+            judging.Remove(submission.Id);
+        }
+    }
+
+    async Task InvalidateAsync(Submission submission)
+    {
+        submission.Invalidated = true;
+        if (!await ApiService.TryUpdateSubmissionAsync(submission))
+        {
+            ModalService.ShowError("Failed to invalidate submission", "Internal error");
+            submission.Invalidated = false;
+        }
+    }
+
+    async Task RevalidateAsync(Submission submission)
+    {
+        submission.Invalidated = false;
+        if (!await ApiService.TryUpdateSubmissionAsync(submission))
+        {
+            ModalService.ShowError("Failed to revalidate submission", "Internal error");
+            submission.Invalidated = true;
+        }
+    }
+
+
+    async Task LoadSubmissionsAsync()
+    {
+        (var success, var subs) = await ApiService.TryReadUserContestSubmissionsAsync(ContestId, participant!.Id, page, 50);
         if (!success || subs is null)
         {
             ModalService.ShowError("Failed to load submissions", "Internal error");
