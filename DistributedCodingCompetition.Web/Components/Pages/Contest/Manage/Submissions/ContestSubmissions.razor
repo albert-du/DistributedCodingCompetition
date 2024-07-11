@@ -6,6 +6,7 @@
 @inject IModalService ModalService
 @inject IUserStateService UserStateService
 @inject IJudgeService JudgeService
+@inject NavigationManager NavigationManager
 
 <AuthCheck Contest=Id Admin />
 
@@ -16,12 +17,18 @@
 <table class="table-auto">
     <thead>
         <tr>
+            <th>Problem</th>
             <th>Time (UTC)</th>
             <th>Judged (UTC)</th>
             <th>Language</th>
-            <th>Score</th>
-            <th>Problem</th>
-            <th>Problem</th>
+            <th>
+                <div>
+                    Score
+                </div>
+                <div>
+                    @("Cases|Score|Points")
+                </div>
+            </th>
             <th>Participant</th>
         </tr>
     </thead>
@@ -29,14 +36,19 @@
         @foreach (var submission in Submissions)
         {
             <tr>
+                <td>
+                    <a class="text-violet-800 hover:underline italic" href="problem/@submission.Problem?.Id/edit">
+                        @(submission.Problem?.Name ?? "no problem")
+                    </a>
+                </td>
                 <td>@submission.SubmissionTime</td>
-                <td>@submission.Language</td>
-                <td>@submission.Score</td>
-                <td>@submission.Problem</td>
                 <td>@submission.EvaluationTime</td>
-                <td>@submission.Problem</td>
+                <td>@submission.Language</td>
+                <td>
+                    @($"{submission.PassedTestCases}/{submission.TotalTestCases}|{submission.Score}/{submission.MaxPossibleScore}|{submission.Points}")
+                </td>
                 <td>@(submission.Submitter?.Username ?? "?username?")</td>
-                <td><a href="submission/@submission.Id">View</a></td>
+                <td><a href="submission/@submission.Id?admin=true">View</a></td>
                 @if (!judging.Contains(submission.Id))
                 {
                     <td><button @onclick="() => RejudgeAsync(submission)">Rejudge</button></td>
@@ -64,36 +76,43 @@
     [Parameter]
     public Guid Id { get; set; }
 
-    [SupplyParameterFromQuery]
-    public int Page { get; set; } = 1;
+    [SupplyParameterFromQuery(Name = "p")]
+    public int? Page { get; set; }
 
-    [SupplyParameterFromQuery]
-    public int PageSize { get; set; } = 10;
+    [SupplyParameterFromQuery(Name = "s")]
+    public int? PageSize { get; set; }
+
+    int page => Page ?? 1;
+    int pageSize => PageSize ?? 50;
 
     List<Submission> Submissions = [];
     Contest? contest;
     HashSet<Guid> judging = [];
 
-    protected override async Task OnInitializedAsync()
+    protected override async Task OnParametersSetAsync()
     {
-
-        (var success, var c) = await ApiService.TryReadContestAsync(Id);
-        if (!success)
-        {
-            ModalService.ShowError("Failed to load contest", "Internal error");
-            return;
-        }
-        contest = c;
-
         await LoadAsync();
         // make sure the user is a contest admin
-        var user = await UserStateService.UserAsync();
-        var userId = user?.Id;
     }
+
+    void NextPage()
+    {
+        NavigationManager.NavigateTo($"/contest/{Id}/manage/submissions?p={page + 1}&s={pageSize}");
+    }
+
+    void PrevPage()
+    {
+        if (Page > 1)
+            NavigationManager.NavigateTo($"/contest/{Id}/manage/submissions?p={page - 1}&s={pageSize}");
+    }
+
 
     private async Task LoadAsync()
     {
-        var sub = ApiService.TryReadContestSubmissionsAsync(Id, PageSize, Page);
+        Console.WriteLine(PageSize);
+        Console.WriteLine(Page);
+
+        var sub = ApiService.TryReadContestSubmissionsAsync(Id, pageSize, page );
         var cont = ApiService.TryReadContestAsync(Id);
         (var success, var submissions) = await sub;
         if (!success || submissions is null)

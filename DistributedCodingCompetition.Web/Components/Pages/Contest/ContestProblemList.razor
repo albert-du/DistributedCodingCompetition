@@ -34,9 +34,9 @@ else
             {
                 <div class="p-4 bg-white rounded-lg shadow-md">
                     <h2 class="text-xl font-semibold">@problem.Name</h2>
-                    <p class="text-gray-600">@problem.Description</p>
+                    <p class="text-gray-600">@problem.TagLine</p>
                     <div class="mt-4">
-                        <a class="text-blue-500" target="_blank" href="contest/@Id/solve/@problem.Id">Solve</a>
+                        <a class="text-blue-500" href="contest/@Id/solve/@problem.Id">Solve</a>
                     </div>
                     @if (userSolveStatus.TryGetValue(problem.Id, out var status))
                     {

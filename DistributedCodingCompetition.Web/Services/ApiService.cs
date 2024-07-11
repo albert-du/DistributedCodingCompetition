@@ -668,7 +668,7 @@ public sealed class ApiService(HttpClient httpClient, ILogger<ApiService> logger
     {
         try
         {
-            return (true, await httpClient.GetFromJsonAsync<IReadOnlyList<TestCaseResult>>($"api/submissions/{submissionId}/results"));
+            return (true, await httpClient.GetFromJsonAsync<IReadOnlyList<TestCaseResult>>($"api/testcaseresults?submissionId={submissionId}"));
         }
         catch (Exception ex)
         {

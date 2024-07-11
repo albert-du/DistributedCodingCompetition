@@ -26,6 +26,11 @@ public class Problem
     public User? Owner { get; set; }
 
     /// <summary>
+    /// Tag line for the problem.
+    /// </summary>
+    public string TagLine { get; set; } = string.Empty;
+
+    /// <summary>
     /// Markdown formatted description of the problem.
     /// </summary>
     public string Description { get; set; } = string.Empty;

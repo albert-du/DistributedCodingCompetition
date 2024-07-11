@@ -1,8 +1,8 @@
-﻿@inject IApiService ApiService
+﻿@page "/submission/{id:guid}"
+@inject IApiService ApiService
 @inject IModalService ModalService
-@page "/submission/{id:guid}"
 
-@if (submission is null)
+@if (submission is null || user is null)
 {
     <p>Submission not found</p>
 }
@@ -21,26 +21,20 @@ else
         <AuthCheck Contest=submission.ContestId Id=submission.SubmitterId />
     }
 
-    <h1 class="text-2xl">Submission</h1>
-    <p>Time: @submission.SubmissionTime</p>
+    <h1 class="text-3xl">Submission</h1>
+    <div class="text-2xl">@contestName: @problemName</div>
+    <p>Time UTC: @submission.SubmissionTime</p>
+    <p>Judge Time UTC: @submission.EvaluationTime</p>
     <p>Language: @submission.Language</p>
-    <p>Score: @submission.Score</p>
-    <p>Problem: @submission.Problem</p>
-    <p>Contestant: @submission.Submitter?.Username</p>
+    <p>Score: @submission.Score / @submission.MaxPossibleScore</p>
+    <p>Contestant: @($"{user.FullName} @{user.Username}")</p>
 
-    <div>
-        <h2>Code</h2>
+    <h2>Code</h2>
+    <div class="h-64">
         <CodeEditor ReadOnly Code=@submission.Code Language=@(submission.Language.Split('=').FirstOrDefault() ?? "text") />
     </div>
 
-    <div>
-        <h2>Results</h2>
-        <p>Contestant: @submission.EvaluationTime</p>
-        <p>Score: @submission.Score / @submission.MaxPossibleScore</p>
-        <p>Points: @submission.Points</p>
-    </div>
-
-    @if (Admin || !active)
+    @if (displayTestCases)
     {
         <div>
             <h2>Test cases</h2>
@@ -71,24 +65,59 @@ else
     public bool Admin { get; set; }
 
     Submission? submission;
+    string problemName = string.Empty;
+    string contestName = string.Empty;
+    User? user;
 
-    bool active;
+    bool displayTestCases;
 
     IReadOnlyList<TestCaseResult> results = [];
 
     protected override async Task OnInitializedAsync()
     {
-        var (success, submission) = await ApiService.TryReadSubmissionAsync(Id);
+        (var success, submission) = await ApiService.TryReadSubmissionAsync(Id);
         if (!success || submission is null)
         {
             ModalService.ShowError("Failed to load submission", "Internal error");
             return;
         }
 
-        if (submission.ContestId.HasValue)
+        if (!submission.ContestId.HasValue)
+        {
+            displayTestCases = true;
+        }
+        else
         {
             (success, var contest) = await ApiService.TryReadContestAsync(submission.ContestId.Value);
-            active = success && contest?.Active == true;
+            if (!success || contest is null)
+            {
+                ModalService.ShowError("Failed to load contest", "Internal error");
+                return;
+            }
+            contestName = contest.Name;
+
+            displayTestCases = !contest.Active || Admin;
+        }
+
+        // load problem name
+
+        (success, var problem) = await ApiService.TryReadProblemAsync(submission.ProblemId);
+        if (!success || problem is null)
+        {
+            ModalService.ShowError("Failed to load problem", "Internal error");
+            return;
+        }
+
+        problemName = problem.Name;
+
+        // load user
+
+        (success, user) = await ApiService.TryReadUserAsync(submission.SubmitterId);
+
+        if (!success || user is null)
+        {
+            ModalService.ShowError("Failed to load user", "Internal error");
+            return;
         }
 
         (success, var res) = await ApiService.TryReadTestCaseResultsAsync(Id);

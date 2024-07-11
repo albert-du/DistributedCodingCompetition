@@ -18,8 +18,8 @@ public class TestCaseResultsController(ContestContext context) : ControllerBase
     /// </summary>
     /// <returns></returns>
     [HttpGet]
-    public async Task<ActionResult<IEnumerable<TestCaseResult>>> GetTestCaseResults() =>
-         await context.TestCaseResults.ToListAsync();
+    public async Task<ActionResult<IEnumerable<TestCaseResult>>> GetTestCaseResults(Guid submissionId) =>
+         await context.TestCaseResults.Where(t => t.SubmissionId == submissionId).ToListAsync();
 
     // GET: api/TestCaseResults/5
     /// <summary>

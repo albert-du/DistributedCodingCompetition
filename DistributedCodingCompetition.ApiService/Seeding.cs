@@ -43,6 +43,7 @@ public static class Seeding
         {
             Id = Guid.Parse("bcd30243-b2bf-4e4f-bf84-44ff02041bc2"),
             Name = "Problem 1",
+            TagLine = "add two integers from stdin",
             Description = "add two integers from stdin",
             RenderedDescription = "add two integers from stdin",
             TestCases = [testCase],

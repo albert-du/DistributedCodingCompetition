@@ -24,11 +24,11 @@ else
     </div>
     <div class="text-xl">@contestName</div>
 
-    <div class="px-5">
+    <div class="px-5 prose">
         @((MarkupString)problem.RenderedDescription)
     </div>
     <div class="py-1">
-        <select class="px-2 py-1 my-1 rounded-md" @bind="language"> 
+        <select class="px-2 py-1 my-1 rounded-md" @bind="language" @bind:after=LanguageChangedAsync>
             <option value="" disabled selected>Select language</option>
             @foreach (var lang in languages)
             {
@@ -49,11 +49,11 @@ else
         else
         {
             <div class="flex justify-center py-1">
-                <button class="rounded-lg px-2 py-1 bg-violet-400 text-slate-200 hover:bg-violet-500 active:bg-violet-600" @onclick=JudgeAsync>Submit</button>
+                <button class="rounded-lg px-2 py-1 bg-violet-500 text-slate-200 hover:bg-violet-600 active:bg-violet-700" @onclick=JudgeAsync>Submit</button>
             </div>
             @if (latestScore is not null)
             {
-                <div class="flex flex-col gap-y-1 @(latestScore.Completed ? "text-emerald-500" : (latestScore.CasesPassed > 0) ? "text-amber-500" : "text-rose-500" )">
+                <div class="font-bold flex flex-col gap-y-1 @(latestScore.Completed ? "text-emerald-500" : (latestScore.CasesPassed > 0) ? "text-amber-500" : "text-rose-500" )">
                     <div>Testcases: @latestScore.CasesPassed out of @latestScore.CasesTotal</div>
                     <div>Score: @latestScore.Score out of @latestScore.MaxScore</div>
                     <div>Points: @latestScore.Points</div>
@@ -86,7 +86,11 @@ else
 
     void OnCodeChanged(string newCode)
     {
+        if (source == newCode)
+            return;
+
         source = newCode;
+
         _ = TriggerSave();
     }
 
@@ -146,10 +150,7 @@ else
             source = result.Code;
             language = result.Language;
         }
-        else
-        {
-            language = await SelectedLanguageService.GetSelectedLanguage() ?? string.Empty;
-        }
+        Console.WriteLine(result?.Code ?? "null");
 
         var user = await UserStateService.UserAsync();
         if (user is null)
@@ -217,10 +218,27 @@ else
         }
     }
 
+    Task LanguageChangedAsync()
+    {
+        _ = TriggerSave();
+        return SelectedLanguageService.ReportLanguageSwitch(language);
+    }
+
     protected async override Task OnAfterRenderAsync(bool firstRender)
     {
-        using PeriodicTimer periodicTimer = new(TimeSpan.FromMilliseconds(500));
-        while (await periodicTimer.WaitForNextTickAsync())
-            await InvokeAsync(StateHasChanged);
+        if (firstRender)
+        {
+            await Task.Delay(500);
+            if (string.IsNullOrEmpty(language))
+            {
+                language = await SelectedLanguageService.GetSelectedLanguage() ?? string.Empty;
+                await InvokeAsync(StateHasChanged);
+            }
+
+
+            using PeriodicTimer periodicTimer = new(TimeSpan.FromMilliseconds(500));
+            while (await periodicTimer.WaitForNextTickAsync())
+                await InvokeAsync(StateHasChanged);
+        }
     }
 }
