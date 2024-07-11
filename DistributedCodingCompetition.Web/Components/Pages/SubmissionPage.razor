@@ -39,14 +39,14 @@ else
         <div>
             <h2>Test cases</h2>
             <div>
-                @foreach (var testcase in results)
+                @foreach (var (testcase, result) in testcases.Zip(results))
                 {
                     <div class="flex">
                         <div>
-
+                            @(testcase.Description)
                         </div>
                         <div>
-                            @(testcase.Passed ? "Passed" : "Failed")
+                            @(result.Passed ? "Passed" : "Failed")
                         </div>
 
                     </div>
@@ -72,6 +72,7 @@ else
     bool displayTestCases;
 
     IReadOnlyList<TestCaseResult> results = [];
+    IReadOnlyList<TestCase> testcases = [];
 
     protected override async Task OnInitializedAsync()
     {

@@ -35,6 +35,11 @@ public class ProblemsController(ContestContext context) : ControllerBase
         return problem == null ? NotFound() : problem;
     }
 
+
+    [HttpGet("{id}/submissions")]
+    public async Task<ActionResult<IEnumerable<Submission>>> GetSubmissionsForProblem(Guid id) =>
+        await context.Submissions.Where(s => s.ProblemId == id).ToListAsync();
+
     // PUT: api/Problems/5
     /// <summary>
     /// Updates a problem

@@ -62,6 +62,10 @@ public class TestCasesController(ContestContext context) : ControllerBase
 
         context.Entry(testCase).State = EntityState.Modified;
 
+        var prob = await context.Problems.FindAsync(testCase.ProblemId);
+        if (prob is not null)
+            prob.ScoringFactorsChanged = DateTime.UtcNow;
+
         try
         {
             await context.SaveChangesAsync();

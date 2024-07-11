@@ -15,6 +15,13 @@ public interface ISubmissionService
     Task<Submission?> ReadSubmissionAsync(Guid submissionId);
     
     /// <summary>
+    /// Read all submissions for a problem
+    /// </summary>
+    /// <param name="problemId"></param>
+    /// <returns></returns>
+    IAsyncEnumerable<Submission> ReadSubmissionsAsync(Guid problemId);
+
+    /// <summary>
     /// Update a submission with scoring information
     /// </summary>
     /// <param name="submissionId"></param>

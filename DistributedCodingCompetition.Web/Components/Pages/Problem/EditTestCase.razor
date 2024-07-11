@@ -10,6 +10,7 @@
 @inject IApiService ApiService
 @inject IUserStateService UserStateService
 @inject IMarkdownRenderService MarkdownRenderService
+@inject IJudgeService JudgeService
 
 <AuthCheck Id=userId />
 
@@ -89,25 +90,43 @@
     ProblemTestCaseModel model { get; set; } = new();
     TestCase? testCase;
     Guid userId;
+    bool submitting;
 
     async Task SubmitAsync()
     {
-        var user = await UserStateService.UserAsync();
-        if (user is null || testCase is null)
+        if (submitting)
             return;
 
-        // Load the test case
-        testCase.Input = model.Input;
-        testCase.Output = model.Output;
-        testCase.Description = model.Description;
-        testCase.Sample = model.Sample;
-        testCase.Active = model.Active;
-        testCase.Weight = model.Weight;
+        try
+        {
+            var user = await UserStateService.UserAsync();
+            if (user is null || testCase is null)
+                return;
 
-        if (!await ApiService.TryUpdateTestCaseAsync(testCase))
-            ModalService.ShowError("Failed to update test case", "Internal error");
-        else
+            // Load the test case
+            testCase.Input = model.Input;
+            testCase.Output = model.Output;
+            testCase.Description = model.Description;
+            testCase.Sample = model.Sample;
+            testCase.Active = model.Active;
+            testCase.Weight = model.Weight;
+
+            if (!await ApiService.TryUpdateTestCaseAsync(testCase))
+            {
+                ModalService.ShowError("Failed to update test case", "Internal error");
+                return;
+            }
+
+            await JudgeService.RejudgeProblemAsync(ProblemId);
+            
+                
             NavigationManager.NavigateTo($"/problem/{ProblemId}/edit");
+        }
+        finally
+        {
+            submitting = false;
+        }
+
     }
 
     protected override async Task OnInitializedAsync()

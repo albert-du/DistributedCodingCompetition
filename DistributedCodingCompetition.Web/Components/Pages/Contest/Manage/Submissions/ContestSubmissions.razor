@@ -148,7 +148,7 @@
 
         try
         {
-            var error = await JudgeService.JudgeAsync(submission.Id);
+            var error = await JudgeService.RejudgeAsync(submission.Id);
             if (error is not null)
                 ModalService.ShowError(error, "Failed to judge submission");
             else

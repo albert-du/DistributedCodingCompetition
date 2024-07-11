@@ -49,4 +49,9 @@ public class Problem
     /// Navigation to the test cases.
     /// </summary>
     public ICollection<TestCase> TestCases { get; set; } = [];
+
+    /// <summary>
+    /// Last time something changed that would affect scoring.
+    /// </summary>
+    public DateTime ScoringFactorsChanged { get; set; } = DateTime.UtcNow;
 }

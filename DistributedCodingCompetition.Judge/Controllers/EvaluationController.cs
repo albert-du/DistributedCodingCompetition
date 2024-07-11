@@ -4,6 +4,7 @@ using Microsoft.AspNetCore.Mvc;
 using DistributedCodingCompetition.ApiService.Models;
 using DistributedCodingCompetition.ExecutionShared;
 using DistributedCodingCompetition.Judge.Services;
+using Microsoft.EntityFrameworkCore;
 
 /// <summary>
 /// Controller for evaluating submissions
@@ -40,8 +41,60 @@ public class EvaluationController(ILogger<EvaluationController> logger,
         if (execLock is null)
             return StatusCode(429);
 
+        await JudgeAsync(submission);
+
+        return Ok();
+    }
+
+    /// <summary>
+    /// Reevaluates all existing submissions for a problem, does not rate limit against user.
+    /// </summary>
+    /// <param name="problemId"></param>
+    /// <returns></returns>
+    [HttpPost("problem")]
+    public async Task<IActionResult> RejudgeProblemAsync(Guid problemId)
+    {
+        // Get all submissions for the problem
+        var submissions = submissionService.ReadSubmissionsAsync(problemId);
+
+        List<Task> tasks = [];
+
+        // rejudge each submission
+        await foreach (var submission in submissions)
+            tasks.Add(JudgeAsync(submission));
+
+        await Task.WhenAll(tasks);
+
+        return Ok();
+    }
+
+    /// <summary>
+    /// Reevaluates a submission, does not rate limit against user.
+    /// </summary>
+    /// <param name="submissionId"></param>
+    /// <returns></returns>
+    [HttpPost("rejudge")]
+    public async Task<IActionResult> RejudgeAsync(Guid submissionId)
+    {
+        // Get the submission from the database
+        var submission = await submissionService.ReadSubmissionAsync(submissionId);
+        if (submission is null)
+            return NotFound("submission not found");
+
+        await JudgeAsync(submission);
+
+        return Ok();
+    }
+
+    /// <summary>
+    /// Judges a problem submission
+    /// </summary>
+    /// <param name="submission"></param>
+    /// <returns></returns>
+    private async Task JudgeAsync(Submission submission)
+    {
         // log the start of the evaluation
-        logger.LogInformation("Evaluating submission {SubmissionId} from {UserId} for problem {ProblemId}", submissionId, submission.SubmitterId, submission.ProblemId);
+        logger.LogInformation("Evaluating submission {SubmissionId} from {UserId} for problem {ProblemId}", submission.Id, submission.SubmitterId, submission.ProblemId);
 
         // record the start time of the evaluation
         var start = DateTime.UtcNow;
@@ -49,9 +102,8 @@ public class EvaluationController(ILogger<EvaluationController> logger,
         // Get the problem from the database
         var testCases = await problemService.ReadTestCasesAsync(submission.ProblemId);
 
-        // unlikely scenario where the problem is not found, likely deleted
-        if (testCases is null)
-            return NotFound("problem not found");
+        // shouldn't happen but 
+        testCases ??= [];
 
         // Execute the submission
         var execResults = await codeExecutionService.ExecuteBatchAsync(testCases.Select(testcase =>
@@ -85,7 +137,7 @@ public class EvaluationController(ILogger<EvaluationController> logger,
             {
                 Id = Guid.NewGuid(),
                 TestCaseId = testCases[i].Id,
-                SubmissionId = submissionId,
+                SubmissionId = submission.Id,
                 Output = execResults[i].Output,
                 Passed = passed,
                 Error = execResults[i].Error,
@@ -94,12 +146,10 @@ public class EvaluationController(ILogger<EvaluationController> logger,
         }
 
         // Save the result
-        await submissionService.UpdateSubmissionResults(submissionId, results, maxScore: possibleScore, score: score);
+        await submissionService.UpdateSubmissionResults(submission.Id, results, maxScore: possibleScore, score: score);
 
         // log the time taken to evaluate the submission
         var end = DateTime.UtcNow;
-        logger.LogInformation("Submission {SubmissionId} from {UserId} for problem {ProblemId} evaluated in {Time}ms", submissionId, submission.SubmitterId, submission.ProblemId, (end - start).TotalMilliseconds);
-
-        return Ok();
+        logger.LogInformation("Submission {SubmissionId} from {UserId} for problem {ProblemId} evaluated in {Time}ms", submission.Id, submission.SubmitterId, submission.ProblemId, (end - start).TotalMilliseconds);
     }
 }
