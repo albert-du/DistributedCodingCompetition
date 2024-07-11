@@ -109,7 +109,7 @@ public class ContestsController(ContestContext context) : ControllerBase
         await context.Contests
             .Where(c => c.Id == contestId)
             .SelectMany(c => c.Banned)
-            .Skip(count * page)
+            .Skip(count * (page-1))
             .Take(count)
             .ToListAsync();
 
@@ -126,7 +126,7 @@ public class ContestsController(ContestContext context) : ControllerBase
         await context.Contests
             .Where(c => c.Id == contestId)
             .SelectMany(c => c.Participants)
-            .Skip(count * page)
+            .Skip(count * (page-1))
             .Take(count)
             .ToListAsync();
 
@@ -142,7 +142,7 @@ public class ContestsController(ContestContext context) : ControllerBase
         await context.Contests
             .Where(c => c.Public)
             .OrderByDescending(c => c.StartTime)
-            .Skip(count * page)
+            .Skip(count * (page-1))
             .Take(count)
             .ToListAsync();
 

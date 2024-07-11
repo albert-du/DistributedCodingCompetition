@@ -26,12 +26,16 @@ app.UseHttpsRedirection();
 
 app.MapGet("/{contest}/{problem}/{user}", async (Guid contest, Guid problem, Guid user, IMongoClient mongoClient) =>
 {
-    var database = mongoClient.GetDatabase("codePersistenceDB");
-    var container = database.GetCollection<PersistenceRecord>("user-code");
-    var record = await container.Find($"{contest}-{problem}-{user}").FirstOrDefaultAsync();
+    var container = GetCollection(mongoClient);
+    var idString = PersistenceRecord.IdString(contest, problem, user);
+    var record = await container.Find(c => c.Id == idString).FirstOrDefaultAsync();
 
     if (record is null)
+    {
+        app.Logger.LogError("Code not found for {contest}/{problem}/{user}", contest, problem, user);
         return Results.NotFound();
+    }
+    app.Logger.LogInformation("Code found for {contest}/{problem}/{user}", contest, problem, user);
 
     return Results.Ok(new SavedCodeDTO
     {
@@ -45,14 +49,20 @@ app.MapGet("/{contest}/{problem}/{user}", async (Guid contest, Guid problem, Gui
 
 app.MapPost("/{contest}/{problem}/{user}", async (Guid contest, Guid problem, Guid user, IMongoClient mongoClient, SavedCodeDTO code) =>
 {
-    var database = mongoClient.GetDatabase("codePersistenceB");
-    var container = database.GetCollection<PersistenceRecord>("user-code");
-    var existingRecord = await container.Find($"{contest}-{problem}-{user}").FirstOrDefaultAsync();
+    var container = GetCollection(mongoClient);
+    var idString = PersistenceRecord.IdString(contest, problem, user);
+    var existingRecord = await container.Find(c => c.Id == idString).FirstOrDefaultAsync();
     if (existingRecord is not null && existingRecord.SubmissionTime > code.SubmissionTime)
+    {
+        app.Logger.LogError("Code is older than existing code for {contest}/{problem}/{user}", contest, problem, user);
         return Results.BadRequest("Code is older than existing code");
+    }
+
+    app.Logger.LogInformation("Saving code for {contest}/{problem}/{user}", contest, problem, user);
 
     var record = new PersistenceRecord
     {
+        Id = idString,
         Contest = contest,
         Problem = problem,
         User = user,
@@ -61,7 +71,11 @@ app.MapPost("/{contest}/{problem}/{user}", async (Guid contest, Guid problem, Gu
         SubmissionTime = code.SubmissionTime
     };
 
-    await container.InsertOneAsync(record);
+
+    if (existingRecord is null)
+        await container.InsertOneAsync(record);
+    else
+        await container.ReplaceOneAsync(c => c.Id == idString, record);
 
     return Results.Created($"/{contest}/{problem}/{user}", new SavedCodeDTO
     {
@@ -75,15 +89,20 @@ app.MapPost("/{contest}/{problem}/{user}", async (Guid contest, Guid problem, Gu
 
 app.Run();
 
+static IMongoCollection<PersistenceRecord> GetCollection(IMongoClient client) =>
+    client.GetDatabase("codePersistenceDB").GetCollection<PersistenceRecord>("user-code");
+
 record PersistenceRecord
 {
-    public string Id => $"{Contest}-{Problem}-{User}";
+    public required string Id { get; init; }
     public Guid Contest { get; init; }
     public Guid Problem { get; init; }
     public Guid User { get; init; }
     public string Code { get; init; } = string.Empty;
     public string Language { get; init; } = string.Empty;
     public DateTime SubmissionTime { get; init; } = DateTime.UtcNow;
+
+    public static string IdString(Guid contest, Guid problem, Guid user) => $"{contest}-{problem}-{user}";
 }
 
 record SavedCodeDTO

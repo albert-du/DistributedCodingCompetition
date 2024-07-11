@@ -53,6 +53,10 @@
                 return;
         }
 
+        // if the page doesn't require anything just return as the user is authenticated at this point.
+        if (!Admin && Contest is null && Id is null)
+            return;
+
         NavigationManager.NavigateTo("dashboard");
     }
 }

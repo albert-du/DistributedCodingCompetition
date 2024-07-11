@@ -17,6 +17,9 @@ public sealed class CodePersistenceService(HttpClient httpClient, ILogger<CodePe
     public async Task<SavedCode?> TryReadCodeAsync(Guid contest, Guid problem, Guid user)
     {
         var response = await httpClient.GetAsync($"{contest}/{problem}/{user}");
+
+        Console.WriteLine(response.StatusCode);
+
         if (!response.IsSuccessStatusCode)
             return null;
 
@@ -36,6 +39,7 @@ public sealed class CodePersistenceService(HttpClient httpClient, ILogger<CodePe
         try
         {
             var response = await httpClient.PostAsJsonAsync($"{contest}/{problem}/{user}", code);
+            Console.WriteLine(response.StatusCode);
             response.EnsureSuccessStatusCode();
 
             return true;

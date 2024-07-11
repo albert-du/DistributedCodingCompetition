@@ -22,12 +22,15 @@ public sealed class CurrentSavedCodeProvider(IUserStateService userStateService,
         // Extract the contest and problem from the URL
         var segments = navigationManager.ToBaseRelativePath(navigationManager.Uri).Split('/');
         if (user is null ||
-            segments.Length != 4 ||
+            segments.Length < 4 ||
             segments[0] != "contest" ||
-            segments[2] != "problem" ||
+            segments[2] != "solve" ||
             !Guid.TryParse(segments[1], out var contest) ||
             !Guid.TryParse(segments[3], out var problem))
             return null;
+
+        Console.WriteLine("Reading code");
+
 
         return await codePersistenceService.TryReadCodeAsync(contest, problem, user.Id);
     }
@@ -40,15 +43,17 @@ public sealed class CurrentSavedCodeProvider(IUserStateService userStateService,
     public async Task<bool> TrySaveCurrentCodeAsync(SavedCode code)
     {
         var user = await userStateService.UserAsync();
+
         // Extract the contest and problem from the URL
         var segments = navigationManager.ToBaseRelativePath(navigationManager.Uri).Split('/');
         if (user is null ||
-            segments.Length != 4 ||
+            segments.Length < 4 ||
             segments[0] != "contest" ||
-            segments[2] != "problem" ||
+            segments[2] != "solve" ||
             !Guid.TryParse(segments[1], out var contest) ||
             !Guid.TryParse(segments[3], out var problem))
             return false;
+        Console.WriteLine("Saving code");
         return await codePersistenceService.TrySaveCodeAsync(contest, problem, user.Id, code);
     }
 }

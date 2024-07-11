@@ -7,15 +7,21 @@
 @inject IJudgeService JudgeService
 @inject IUserStateService UserStateService
 @rendermode InteractiveServer
+
 <AuthCheck Contest=ContestId />
+
+<PageTitle>Solve @problem?.Name</PageTitle>
 
 @if (problem is null)
 {
-    <div>loading</div>
+    <LoadingSpinner />
 }
 else
 {
-    <h1 class="text-3xl">@problem.Name</h1>
+    <div class="flex justify-between">
+        <h1 class="text-3xl">@problem.Name</h1>
+        <div>Remaining: @((contestEndTimeUTC - DateTime.UtcNow).ToString(@"hh\:mm\:ss"))</div>
+    </div>
     <div class="text-xl">@contestName</div>
 
     <div class="px-5">
@@ -67,6 +73,7 @@ else
     public Guid ProblemId { get; set; }
 
     string contestName = "";
+    DateTime contestEndTimeUTC;
 
     Problem? problem;
 
@@ -98,6 +105,7 @@ else
         {
             loading = true;
             queued = false;
+            await Task.Delay(1000);
             if (!await CurrentSavedCodeProvider.TrySaveCurrentCodeAsync(new()
                 {
                     Code = source,
@@ -121,7 +129,7 @@ else
             return;
         }
         contestName = contest.Name;
-
+        contestEndTimeUTC = contest.EndTime;
         (success, problem) = await ApiService.TryReadProblemAsync(ProblemId);
         if (!success || problem is null)
         {
@@ -131,6 +139,7 @@ else
         }
         languages = await CodeExecutionClient.AvailableLanguagesAsync();
         var result = await CurrentSavedCodeProvider.GetCurrentSavedCodeAsync();
+
         if (result is not null)
         {
             source = result.Code;
@@ -176,6 +185,13 @@ else
         {
             judgingInProgress = false;
         }
+    }
+
+    protected async override Task OnAfterRenderAsync(bool firstRender)
+    {
+        using PeriodicTimer periodicTimer = new(TimeSpan.FromMilliseconds(500));
+        while (await periodicTimer.WaitForNextTickAsync())
+            await InvokeAsync(StateHasChanged);
     }
 
     record LatestScore(int Passed, int Total, int Points, int TotalPoints);

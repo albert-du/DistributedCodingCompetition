@@ -295,7 +295,29 @@ else
 
             <a href="contest/@Id/manage/problems" class="italic hover:underline">Manage problems</a>
         </div>
-        <a href="contest/@Id/manage/submissions" class="italic hover:underline">@model.Submissions submissions</a>
+
+        <div class="flex flex-col gap-y-1">
+            <h2 class="text-2xl">Submissions</h2>
+            <div class="flex flex-wrap w-full gap-1 px-1 my-2 bg-blue-200 rounded-lg text-slate-600">
+                @if (submissions.Count == 0)
+                {
+                    <div>No Problems</div>
+                }
+                else
+                {
+                    @foreach (var sub in submissions)
+                    {
+                        <div class="flex gap-x-4">
+                            <div>@sub.SubmissionTime</div>
+                            <div>@sub.Problem</div>
+                            <div>@sub.PassedTestCases / @sub.TotalTestCases</div>
+                        </div>
+                    }
+                }
+            </div>
+
+            <a href="contest/@Id/manage/submissions" class="italic hover:underline">Manage submissions</a>
+        </div>
     </div>
 }
 
@@ -325,6 +347,7 @@ else
 
     IReadOnlyList<JoinCode> joinCodes = [];
     IReadOnlyList<Problem> problems = [];
+    IReadOnlyList<Submission> submissions = [];
 
     // Pagination methods
     async Task LastParticipantAsync()
@@ -466,18 +489,21 @@ else
         var b = ApiService.TryReadContestBannedAsync(Id, 10, bannedPage);
         var j = ApiService.TryReadContestJoinCodesAsync(Id);
         var pr = ApiService.TryReadContestProblemsAsync(Id);
+        var s = ApiService.TryReadContestSubmissionsAsync(Id, 10, 1);
 
         // wait for all requests to finish and save
-        (var success, var aa) = await ApiService.TryReadContestAdminsAsync(Id);
+        (var success, var aa) = await a;
         if (!success) ModalService.ShowError("Failed to load administrators", "Internal error");
-        (success, var pp) = await ApiService.TryReadContestParticipantsAsync(Id, 10, participantsPage);
+        (success, var pp) = await p;
         if (!success) ModalService.ShowError("Failed to load participants", "Internal error");
-        (success, var bb) = await ApiService.TryReadContestBannedAsync(Id, 10, bannedPage);
+        (success, var bb) = await b;
         if (!success) ModalService.ShowError("Failed to load banned participants", "Internal error");
-        (success, var jj) = await ApiService.TryReadContestJoinCodesAsync(Id);
+        (success, var jj) = await j;
         if (!success) ModalService.ShowError("Failed to load join codes", "Internal error");
-        (success, var prr) = await ApiService.TryReadContestProblemsAsync(Id);
+        (success, var prr) = await pr;
         if (!success) ModalService.ShowError("Failed to load problems", "Internal error");
+        (success, var ss) = await s;
+        if (!success) ModalService.ShowError("Failed to load submissions", "Internal error");
 
         // save results
         administrators = aa ?? [];
@@ -485,6 +511,8 @@ else
         banned = bb ?? [];
         joinCodes = jj ?? [];
         problems = prr ?? [];
+        submissions = ss ?? [];
+
     }
 
     class ContestModel

@@ -6,10 +6,15 @@
 @inject IMarkdownRenderService MarkdownRenderService
 @rendermode InteractiveServer
 
-<AuthCheck Id=userId />
+@if (userId.HasValue)
+{
+    <AuthCheck Id=userId.Value />
+}
+
 <PageTitle>New Test Case</PageTitle>
 
 <h1 class="mb-2 text-2xl">New Test Case</h1>
+<a href="problem/@Id/edit" class="hover:underline italic">back</a>
 
 <EditForm Model=model OnValidSubmit=SubmitAsync class="flex flex-col gap-y-1">
     <label class="flex flex-col">
@@ -70,7 +75,7 @@
 
     ProblemTestCaseModel model { get; set; } = new();
 
-    Guid userId;
+    Guid? userId;
 
     protected override async Task OnInitializedAsync()
     {
@@ -96,6 +101,9 @@
     {
         var user = await UserStateService.UserAsync();
         if (user is null)
+            return;
+
+        if (user.Id != userId)
             return;
 
         // Create the test case

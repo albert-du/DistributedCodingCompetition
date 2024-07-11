@@ -9,11 +9,8 @@
 @inject IMarkdownRenderService MarkdownRenderService
 @rendermode InteractiveServer
 
-<AuthCheck Id=userId />
-
 <PageTitle>Edit Problem</PageTitle>
 
-<h1 class="text-3xl">Problem: @problem?.Name</h1>
 
 @if (model is null)
 {
@@ -21,6 +18,10 @@
 }
 else
 {
+    <h1 class="text-3xl">Problem: @problem?.Name</h1>
+
+    <AuthCheck Id=userId />
+    
     <EditForm Model=model OnValidSubmit=SubmitAsync class="flex flex-col gap-y-1">
         <label class="flex flex-col">
             <div class="pl-2">
