@@ -17,11 +17,11 @@ builder.Services.AddStackExchangeRedisCache(options =>
 });
 
 builder.Services.AddSingleton<ICodeExecutionService, CodeExecutionService>();
-builder.Services.AddHttpClient<CodeExecutionService>(client => client.BaseAddress = new("https+http://codeexecution"));
+builder.Services.AddHttpClient<ICodeExecutionService, CodeExecutionService>(client => client.BaseAddress = new("https+http://codeexecution"));
 builder.Services.AddSingleton<ISubmissionService, SubmissionService>();
-builder.Services.AddHttpClient<SubmissionService>(client => client.BaseAddress = new("https+http://apiservice"));
+builder.Services.AddHttpClient<ISubmissionService, SubmissionService>(client => client.BaseAddress = new("https+http://apiservice"));
 builder.Services.AddSingleton<IProblemService, ProblemService>();
-builder.Services.AddHttpClient<ProblemService>(client => client.BaseAddress = new("https+http://apiservice"));
+builder.Services.AddHttpClient<IProblemService, ProblemService>(client => client.BaseAddress = new("https+http://apiservice"));
 
 builder.Services.AddSingleton<IRateLimitService, RateLimitService>();
 

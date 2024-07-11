@@ -305,14 +305,16 @@ else
                 }
                 else
                 {
-                    @foreach (var sub in submissions)
-                    {
-                        <div class="flex gap-x-4">
-                            <div>@sub.SubmissionTime</div>
-                            <div>@sub.Problem</div>
-                            <div>@sub.PassedTestCases / @sub.TotalTestCases</div>
-                        </div>
-                    }
+                    <div class="flex flex-col gap-y-1">
+                        @foreach (var sub in submissions)
+                        {
+                            <div class="flex gap-x-4">
+                                <div>@sub.SubmissionTime</div>
+                                <div>@sub.Problem?.Name</div>
+                                <div>@sub.PassedTestCases / @sub.TotalTestCases</div>
+                            </div>
+                        }
+                    </div>
                 }
             </div>
 

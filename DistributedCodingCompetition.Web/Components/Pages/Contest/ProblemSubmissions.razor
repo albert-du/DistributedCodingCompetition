@@ -3,6 +3,7 @@
 @inject IModalService ModalService
 @inject ITimeZoneProvider TimeZoneProvider
 @inject IUserStateService UserStateService
+@rendermode InteractiveServer
 
 <AuthCheck Contest=ContestId />
 
@@ -19,11 +20,16 @@
         <div>
             <div class="flex justify-between">
                 <div>@submission.Language</div>
-                <div>@submission.SubmissionTime.Add(tzOffset).ToString("yyyy-MM-dd HH:mm:ss")</div>
+                <div>@submission.SubmissionTime.Add(-tzOffset).ToString("yyyy-MM-dd HH:mm:ss")</div>
             </div>
-            <a href="submission/@submission.Id" class="border p-2 h-32 overflow-clip">
+            <div class="border p-2 h-32">
                 <CodeEditor ReadOnly Language=@(submission.Language.Split('=').FirstOrDefault()??"text") Code=@submission.Code />
-            </a>
+            </div>
+            <div>
+                <div>Testcases: @submission.PassedTestCases out of @submission.TotalTestCases</div>
+                <div>Score: @submission.Score out of @submission.MaxPossibleScore</div>
+                <div>Points: @submission.Points</div>
+            </div>
         </div>
     }
 </div>

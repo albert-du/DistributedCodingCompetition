@@ -10,7 +10,7 @@ public class RateLimitService(IDistributedCache distributedCache) : IRateLimitSe
     public async Task<IAsyncDisposable?> TryLockAsync(Guid id, TimeSpan duration)
     {
         var key = id.ToString();
-        var val = distributedCache.GetAsync(key);
+        var val = await distributedCache.GetAsync(key);
         if (val != null)
             return null;
         var options = new DistributedCacheEntryOptions().SetSlidingExpiration(duration);

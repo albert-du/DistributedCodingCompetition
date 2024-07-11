@@ -12,6 +12,7 @@ public class ExecLoadBalancer : IExecLoadBalancer
     {
         Dictionary<string, int> weights = [];
         Dictionary<string, List<ExecRunner>> allRunners = [];
+        Console.WriteLine(execRunnerContext.ExecRunners.Count());
         foreach (var runner in execRunnerContext.ExecRunners)
         {
             if (!runner.Live || !runner.Available || !runner.Enabled)

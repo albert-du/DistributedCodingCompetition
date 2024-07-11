@@ -32,7 +32,7 @@ public static class Seeding
         TestCase testCase = new()
         {
             Id = Guid.Parse("82720217-26d3-4c5c-82c8-fb047b5383e1"),
-            Input = "1 2",
+            Input = "1\n2\n",
             Output = "3",
             Description = "Add two numbers",
             Sample = true,
@@ -43,7 +43,8 @@ public static class Seeding
         {
             Id = Guid.Parse("bcd30243-b2bf-4e4f-bf84-44ff02041bc2"),
             Name = "Problem 1",
-            Description = "First problem",
+            Description = "add two integers from stdin",
+            RenderedDescription = "add two integers from stdin",
             TestCases = [testCase],
             Owner = user1,
         };

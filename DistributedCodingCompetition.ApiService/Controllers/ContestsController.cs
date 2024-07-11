@@ -109,7 +109,7 @@ public class ContestsController(ContestContext context) : ControllerBase
         await context.Contests
             .Where(c => c.Id == contestId)
             .SelectMany(c => c.Banned)
-            .Skip(count * (page-1))
+            .Skip(count * (page - 1))
             .Take(count)
             .ToListAsync();
 
@@ -126,7 +126,7 @@ public class ContestsController(ContestContext context) : ControllerBase
         await context.Contests
             .Where(c => c.Id == contestId)
             .SelectMany(c => c.Participants)
-            .Skip(count * (page-1))
+            .Skip(count * (page - 1))
             .Take(count)
             .ToListAsync();
 
@@ -142,7 +142,7 @@ public class ContestsController(ContestContext context) : ControllerBase
         await context.Contests
             .Where(c => c.Public)
             .OrderByDescending(c => c.StartTime)
-            .Skip(count * (page-1))
+            .Skip(count * (page - 1))
             .Take(count)
             .ToListAsync();
 
@@ -168,12 +168,15 @@ public class ContestsController(ContestContext context) : ControllerBase
     /// <param name="userId"></param>
     /// <returns></returns>
     [HttpGet("{contestId}/user/{userId}/solve")]
-    public async Task<ActionResult<IReadOnlyList<ProblemUserSolveStatus>>> GetUserSolveStatusForContest(Guid contestId, Guid userId)
+    public async Task<IEnumerable<ProblemUserSolveStatus>> GetUserSolveStatusForContest(Guid contestId, Guid userId)
     {
         var submissions = await context.Submissions
             .Where(c => c.ContestId == contestId && c.SubmitterId == userId)
             .Select(s => new { s.ProblemId, s.Points, s.Score, s.MaxPossibleScore }).ToListAsync();
-        return submissions.Select(s => new ProblemUserSolveStatus(s.ProblemId, s.Points, s.Score, s.MaxPossibleScore)).ToList();
+
+        return submissions.OrderByDescending(s => s.Score)
+                          .DistinctBy(s => s.ProblemId)
+                          .Select(s => new ProblemUserSolveStatus(s.ProblemId, s.Points, s.Score, s.MaxPossibleScore));
     }
 
     // PUT api/contests/{contestId}/role/{userId}
@@ -308,8 +311,9 @@ public class ContestsController(ContestContext context) : ControllerBase
     /// <param name="page"></param>
     /// <returns></returns>
     [HttpGet("{contestId}/submissions")]
-    public async Task<ActionResult<IReadOnlyList<Submission>>> GetContestSubmissions(Guid contestId, int count, int page) =>
-        await context.Submissions
+    public async Task<ActionResult<IReadOnlyList<Submission>>> GetContestSubmissions(Guid contestId, int count, int page)
+    {
+        var rv = await context.Submissions
             .Include(s => s.Problem)
             .Include(s => s.Submitter)
             .Where(s => s.ContestId == contestId)
@@ -317,6 +321,13 @@ public class ContestsController(ContestContext context) : ControllerBase
             .Skip(count * page)
             .Take(count)
             .ToListAsync();
+        foreach (var s in rv)
+        {
+            if (s.Submitter?.Submissions is not null)
+                s.Submitter.Submissions = [];
+        }
+        return rv;
+    }
 
     /// <summary>
     /// Check if a contest exists

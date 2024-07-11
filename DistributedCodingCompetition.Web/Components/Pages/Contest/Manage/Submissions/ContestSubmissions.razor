@@ -94,10 +94,10 @@
 
     private async Task LoadAsync()
     {
-        var sub = ApiService.TryReadContestSubmissionsAsync(Id, Page, PageSize);
+        var sub = ApiService.TryReadContestSubmissionsAsync(Id, PageSize, Page);
         var cont = ApiService.TryReadContestAsync(Id);
         (var success, var submissions) = await sub;
-        if (!success)
+        if (!success || submissions is null)
         {
             ModalService.ShowError("Failed to load submissions", "Internal error");
             return;
@@ -117,6 +117,7 @@
         }
 
         Submissions = [.. submissions];
+        Console.WriteLine($"Loaded {Submissions.Count} submissions");
 
     }
 

@@ -32,7 +32,7 @@ app.MapGet("/{contest}/{problem}/{user}", async (Guid contest, Guid problem, Gui
 
     if (record is null)
     {
-        app.Logger.LogError("Code not found for {contest}/{problem}/{user}", contest, problem, user);
+        app.Logger.LogInformation("Code not found for {contest}/{problem}/{user}", contest, problem, user);
         return Results.NotFound();
     }
     app.Logger.LogInformation("Code found for {contest}/{problem}/{user}", contest, problem, user);
@@ -54,7 +54,7 @@ app.MapPost("/{contest}/{problem}/{user}", async (Guid contest, Guid problem, Gu
     var existingRecord = await container.Find(c => c.Id == idString).FirstOrDefaultAsync();
     if (existingRecord is not null && existingRecord.SubmissionTime > code.SubmissionTime)
     {
-        app.Logger.LogError("Code is older than existing code for {contest}/{problem}/{user}", contest, problem, user);
+        app.Logger.LogInformation("Code is older than existing code for {contest}/{problem}/{user}", contest, problem, user);
         return Results.BadRequest("Code is older than existing code");
     }
 
