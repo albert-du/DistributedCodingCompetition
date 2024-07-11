@@ -9,7 +9,7 @@
 /// <param name="Points">Points it's worth in the contest</param>
 /// <param name="Score">Score earned</param>
 /// <param name="MaxScore">Max possible score</param>
-public record ProblemUserSolveStatus(Guid Problem, int Points, int Score, int MaxScore)
+public record ProblemUserSolveStatus(Guid Problem, int Points, int Score, int MaxScore, int CasesPassed, int CasesTotal)
 {
     /// <summary>
     /// Maximum score achieved

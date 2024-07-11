@@ -6,7 +6,7 @@
 @inject ICurrentSavedCodeProvider CurrentSavedCodeProvider
 @inject IJudgeService JudgeService
 @inject IUserStateService UserStateService
-@rendermode InteractiveServer
+@inject ISelectedLanguageService SelectedLanguageService
 
 <AuthCheck Contest=ContestId />
 
@@ -40,10 +40,7 @@ else
     <div class="border p-2 border-slate-500 h-[75vh]">
         <CodeEditor Code=@source Language=@Lang @key=@Lang CodeChanged=OnCodeChanged />
     </div>
-    <div class="flex justify-center py-1">
-        <button class="rounded-lg px-2 py-1 bg-violet-400 text-slate-200 hover:bg-violet-500 active:bg-violet-600" @onclick=JudgeAsync>Submit</button>
-    </div>
-    <div>
+    <div class="pb-24">
         @if (judgingInProgress)
         {
             <div>Submitting...</div>
@@ -51,15 +48,19 @@ else
         }
         else
         {
+            <div class="flex justify-center py-1">
+                <button class="rounded-lg px-2 py-1 bg-violet-400 text-slate-200 hover:bg-violet-500 active:bg-violet-600" @onclick=JudgeAsync>Submit</button>
+            </div>
             @if (latestScore is not null)
             {
-                <div class="flex flex-col gap-y-1 @(latestScore.Passed == latestScore.Total ? "text-emerald-500" : (latestScore.Passed > 0) ? "text-amber-500" : "text-rose-500" )">
-                    <div>Testcases: @latestScore.Passed out of @latestScore.Total</div>
-                    <div>Points: @latestScore.Points out of @latestScore.TotalPoints</div>
+                <div class="flex flex-col gap-y-1 @(latestScore.Completed ? "text-emerald-500" : (latestScore.CasesPassed > 0) ? "text-amber-500" : "text-rose-500" )">
+                    <div>Testcases: @latestScore.CasesPassed out of @latestScore.CasesTotal</div>
+                    <div>Score: @latestScore.Score out of @latestScore.MaxScore</div>
+                    <div>Points: @latestScore.Points</div>
                 </div>
             }
 
-            <a href="/contest/@ContestId/solve/@ProblemId/submissions">View your submissions</a>
+            <a class="italic hover:underline text-violet-800" href="/contest/@ContestId/solve/@ProblemId/submissions">View your submissions</a>
         }
 
     </div>
@@ -89,7 +90,7 @@ else
         _ = TriggerSave();
     }
 
-    LatestScore? latestScore;
+    ProblemUserSolveStatus? latestScore;
 
     bool queued;
     bool loading;
@@ -145,6 +146,26 @@ else
             source = result.Code;
             language = result.Language;
         }
+        else
+        {
+            language = await SelectedLanguageService.GetSelectedLanguage() ?? string.Empty;
+        }
+
+        var user = await UserStateService.UserAsync();
+        if (user is null)
+        {
+            ModalService.ShowError("Failed to load user", "Internal error");
+            NavigationManager.NavigateTo("/dashboard");
+            return;
+        }
+
+        (success, latestScore) = await ApiService.TryReadUserSolveStatusAsync(ContestId, user.Id, ProblemId);
+        if (!success)
+        {
+            ModalService.ShowError("Failed to load user solve status", "Internal error");
+            NavigationManager.NavigateTo("/dashboard");
+            return;
+        }
     }
     bool judgingInProgress;
     async Task JudgeAsync()
@@ -154,6 +175,7 @@ else
         judgingInProgress = true;
         try
         {
+            var delay = Task.Delay(2000);
             if ((await UserStateService.UserAsync())?.Id is not Guid userId)
             {
                 ModalService.ShowError("Failed to load user", "Internal error");
@@ -178,8 +200,16 @@ else
             if (await JudgeService.JudgeAsync(submission.Id) is string error)
             {
                 ModalService.ShowError("Failed to judge submission", error);
+                return;
             }
-            NavigationManager.NavigateTo($"/contest/{ContestId}/solve/{ProblemId}/submissions");
+            (var success, var sub) = await ApiService.TryReadSubmissionAsync(submission.Id);
+            if (!success || sub is null)
+            {
+                ModalService.ShowError("Failed to load latest", "Internal error");
+                return;
+            }
+            await delay;
+            latestScore = new(sub.ProblemId, sub.Points, sub.Score, sub.MaxPossibleScore, sub.PassedTestCases, sub.TotalTestCases);
         }
         finally
         {
@@ -193,6 +223,4 @@ else
         while (await periodicTimer.WaitForNextTickAsync())
             await InvokeAsync(StateHasChanged);
     }
-
-    record LatestScore(int Passed, int Total, int Points, int TotalPoints);
 }

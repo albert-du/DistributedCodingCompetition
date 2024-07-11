@@ -688,5 +688,19 @@ public sealed class ApiService(HttpClient httpClient, ILogger<ApiService> logger
             return (false, null);
         }
     }
+    public async Task<(bool, ProblemUserSolveStatus?)> TryReadUserSolveStatusAsync(Guid contestId, Guid userId, Guid problemId)
+    {
+        try
+        {
+            return (true, await httpClient.GetFromJsonAsync<ProblemUserSolveStatus>($"api/contests/{contestId}/user/{userId}/solve/{problemId}"));
+        }
+        catch (HttpRequestException ex)
+        {
+            if (ex.StatusCode == HttpStatusCode.NotFound)
+                return (true, null);
 
+            logger.LogError(ex, "Failed to read user solve status");
+            return (false, null);
+        }
+    }
 }

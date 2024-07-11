@@ -35,6 +35,7 @@ builder.Services.AddScoped<IUserStateService, UserStateService>();
 builder.Services.AddScoped<ITimeZoneProvider, TimeZoneProvider>();
 builder.Services.AddScoped<IClipboardService, BrowserClipboardService>();
 builder.Services.AddScoped<ICurrentSavedCodeProvider, CurrentSavedCodeProvider>();
+builder.Services.AddScoped<ISelectedLanguageService, SelectedLanguageService>();
 
 builder.Services.AddHttpClient<CodeExecutionClient>(client => client.BaseAddress = new("https+http://codeexecution"));
 builder.Services.AddHttpClient<ICodePersistenceService, CodePersistenceService>(client => client.BaseAddress = new("https+http://codepersistence"));

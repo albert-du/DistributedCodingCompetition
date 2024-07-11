@@ -172,12 +172,28 @@ public class ContestsController(ContestContext context) : ControllerBase
     {
         var submissions = await context.Submissions
             .Where(c => c.ContestId == contestId && c.SubmitterId == userId)
-            .Select(s => new { s.ProblemId, s.Points, s.Score, s.MaxPossibleScore }).ToListAsync();
+            .Select(s => new { s.ProblemId, s.Points, s.Score, s.MaxPossibleScore, s.TotalTestCases, s.PassedTestCases }).ToListAsync();
 
         return submissions.OrderByDescending(s => s.Score)
                           .DistinctBy(s => s.ProblemId)
-                          .Select(s => new ProblemUserSolveStatus(s.ProblemId, s.Points, s.Score, s.MaxPossibleScore));
+                          .Select(s => new ProblemUserSolveStatus(s.ProblemId, s.Points, s.Score, s.MaxPossibleScore, s.PassedTestCases, s.TotalTestCases));
     }
+
+    // GET api/contests/{contestId}/user/{userId}/solve/{problemId}
+    [HttpGet("{contestId}/user/{userId}/solve/{problemId}")]
+    public async Task<ActionResult<ProblemUserSolveStatus>> GetUserSolveStatusForProblem(Guid contestId, Guid userId, Guid problemId)
+    {
+        var submission = await context.Submissions
+            .Where(c => c.ContestId == contestId && c.SubmitterId == userId && c.ProblemId == problemId)
+            .OrderByDescending(s => s.Score)
+            .FirstOrDefaultAsync();
+
+        if (submission is null)
+            return NotFound();
+
+        return new ProblemUserSolveStatus(submission.ProblemId, submission.Points, submission.Score, submission.MaxPossibleScore, submission.PassedTestCases, submission.TotalTestCases);
+    }
+
 
     // PUT api/contests/{contestId}/role/{userId}
     /// <summary>

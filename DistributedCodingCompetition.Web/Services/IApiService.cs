@@ -286,6 +286,16 @@ public interface IApiService
     /// <returns></returns>
     Task<(bool, IReadOnlyList<ProblemUserSolveStatus>?)> TryReadUserSolveStatusForContestAsync(Guid contestId, Guid userId);
 
+
+    /// <summary>
+    /// Read a user's solve status for a problem.
+    /// </summary>
+    /// <param name="contestId"></param>
+    /// <param name="userId"></param>
+    /// <param name="problemId"></param>
+    /// <returns></returns>
+    Task<(bool, ProblemUserSolveStatus?)> TryReadUserSolveStatusAsync(Guid contestId, Guid userId, Guid problemId);
+
     /// <summary>
     /// Create a new submission.
     /// Does not solve automatically

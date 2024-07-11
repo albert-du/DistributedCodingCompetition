@@ -131,6 +131,7 @@ public class SubmissionsController(ContestContext context) : ControllerBase
         submission.Score = score;
         submission.TotalTestCases = results.Count;
         submission.PassedTestCases = results.Count(x => x.Passed);
+        submission.EvaluationTime = DateTime.UtcNow;
 
         await context.SaveChangesAsync();
 
