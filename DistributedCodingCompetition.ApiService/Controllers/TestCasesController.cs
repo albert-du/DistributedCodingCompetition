@@ -38,15 +38,6 @@ public class TestCasesController(ContestContext context) : ControllerBase
         return testCase;
     }
 
-    // GET: api/TestCases/{id}/results
-    /// <summary>
-    /// Gets all test case results for a test case
-    /// </summary>
-    /// <param name="id"></param>
-    /// <returns></returns>
-    public async Task<ActionResult<IEnumerable<TestCaseResult>>> GetTestCaseResults(Guid id) =>
-        await context.TestCaseResults.Where(r => r.TestCaseId == id).ToListAsync();
-
     // PUT: api/TestCases/5
     /// <summary>
     /// Updates a test case

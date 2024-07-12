@@ -1,8 +1,10 @@
 ﻿namespace DistributedCodingCompetition.ApiService.Controllers;
 
+using System.Collections.Concurrent;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using DistributedCodingCompetition.ApiService.Models;
+using System.Collections.Frozen;
 
 [Route("api/[controller]")]
 [ApiController]
@@ -215,35 +217,84 @@ public class ContestsController(ContestContext context) : ControllerBase
         if (contest is null)
             return NotFound();
 
-        var res = (await context.Contests
-                               .Where(c => c.Id == contestId)
-                               .Take(1)
-                               .SelectMany(c => c.Participants)
-                               .Join(context.Submissions
-                                            .Where(s => s.ContestId == contestId),
-                                     u => u.Id,
-                                     s => s.SubmitterId,
-                                     (u, s) => new { u, s })
-                               .GroupBy(x => x.u)
-                               .Select(g => new
-                               {
-                                   UserId = g.Key.Id,
-                                   UserName = $"{g.Key.FullName} @{g.Key.Username}",
-                                   Score = g.OrderByDescending(s => s.s.Score)
-                                            .DistinctBy(x => x.s.ProblemId)
-                                            .Sum(x => x.s.Score)
-                               })
-                               .OrderByDescending(x => x.Score)
-                               .Take(500)
-                               .ToListAsync())
-                    .Select((x, i) => new LeaderboardEntry(x.UserId, x.UserName, x.Score, i)).ToArray();
+        //var res = await context.Contests
+        //                       .Where(c => c.Id == contestId)
+        //                       .Take(1)
+        //                       .SelectMany(c => c.Participants)
+        //                       .Join(context.Submissions
+        //                                    .Where(s => s.ContestId == contestId),
+        //                             u => u.Id,
+        //                             s => s.SubmitterId,
+        //                             (u, s) => new { u, s })
+        //                       .GroupBy(x => x.u)
+        //                       .Select(g => new
+        //                       {
+        //                           UserId = g.Key.Id,
+        //                           UserName = $"{g.Key.FullName} @{g.Key.Username}",
+        //                           Score = g.Sum(x => x.s.Score)
+        //                       })
+        //                       .OrderByDescending(x => x.Score)
+        //                       .Take(500)
+        //                       .ToListAsync();
+
+        //var res = await context.Contests
+        //                 .Where(c => c.Id == contestId)
+        //                 .Take(1)
+        //                 .SelectMany(c => c.Participants)
+        //                 .SelectMany(u => u.Submissions)
+        //                 .Where(s => s.ContestId == contestId)
+        //                 .OrderByDescending(s => s.Score)
+        //                 .DistinctBy(s => new { s = s.SubmitterId, p = s.ProblemId })
+        //                 .GroupBy(s => s.Submitter)
+        //                 .Select(g => new
+        //                 {
+        //                     UserId = g.Key!.Id,
+        //                     UserName = $"{g.Key.FullName} @{g.Key.Username}",
+        //                     Score = g.Sum(s => s.Score)
+        //                 })
+        //                 .OrderByDescending(x => x.Score)
+        //                 .Take(500)
+        //                 .ToListAsync();
+
+
+        // the sad approach
+
+        var problemIds = await context.Contests
+            .Where(c => c.Id == contestId)
+            .SelectMany(c => c.Problems)
+            .Select(p => p.Id)
+            .ToListAsync();
+
+        ConcurrentDictionary<Guid, int> scoreTable = new();
+
+        foreach (var problem in problemIds)
+        {
+            var res = context.Submissions
+                .Where(s => s.ContestId == contestId && s.ProblemId == problem && !s.Invalidated && s.Score > 0)
+                .GroupBy(s => s.SubmitterId)
+                .Select(selector => new { SubmitterId = selector.Key, Score = selector.GroupBy(x => x.Id).Select(x => x.Select(y => y.Score).Max()).Sum() })
+                .AsAsyncEnumerable();
+
+            await foreach (var s in res)
+                scoreTable.AddOrUpdate(s.SubmitterId, s.Score, (k, v) => v + s.Score);
+        }
+
+        // lookup the users 
+
+        var users = context.Contests
+            .Where(c => c.Id == contestId)
+            .SelectMany(c => c.Participants)
+            .Select(u => new { u.Id, Name = $"{u.FullName} @{u.Username}" })
+            .ToFrozenDictionary(x => x.Id, x => x.Name);
+
+        var entries = scoreTable.Select((x, i) => new LeaderboardEntry(x.Key, users[x.Key], x.Value, i)).ToArray();
 
         return new Leaderboard()
         {
             ContestId = contestId,
             ContestName = contest.Name,
-            Count = res.Length,
-            Entries = res
+            Count = entries.Length,
+            Entries = entries
         };
     }
 
