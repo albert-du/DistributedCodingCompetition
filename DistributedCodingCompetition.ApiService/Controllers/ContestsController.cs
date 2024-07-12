@@ -257,43 +257,110 @@ public class ContestsController(ContestContext context) : ControllerBase
         //                 .ToListAsync();
 
 
-        // the sad approach
+        //// the sad approach
 
-        var problemIds = await context.Contests
-            .Where(c => c.Id == contestId)
-            .SelectMany(c => c.Problems)
-            .Select(p => p.Id)
-            .ToListAsync();
+        //var problemIds = await context.Contests
+        //    .Where(c => c.Id == contestId)
+        //    .SelectMany(c => c.Problems)
+        //    .Select(p => p.Id)
+        //    .ToListAsync();
 
-        ConcurrentDictionary<Guid, int> scoreTable = new();
+        //ConcurrentDictionary<Guid, int> scoreTable = new();
 
-        foreach (var problem in problemIds)
-        {
-            var res = context.Submissions
-                .Where(s => s.ContestId == contestId && s.ProblemId == problem && !s.Invalidated && s.Score > 0)
-                .GroupBy(s => s.SubmitterId)
-                .Select(selector => new { SubmitterId = selector.Key, Score = selector.GroupBy(x => x.Id).Select(x => x.Select(y => y.Score).Max()).Sum() })
-                .AsAsyncEnumerable();
+        //foreach (var problem in problemIds)
+        //{
+        //    var res = context.Submissions
+        //        .Where(s => s.ContestId == contestId && s.ProblemId == problem && !s.Invalidated && s.Score > 0)
+        //        .GroupBy(s => s.SubmitterId)
+        //        .Select(selector => new { SubmitterId = selector.Key, Score = selector.GroupBy(x => x.Id).Select(x => x.Select(y => y.Score).Max()).Sum() })
+        //        .AsAsyncEnumerable();
 
-            await foreach (var s in res)
-                scoreTable.AddOrUpdate(s.SubmitterId, s.Score, (k, v) => v + s.Score);
-        }
+        //    await foreach (var s in res)
+        //        scoreTable.AddOrUpdate(s.SubmitterId, s.Score, (k, v) => v + s.Score);
+        //}
 
-        // lookup the users 
+        //// lookup the users 
 
-        var users = context.Contests
-            .Where(c => c.Id == contestId)
-            .SelectMany(c => c.Participants)
-            .Select(u => new { u.Id, Name = $"{u.FullName} @{u.Username}" })
-            .ToFrozenDictionary(x => x.Id, x => x.Name);
+        //var users = context.Contests
+        //    .Where(c => c.Id == contestId)
+        //    .SelectMany(c => c.Participants)
+        //    .Select(u => new { u.Id, Name = $"{u.FullName} @{u.Username}" })
+        //    .ToFrozenDictionary(x => x.Id, x => x.Name);
 
-        var entries = scoreTable.Select((x, i) => new LeaderboardEntry(x.Key, users[x.Key], x.Value, i)).ToArray();
+        //var entries = scoreTable.Select((x, i) => new LeaderboardEntry(x.Key, users[x.Key], x.Value, i)).ToArray();
+
+        var defaultPoints = contest.DefaultPointsForProblem;
+
+        const int SCALER = 10000;
+
+        //var entries = await context.Submissions
+        //                 .AsNoTracking()
+        //                 .Where(s => s.ContestId == contestId && !s.Invalidated && s.Score > 0)
+        //                 .GroupBy(s => s.Submitter)
+        //                 .Select(selector => new
+        //                 {
+        //                     SubmitterId = selector.Key!.Id,
+        //                     SubmitterName = $"{selector.Key.FullName} @{selector.Key.Username}",
+        //                     Score = selector.GroupBy(sub => sub.ProblemId)
+        //                                     .GroupJoin(context.ProblemPointValues.Where(ppv => ppv.ContestId == contestId),
+        //                                           sub => sub.Key,
+        //                                           ppv => ppv.ProblemId,
+        //                                           (sub, ppv) => new { Score = sub.Select(sub => SCALER * sub.Score / sub.MaxPossibleScore).Max() * (ppv.FirstOrDefault() == null ? defaultPoints : ppv.First().Points) / SCALER, ppv })
+        //                                     .SelectMany(sub => sub)
+        //                                     //.Select(subs => subs.sub.Select(sub => SCALER * sub.Score / sub.MaxPossibleScore).Max() * (subs.ppv.FirstOrDefault() == null ? defaultPoints : subs.ppv.First().Points) / SCALER)
+        //                                     //.Select(subs => subs.Select(sub => SCALER * sub.Score / sub.MaxPossibleScore).Max() * (defaultPoints) / SCALER) 
+        //                                     //.Sum()
+        //                 })
+        //                 .OrderByDescending(x => x.Score)
+        //                 .Take(500)
+        //                 .AsAsyncEnumerable()
+        //                 .Select((result, i) => new LeaderboardEntry(result.SubmitterId, result.SubmitterName, result.Score, i))
+        //                 .ToListAsync();
+
+        //var entries = await context.Submissions
+        //    .AsNoTracking()
+        //    .Where(s => s.ContestId == contestId && !s.Invalidated && s.Score > 0)
+        //    .GroupBy(s => s.Submitter)
+        //    .Select(selector => new
+        //    {
+        //        SubmitterId = selector.Key!.Id,
+        //        SubmitterName = $"{selector.Key.FullName} @{selector.Key.Username}",
+        //        Score = selector.GroupBy(sub => sub.ProblemId)
+        //                        .Select(subs => subs.Select(sub => SCALER * sub.Score / sub.MaxPossibleScore).Max() * (context.ProblemPointValues.Where(p => p.ProblemId == subs.Key).FirstOrDefault().Points) / SCALER)
+        //                        .Sum()
+        //    })
+        //    .OrderByDescending(x => x.Score)
+        //    .Take(500)
+        //    .AsAsyncEnumerable()
+        //    .Select((result, i) => new LeaderboardEntry(result.SubmitterId, result.SubmitterName, result.Score, i))
+        //    .ToListAsync();
+
+        var entries =
+            await (from submission in context.Submissions.AsNoTracking()
+                   where submission.ContestId == contestId && !submission.Invalidated && submission.Score > 0
+                   group submission by submission.Submitter into userSubmissions
+                   select new
+                   {
+                       SubmitterId = userSubmissions.Key!.Id,
+                       SubmitterName = $"{userSubmissions.Key.FullName} @{userSubmissions.Key.Username}",
+                       Score =
+                           (from sub in userSubmissions
+                            group sub by sub.ProblemId into subs
+                            select subs.Select(sub => SCALER * sub.Score / sub.MaxPossibleScore).Max() * (context.ProblemPointValues.Where(p => p.ProblemId == subs.Key).Select(p => p.Points).Sum() + defaultPoints) / SCALER).Sum()
+
+                   } into userScore
+                   orderby userScore.Score descending
+                   select userScore)
+             .Take(500)
+             .AsAsyncEnumerable()
+             .Select((result, i) => new LeaderboardEntry(result.SubmitterId, result.SubmitterName, result.Score, i))
+             .ToListAsync();
 
         return new Leaderboard()
         {
             ContestId = contestId,
             ContestName = contest.Name,
-            Count = entries.Length,
+            Count = entries.Count,
             Entries = entries
         };
     }
