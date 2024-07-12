@@ -344,4 +344,11 @@ public interface IApiService
     /// <param name="pageSize"></param>
     /// <returns></returns>
     Task<(bool, IReadOnlyList<Submission>?)> TryReadUserContestSubmissionsAsync(Guid contestId, Guid userId, int page, int pageSize);
+
+    /// <summary>
+    /// Read a contest's point values for problems.
+    /// </summary>
+    /// <param name="contestId"></param>
+    /// <returns></returns>
+    Task<(bool, IReadOnlyList<ProblemPointValue>?)> TryReadContestProblemPointValues(Guid contestId);
 }

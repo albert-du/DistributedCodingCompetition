@@ -703,4 +703,18 @@ public sealed class ApiService(HttpClient httpClient, ILogger<ApiService> logger
             return (false, null);
         }
     }
+
+    public async Task<(bool, IReadOnlyList<ProblemPointValue>?)> TryReadContestProblemPointValues(Guid contestId)
+    {
+        try
+        {
+            return (true, await httpClient.GetFromJsonAsync<IReadOnlyList<ProblemPointValue>>($"api/contests/{contestId}/pointvalues"));
+        }
+        catch (Exception ex)
+        {
+            logger.LogError(ex, "Failed to read contest problem point values");
+            return (false, null);
+        }
+    }
+
 }

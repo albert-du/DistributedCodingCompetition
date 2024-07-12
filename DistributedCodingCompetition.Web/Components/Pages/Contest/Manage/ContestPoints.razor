@@ -1,0 +1,49 @@
+﻿@page "/contest/{id:guid}/manage/points"
+@inject IModalService ModalService
+@inject IApiService ApiService
+
+<AuthCheck Contest=Id Admin />
+
+<PageTitle>Contest Points</PageTitle>
+
+@foreach (var prob in problems)
+{
+    <div class="flex gap-x-2">
+        <div>@prob.Name</div>
+    </div>
+}
+
+@code {
+    [Parameter]
+    public Guid Id { get; set; }
+
+    IReadOnlyDictionary<Guid, int> Points = new Dictionary<Guid, int>();
+
+    IReadOnlyList<Problem> problems = [];
+
+    protected override async Task OnInitializedAsync()
+    {
+        var (success, contest) = await ApiService.TryReadContestAsync(Id);
+        if (!success || contest is null)
+        {
+            ModalService.ShowError("Failed to load contest", "Internal error");
+            return;
+        }
+
+        var (success2, probs) = await ApiService.TryReadContestProblemsAsync(Id);
+        if (!success2 || probs is null)
+        {
+            ModalService.ShowError("Failed to load problems", "Internal error");
+            return;
+        }
+        problems = probs;
+
+        var (success3, points) = await ApiService.TryReadContestProblemPointValues(Id);
+        if (!success3 || points is null)
+        {
+            ModalService.ShowError("Failed to load points", "Internal error");
+            return;
+        }
+        Points = points.ToFrozenDictionary(x => x.Id, x => x.Points);
+    }
+}

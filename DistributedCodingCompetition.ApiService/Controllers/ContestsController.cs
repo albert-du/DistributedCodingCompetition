@@ -194,6 +194,58 @@ public class ContestsController(ContestContext context) : ControllerBase
         return new ProblemUserSolveStatus(submission.ProblemId, submission.Points, submission.Score, submission.MaxPossibleScore, submission.PassedTestCases, submission.TotalTestCases);
     }
 
+    /// <summary>
+    /// Get point values for a contest
+    /// </summary>
+    /// <param name="contestId"></param>
+    /// <returns></returns>
+    [HttpGet("{contestId}/problem/{problemId}/pointvalues")]
+    public async Task<ActionResult<IEnumerable<ProblemPointValue>>> GetProblemPointValues(Guid contestId) =>
+        await context.ProblemPointValues.Where(ppv => ppv.ContestId == contestId).ToListAsync();
+
+    /// <summary>
+    /// Calculate the leaderboard for a contest
+    /// </summary>
+    /// <param name="contestId"></param>
+    /// <returns></returns>
+    [HttpGet("{contestId}/leaderboard")]
+    public async Task<ActionResult<Leaderboard>> GetLeaderboard(Guid contestId)
+    {
+        var contest = await context.Contests.FindAsync(contestId);
+        if (contest is null)
+            return NotFound();
+
+        var res = (await context.Contests
+                               .Where(c => c.Id == contestId)
+                               .Take(1)
+                               .SelectMany(c => c.Participants)
+                               .Join(context.Submissions
+                                            .Where(s => s.ContestId == contestId),
+                                     u => u.Id,
+                                     s => s.SubmitterId,
+                                     (u, s) => new { u, s })
+                               .GroupBy(x => x.u)
+                               .Select(g => new
+                               {
+                                   UserId = g.Key.Id,
+                                   UserName = $"{g.Key.FullName} @{g.Key.Username}",
+                                   Score = g.OrderByDescending(s => s.s.Score)
+                                            .DistinctBy(x => x.s.ProblemId)
+                                            .Sum(x => x.s.Score)
+                               })
+                               .OrderByDescending(x => x.Score)
+                               .Take(500)
+                               .ToListAsync())
+                    .Select((x, i) => new LeaderboardEntry(x.UserId, x.UserName, x.Score, i)).ToArray();
+
+        return new Leaderboard()
+        {
+            ContestId = contestId,
+            ContestName = contest.Name,
+            Count = res.Length,
+            Entries = res
+        };
+    }
 
     // PUT api/contests/{contestId}/role/{userId}
     /// <summary>
