@@ -1,0 +1,66 @@
+﻿@page "/contest/{id:guid}/leaderboard"
+@inject NavigationManager NavigationManager
+@inject IApiService ApiService
+@inject IModalService ModalService
+@inject ILeaderboardService LeaderboardService
+
+<AuthCheck Contest=Id Admin />
+
+<PageTitle>Leaderboard</PageTitle>
+
+<h1>@contest?.Name Leaderboard</h1>
+<p>This leaderboard shows the correct </p>
+
+@if (contest is null)
+{
+    <LoadingSpinner />
+}
+else
+{
+
+    <div class="flex">
+        <button enabled="@PrevEnabled" @onclick=Prev>Previous</button>
+        <button enabled="@NextEnabled" @onclick=Next>Next</button>
+    </div>
+}
+
+@code {
+    [Parameter]
+    public Guid Id { get; set; }
+
+    [SupplyParameterFromQuery]
+    public int? Page { get; set; }
+
+    int page => Page ?? 1;
+
+    bool NextEnabled => leaderboard.Count == 50;
+    bool PrevEnabled => page > 1;
+
+    void Next() =>
+        NavigationManager.NavigateTo(NavigationManager.GetUriWithQueryParameter("page", (page + 1)));
+
+    void Prev() =>
+        NavigationManager.NavigateTo(NavigationManager.GetUriWithQueryParameter("page", (page - 1)));
+
+    Contest? contest;
+
+    IReadOnlyList<LeaderboardEntry> leaderboard = [];
+
+    protected override async Task OnParametersSetAsync()
+    {
+        (var success, contest) = await ApiService.TryReadContestAsync(Id);
+        if (!success || contest is null)
+        {
+            ModalService.ShowError("Failed to load contest", "Internal error");
+            return;
+        }
+
+        var lb = await LeaderboardService.TryGetLeaderboardAsync(Id, page);
+        if (lb is null)
+        {
+            ModalService.ShowError("Failed to load leaderboard", "Internal error");
+            return;
+        }
+        leaderboard = lb;
+    }
+}

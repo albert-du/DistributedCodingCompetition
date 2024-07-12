@@ -28,6 +28,7 @@ builder.Services.AddSingleton<CodeExecutionClient>();
 builder.Services.AddSingleton<IApiService, ApiService>();
 builder.Services.AddSingleton<IJudgeService, JudgeService>();
 builder.Services.AddSingleton<ICodePersistenceService, CodePersistenceService>();
+builder.Services.AddSingleton<ILeaderboardService, LeaderboardService>();
 
 builder.Services.AddScoped<IModalService, ModalService>();
 builder.Services.AddScoped<IAuthService, AuthService>();
@@ -42,6 +43,7 @@ builder.Services.AddHttpClient<ICodePersistenceService, CodePersistenceService>(
 builder.Services.AddHttpClient<IAuthService, AuthService>(client => client.BaseAddress = new("https+http://authentication"));
 builder.Services.AddHttpClient<IApiService, ApiService>(client => client.BaseAddress = new("https+http://apiservice"));
 builder.Services.AddHttpClient<IJudgeService, JudgeService>(client => client.BaseAddress = new("https+http://judge"));
+builder.Services.AddHttpClient<ILeaderboardService, LeaderboardService>(client => client.BaseAddress = new("https+http://leaderboard"));
 
 builder.Services.AddSingleton(_ =>
 {
