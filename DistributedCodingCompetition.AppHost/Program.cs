@@ -32,6 +32,10 @@ var judge = builder.AddProject<Projects.DistributedCodingCompetition_Judge>("jud
                    .WithReference(apiService)
                    .WithReference(codeExecution);
 
+var leaderboard = builder.AddProject<Projects.DistributedCodingCompetition_Leaderboard>("leaderboard")
+                         .WithReference(apiService)
+                         .WithReference(cache);
+
 builder.AddProject<Projects.DistributedCodingCompetition_Web>("webfrontend")
        .WithExternalHttpEndpoints()
        .WithReference(cache)
@@ -39,6 +43,8 @@ builder.AddProject<Projects.DistributedCodingCompetition_Web>("webfrontend")
        .WithReference(judge)
        .WithReference(auth)
        .WithReference(codePersistence)
+       .WithReference(leaderboard)
        .WithReference(codeExecution);
+
 
 builder.Build().Run();
