@@ -2,7 +2,7 @@ var builder = DistributedApplication.CreateBuilder(args);
 
 var cache = builder.AddRedis("cache");
 
-var postgres = builder.AddPostgres("postgres");
+var postgres = builder.AddPostgres("postgres").WithPgAdmin();
 
 var mongo = builder.AddMongoDB("mongo");
 
