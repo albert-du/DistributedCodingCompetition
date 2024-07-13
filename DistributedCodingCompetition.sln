@@ -26,6 +26,8 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "DistributedCodingCompetitio
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "DistributedCodingCompetition.Leaderboard", "DistributedCodingCompetition.Leaderboard\DistributedCodingCompetition.Leaderboard.csproj", "{A563693B-2616-415C-89B5-9A196E2D27A0}"
 EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "DistributedCodingCompetition.LiveLeaders", "DistributedCodingCompetition.LiveLeaders\DistributedCodingCompetition.LiveLeaders.csproj", "{5558F9F2-6E67-416C-8D17-BDE05E1CFDA2}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -80,6 +82,10 @@ Global
 		{A563693B-2616-415C-89B5-9A196E2D27A0}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{A563693B-2616-415C-89B5-9A196E2D27A0}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{A563693B-2616-415C-89B5-9A196E2D27A0}.Release|Any CPU.Build.0 = Release|Any CPU
+		{5558F9F2-6E67-416C-8D17-BDE05E1CFDA2}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{5558F9F2-6E67-416C-8D17-BDE05E1CFDA2}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{5558F9F2-6E67-416C-8D17-BDE05E1CFDA2}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{5558F9F2-6E67-416C-8D17-BDE05E1CFDA2}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

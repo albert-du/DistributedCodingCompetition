@@ -4,7 +4,7 @@ using System.Text.Json;
 using Microsoft.Extensions.Caching.Distributed;
 using DistributedCodingCompetition.ApiService.Models;
 
-public class LeaderboardService(HttpClient httpClient, IDistributedCache distributedCache) : ILeaderboardService
+public class LeaderboardService(ILogger<LeaderboardService> logger, HttpClient httpClient, IDistributedCache distributedCache) : ILeaderboardService
 {
     private static readonly DistributedCacheEntryOptions options = new() { AbsoluteExpirationRelativeToNow = TimeSpan.FromSeconds(30) };
 
@@ -13,13 +13,13 @@ public class LeaderboardService(HttpClient httpClient, IDistributedCache distrib
         // check the cache for the leaderboard page
         var bytes = await distributedCache.GetStringAsync($"{contest}:{page}");
         if (bytes != null)
-        {
             // deserialize the leaderboard page
             return JsonSerializer.Deserialize<Leaderboard>(bytes);
-        }
 
         // fetch the leaderboard from the api
-        var response = await httpClient.GetFromJsonAsync<Leaderboard>($"api/{contest}/leaderboard");
+        var start = DateTime.UtcNow;
+        var response = await httpClient.GetFromJsonAsync<Leaderboard>($"api/contests/{contest}/leaderboard");
+        logger.LogInformation("Fetched leaderboard in {Elapsed}", DateTime.UtcNow - start);
         if (response == null)
             return null;
 

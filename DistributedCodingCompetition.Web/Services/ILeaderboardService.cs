@@ -10,5 +10,5 @@ public interface ILeaderboardService
     /// </summary>
     /// <param name="page"></param>
     /// <returns></returns>
-    Task<IReadOnlyList<LeaderboardEntry>?> TryGetLeaderboardAsync(Guid contestId, int page);
+    Task<Leaderboard?> TryGetLeaderboardAsync(Guid contestId, int page);
 }

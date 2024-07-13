@@ -16,6 +16,7 @@
     <ProjectReference Include="..\DistributedCodingCompetition.CodePersistence\DistributedCodingCompetition.CodePersistence.csproj" />
     <ProjectReference Include="..\DistributedCodingCompetition.Judge\DistributedCodingCompetition.Judge.csproj" />
     <ProjectReference Include="..\DistributedCodingCompetition.Leaderboard\DistributedCodingCompetition.Leaderboard.csproj" />
+    <ProjectReference Include="..\DistributedCodingCompetition.LiveLeaders\DistributedCodingCompetition.LiveLeaders.csproj" />
     <ProjectReference Include="..\DistributedCodingCompetition.Web\DistributedCodingCompetition.Web.csproj" />
   </ItemGroup>
 

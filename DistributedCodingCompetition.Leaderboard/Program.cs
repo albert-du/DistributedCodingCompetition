@@ -15,6 +15,7 @@ builder.Services.AddStackExchangeRedisCache(options =>
 });
 
 builder.Services.AddSingleton<ILeaderboardService, LeaderboardService>();
+builder.Services.AddHttpClient<ILeaderboardService, LeaderboardService>(client => client.BaseAddress = new("https+http://apiservice"));
 
 var app = builder.Build();
 
@@ -29,17 +30,17 @@ if (app.Environment.IsDevelopment())
 
 app.UseHttpsRedirection();
 
-app.MapGet("/leaders/{contestId}/{page}", (Guid contestId, int page, ILeaderboardService leaderboardService) =>
+app.MapGet("/leaderboard/{contestId}/{page}", async (Guid contestId, int page, ILeaderboardService leaderboardService) =>
 {
     // check if page is valid
     if (page < 1)
         return Results.BadRequest("Page must be greater than 0");
 
     // check the redis cache for the leaderboard
-    return Results.Ok(leaderboardService.GetLeaderboardAsync(contestId, page));
+    return Results.Ok(await leaderboardService.GetLeaderboardAsync(contestId, page));
 
 })
-.WithName("GetWeatherForecast")
+.WithName("Leaderboard")
 .WithOpenApi();
 
 app.Run();

@@ -47,4 +47,10 @@ builder.AddProject<Projects.DistributedCodingCompetition_Web>("webfrontend")
        .WithReference(codeExecution);
 
 
+builder.AddProject<Projects.LiveLeaders>("liveleaders");
+
+
+builder.AddProject<Projects.DistributedCodingCompetition_LiveLeaders>("distributedcodingcompetition-liveleaders");
+
+
 builder.Build().Run();
