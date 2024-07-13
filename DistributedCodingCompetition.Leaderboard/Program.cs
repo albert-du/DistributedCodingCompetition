@@ -16,6 +16,8 @@ builder.Services.AddStackExchangeRedisCache(options =>
 
 builder.Services.AddSingleton<ILeaderboardService, LeaderboardService>();
 builder.Services.AddHttpClient<ILeaderboardService, LeaderboardService>(client => client.BaseAddress = new("https+http://apiservice"));
+builder.Services.AddSingleton<ILiveReportingService, LiveReportingService>();
+builder.Services.AddHttpClient<ILiveReportingService, LiveReportingService>(client => client.BaseAddress = new("https+http://liveleaders"));
 
 var app = builder.Build();
 

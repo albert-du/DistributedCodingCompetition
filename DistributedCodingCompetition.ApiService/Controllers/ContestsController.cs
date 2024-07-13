@@ -201,9 +201,30 @@ public class ContestsController(ContestContext context) : ControllerBase
     /// </summary>
     /// <param name="contestId"></param>
     /// <returns></returns>
-    [HttpGet("{contestId}/problem/{problemId}/pointvalues")]
+    [HttpGet("{contestId}/problem/pointvalues")]
     public async Task<ActionResult<IEnumerable<ProblemPointValue>>> GetProblemPointValues(Guid contestId) =>
         await context.ProblemPointValues.Where(ppv => ppv.ContestId == contestId).ToListAsync();
+
+    /// <summary>
+    /// Get point value for a problem in a contest
+    /// </summary>
+    /// <param name="contestId"></param>
+    /// <param name="problemId"></param>
+    /// <returns></returns>
+    [HttpGet("{contestId}/pointvalues/{problemId}")]
+    public async Task<ActionResult<ProblemPointValue>> GetProblemPointValue(Guid contestId, Guid problemId)
+    {
+        var ppv = await context.ProblemPointValues.Where(ppv => ppv.ContestId == contestId && ppv.ProblemId == problemId).FirstOrDefaultAsync();
+        if (ppv is not null)
+            return ppv;
+
+        // read the contest max
+        var contest = await context.Contests.FindAsync(contestId);
+        if (contest is null)
+            return NotFound();
+
+        return new ProblemPointValue() { Id = Guid.Empty, ContestId = contestId, ProblemId = problemId, Points = contest.DefaultPointsForProblem };
+    }
 
     /// <summary>
     /// Calculate the leaderboard for a contest

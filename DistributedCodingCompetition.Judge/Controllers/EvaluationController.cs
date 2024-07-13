@@ -20,7 +20,9 @@ public class EvaluationController(ILogger<EvaluationController> logger,
                                   ICodeExecutionService codeExecutionService,
                                   IRateLimitService rateLimitService,
                                   ISubmissionService submissionService,
-                                  IProblemService problemService) : ControllerBase
+                                  IProblemService problemService,
+                                  ILiveReportingService liveReportingService,
+                                  IProblemPointValueService problemPointValueService) : ControllerBase
 {
     /// <summary>
     /// Evaluate a submission
@@ -147,6 +149,12 @@ public class EvaluationController(ILogger<EvaluationController> logger,
 
         // Save the result
         await submissionService.UpdateSubmissionResults(submission.Id, results, maxScore: possibleScore, score: score);
+
+        // report the results to the live reporting service
+
+        var max = await problemPointValueService.GetPointMaxAsync(submission.ContestId!.Value, submission.ProblemId);
+
+        await liveReportingService.ReportAsync(submission.ContestId!.Value, submission.SubmitterId, max * score / possibleScore);
 
         // log the time taken to evaluate the submission
         var end = DateTime.UtcNow;

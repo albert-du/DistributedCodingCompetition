@@ -29,19 +29,29 @@ if (app.Environment.IsDevelopment())
 
 app.UseHttpsRedirection();
 
-app.MapPost("/refresh/{contestId}", async (Guid contestId, IReadOnlyList<(Guid, int)> Leaders, ILeadersService leadersService) =>
+app.MapPost("/refresh/{contestId}", async (Guid contestId, DateTime sync, IReadOnlyList<(Guid, int)> Leaders, ILeadersService leadersService) =>
 {
-    await leadersService.RefreshLeaderboardAsync(contestId, Leaders, DateTime.UtcNow);
+    await leadersService.RefreshLeaderboardAsync(contestId, Leaders, sync);
     return Results.Ok();
 })
-.WithName("GetWeatherForecast")
+.WithName("Refresh")
+.WithOpenApi();
+
+app.MapPost("/report/{contestId}/{userId}", async (Guid contestId, Guid userId, int points, DateTime sync, ILeadersService leadersService) =>
+{
+    await leadersService.ReportJudgingAsync(contestId, userId, points, sync);
+    return Results.Ok();
+})
+.WithName("Report")
 .WithOpenApi();
 
 app.MapGet("/leaders/{contestId}", async (Guid contestId, ILeadersService leadersService) =>
 {
-    var leaders = await leadersService.GetLeadersAsync(contestId);
+    var leaders = await leadersService.GetLeadersAsync(contestId, 100);
     return Results.Ok(leaders);
 })
+.WithName("GetLeaders")
+.WithOpenApi();
 
 app.Run();
 

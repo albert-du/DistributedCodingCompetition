@@ -4,7 +4,7 @@ using System.Text.Json;
 using Microsoft.Extensions.Caching.Distributed;
 using DistributedCodingCompetition.ApiService.Models;
 
-public class LeaderboardService(ILogger<LeaderboardService> logger, HttpClient httpClient, IDistributedCache distributedCache) : ILeaderboardService
+public class LeaderboardService(ILogger<LeaderboardService> logger, HttpClient httpClient, IDistributedCache distributedCache, ILiveReportingService liveReportingService) : ILeaderboardService
 {
     private static readonly DistributedCacheEntryOptions options = new() { AbsoluteExpirationRelativeToNow = TimeSpan.FromSeconds(30) };
 
@@ -22,6 +22,9 @@ public class LeaderboardService(ILogger<LeaderboardService> logger, HttpClient h
         logger.LogInformation("Fetched leaderboard in {Elapsed}", DateTime.UtcNow - start);
         if (response == null)
             return null;
+
+        // refresh the live reporting service
+        _ = liveReportingService.RefreshAsync(new() { Creation = response.Creation, ContestId = response.ContestId, ContestName = response.ContestName, Count = response.Count, Entries = [.. response.Entries.Take(200)] });
 
         // cache the leaderboard
         List<LeaderboardEntry> entries = new(50);
