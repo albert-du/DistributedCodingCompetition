@@ -17,11 +17,17 @@ public class LeadersService(IDistributedCache cache) : ILeadersService
         {
             AbsoluteExpirationRelativeToNow = TimeSpan.FromMinutes(5)
         };
-        var keys = string.Join(";", leaders.Select(x => x.Item1));
-        await cache.SetStringAsync($"leaderboard:{contest}", keys, options);
+        var newLeaders = leaders.Select(x => x.Item1);
+        var oldLeaders = (await cache.GetStringAsync($"leaderboard:{contest}"))?.Split(';')?.Select(Guid.Parse) ?? [];
+        var removed = oldLeaders.Except(newLeaders);
+
+        await cache.SetStringAsync($"leaderboard:{contest}", string.Join(";", newLeaders), options);
         await cache.SetStringAsync($"leaderboard:{contest}:sync", sync.ToString("O"), options);
         foreach (var (leader, points) in leaders)
             await cache.SetAsync($"leaderboard:{contest}:{leader}", BitConverter.GetBytes(points), options);
+
+        foreach (var leader in removed)
+            await cache.RemoveAsync($"leaderboard:{contest}:{leader}");
     }
 
     public async Task ReportJudgingAsync(Guid contest, Guid leader, int points, DateTime sync)
@@ -34,6 +40,7 @@ public class LeadersService(IDistributedCache cache) : ILeadersService
         // get the current points
         var current = await cache.GetAsync($"leaderboard:{contest}:{leader}");
         if (current == null)
+            // if the leader is not being tracked, ignore the submission
             return;
 
         // update the points

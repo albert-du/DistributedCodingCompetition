@@ -1,3 +1,4 @@
+using DistributedCodingCompetition.ApiService.Models;
 using DistributedCodingCompetition.Leaderboard.Services;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -43,6 +44,43 @@ app.MapGet("/leaderboard/{contestId}/{page}", async (Guid contestId, int page, I
 
 })
 .WithName("Leaderboard")
+.WithOpenApi();
+
+app.MapGet("/live/{contestId}", async (Guid contestId, ILeaderboardService leaderboardService, ILiveReportingService liveReportingService) =>
+{
+    // get the first 200 leaders from last leaderboard
+    List<Task<Leaderboard?>> tasks = [];
+
+    for (var i = 1; i <= 4; i++)
+        tasks.Add(leaderboardService.GetLeaderboardAsync(contestId, i));
+
+    Dictionary<Guid, string> leaderboardEntries = [];
+    var contestName = "";
+
+    foreach (var task in tasks)
+    {
+        var leaderboard = await task;
+        if (leaderboard is not null)
+        {
+            contestName = leaderboard.ContestName;
+            foreach (var entry in leaderboard.Entries)
+                leaderboardEntries[entry.UserId] = entry.Username;
+        }
+    }
+
+    var adjusted = await liveReportingService.GetLeadersAsync(contestId) ?? [];
+
+    var liveEntries = adjusted.Select((x, i) => new LeaderboardEntry(x.Item1, leaderboardEntries[x.Item1], x.Item2, i + 1)).ToList();
+
+    return Results.Ok(new Leaderboard
+    {
+        ContestName = $"{contestName} LIVE",
+        Count = liveEntries.Count,
+        ContestId = contestId,
+        Entries = liveEntries
+    });
+})
+.WithName("LiveLeaderboard")
 .WithOpenApi();
 
 app.Run();
