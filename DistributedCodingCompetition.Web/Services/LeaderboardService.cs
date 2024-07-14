@@ -21,7 +21,7 @@ public sealed class LeaderboardService(ILogger<LeaderboardService> logger, HttpC
     {
         try
         {
-            return await httpClient.GetFromJsonAsync<Leaderboard>($"leaderboard/{contestId}/live");
+            return await httpClient.GetFromJsonAsync<Leaderboard>($"live/{contestId}");
         }
         catch (Exception ex)
         {

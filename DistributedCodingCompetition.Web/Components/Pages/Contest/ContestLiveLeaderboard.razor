@@ -6,9 +6,11 @@
 
 <AuthCheck Contest=Id />
 
-<PageTitle>Leaderboard</PageTitle>
+<PageTitle>Live Leaderboard</PageTitle>
 
-<h1 class="text-3xl">@contest?.Name Leaderboard</h1>
+<h1 class="text-3xl">@contest?.Name LIVE Leaderboard</h1>
+<div>this leaderboard updates live up to the first 100 places</div>
+<a class="text-violet-500 italic hover:underline" href="contest/@Id/leaderboard">back to certified (not live) leaderboard</a>
 
 @if (contest is null || leaderboard is null)
 {
@@ -36,10 +38,6 @@ else
             }
         </div>
 
-        <div class="flex w-full justify-between">
-            <button enabled="@PrevEnabled" @onclick=Prev>Previous</button>
-            <button enabled="@NextEnabled" @onclick=Next>Next</button>
-        </div>
 
     </div>
 }
@@ -47,23 +45,6 @@ else
 @code {
     [Parameter]
     public Guid Id { get; set; }
-
-    [SupplyParameterFromQuery]
-    public int? Page { get; set; }
-
-    int page => Page ?? 1;
-
-    bool NextEnabled => leaderboard?.Count is 50;
-    bool PrevEnabled => page > 1;
-
-    void Next() =>
-        NavigationManager.NavigateTo(NavigationManager.GetUriWithQueryParameter(nameof(Page), (page + 1)));
-
-    void Prev()
-    {
-        if (page > 1)
-            NavigationManager.NavigateTo(NavigationManager.GetUriWithQueryParameter(nameof(Page), (page - 1)));
-    }
 
     Contest? contest;
 
@@ -78,7 +59,7 @@ else
             return;
         }
 
-        leaderboard = await LeaderboardService.TryGetLeaderboardAsync(Id, page);
+        leaderboard = await LeaderboardService.TryGetLiveLeaderboardAsync(Id);
         if (leaderboard is null)
         {
             ModalService.ShowError("Failed to load leaderboard", "Internal error");
@@ -90,10 +71,10 @@ else
     {
         if (firstRender)
         {
-            using PeriodicTimer periodicTimer = new(TimeSpan.FromSeconds(30));
+            using PeriodicTimer periodicTimer = new(TimeSpan.FromSeconds(5));
             while (await periodicTimer.WaitForNextTickAsync())
             {
-                leaderboard = await LeaderboardService.TryGetLeaderboardAsync(Id, page);
+                leaderboard = await LeaderboardService.TryGetLiveLeaderboardAsync(Id);
                 await InvokeAsync(StateHasChanged);
             }
         }

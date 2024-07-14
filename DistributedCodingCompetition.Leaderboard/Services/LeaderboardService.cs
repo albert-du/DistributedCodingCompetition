@@ -24,7 +24,8 @@ public class LeaderboardService(ILogger<LeaderboardService> logger, HttpClient h
             return null;
 
         // refresh the live reporting service
-        _ = liveReportingService.RefreshAsync(new() { Creation = response.Creation, ContestId = response.ContestId, ContestName = response.ContestName, Count = response.Count, Entries = [.. response.Entries.Take(200)] });
+        if (response.Entries.Count > 0)
+            _ = liveReportingService.RefreshAsync(new() { Creation = response.Creation, ContestId = response.ContestId, ContestName = response.ContestName, Count = response.Count, Entries = [.. response.Entries.Take(200)] });
 
         // cache the leaderboard
         List<LeaderboardEntry> entries = new(50);
@@ -53,8 +54,12 @@ public class LeaderboardService(ILogger<LeaderboardService> logger, HttpClient h
             if (p == page)
                 leaderboardPage = leaderboard;
 
-            await distributedCache.SetStringAsync($"{contest}:{p}", JsonSerializer.Serialize(leaderboard), options);
+            await distributedCache.SetStringAsync($"{contest}:{p++}", JsonSerializer.Serialize(leaderboard), options);
         }
+
+        // fill any pages from p to 20 with empty leaderboards
+        for (; p <= 20; p++)
+            await distributedCache.SetStringAsync($"{contest}:{p}", JsonSerializer.Serialize(new Leaderboard { ContestId = contest, ContestName = "No leaderboard", Count = 0, Entries = [], Creation = DateTime.UtcNow }), options);
 
         return leaderboardPage;
     }

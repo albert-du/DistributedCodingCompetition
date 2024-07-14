@@ -1,8 +1,9 @@
 ﻿namespace DistributedCodingCompetition.LiveLeaders.Services;
 
 using Microsoft.Extensions.Caching.Distributed;
+using Microsoft.Extensions.Logging;
 
-public class LeadersService(IDistributedCache cache) : ILeadersService
+public class LeadersService(ILogger<LeadersService> logger, IDistributedCache cache) : ILeadersService
 {
     /// <summary>
     /// Send the refreshed leaderboard to the live leaderboard service.
@@ -13,6 +14,7 @@ public class LeadersService(IDistributedCache cache) : ILeadersService
     /// <returns></returns>
     public async Task RefreshLeaderboardAsync(Guid contest, IReadOnlyList<(Guid, int)> leaders, DateTime sync)
     {
+        logger.LogInformation("Refreshing leaderboard for {Contest}", contest);
         DistributedCacheEntryOptions options = new()
         {
             AbsoluteExpirationRelativeToNow = TimeSpan.FromMinutes(5)
@@ -32,6 +34,7 @@ public class LeadersService(IDistributedCache cache) : ILeadersService
 
     public async Task ReportJudgingAsync(Guid contest, Guid leader, int points, DateTime sync)
     {
+        logger.LogInformation("Reporting judging for {Leader} in {Contest}", leader, contest);
         DistributedCacheEntryOptions options = new()
         {
             AbsoluteExpirationRelativeToNow = TimeSpan.FromMinutes(5)
@@ -54,6 +57,7 @@ public class LeadersService(IDistributedCache cache) : ILeadersService
 
     public async Task<IReadOnlyList<(Guid, int)>> GetLeadersAsync(Guid contest, int count)
     {
+        logger.LogInformation("Getting leaders for {Contest}", contest);
         var keys = await cache.GetStringAsync($"leaderboard:{contest}");
         if (keys == null)
             return [];
