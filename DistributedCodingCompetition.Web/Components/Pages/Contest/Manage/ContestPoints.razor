@@ -6,24 +6,47 @@
 
 <PageTitle>Contest Points</PageTitle>
 
-@foreach (var prob in problems)
+@if (contest is null)
 {
-    <div class="flex gap-x-2">
-        <div>@prob.Name</div>
-    </div>
+    <h1>Not found</h1>
+}
+else
+{
+    <h1>@contest.Name points</h1>
+    <a class="text-violet-500 italic hover:underline" href="contest/@Id/manage">back</a>
+
+    @foreach (var prob in problems)
+    {
+        <div class="flex gap-x-2">
+            <div>@prob.Name</div>
+            @if (points.TryGetValue(prob.Id, out var ppv))
+            {
+                <div>Points set to: @ppv</div>
+                <div><button>Change points</button></div>
+            }
+            else
+            {
+                <div>Points not set</div>
+                <div>defaulting to: @contest.DefaultPointsForProblem</div>
+                <div><button>Set points</button></div>
+            }
+        </div>
+    }
 }
 
 @code {
     [Parameter]
     public Guid Id { get; set; }
 
-    IReadOnlyDictionary<Guid, int> Points = new Dictionary<Guid, int>();
+    IReadOnlyDictionary<Guid, int> points = new Dictionary<Guid, int>();
 
     IReadOnlyList<Problem> problems = [];
 
+    Contest? contest;
+
     protected override async Task OnInitializedAsync()
     {
-        var (success, contest) = await ApiService.TryReadContestAsync(Id);
+        (var success, contest) = await ApiService.TryReadContestAsync(Id);
         if (!success || contest is null)
         {
             ModalService.ShowError("Failed to load contest", "Internal error");
@@ -38,12 +61,12 @@
         }
         problems = probs;
 
-        var (success3, points) = await ApiService.TryReadContestProblemPointValues(Id);
-        if (!success3 || points is null)
+        var (success3, ppvs) = await ApiService.TryReadContestProblemPointValues(Id);
+        if (!success3 || ppvs is null)
         {
             ModalService.ShowError("Failed to load points", "Internal error");
             return;
         }
-        Points = points.ToFrozenDictionary(x => x.Id, x => x.Points);
+        points = ppvs.ToFrozenDictionary(x => x.Id, x => x.Points);
     }
 }

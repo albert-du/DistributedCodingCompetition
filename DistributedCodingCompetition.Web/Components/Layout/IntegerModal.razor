@@ -1,0 +1,61 @@
+﻿@*
+    This component listens for modal messages and displays them in a modal dialog.
+*@
+@inject IModalService ModalService
+@implements IDisposable
+
+@if (modalMessage is not null)
+{
+    <div class="z-50 fixed inset-0 flex items-center justify-center bg-black bg-opacity-50">
+        <div class="p-4 bg-white rounded-md">
+            <h3 class="text-lg font-semibold">@modalMessage.Title</h3>
+            <p>@modalMessage.Message</p>
+            <InputNumber @bind-Value="value" />
+            <div>
+
+            </div>
+            <button @onclick="Enter">Submit</button>
+            <button @onclick="Close">Close</button>
+        </div>
+    </div>
+}
+
+@code {
+    IModalService.IntegerModalMessage? modalMessage;
+
+    int value;
+
+    void Enter()
+    {
+        if (value < modalMessage?.Min || value > modalMessage?.Max)
+        {
+            ModalService.ShowError("Invalid value", "Value out of range");
+            return;
+        }
+
+        modalMessage?.OnResult(value);
+        modalMessage = null;
+    }
+
+    void Close()
+    {
+        modalMessage?.OnResult(null);
+        modalMessage = null;
+    }
+
+    async void OnShow(IModalService.IntegerModalMessage message)
+    {
+        value = message.Min;
+        modalMessage = message;
+        await InvokeAsync(StateHasChanged);
+    }
+
+    public void Dispose() =>
+        ModalService.OnShowInteger -= OnShow;
+
+    protected override void OnAfterRender(bool firstRender)
+    {
+        if (firstRender)
+            ModalService.OnShowInteger += OnShow;
+    }
+}
