@@ -1,8 +1,8 @@
-﻿using DistributedCodingCompetition.ApiService.Models;
+﻿namespace DistributedCodingCompetition.Web.Services;
 
-namespace DistributedCodingCompetition.Web.Services;
+using DistributedCodingCompetition.ApiService.Models;
 
-public class LeaderboardService(ILogger<LeaderboardService> logger, HttpClient httpClient) : ILeaderboardService
+public sealed class LeaderboardService(ILogger<LeaderboardService> logger, HttpClient httpClient) : ILeaderboardService
 {
     public async Task<Leaderboard?> TryGetLeaderboardAsync(Guid contestId, int page)
     {
@@ -17,4 +17,16 @@ public class LeaderboardService(ILogger<LeaderboardService> logger, HttpClient h
         }
     }
 
+    public async Task<Leaderboard?> TryGetLiveLeaderboardAsync(Guid contestId)
+    {
+        try
+        {
+            return await httpClient.GetFromJsonAsync<Leaderboard>($"leaderboard/{contestId}/live");
+        }
+        catch (Exception ex)
+        {
+            logger.LogError(ex, "Failed to fetch live leaderboard");
+            return null;
+        }
+    }
 }

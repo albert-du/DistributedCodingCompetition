@@ -1,7 +1,10 @@
-﻿using DistributedCodingCompetition.ApiService.Models;
+﻿namespace DistributedCodingCompetition.Web.Services;
 
-namespace DistributedCodingCompetition.Web.Services;
+using DistributedCodingCompetition.ApiService.Models;
 
+/// <summary>
+/// Service for accessing the leaderboard
+/// </summary>
 public interface ILeaderboardService
 {
     /// <summary>
@@ -11,4 +14,11 @@ public interface ILeaderboardService
     /// <param name="page"></param>
     /// <returns></returns>
     Task<Leaderboard?> TryGetLeaderboardAsync(Guid contestId, int page);
+
+    /// <summary>
+    /// Get the live leaderboard
+    /// </summary>
+    /// <param name="contestId"></param>
+    /// <returns></returns>
+    Task<Leaderboard?> TryGetLiveLeaderboardAsync(Guid contestId);
 }

@@ -32,6 +32,11 @@ public class LeadersService(IDistributedCache cache) : ILeadersService
 
     public async Task ReportJudgingAsync(Guid contest, Guid leader, int points, DateTime sync)
     {
+        DistributedCacheEntryOptions options = new()
+        {
+            AbsoluteExpirationRelativeToNow = TimeSpan.FromMinutes(5)
+        };
+
         // make sure the sync is newer than the leaderboard
         var lastSync = await cache.GetStringAsync($"leaderboard:{contest}:sync");
         if (lastSync == null || DateTime.Parse(lastSync) > sync)
@@ -44,7 +49,7 @@ public class LeadersService(IDistributedCache cache) : ILeadersService
             return;
 
         // update the points
-        await cache.SetAsync($"leaderboard:{contest}:{leader}", BitConverter.GetBytes(BitConverter.ToInt32(current) + points));
+        await cache.SetAsync($"leaderboard:{contest}:{leader}", BitConverter.GetBytes(BitConverter.ToInt32(current) + points), options);
     }
 
     public async Task<IReadOnlyList<(Guid, int)>> GetLeadersAsync(Guid contest, int count)

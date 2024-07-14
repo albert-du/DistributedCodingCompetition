@@ -19,6 +19,12 @@ else
     <div>This leaderboard was generated @leaderboard.Creation</div>
     <div>Displaying @leaderboard.Entries.Count contestents out of @leaderboard.Count</div>
     <div class="flex flex-col gap-y-1">
+        <div class="flex w-full">
+            <div class="w-1/5">Rank</div>
+            <div class="w-3/5">Username</div>
+            <div class="w-1/5">Points</div>
+        </div>
+
         @foreach (var entry in leaderboard.Entries)
         {
             <div>@entry.Rank. @entry.Username with @entry.Points points</div>
@@ -46,8 +52,11 @@ else
     void Next() =>
         NavigationManager.NavigateTo(NavigationManager.GetUriWithQueryParameter(nameof(Page), (page + 1)));
 
-    void Prev() =>
-        NavigationManager.NavigateTo(NavigationManager.GetUriWithQueryParameter(nameof(Page), (page - 1)));
+    void Prev()
+    {
+        if (page > 1)
+            NavigationManager.NavigateTo(NavigationManager.GetUriWithQueryParameter(nameof(Page), (page - 1)));
+    }
 
     Contest? contest;
 

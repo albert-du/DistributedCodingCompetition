@@ -16,6 +16,8 @@ builder.Services.AddStackExchangeRedisCache(options =>
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 
+builder.Services.AddSingleton<ILeadersService, LeadersService>();
+
 var app = builder.Build();
 
 app.MapDefaultEndpoints();

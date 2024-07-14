@@ -40,8 +40,7 @@ app.MapGet("/leaderboard/{contestId}/{page}", async (Guid contestId, int page, I
         return Results.BadRequest("Page must be greater than 0");
 
     // check the redis cache for the leaderboard
-    return Results.Ok(await leaderboardService.GetLeaderboardAsync(contestId, page));
-
+    return Results.Ok(await leaderboardService.GetLeaderboardAsync(contestId, page) ?? new Leaderboard() { ContestId = contestId, ContestName = "No leaderboard", Count = 0, Entries = [], Creation = DateTime.UtcNow });
 })
 .WithName("Leaderboard")
 .WithOpenApi();

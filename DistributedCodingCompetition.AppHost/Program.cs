@@ -27,7 +27,8 @@ var codeExecution = builder.AddProject<Projects.DistributedCodingCompetition_Cod
 var apiService = builder.AddProject<Projects.DistributedCodingCompetition_ApiService>("apiservice")
                         .WithReference(contestDatabase);
 
-var liveLeaders = builder.AddProject<Projects.DistributedCodingCompetition_LiveLeaders>("liveleaders");
+var liveLeaders = builder.AddProject<Projects.DistributedCodingCompetition_LiveLeaders>("liveleaders") 
+                         .WithReference(cache);
 
 var judge = builder.AddProject<Projects.DistributedCodingCompetition_Judge>("judge")
                    .WithReference(cache)
@@ -50,8 +51,5 @@ builder.AddProject<Projects.DistributedCodingCompetition_Web>("webfrontend")
        .WithReference(codePersistence)
        .WithReference(leaderboard)
        .WithReference(codeExecution);
-
-
-
 
 builder.Build().Run();
