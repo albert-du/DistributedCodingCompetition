@@ -66,6 +66,15 @@ else
     app.UseExceptionHandler("/Error", createScopeForErrors: true);
     // The default HSTS value is 30 days. You may want to change this for production scenarios, see https://aka.ms/aspnetcore-hsts.
     app.UseHsts();
+
+    // migrate delayed
+    _ = Task.Run(async () =>
+    {
+        await Task.Delay(5000);
+        using var scope = app.Services.CreateScope();
+        var context = scope.ServiceProvider.GetRequiredService<ExecRunnerContext>();
+        await context.Database.MigrateAsync();
+    });
 }
 
 app.UseHttpsRedirection();

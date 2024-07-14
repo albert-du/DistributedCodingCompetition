@@ -13,7 +13,7 @@ public class LiveReportingService(HttpClient httpClient) : ILiveReportingService
     public async Task<IReadOnlyList<(Guid, int)>> GetLeadersAsync(Guid contestId)
     {
         var str = await httpClient.GetStringAsync($"leaders/{contestId}");
-        return str.Trim('\"').Split(';').Select(x =>
+        return str.Trim('\"').Split(';', StringSplitOptions.RemoveEmptyEntries).Select(x =>
         {
             var parts = x.Split(',');
             return (Guid.Parse(parts[0]), int.Parse(parts[1]));

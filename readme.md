@@ -2,10 +2,16 @@
 
 All in one cloud native solution for administering coding competitions with user configurable and manageable contests.
 
+
+## Service Diagram
+
+![service diagram](./service-diagram.png)
+
 * ASP.NET Core Blazor
 * .NET Aspire
 * MongoDB
 * Postgres
+* Redis
 * Docker
 * [Piston](https://github.com/engineer-man/piston)
 
