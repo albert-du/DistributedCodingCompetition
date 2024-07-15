@@ -1,4 +1,4 @@
-﻿namespace DistributedCodingCompetition.AuthService.Models;
+﻿namespace DistributedCodingCompetition.AuthModels;
 
 /// <summary>
 /// Sucessful login result.

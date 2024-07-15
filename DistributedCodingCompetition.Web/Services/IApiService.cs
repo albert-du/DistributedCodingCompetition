@@ -1,7 +1,5 @@
 ﻿namespace DistributedCodingCompetition.Web.Services;
 
-using DistributedCodingCompetition.ApiService.Models;
-
 /// <summary>
 /// API service for interacting with the contest API service.
 /// </summary>

@@ -1,5 +1,7 @@
 ﻿namespace DistributedCodingCompetition.Judge.Services;
 
+using DistributedCodingCompetition.Models;
+
 /// <summary>
 /// Service for accessing submissions
 /// </summary>

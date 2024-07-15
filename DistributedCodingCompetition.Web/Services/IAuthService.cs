@@ -1,6 +1,6 @@
 ﻿namespace DistributedCodingCompetition.Web.Services;
 
-using DistributedCodingCompetition.AuthService.Models;
+using DistributedCodingCompetition.AuthModels;
 
 /// <summary>
 /// Authentication Service

@@ -1,3 +1,5 @@
+
+global using DistributedCodingCompetition.Models;
 using DistributedCodingCompetition.Judge.Services;
 
 var builder = WebApplication.CreateBuilder(args);

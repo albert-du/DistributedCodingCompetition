@@ -1,7 +1,5 @@
 ﻿namespace DistributedCodingCompetition.Web.Services;
 
-using DistributedCodingCompetition.ApiService.Models;
-
 public sealed class LeaderboardService(ILogger<LeaderboardService> logger, HttpClient httpClient) : ILeaderboardService
 {
     public async Task<Leaderboard?> TryGetLeaderboardAsync(Guid contestId, int page)

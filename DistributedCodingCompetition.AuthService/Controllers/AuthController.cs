@@ -3,6 +3,7 @@
 using Microsoft.AspNetCore.Mvc;
 using MongoDB.Driver;
 using DistributedCodingCompetition.AuthService.Models;
+using DistributedCodingCompetition.AuthModels;
 using DistributedCodingCompetition.AuthService.Services;
 
 /// <summary>

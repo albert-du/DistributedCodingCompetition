@@ -1,6 +1,6 @@
 ﻿namespace DistributedCodingCompetition.Web.Services;
 
-using DistributedCodingCompetition.AuthService.Models;
+using DistributedCodingCompetition.AuthModels;
 
 /// <inheritdoc/>
 public sealed class AuthService(HttpClient httpClient, ILogger<AuthService> logger, IModalService modalService, IApiService apiService) : IAuthService

@@ -5,6 +5,7 @@ using System.Security.Claims;
 using System.IdentityModel.Tokens.Jwt;
 using Microsoft.IdentityModel.Tokens;
 using DistributedCodingCompetition.AuthService.Models;
+using DistributedCodingCompetition.AuthModels;
 using MongoDB.Driver;
 
 /// <summary>

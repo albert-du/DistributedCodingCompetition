@@ -1,6 +1,4 @@
-﻿using DistributedCodingCompetition.ApiService.Models;
-
-namespace DistributedCodingCompetition.Web.Services;
+﻿namespace DistributedCodingCompetition.Web.Services;
 
 /// <summary>
 /// Service to judge submissions

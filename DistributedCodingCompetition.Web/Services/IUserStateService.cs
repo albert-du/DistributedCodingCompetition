@@ -1,7 +1,5 @@
 namespace DistributedCodingCompetition.Web.Services;
 
-using DistributedCodingCompetition.ApiService.Models;
-
 /// <summary>
 /// Get the current user.
 /// </summary>

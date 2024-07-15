@@ -30,6 +30,8 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "DistributedCodingCompetitio
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "DistributedCodingCompetition.Models", "DistributedCodingCompetition.Models\DistributedCodingCompetition.Models.csproj", "{419497D6-B697-4B5E-9AEC-4A663BE675BA}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "DistributedCodingCompetition.AuthModels", "DistributedCodingCompetition.AuthModels\DistributedCodingCompetition.AuthModels.csproj", "{5D657FAC-279A-493E-B2C9-008C68A843DD}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -92,6 +94,10 @@ Global
 		{419497D6-B697-4B5E-9AEC-4A663BE675BA}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{419497D6-B697-4B5E-9AEC-4A663BE675BA}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{419497D6-B697-4B5E-9AEC-4A663BE675BA}.Release|Any CPU.Build.0 = Release|Any CPU
+		{5D657FAC-279A-493E-B2C9-008C68A843DD}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{5D657FAC-279A-493E-B2C9-008C68A843DD}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{5D657FAC-279A-493E-B2C9-008C68A843DD}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{5D657FAC-279A-493E-B2C9-008C68A843DD}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

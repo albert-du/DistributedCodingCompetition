@@ -1,6 +1,6 @@
 ﻿namespace DistributedCodingCompetition.Leaderboard.Services;
 
-using DistributedCodingCompetition.ApiService.Models;
+using DistributedCodingCompetition.Models;
 
 public interface ILiveReportingService
 {

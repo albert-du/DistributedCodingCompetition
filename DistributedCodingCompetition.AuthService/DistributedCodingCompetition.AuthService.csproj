@@ -18,6 +18,7 @@
 
   <ItemGroup>
     <ProjectReference Include="..\DistributedCodingCompetition.ServiceDefaults\DistributedCodingCompetition.ServiceDefaults.csproj" />
+    <ProjectReference Include="..\DistributedCodingCompetition.AuthModels\DistributedCodingCompetition.AuthModels.csproj" />
   </ItemGroup>
 
 </Project>

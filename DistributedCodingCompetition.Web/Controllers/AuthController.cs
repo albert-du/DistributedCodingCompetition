@@ -5,7 +5,7 @@ using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
-using DistributedCodingCompetition.AuthService.Models;
+using DistributedCodingCompetition.AuthModels;
 
 /// <summary>
 /// Controller for handling authentication

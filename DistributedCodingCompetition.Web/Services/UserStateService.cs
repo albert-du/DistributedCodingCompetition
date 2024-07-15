@@ -2,7 +2,6 @@ namespace DistributedCodingCompetition.Web.Services;
 
 using System.Security.Claims;
 using Microsoft.AspNetCore.Components.Authorization;
-using DistributedCodingCompetition.ApiService.Models;
 
 /// <inheritdoc/>
 public sealed class UserStateService(IApiService apiService, AuthenticationStateProvider authenticationStateProvider, IModalService modalService) : IUserStateService

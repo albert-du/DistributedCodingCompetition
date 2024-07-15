@@ -16,7 +16,7 @@
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\DistributedCodingCompetition.ApiService\DistributedCodingCompetition.ApiService.csproj" />
+    <ProjectReference Include="..\DistributedCodingCompetition.Models\DistributedCodingCompetition.Models.csproj" />
     <ProjectReference Include="..\DistributedCodingCompetition.ServiceDefaults\DistributedCodingCompetition.ServiceDefaults.csproj" />
   </ItemGroup>
 

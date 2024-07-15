@@ -2,7 +2,7 @@
 
 using System.Text.Json;
 using Microsoft.Extensions.Caching.Distributed;
-using DistributedCodingCompetition.ApiService.Models;
+using DistributedCodingCompetition.Models;
 
 public class LeaderboardService(ILogger<LeaderboardService> logger, HttpClient httpClient, IDistributedCache distributedCache, ILiveReportingService liveReportingService) : ILeaderboardService
 {

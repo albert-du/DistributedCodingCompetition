@@ -1,6 +1,7 @@
 ﻿namespace DistributedCodingCompetition.AuthService.Services;
 
 using DistributedCodingCompetition.AuthService.Models;
+using DistributedCodingCompetition.AuthModels;
 
 /// <summary>
 /// Service for generating and validating tokens

@@ -1,7 +1,6 @@
 ﻿namespace DistributedCodingCompetition.Web.Services;
 
 using System.Net;
-using DistributedCodingCompetition.ApiService.Models;
 
 /// <inheritdoc/>
 public sealed class ApiService(HttpClient httpClient, ILogger<ApiService> logger) : IApiService
