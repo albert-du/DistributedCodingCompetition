@@ -33,6 +33,7 @@
   </ItemGroup>
 
   <ItemGroup>
+    <_ContentIncludedByDefault Remove="Components\Pages\Admin\UsersAdmin.razor" />
     <_ContentIncludedByDefault Remove="Components\Pages\Contest\ContestLiveLeaderboard.razor" />
   </ItemGroup>
 
@@ -40,6 +41,10 @@
     <Content Update="Components\Pages\Auth\ChangePassword.razor">
       <ExcludeFromSingleFile>true</ExcludeFromSingleFile>
     </Content>
+  </ItemGroup>
+
+  <ItemGroup>
+    <UpToDateCheckInput Remove="Components\Pages\Admin\UsersAdmin.razor" />
   </ItemGroup>
 
 </Project>
