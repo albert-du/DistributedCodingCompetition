@@ -1,15 +1,22 @@
 ﻿@page "/admin/bans"
 @inject IApiService ApiService
+@inject IModalService ModalService
 <AuthCheck Admin />
 
 <PageTitle>Bans</PageTitle>
 
 <h1 class="text-2xl">Application-wide Bans</h1>
 
-<div>
-    @foreach (var ban in bans)
+<div class="flex flex-col gap-y-1">
+    @foreach (var user in banned)
     {
         <div class="flex gap-x-2">
+            <div>
+                @($"{user.FullName} @{user.Username}")
+            </div>
+            <div>
+                <button class="rounded-lg px-2 py-1 bg-rose-500 text-slate-200" @onclick="() => UnbanUserAsync(user)">Unban</button>
+            </div>
         </div>
     }
 </div>
@@ -20,17 +27,30 @@
 
     int page => Page ?? 1;
 
-    IReadOnlyDictionary<Guid, Ban> bans = new Dictionary<Guid, Ban>();
-
     IReadOnlyList<User> banned = [];
 
-    bool NextEnabled => bans.Count == 50;
+    bool NextEnabled => banned.Count == 50;
 
     bool PrevEnabled => page > 1;
 
+    async Task UnbanUserAsync(User user)
+    {
+        if (!await ApiService.TryUnbanUserAsync(user.Id))
+        {
+            ModalService.ShowError("Failed to unban user", "Internal error");
+            return;
+        }
+    }
+
     protected override async Task OnParametersSetAsync()
     {
-
+        var (success, banned_) = await ApiService.TryReadBannedUsers(page, 50);
+        if (!success || banned_ is null)
+        {
+            ModalService.ShowError("Failed to load banned users", "Internal error");
+            return;
+        }
+        banned = banned_;
     }
 }
 

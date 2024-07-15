@@ -757,6 +757,35 @@ public sealed class ApiService(HttpClient httpClient, ILogger<ApiService> logger
             logger.LogError(ex, "Failed to read banned users");
             return (false, null);
         }
+    }
 
+    public async Task<bool> TryBanUser(Ban ban)
+    {
+        try
+        {
+            var response = await httpClient.PostAsJsonAsync("api/bans", ban);
+            response.EnsureSuccessStatusCode();
+            return true;
+        }
+        catch (Exception ex)
+        {
+            logger.LogError(ex, "Failed to ban user");
+            return false;
+        }
+    }
+
+    public async Task<bool> TryUnbanUserAsync(Guid userId)
+    {
+        try
+        {
+            var response = await httpClient.DeleteAsync($"api/bans/{userId}");
+            response.EnsureSuccessStatusCode();
+            return true;
+        }
+        catch (Exception ex)
+        {
+            logger.LogError(ex, "Failed to unban user");
+            return false;
+        }
     }
 }

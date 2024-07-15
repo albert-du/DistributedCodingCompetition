@@ -367,4 +367,8 @@ public interface IApiService
     Task<bool> TryUpdateProblemPointValueAsync(ProblemPointValue problemPointValue);
 
     Task<(bool, IReadOnlyList<User>?)> TryReadBannedUsers(int page, int count);
+
+    Task<bool> TryBanUser(Ban ban);
+
+    Task<bool> TryUnbanUserAsync(Guid userId);
 }

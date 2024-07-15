@@ -36,4 +36,10 @@
     <_ContentIncludedByDefault Remove="Components\Pages\Contest\ContestLiveLeaderboard.razor" />
   </ItemGroup>
 
+  <ItemGroup>
+    <Content Update="Components\Pages\Auth\ChangePassword.razor">
+      <ExcludeFromSingleFile>true</ExcludeFromSingleFile>
+    </Content>
+  </ItemGroup>
+
 </Project>

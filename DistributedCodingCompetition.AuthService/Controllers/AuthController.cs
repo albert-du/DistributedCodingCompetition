@@ -111,4 +111,16 @@ public class AuthController(IPasswordService passwordService, IMongoClient mongo
         await collection.ReplaceOneAsync(u => u.Id == id, user);
         return Ok();
     }
+
+    [HttpPost("resetPassword")]
+    public async Task<ActionResult> ChangePassword(Guid id, string newPassword)
+    {
+        var user = await collection.Find(u => u.Id == id).FirstOrDefaultAsync();
+        if (user is null)
+            return NotFound();
+
+        user.PasswordHash = passwordService.HashPassword(newPassword);
+        await collection.ReplaceOneAsync(u => u.Id == id, user);
+        return Ok();
+    }
 }
