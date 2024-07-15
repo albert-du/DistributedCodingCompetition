@@ -75,12 +75,12 @@ jobs:
       - name: Push to docker Hub
         if: ${{ github.event_name == 'push' }}
         run: |
-          docker push distributedcodingcompetition-apiservice:latest
-          docker push distributedcodingcompetition-authservice:latest
-          docker push distributedcodingcompetition-codeexecution:latest
-          docker push distributedcodingcompetition-codepersistence:latest
-          docker push distributedcodingcompetition-execrunner:latest
-          docker push distributedcodingcompetition-judge:latest
-          docker push distributedcodingcompetition-leaderboard:latest
-          docker push distributedcodingcompetition-liveleaders:latest
-          docker push distributedcodingcompetition-web:latest
+          docker push ${{ secrets.DOCKERHUB_USERNAME }}/distributedcodingcompetition-apiservice:latest
+          docker push ${{ secrets.DOCKERHUB_USERNAME }}/distributedcodingcompetition-authservice:latest
+          docker push ${{ secrets.DOCKERHUB_USERNAME }}/distributedcodingcompetition-codeexecution:latest
+          docker push ${{ secrets.DOCKERHUB_USERNAME }}/distributedcodingcompetition-codepersistence:latest
+          docker push ${{ secrets.DOCKERHUB_USERNAME }}/distributedcodingcompetition-execrunner:latest
+          docker push ${{ secrets.DOCKERHUB_USERNAME }}/distributedcodingcompetition-judge:latest
+          docker push ${{ secrets.DOCKERHUB_USERNAME }}/distributedcodingcompetition-leaderboard:latest
+          docker push ${{ secrets.DOCKERHUB_USERNAME }}/distributedcodingcompetition-liveleaders:latest
+          docker push ${{ secrets.DOCKERHUB_USERNAME }}/distributedcodingcompetition-web:latest
