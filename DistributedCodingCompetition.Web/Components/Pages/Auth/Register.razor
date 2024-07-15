@@ -323,17 +323,17 @@
     {
         [Required]
         [EmailAddress]
-        public string Email { get; set; } = "";
+        public string Email { get; set; } = string.Empty;
 
         [Required]
         [MinLength(8)]
         [DataType(DataType.Password)]
-        public string Password { get; set; } = "";
+        public string Password { get; set; } = string.Empty;
 
         [Required]
         [DataType(DataType.Password)]
         [Compare(nameof(Password))]
-        public string ConfirmPassword { get; set; } = "";
+        public string ConfirmPassword { get; set; } = string.Empty;
     }
 
     class RegisterModel2
@@ -341,10 +341,10 @@
         [Required(AllowEmptyStrings = false)]
         [Length(5, 25)]
         [RegularExpression(@"^[a-z0-9_-]+$")]
-        public string Username { get; set; } = "";
+        public string Username { get; set; } = string.Empty;
 
         [Required(AllowEmptyStrings = false)]
-        public string FullName { get; set; } = "";
+        public string FullName { get; set; } = string.Empty;
 
         public DateTime Birthday { get; set; } = DateTime.UtcNow;
     }
@@ -353,6 +353,6 @@
     {
         [Required]
         [Length(6, 6)]
-        public string OTC { get; set; } = "";
+        public string OTC { get; set; } = string.Empty;
     }
 }

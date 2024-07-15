@@ -74,4 +74,28 @@ public sealed class AuthService(HttpClient httpClient, ILogger<AuthService> logg
             return null;
         }
     }
+
+    public async Task<bool> ChangePasswordAsync(Guid id, string oldPassword, string newPassword)
+    {
+        Dictionary<string, string> data = new()
+        {
+            { "id", id.ToString() },
+            { "oldPassword", oldPassword },
+            { "newPassword", newPassword }
+        };
+        FormUrlEncodedContent urlEncoded = new(data);
+        var queryString = await urlEncoded.ReadAsStringAsync();
+        try
+        {
+            var resp = await httpClient.PostAsync($"api/auth/changePassword?{queryString}", null);
+            resp.EnsureSuccessStatusCode();
+            return true;
+        }
+        catch (Exception ex)
+        {
+            modalService.ShowError("Failed to change password", ex.Message);
+            logger.LogError(ex, "Failed to change password");
+            return false;
+        }
+    }
 }

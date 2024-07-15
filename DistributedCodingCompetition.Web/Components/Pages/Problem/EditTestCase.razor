@@ -118,8 +118,8 @@
             }
 
             await JudgeService.RejudgeProblemAsync(ProblemId);
-            
-                
+
+
             NavigationManager.NavigateTo($"/problem/{ProblemId}/edit");
         }
         finally
@@ -166,9 +166,9 @@
 
     class ProblemTestCaseModel
     {
-        public string Input { get; set; } = "";
-        public string Output { get; set; } = "";
-        public string Description { get; set; } = "";
+        public string Input { get; set; } = string.Empty;
+        public string Output { get; set; } = string.Empty;
+        public string Description { get; set; } = string.Empty;
         public bool Sample { get; set; }
         public bool Active { get; set; } = true;
         public int Weight { get; set; } = 100;

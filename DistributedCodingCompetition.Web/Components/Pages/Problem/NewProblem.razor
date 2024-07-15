@@ -64,7 +64,7 @@ else
     [SupplyParameterFromQuery]
     public Guid? ContestId { get; set; }
 
-    string contestName = "";
+    string contestName = string.Empty;
     ProblemModel model = new();
 
     async Task SubmitAsync()

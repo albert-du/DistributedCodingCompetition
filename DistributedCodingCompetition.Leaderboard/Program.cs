@@ -54,7 +54,7 @@ app.MapGet("/live/{contestId}", async (Guid contestId, ILeaderboardService leade
         tasks.Add(leaderboardService.GetLeaderboardAsync(contestId, i));
 
     Dictionary<Guid, string> leaderboardEntries = [];
-    var contestName = "";
+    var contestName = string.Empty;
 
     foreach (var task in tasks)
     {

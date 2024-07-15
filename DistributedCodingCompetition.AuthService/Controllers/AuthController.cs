@@ -95,4 +95,20 @@ public class AuthController(IPasswordService passwordService, IMongoClient mongo
         var res = tokenService.ValidateToken(token);
         return res is null ? Unauthorized() : res;
     }
+
+    [HttpPost("changePassword")]
+    public async Task<ActionResult> ChangePassword(Guid id, string oldPassword, string newPassword)
+    {
+        var user = await collection.Find(u => u.Id == id).FirstOrDefaultAsync();
+        if (user is null)
+            return NotFound();
+
+        (bool valid, string? newHash) = passwordService.VerifyPassword(oldPassword, user.PasswordHash);
+        if (!valid)
+            return Unauthorized();
+
+        user.PasswordHash = passwordService.HashPassword(newPassword);
+        await collection.ReplaceOneAsync(u => u.Id == id, user);
+        return Ok();
+    }
 }

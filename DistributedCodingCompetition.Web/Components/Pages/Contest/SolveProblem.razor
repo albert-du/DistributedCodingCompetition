@@ -53,14 +53,14 @@ else
             </div>
             @if (latestScore is not null)
             {
-                <div class="font-bold flex flex-col gap-y-1 @(latestScore.Completed ? "text-emerald-500" : (latestScore.CasesPassed > 0) ? "text-amber-500" : "text-rose-500" )">
+                <div class="font-bold flex flex-col gap-y-2 @(latestScore.Completed ? "text-emerald-500" : (latestScore.CasesPassed > 0) ? "text-amber-500" : "text-rose-500" )">
                     <div>Testcases: @latestScore.CasesPassed out of @latestScore.CasesTotal</div>
                     <div>Score: @latestScore.Score out of @latestScore.MaxScore</div>
                     <div>Points: @latestScore.Points</div>
                 </div>
             }
 
-            <a class="italic hover:underline text-violet-800" href="/contest/@ContestId/solve/@ProblemId/submissions">View your submissions</a>
+            <a class="italic hover:underline text-violet-800" href="contest/@ContestId/solve/@ProblemId/submissions">View your submissions</a>
         }
 
     </div>
@@ -73,16 +73,16 @@ else
     [Parameter]
     public Guid ProblemId { get; set; }
 
-    string contestName = "";
+    string contestName = string.Empty;
     DateTime contestEndTimeUTC;
 
     Problem? problem;
 
     IReadOnlyList<string> languages = [];
 
-    string language = "";
+    string language = string.Empty;
     string Lang => language.Split('=').FirstOrDefault() ?? string.Empty;
-    string source = "";
+    string source = string.Empty;
 
     void OnCodeChanged(string newCode)
     {

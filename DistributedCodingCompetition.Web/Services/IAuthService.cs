@@ -31,4 +31,7 @@ public interface IAuthService
     /// <param name="token"></param>
     /// <returns></returns>
     Task<ValidationResult?> ValidateTokenAsync(string token);
+
+    Task<bool> ChangePasswordAsync(Guid id, string oldPassword, string newPassword);
+    Task<bool> ResetPasswordAsync(Guid id, string newPassword);
 }
