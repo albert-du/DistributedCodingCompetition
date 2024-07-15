@@ -75,6 +75,15 @@ jobs:
       - name: Push to docker Hub
         if: ${{ github.event_name == 'push' }}
         run: |
+          docker tag distributedcodingcompetition-apiservice:latest ${{ secrets.DOCKERHUB_USERNAME }}/distributedcodingcompetition-apiservice:latest
+          docker tag distributedcodingcompetition-authservice:latest ${{ secrets.DOCKERHUB_USERNAME }}/distributedcodingcompetition-authservice:latest
+          docker tag distributedcodingcompetition-codeexecution:latest ${{ secrets.DOCKERHUB_USERNAME }}/distributedcodingcompetition-codeexecution:latest
+          docker tag distributedcodingcompetition-codepersistence:latest ${{ secrets.DOCKERHUB_USERNAME }}/distributedcodingcompetition-codepersistence:latest
+          docker tag distributedcodingcompetition-execrunner:latest ${{ secrets.DOCKERHUB_USERNAME }}/distributedcodingcompetition-execrunner:latest
+          docker tag distributedcodingcompetition-judge:latest ${{ secrets.DOCKERHUB_USERNAME }}/distributedcodingcompetition-judge:latest
+          docker tag distributedcodingcompetition-leaderboard:latest ${{ secrets.DOCKERHUB_USERNAME }}/distributedcodingcompetition-leaderboard:latest
+          docker tag distributedcodingcompetition-liveleaders:latest ${{ secrets.DOCKERHUB_USERNAME }}/distributedcodingcompetition-liveleaders:latest
+          docker tag distributedcodingcompetition-web:latest ${{ secrets.DOCKERHUB_USERNAME }}/distributedcodingcompetition-web:latest
           docker push ${{ secrets.DOCKERHUB_USERNAME }}/distributedcodingcompetition-apiservice:latest
           docker push ${{ secrets.DOCKERHUB_USERNAME }}/distributedcodingcompetition-authservice:latest
           docker push ${{ secrets.DOCKERHUB_USERNAME }}/distributedcodingcompetition-codeexecution:latest
