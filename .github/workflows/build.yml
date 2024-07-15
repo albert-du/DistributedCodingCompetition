@@ -46,41 +46,41 @@ jobs:
         run: dotnet build --configuration Release
 
       - name: Publish ApiService
-        run: dotnet publish ./DistributedCodingCompetition.ApiService -c Release --os linux --arch x64 /t:PublishContainer -o ./publish/apiservice
+        run: dotnet publish ./DistributedCodingCompetition.ApiService -c Release --os linux --arch x64 /t:PublishContainer -o ./publish/apiservice --no-restore --no-build
 
       - name: Publish AuthService
-        run: dotnet publish ./DistributedCodingCompetition.AuthService -c Release --os linux --arch x64 /t:PublishContainer -o ./publish/authservice
+        run: dotnet publish ./DistributedCodingCompetition.AuthService -c Release --os linux --arch x64 /t:PublishContainer -o ./publish/authservice --no-restore --no-build
 
       - name: Publish CodeExecution
-        run: dotnet publish ./DistributedCodingCompetition.CodeExecution -c Release --os linux --arch x64 /t:PublishContainer -o ./publish/codeexecution
+        run: dotnet publish ./DistributedCodingCompetition.CodeExecution -c Release --os linux --arch x64 /t:PublishContainer -o ./publish/codeexecution --no-restore --no-build
 
       - name: Publish CodePersistence
-        run: dotnet publish ./DistributedCodingCompetition.CodePersistence -c Release --os linux --arch x64 /t:PublishContainer -o ./publish/codepersistence
+        run: dotnet publish ./DistributedCodingCompetition.CodePersistence -c Release --os linux --arch x64 /t:PublishContainer -o ./publish/codepersistence --no-restore --no-build
 
       - name: Publish ExecRunner
-        run: dotnet publish ./DistributedCodingCompetition.ExecRunner -c Release --os linux --arch x64 /t:PublishContainer -o ./publish/execrunner
+        run: dotnet publish ./DistributedCodingCompetition.ExecRunner -c Release --os linux --arch x64 /t:PublishContainer -o ./publish/execrunner --no-restore --no-build
 
       - name: Publish Judge
-        run: dotnet publish ./DistributedCodingCompetition.Judge -c Release --os linux --arch x64 /t:PublishContainer -o ./publish/judge
+        run: dotnet publish ./DistributedCodingCompetition.Judge -c Release --os linux --arch x64 /t:PublishContainer -o ./publish/judge --no-restore --no-build
 
       - name: Publish Leaderboard
-        run: dotnet publish ./DistributedCodingCompetition.Leaderboard -c Release --os linux --arch x64 /t:PublishContainer -o ./publish/leaderboard
+        run: dotnet publish ./DistributedCodingCompetition.Leaderboard -c Release --os linux --arch x64 /t:PublishContainer -o ./publish/leaderboard --no-restore --no-build
 
       - name: Publish LiveLeaders
-        run: dotnet publish ./DistributedCodingCompetition.LiveLeaders -c Release --os linux --arch x64 /t:PublishContainer -o ./publish/liveleaders
+        run: dotnet publish ./DistributedCodingCompetition.LiveLeaders -c Release --os linux --arch x64 /t:PublishContainer -o ./publish/liveleaders --no-restore --no-build
 
       - name: Publish Web
-        run: dotnet publish ./DistributedCodingCompetition.Web -c Release --os linux --arch x64 /t:PublishContainer -o ./publish/web
+        run: dotnet publish ./DistributedCodingCompetition.Web -c Release --os linux --arch x64 /t:PublishContainer -o ./publish/web --no-restore --no-build
 
       - name: Push to docker Hub
         if: ${{ github.event_name == 'push' }}
         run: |
-          docker push distributedcodingcompetition/apiservice:latest
-          docker push distributedcodingcompetition/authservice:latest
-          docker push distributedcodingcompetition/codeexecution:latest
-          docker push distributedcodingcompetition/codepersistence:latest
-          docker push distributedcodingcompetition/execrunner:latest
-          docker push distributedcodingcompetition/judge:latest
-          docker push distributedcodingcompetition/leaderboard:latest
-          docker push distributedcodingcompetition/liveleaders:latest
-          docker push distributedcodingcompetition/web:latest
+          docker push distributedcodingcompetition-apiservice:latest
+          docker push distributedcodingcompetition-authservice:latest
+          docker push distributedcodingcompetition-codeexecution:latest
+          docker push distributedcodingcompetition-codepersistence:latest
+          docker push distributedcodingcompetition-execrunner:latest
+          docker push distributedcodingcompetition-judge:latest
+          docker push distributedcodingcompetition-leaderboard:latest
+          docker push distributedcodingcompetition-liveleaders:latest
+          docker push distributedcodingcompetition-web:latest
