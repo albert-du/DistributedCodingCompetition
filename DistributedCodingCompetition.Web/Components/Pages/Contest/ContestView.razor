@@ -15,7 +15,6 @@
 else
 {
     <h1 class="mb-4 text-3xl">@contest.Name</h1>
-    @* Render HTML *@
     <article class="p-2 prose border-2 rounded-md border-slate-400 min-h-96">
         @((MarkupString)contest.RenderedDescription)
     </article>
@@ -28,6 +27,7 @@ else
     {
         <div>This contest is now open</div>
         <a href="contest/@Id/solve" class="w-fit p-2 rounded-xl text-emerald-500 border border-emerald-500 hover:text-white hover:bg-emerald-500 active:bg-emerald-600 transition-colors duration-100">Start Solving Problems</a>
+        <a href="contest/@Id/leaderboard" class="w-fit p-2 rounded-xl text-violet-500 border border-violet-500 hover:text-white hover:bg-violet-500 active:bg-violet-600 transition-colors duration-100">View Leaderboard</a>
     }
     else
     {
