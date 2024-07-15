@@ -366,9 +366,33 @@ public interface IApiService
     /// <returns></returns>
     Task<bool> TryUpdateProblemPointValueAsync(ProblemPointValue problemPointValue);
 
-    Task<(bool, IReadOnlyList<User>?)> TryReadBannedUsers(int page, int count);
+    /// <summary>
+    /// Read banned users.
+    /// </summary>
+    /// <param name="page"></param>
+    /// <param name="count"></param>
+    /// <returns></returns>
+    Task<(bool, IReadOnlyList<User>?)> TryReadBannedUsersAsync(int page, int count);
 
-    Task<bool> TryBanUser(Ban ban);
+    /// <summary>
+    /// Bans a user.
+    /// </summary>
+    /// <param name="ban"></param>
+    /// <returns></returns>
+    Task<bool> TryBanUserAsync(Ban ban);
 
+    /// <summary>
+    /// Unbans a user.
+    /// </summary>
+    /// <param name="userId"></param>
+    /// <returns></returns>
     Task<bool> TryUnbanUserAsync(Guid userId);
+
+    /// <summary>
+    /// Read users.
+    /// </summary>
+    /// <param name="page"></param>
+    /// <param name="count"></param>
+    /// <returns></returns>
+    Task<(bool, IReadOnlyList<User>?)> TryReadUsersAsync(int page, int count);
 }

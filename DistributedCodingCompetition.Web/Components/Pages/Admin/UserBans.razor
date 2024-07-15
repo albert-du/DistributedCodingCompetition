@@ -75,7 +75,7 @@
 
     protected override async Task OnParametersSetAsync()
     {
-        var (success, banned_) = await ApiService.TryReadBannedUsers(page, 50);
+        var (success, banned_) = await ApiService.TryReadBannedUsersAsync(page, 50);
         if (!success || banned_ is null)
         {
             ModalService.ShowError("Failed to load banned users", "Internal error");

@@ -5,7 +5,7 @@
 @inject NavigationManager NavigationManager
 @inject IApiService ApiService
 @inject IModalService ModalService
-
+@using DistributedCodingCompetition.Models
 <AuthCheck Contest=Id Admin />
 
 <PageTitle>Contest Problems</PageTitle>
@@ -30,7 +30,7 @@
 </div>
 
 <div>
-    <a class="hover:underline italic" href="problem/new?contestId=@Id">Add New Problem</a>
+    <a class="italic hover:underline" href="problem/new?contestId=@Id">Add New Problem</a>
 </div>
 
 @code {

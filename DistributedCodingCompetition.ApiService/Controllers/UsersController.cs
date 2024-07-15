@@ -18,8 +18,11 @@ public class UsersController(ContestContext context) : ControllerBase
     /// </summary>
     /// <returns></returns>
     [HttpGet]
-    public async Task<ActionResult<IEnumerable<User>>> GetUsers() =>
-        await context.Users.ToListAsync();
+    public async Task<ActionResult<IEnumerable<User>>> GetUsers(int page, int count) =>
+        await context.Users
+            .Skip(count * (page - 1))
+            .Take(count)
+            .ToListAsync();
 
     // GET: api/Users/5
     /// <summary>

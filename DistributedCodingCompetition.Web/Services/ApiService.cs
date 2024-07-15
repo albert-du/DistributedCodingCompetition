@@ -746,7 +746,7 @@ public sealed class ApiService(HttpClient httpClient, ILogger<ApiService> logger
         }
     }
 
-    public async Task<(bool, IReadOnlyList<User>?)> TryReadBannedUsers(int page, int count)
+    public async Task<(bool, IReadOnlyList<User>?)> TryReadBannedUsersAsync(int page, int count)
     {
         try
         {
@@ -759,7 +759,7 @@ public sealed class ApiService(HttpClient httpClient, ILogger<ApiService> logger
         }
     }
 
-    public async Task<bool> TryBanUser(Ban ban)
+    public async Task<bool> TryBanUserAsync(Ban ban)
     {
         try
         {
@@ -786,6 +786,19 @@ public sealed class ApiService(HttpClient httpClient, ILogger<ApiService> logger
         {
             logger.LogError(ex, "Failed to unban user");
             return false;
+        }
+    }
+
+    public async Task<(bool, IReadOnlyList<User>?)> TryReadUsersAsync(int page, int count)
+    {
+        try
+        {
+            return (true, await httpClient.GetFromJsonAsync<IReadOnlyList<User>>($"api/users?page={page}&count={count}"));
+        }
+        catch (Exception ex)
+        {
+            logger.LogError(ex, "Failed to read users");
+            return (false, null);
         }
     }
 }

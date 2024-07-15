@@ -1,7 +1,5 @@
 ﻿namespace DistributedCodingCompetition.Judge.Services;
 
-using DistributedCodingCompetition.ApiService.Models;
-
 public class ProblemPointValueService(HttpClient httpClient) : IProblemPointValueService
 {
     public async Task<int> GetPointMaxAsync(Guid contestId, Guid problemId)

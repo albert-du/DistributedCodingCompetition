@@ -7,16 +7,17 @@
   "containerBuilder": "docker",
   "outputFormat": "compose",
   "privateRegistryEmail": "aspir8@aka.ms",
+  "includeDashboard": true,
   "secrets": {
-    "salt": "dehlebrmMv1Pixj0",
-    "hash": "GivMVDoEwZfGOtRt4f2An/BZTMhD\u002BGXxhRpNodwT06I=",
+    "salt": "iIG8LYTzbxvkI\u002BHU",
+    "hash": "cON9eNSAndzK\u002BC5i/XzDw\u002BcucSusNTMHg1/shG7nHJo=",
     "secrets": {
       "postgres-password": {
-        "value": "dehlebrmMv1Pixj0xPKUkX2u9OD2eRIbeRyUBEHtwr1apnln\u002By9A73jojSodHL1kly0="
+        "value": "iIG8LYTzbxvkI\u002BHUjopyuGIWGYKds33t\u002BSi1rEqFwAbqLdSU5wDbj3mFBEfzgPUtSRc="
       },
       "cache": {},
       "postgres": {
-        "POSTGRES_PASSWORD": "dehlebrmMv1Pixj0xPKUkX2u9OD2eRIbeRyUBEHtwr1apnln\u002By9A73jojSodHL1kly0="
+        "POSTGRES_PASSWORD": "iIG8LYTzbxvkI\u002BHUjopyuGIWGYKds33t\u002BSi1rEqFwAbqLdSU5wDbj3mFBEfzgPUtSRc="
       },
       "mongo": {},
       "evaluationdb": {},
@@ -24,22 +25,28 @@
       "authdb": {},
       "codepersistencedb": {},
       "authentication": {
-        "ConnectionStrings__authdb": "dehlebrmMv1Pixj0XzhZ2RlViFStvb5/pd0tc1rB2K1nuFoPrEhlwiG3o1gaWrgvzmhaSR4mo80="
+        "ConnectionStrings__authdb": "iIG8LYTzbxvkI\u002BHUbdi0arllc/DQ0z9iyX68fHGt5znfJOOeuk34kG2PEkyj3I1KNkJemhfh674="
       },
       "codepersistence": {
-        "ConnectionStrings__codepersistencedb": "dehlebrmMv1Pixj0mvp6CR6Q9tU6Mlncbs1YbVrB2K1nuFoPrEhlwiG3o1gaWrgvzmhYUw4rt8qI5ccnhsFWTdSbEg=="
+        "ConnectionStrings__codepersistencedb": "iIG8LYTzbxvkI\u002BHUEDBYJ37qDgRKTQhSYaj\u002BWnGt5znfJOOeuk34kG2PEkyj3I1KNkJcgAfs/7lW1xhyAkrK4kEy1A=="
       },
       "codeexecution": {
-        "ConnectionStrings__evaluationdb": "dehlebrmMv1Pixj0XVyRv\u002BoEdx9kfRtPD1QPw3/Bxb41rFdG9wB6yDzrnA1aGbUrzXQJBz89ot2U98Mxz9RXXcWYAtCDL\u002BrXqOHQtRNSRcBw6UHufHfZuqT37zK/CsbZkGyWe9K2ZoXqhfX7uhP8KbCd\u002BRz0DyPTV4Ni"
+        "ConnectionStrings__evaluationdb": "iIG8LYTzbxvkI\u002BHUHRwZ3GxdrlfvOBV9BfgIhVSt\u002BiqNMO7X4QXnmnDTLRnjn4BONV4N1Db66q5KxRxkS1/L8lAxxCvT4nCXv6xy3h26m8sQg71dxJ53S85dMtIFRj1t9O7rjYcpHKLjbU62Ptd8DVht9GhAr9\u002B4rNN0"
       },
       "apiservice": {
-        "ConnectionStrings__contestdb": "dehlebrmMv1Pixj0GdpsSFjO5gfrTZbUX6FkOX/Bxb41rFdG9wB6yDzrnA1aGbUrzXQJBz89ot2U98Mxz9RXXcWYAtCDL\u002BrXqOHQtRNSRcBw6UHufHfZuqT37zK/CsbZkGyWe9K2ZoXqhfX7uhP8L6mS4QzmDy7e"
+        "ConnectionStrings__contestdb": "iIG8LYTzbxvkI\u002BHU3gYMe2HNO9eBbjc//0opPlSt\u002BiqNMO7X4QXnmnDTLRnjn4BONV4N1Db66q5KxRxkS1/L8lAxxCvT4nCXv6xy3h26m8sQg71dxJ53S85dMtIFRj1t9O7rjYcpHKLjbU62Ptd8C0Fi7HhSr9K1"
+      },
+      "liveleaders": {
+        "ConnectionStrings__cache": "iIG8LYTzbxvkI\u002BHU8RELSJ1cpagC0ECrSqp57n\u002Bj6jbVereXols="
       },
       "judge": {
-        "ConnectionStrings__cache": "dehlebrmMv1Pixj0dEIj4HbqAtlWToQmlASgZ1TP1aJt5g4GtF4="
+        "ConnectionStrings__cache": "iIG8LYTzbxvkI\u002BHU8RELSJ1cpagC0ECrSqp57n\u002Bj6jbVereXols="
+      },
+      "leaderboard": {
+        "ConnectionStrings__cache": "iIG8LYTzbxvkI\u002BHU8RELSJ1cpagC0ECrSqp57n\u002Bj6jbVereXols="
       },
       "webfrontend": {
-        "ConnectionStrings__cache": "dehlebrmMv1Pixj0dEIj4HbqAtlWToQmlASgZ1TP1aJt5g4GtF4="
+        "ConnectionStrings__cache": "iIG8LYTzbxvkI\u002BHU8RELSJ1cpagC0ECrSqp57n\u002Bj6jbVereXols="
       }
     }
   },

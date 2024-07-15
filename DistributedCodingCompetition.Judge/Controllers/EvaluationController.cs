@@ -1,7 +1,6 @@
 namespace DistributedCodingCompetition.Judge.Controllers;
 
 using Microsoft.AspNetCore.Mvc;
-using DistributedCodingCompetition.ApiService.Models;
 using DistributedCodingCompetition.ExecutionShared;
 using DistributedCodingCompetition.Judge.Services;
 using Microsoft.EntityFrameworkCore;

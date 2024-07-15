@@ -1,7 +1,5 @@
 ﻿namespace DistributedCodingCompetition.Judge.Services;
 
-using DistributedCodingCompetition.ApiService.Models;
-
 /// <inheritdoc/>
 public class SubmissionService(HttpClient httpClient) : ISubmissionService
 {

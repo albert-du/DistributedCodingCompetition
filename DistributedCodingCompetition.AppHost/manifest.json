@@ -155,6 +155,29 @@
         }
       }
     },
+    "liveleaders": {
+      "type": "project.v0",
+      "path": "../DistributedCodingCompetition.LiveLeaders/DistributedCodingCompetition.LiveLeaders.csproj",
+      "env": {
+        "OTEL_DOTNET_EXPERIMENTAL_OTLP_EMIT_EXCEPTION_LOG_ATTRIBUTES": "true",
+        "OTEL_DOTNET_EXPERIMENTAL_OTLP_EMIT_EVENT_LOG_ATTRIBUTES": "true",
+        "OTEL_DOTNET_EXPERIMENTAL_OTLP_RETRY": "in_memory",
+        "ASPNETCORE_FORWARDEDHEADERS_ENABLED": "true",
+        "ConnectionStrings__cache": "{cache.connectionString}"
+      },
+      "bindings": {
+        "http": {
+          "scheme": "http",
+          "protocol": "tcp",
+          "transport": "http"
+        },
+        "https": {
+          "scheme": "https",
+          "protocol": "tcp",
+          "transport": "http"
+        }
+      }
+    },
     "judge": {
       "type": "project.v0",
       "path": "../DistributedCodingCompetition.Judge/DistributedCodingCompetition.Judge.csproj",
@@ -167,7 +190,36 @@
         "services__apiservice__http__0": "{apiservice.bindings.http.url}",
         "services__apiservice__https__0": "{apiservice.bindings.https.url}",
         "services__codeexecution__http__0": "{codeexecution.bindings.http.url}",
-        "services__codeexecution__https__0": "{codeexecution.bindings.https.url}"
+        "services__codeexecution__https__0": "{codeexecution.bindings.https.url}",
+        "services__liveleaders__http__0": "{liveleaders.bindings.http.url}",
+        "services__liveleaders__https__0": "{liveleaders.bindings.https.url}"
+      },
+      "bindings": {
+        "http": {
+          "scheme": "http",
+          "protocol": "tcp",
+          "transport": "http"
+        },
+        "https": {
+          "scheme": "https",
+          "protocol": "tcp",
+          "transport": "http"
+        }
+      }
+    },
+    "leaderboard": {
+      "type": "project.v0",
+      "path": "../DistributedCodingCompetition.Leaderboard/DistributedCodingCompetition.Leaderboard.csproj",
+      "env": {
+        "OTEL_DOTNET_EXPERIMENTAL_OTLP_EMIT_EXCEPTION_LOG_ATTRIBUTES": "true",
+        "OTEL_DOTNET_EXPERIMENTAL_OTLP_EMIT_EVENT_LOG_ATTRIBUTES": "true",
+        "OTEL_DOTNET_EXPERIMENTAL_OTLP_RETRY": "in_memory",
+        "ASPNETCORE_FORWARDEDHEADERS_ENABLED": "true",
+        "services__apiservice__http__0": "{apiservice.bindings.http.url}",
+        "services__apiservice__https__0": "{apiservice.bindings.https.url}",
+        "ConnectionStrings__cache": "{cache.connectionString}",
+        "services__liveleaders__http__0": "{liveleaders.bindings.http.url}",
+        "services__liveleaders__https__0": "{liveleaders.bindings.https.url}"
       },
       "bindings": {
         "http": {
@@ -199,6 +251,8 @@
         "services__authentication__https__0": "{authentication.bindings.https.url}",
         "services__codepersistence__http__0": "{codepersistence.bindings.http.url}",
         "services__codepersistence__https__0": "{codepersistence.bindings.https.url}",
+        "services__leaderboard__http__0": "{leaderboard.bindings.http.url}",
+        "services__leaderboard__https__0": "{leaderboard.bindings.https.url}",
         "services__codeexecution__http__0": "{codeexecution.bindings.http.url}",
         "services__codeexecution__https__0": "{codeexecution.bindings.https.url}"
       },

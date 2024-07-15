@@ -1,4 +1,4 @@
-﻿namespace DistributedCodingCompetition.ApiService.Models;
+﻿namespace DistributedCodingCompetition.Models;
 
 /// <summary>
 /// Point value for a problem in a contest

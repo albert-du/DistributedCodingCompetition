@@ -1,6 +1,6 @@
-﻿namespace DistributedCodingCompetition.ApiService;
+﻿namespace DistributedCodingCompetition.Models;
 
-public static class Utils
+internal static class Utils
 {
     public static string RandomString(int length)
     {

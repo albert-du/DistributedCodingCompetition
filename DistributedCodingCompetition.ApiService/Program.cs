@@ -1,6 +1,9 @@
-using Microsoft.EntityFrameworkCore;
+global using DistributedCodingCompetition.Models;
+global using DistributedCodingCompetition.ApiService.Models;
+
 using DistributedCodingCompetition.ApiService;
-using DistributedCodingCompetition.ApiService.Models;
+using Microsoft.EntityFrameworkCore;
+
 
 var builder = WebApplication.CreateBuilder(args);
 
