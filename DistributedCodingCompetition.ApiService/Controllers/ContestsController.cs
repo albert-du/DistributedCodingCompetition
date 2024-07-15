@@ -212,7 +212,7 @@ public class ContestsController(ContestContext context) : ControllerBase
     /// <param name="problemId"></param>
     /// <returns></returns>
     [HttpGet("{contestId}/pointvalues/{problemId}")]
-    public async Task<ActionResult<ProblemPointValue>> GetProblemPointValue(Guid contestId, Guid problemId)
+    public async Task<ActionResult<ProblemPointValue>> GetProblemPointValue(Guid contestId, Guid problemId, bool generateIfNotExist = true)
     {
         var ppv = await context.ProblemPointValues.Where(ppv => ppv.ContestId == contestId && ppv.ProblemId == problemId).FirstOrDefaultAsync();
         if (ppv is not null)
@@ -223,8 +223,49 @@ public class ContestsController(ContestContext context) : ControllerBase
         if (contest is null)
             return NotFound();
 
+        if (!generateIfNotExist)
+            return NotFound();
+
         return new ProblemPointValue() { Id = Guid.Empty, ContestId = contestId, ProblemId = problemId, Points = contest.DefaultPointsForProblem };
     }
+
+    [HttpPost("{contestId}/pointvalues/{problemId}")]
+    public async Task<ActionResult<ProblemPointValue>> PostProblemPointValue(Guid contestId, Guid problemId, ProblemPointValue ppv)
+    {
+        ppv.ContestId = contestId;
+        ppv.ProblemId = problemId;
+
+        context.ProblemPointValues.Add(ppv);
+        await context.SaveChangesAsync();
+
+        return CreatedAtAction(nameof(GetProblemPointValue), new { contestId, problemId }, ppv);
+    }
+
+    [HttpPut("{contestId}/pointvalues/{problemId}")]
+    public async Task<IActionResult> PutProblemPointValue(Guid contestId, Guid problemId, ProblemPointValue ppv)
+    {
+        if (contestId != ppv.ContestId || problemId != ppv.ProblemId)
+            return BadRequest();
+
+        context.Entry(ppv).State = EntityState.Modified;
+
+        try
+        {
+            await context.SaveChangesAsync();
+        }
+        catch (DbUpdateConcurrencyException)
+        {
+            if (!ProblemPointValueExists(contestId, problemId))
+                return NotFound();
+            else
+                throw;
+        }
+
+        return NoContent();
+    }
+
+    bool ProblemPointValueExists(Guid contestId, Guid problemId) =>
+        context.ProblemPointValues.Any(e => e.ContestId == contestId && e.ProblemId == problemId);
 
     /// <summary>
     /// Calculate the leaderboard for a contest

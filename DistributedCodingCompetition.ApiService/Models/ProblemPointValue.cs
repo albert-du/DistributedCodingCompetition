@@ -8,7 +8,7 @@ public class ProblemPointValue
     /// <summary>
     /// Id of the point value
     /// </summary>
-    public Guid Id { get; set; }
+    public Guid Id { get; set; } = Guid.NewGuid();
 
     /// <summary>
     /// Id of the problem

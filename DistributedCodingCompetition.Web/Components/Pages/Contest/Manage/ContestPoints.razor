@@ -39,6 +39,8 @@ else
     public Guid Id { get; set; }
 
     IReadOnlyDictionary<Guid, int> points = new Dictionary<Guid, int>();
+    IReadOnlyDictionary<Guid, ProblemPointValue> ppvs = new Dictionary<Guid, ProblemPointValue>();
+
 
     IReadOnlyList<Problem> problems = [];
 
@@ -77,11 +79,23 @@ else
             if (value is null)
                 return;
 
-            var success = await ApiService.TrySetContestProblemPointValueAsync(Id, prob.Id, value.Value);
-            if (!success)
-                ModalService.ShowError("Failed to set points", "Internal error");
+            if (ppvs.TryGetValue(prob.Id, out var ppv))
+            {
+                // update
+                ppv.Points = value.Value;
+                var success = await ApiService.TryUpdateProblemPointValueAsync(ppv);
+            }
             else
-                points = points.SetItem(prob.Id, value.Value);
+            {
+                // create
+                ppv = new()
+                    {
+                        ContestId = Id,
+                        ProblemId = prob.Id,
+                        Points = value.Value
+                    };
+                var success = await ApiService.TryCreateProblemPointValueAsync(ppv);
+            }
         });
     }
 }

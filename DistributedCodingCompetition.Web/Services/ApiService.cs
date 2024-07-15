@@ -716,5 +716,33 @@ public sealed class ApiService(HttpClient httpClient, ILogger<ApiService> logger
             return (false, null);
         }
     }
+    public async Task<bool> TryCreateProblemPointValueAsync(ProblemPointValue problemPointValue)
+    {
+        try
+        {
+            var response = await httpClient.PostAsJsonAsync($"api/{problemPointValue.ContestId}/pointvalues/{problemPointValue.ProblemId}", problemPointValue);
+            response.EnsureSuccessStatusCode();
+            return true;
+        }
+        catch (Exception ex)
+        {
+            logger.LogError(ex, "Failed to create problem point value");
+            return false;
+        }
+    }
 
+    public async Task<bool> TryUpdateProblemPointValueAsync(ProblemPointValue problemPointValue)
+    {
+        try
+        {
+            var response = await httpClient.PutAsJsonAsync($"api/{problemPointValue.ContestId}/pointvalues/{problemPointValue.ProblemId}", problemPointValue);
+            response.EnsureSuccessStatusCode();
+            return true;
+        }
+        catch (Exception ex)
+        {
+            logger.LogError(ex, "Failed to update problem point value");
+            return false;
+        }
+    }
 }

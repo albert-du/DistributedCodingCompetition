@@ -351,4 +351,18 @@ public interface IApiService
     /// <param name="contestId"></param>
     /// <returns></returns>
     Task<(bool, IReadOnlyList<ProblemPointValue>?)> TryReadContestProblemPointValues(Guid contestId);
+
+    /// <summary>
+    /// Create a new problem point value.
+    /// </summary>
+    /// <param name="problemPointValue"></param>
+    /// <returns></returns>
+    Task<bool> TryCreateProblemPointValueAsync(ProblemPointValue problemPointValue);
+
+    /// <summary>
+    /// Update a problem point value.
+    /// </summary>
+    /// <param name="problemPointValue"></param>
+    /// <returns></returns>
+    Task<bool> TryUpdateProblemPointValueAsync(ProblemPointValue problemPointValue);
 }
