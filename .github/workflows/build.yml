@@ -27,8 +27,14 @@ jobs:
           npm install -D tailwindcss
           npm install -D @tailwindcss/typography
 
+      - name: Login to Docker Hub
+        uses: docker/login-action@v3
+        with:
+          username: ${{ secrets.DOCKERHUB_USERNAME }}
+          password: ${{ secrets.DOCKERHUB_TOKEN }}
+
       - name: tailwindcss
-        run: sh ./DistributedCodingCompetition.Web/tailwind.sh
+        run: sh ./DistributedCodingCompetition.Web/tailwind-build.sh
 
       - name: Restore
         run: dotnet restore
@@ -44,7 +50,7 @@ jobs:
 
       - name: Publish CodeExecution
         run: dotnet publish ./DistributedCodingCompetition.CodeExecution -c Release --os linux --arch x64 /t:PublishContainer -o ./publish/codeexecution
-      
+
       - name: Publish CodePersistence
         run: dotnet publish ./DistributedCodingCompetition.CodePersistence -c Release --os linux --arch x64 /t:PublishContainer -o ./publish/codepersistence
 
@@ -62,4 +68,16 @@ jobs:
 
       - name: Publish Web
         run: dotnet publish ./DistributedCodingCompetition.Web -c Release --os linux --arch x64 /t:PublishContainer -o ./publish/web
-     
+
+      - name: Push to docker Hub
+        if: ${{ github.event_name == 'push' }}
+        run: |
+          docker push distributedcodingcompetition/apiservice:latest
+          docker push distributedcodingcompetition/authservice:latest
+          docker push distributedcodingcompetition/codeexecution:latest
+          docker push distributedcodingcompetition/codepersistence:latest
+          docker push distributedcodingcompetition/execrunner:latest
+          docker push distributedcodingcompetition/judge:latest
+          docker push distributedcodingcompetition/leaderboard:latest
+          docker push distributedcodingcompetition/liveleaders:latest
+          docker push distributedcodingcompetition/web:latest
