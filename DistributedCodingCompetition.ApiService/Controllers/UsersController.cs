@@ -97,6 +97,10 @@ public class UsersController(ContestContext context) : ControllerBase
             .Take(count)
             .ToListAsync();
 
+    [HttpGet("banned")]
+    public async Task<ActionResult<IEnumerable<User>>> GetBannedUsers(int page, int count) =>
+        await context.Users.Where(user => user.Ban != null).ToListAsync();
+
     // PUT: api/Users/5
     /// <summary>
     /// Updates a user

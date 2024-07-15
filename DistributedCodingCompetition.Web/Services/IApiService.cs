@@ -365,4 +365,6 @@ public interface IApiService
     /// <param name="problemPointValue"></param>
     /// <returns></returns>
     Task<bool> TryUpdateProblemPointValueAsync(ProblemPointValue problemPointValue);
+
+    Task<(bool, IReadOnlyList<User>?)> TryReadBannedUsers(int page, int count);
 }

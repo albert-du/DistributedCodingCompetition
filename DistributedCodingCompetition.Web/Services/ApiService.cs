@@ -745,4 +745,18 @@ public sealed class ApiService(HttpClient httpClient, ILogger<ApiService> logger
             return false;
         }
     }
+
+    public async Task<(bool, IReadOnlyList<User>?)> TryReadBannedUsers(int page, int count)
+    {
+        try
+        {
+            return (true, await httpClient.GetFromJsonAsync<IReadOnlyList<User>>($"api/users/banned?page={page}&count={count}"));
+        }
+        catch (Exception ex)
+        {
+            logger.LogError(ex, "Failed to read banned users");
+            return (false, null);
+        }
+
+    }
 }

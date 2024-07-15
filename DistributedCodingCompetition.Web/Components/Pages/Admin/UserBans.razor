@@ -1,0 +1,37 @@
+﻿@page "/admin/bans"
+@inject IApiService ApiService
+<AuthCheck Admin />
+
+<PageTitle>Bans</PageTitle>
+
+<h1 class="text-2xl">Application-wide Bans</h1>
+
+<div>
+    @foreach (var ban in bans)
+    {
+        <div class="flex gap-x-2">
+        </div>
+    }
+</div>
+
+@code {
+    [SupplyParameterFromQuery]
+    public int? Page { get; set; }
+
+    int page => Page ?? 1;
+
+    IReadOnlyDictionary<Guid, Ban> bans = new Dictionary<Guid, Ban>();
+
+    IReadOnlyList<User> banned = [];
+
+    bool NextEnabled => bans.Count == 50;
+
+    bool PrevEnabled => page > 1;
+
+    protected override async Task OnParametersSetAsync()
+    {
+
+    }
+}
+
+
