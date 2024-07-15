@@ -22,13 +22,13 @@ else
             @if (points.TryGetValue(prob.Id, out var ppv))
             {
                 <div>Points set to: @ppv</div>
-                <div><button>Change points</button></div>
+                <div><button @onclick="() => SetPoints(prob)">Change points</button></div>
             }
             else
             {
                 <div>Points not set</div>
                 <div>defaulting to: @contest.DefaultPointsForProblem</div>
-                <div><button>Set points</button></div>
+                <div><button @onclick="() => SetPoints(prob)">Set points</button></div>
             }
         </div>
     }
@@ -68,5 +68,20 @@ else
             return;
         }
         points = ppvs.ToFrozenDictionary(x => x.Id, x => x.Points);
+    }
+
+    void SetPoints(Problem prob)
+    {
+        ModalService.AskInteger("Set points", "Enter points", 0, 100, async (value) =>
+        {
+            if (value is null)
+                return;
+
+            var success = await ApiService.TrySetContestProblemPointValueAsync(Id, prob.Id, value.Value);
+            if (!success)
+                ModalService.ShowError("Failed to set points", "Internal error");
+            else
+                points = points.SetItem(prob.Id, value.Value);
+        });
     }
 }
