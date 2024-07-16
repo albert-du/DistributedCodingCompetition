@@ -23,7 +23,7 @@ public class Problem
     /// <summary>
     /// Navigation Property for the owner of the problem.
     /// </summary>
-    public User? Owner { get; set; }
+    public User Owner { get; set; } = null!;
 
     /// <summary>
     /// Tag line for the problem.

@@ -24,6 +24,11 @@ public class Submission
     /// Id of the contest
     /// </summary>
     public Guid? ContestId { get; set; }
+    
+    /// <summary>
+    /// Navigation Property for the contest
+    /// </summary>
+    public Contest? Contest { get; set; }
 
     /// <summary>
     /// Id of the problem
@@ -33,7 +38,7 @@ public class Submission
     /// <summary>
     /// Problem
     /// </summary>
-    public Problem? Problem { get; set; }
+    public Problem Problem { get; set; } = null!;
 
     /// <summary>
     /// Code submitted

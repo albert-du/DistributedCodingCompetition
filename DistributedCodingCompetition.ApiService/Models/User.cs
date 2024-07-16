@@ -86,5 +86,5 @@ public class User
             FullName = FullName,
             CreatedAt = Creation,
             Banned = BanId.HasValue
-        }
+        };
 }
