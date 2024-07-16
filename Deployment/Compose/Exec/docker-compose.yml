@@ -1,0 +1,28 @@
+services:
+  execrunner:
+    image: "albertdu/distributedcodingcompetition-execrunner:latest"
+    environment:
+      PISTON: "http://piston:2000"
+    ports:
+    - target: 8080
+      published: 18880
+    restart: unless-stopped
+
+  piston:
+    image: ghcr.io/engineer-man/piston
+    container_name: piston_api
+    restart: always
+    ports:
+        - 2000:2000
+    volumes:
+        - ./data/piston/packages:/piston/packages
+    tmpfs:
+        - /piston/jobs:exec,uid=1000,gid=1000,mode=711
+        - /tmp:exec
+
+  watchtower:
+    image: containrrr/watchtower
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock
+      - /root/.docker/config.json:/config.json
+    command: --interval 30
