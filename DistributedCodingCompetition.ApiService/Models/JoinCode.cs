@@ -18,7 +18,7 @@ public class JoinCode
     /// <summary>
     /// Contest the code is for.
     /// </summary>
-    public Contest? Contest { get; set; } = null!;
+    public Contest Contest { get; set; } = null!;
 
     /// <summary>
     /// The code to join the contest.
@@ -73,5 +73,5 @@ public class JoinCode
     /// <summary>
     /// Admin user who created the code.
     /// </summary>
-    public User? Creator { get; set; }
+    public User Creator { get; set; } = null!;
 }
