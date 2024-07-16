@@ -183,6 +183,14 @@ services:
       services__codeexecution__http__0: "http://codeexecution:8080"
       OTEL_EXPORTER_OTLP_ENDPOINT: "http://aspire-dashboard:18889"
       OTEL_SERVICE_NAME: "webfrontend"
+      SMTPOptions__From: ${SMTPOptions__From}
+      SMTPOptions__Host: ${SMTPOptions__Host}
+      SMTPOptions__Port: ${SMTPOptions__Port}
+      SMTPOptions__Username: ${SMTPOptions__Username}
+      SMTPOptions__Password: ${SMTPOptions__Password}
+      SMTPOptions__EnableTLS: ${SMTPOptions__EnableTLS}
+      ContestOptions__OpenCreation: "true"
+
     ports:
     - target: 8080
       published: 10014
