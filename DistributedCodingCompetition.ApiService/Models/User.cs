@@ -1,4 +1,4 @@
-﻿namespace DistributedCodingCompetition.Models;
+﻿namespace DistributedCodingCompetition.ApiService.Models;
 
 /// <summary>
 /// User model
@@ -14,7 +14,7 @@ public class User
     /// Unique username of the user
     /// </summary>
     public string Username { get; set; } = string.Empty;
-    
+
     /// <summary>
     /// Email address of the user.
     /// </summary>
@@ -49,22 +49,22 @@ public class User
     /// Submissions navigation property
     /// </summary>
     public ICollection<Submission> Submissions { get; set; } = [];
-    
+
     /// <summary>
     /// Entered contests navigation property
     /// </summary>
     public ICollection<Contest> EnteredContests { get; set; } = [];
-    
+
     /// <summary>
     /// Administered contests navigation property
     /// </summary>
     public ICollection<Contest> OwnedContests { get; set; } = [];
-    
+
     /// <summary>
     /// Administered contests navigation property
     /// </summary>
     public ICollection<Contest> AdministeredContests { get; set; } = [];
-    
+
     /// <summary>
     /// Banned contests navigation property
     /// </summary>
@@ -76,4 +76,15 @@ public class User
     public ICollection<Problem> Problems { get; set; } = [];
 
     public ICollection<Ban> IssuedBans { get; set; } = [];
+
+    internal UserResponseDTO Serialize() =>
+        new()
+        {
+            Id = Id,
+            Username = Username,
+            Email = Email,
+            FullName = FullName,
+            CreatedAt = Creation,
+            Banned = BanId.HasValue
+        }
 }

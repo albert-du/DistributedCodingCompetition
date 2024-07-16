@@ -16,8 +16,35 @@ public class ContestsController(ContestContext context) : ControllerBase
     /// </summary>
     /// <returns></returns>
     [HttpGet]
-    public async Task<ActionResult<IEnumerable<Contest>>> GetContests() =>
-        await context.Contests.ToListAsync();
+    public async Task<PaginateResult<ContestResponseDTO>> GetContests(int page, int count)
+    {
+        var contests = await context.Contests
+            .OrderByDescending(c => c.StartTime)
+            .Skip(count * (page - 1))
+            .Take(count)
+            .Select(c => new { c.Id, c.Name, c.StartTime, c.EndTime, c.Description, c.RenderedDescription })
+            .ToListAsync();
+
+        var total = await context.Contests.CountAsync();
+
+        return new()
+        {
+            Page = page,
+            PageSize = count,
+            TotalCount = total,
+            TotalPages = (int)Math.Ceiling(total / (double)count),
+            Items = contests.Select(c => new ContestResponseDTO()
+            {
+                Id = c.Id,
+                Name = c.Name,
+                StartTime = c.StartTime,
+                EndTime = c.EndTime,
+                Description = c.Description,
+                RenderedDescription = c.RenderedDescription
+            }).ToArray()
+        };
+
+    }
 
     // GET: api/Contests/5
     /// <summary>
@@ -26,11 +53,11 @@ public class ContestsController(ContestContext context) : ControllerBase
     /// <param name="id"></param>
     /// <returns></returns>
     [HttpGet("{id}")]
-    public async Task<ActionResult<Contest>> GetContest(Guid id)
+    public async Task<ActionResult<ContestResponseDTO>> GetContest(Guid id)
     {
         var contest = await context.Contests.FindAsync(id);
 
-        return contest is null ? NotFound() : contest;
+        return contest is null ? NotFound() : contest.Serialize();
     }
 
     // GET: api/contests/joincode/{code}
@@ -40,14 +67,14 @@ public class ContestsController(ContestContext context) : ControllerBase
     /// <param name="code"></param>
     /// <returns></returns>
     [HttpGet("joincode/{code}")]
-    public async Task<ActionResult<Contest>> GetContestByJoinCode(string code)
+    public async Task<ActionResult<ContestResponseDTO>> GetContestByJoinCode(string code)
     {
         var contest = await context.JoinCodes
             .Where(jc => jc.Code == code)
             .Select(jc => jc.Contest)
             .FirstOrDefaultAsync();
 
-        return contest is null ? NotFound() : contest;
+        return contest is null ? NotFound() : contest.Serialize();
     }
 
     // GET: api/contests/{contestId}/admins
@@ -57,11 +84,27 @@ public class ContestsController(ContestContext context) : ControllerBase
     /// <param name="contestId"></param>
     /// <returns></returns>
     [HttpGet("{contestId}/admins")]
-    public async Task<ActionResult<IReadOnlyList<User>>> GetContestAdmins(Guid contestId) =>
-        await context.Contests
-            .Where(c => c.Id == contestId)
-            .SelectMany(c => c.Administrators)
-            .ToListAsync();
+    public async Task<PaginateResult<UserResponseDTO>> GetContestAdmins(Guid contestId, int page, int count)
+    {
+        var resp =
+            await context.Contests
+                .Where(c => c.Id == contestId)
+                .SelectMany(c => c.Administrators)
+                .Skip(count * (page - 1))
+                .Take(count)
+                .ToListAsync();
+
+        var total = await context.Contests.Where(c => c.Id == contestId).SelectMany(c => c.Administrators).CountAsync();
+
+        return new()
+        {
+            Page = page,
+            PageSize = count,
+            TotalCount = total,
+            TotalPages = (int)Math.Ceiling(total / (double)count),
+            Items = resp.Select(u => u.Serialize()).ToArray()
+        };
+    }
 
     // GET: api/contests/{contestId}/joincodes
     /// <summary>
@@ -70,7 +113,7 @@ public class ContestsController(ContestContext context) : ControllerBase
     /// <param name="contestId"></param>
     /// <returns></returns>
     [HttpGet("{contestId}/joincodes")]
-    public async Task<ActionResult<IReadOnlyList<JoinCode>>> GetJoinCodes(Guid contestId) =>
+    public async Task<ActionResult<IReadOnlyList<JoinCodeResponseDTO>>> GetJoinCodes(Guid contestId) =>
         await context.Contests
             .Where(c => c.Id == contestId)
             .SelectMany(c => c.JoinCodes)
@@ -107,13 +150,28 @@ public class ContestsController(ContestContext context) : ControllerBase
     /// <param name="page"></param>
     /// <returns></returns>
     [HttpGet("{contestId}/banned")]
-    public async Task<ActionResult<IReadOnlyList<User>>> GetContestBannedUsers(Guid contestId, int count, int page) =>
-        await context.Contests
-            .Where(c => c.Id == contestId)
-            .SelectMany(c => c.Banned)
-            .Skip(count * (page - 1))
-            .Take(count)
-            .ToListAsync();
+    public async Task<PaginateResult<UserResponseDTO>> GetContestBannedUsers(Guid contestId, int count, int page)
+    {
+
+        var resp =
+            await context.Contests
+                .Where(c => c.Id == contestId)
+                .SelectMany(c => c.Banned)
+                .Skip(count * (page - 1))
+                .Take(count)
+                .ToListAsync();
+
+        var total = await context.Contests.Where(c => c.Id == contestId).SelectMany(c => c.Banned).CountAsync();
+
+        return new()
+        {
+            Page = page,
+            PageSize = count,
+            TotalCount = total,
+            TotalPages = (int)Math.Ceiling(total / (double)count),
+            Items = resp.Select(u => u.Serialize()).ToArray()
+        };
+    }
 
     // GET api/contests/{contestId}/participants?count={count}&page={page}
     /// <summary>

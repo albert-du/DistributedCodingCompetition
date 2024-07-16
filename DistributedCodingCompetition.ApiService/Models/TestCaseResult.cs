@@ -1,4 +1,4 @@
-﻿namespace DistributedCodingCompetition.Models;
+﻿namespace DistributedCodingCompetition.ApiService.Models;
 
 /// <summary>
 /// Result of a test case

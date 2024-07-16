@@ -28,9 +28,11 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "DistributedCodingCompetitio
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "DistributedCodingCompetition.LiveLeaders", "DistributedCodingCompetition.LiveLeaders\DistributedCodingCompetition.LiveLeaders.csproj", "{5558F9F2-6E67-416C-8D17-BDE05E1CFDA2}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "DistributedCodingCompetition.Models", "DistributedCodingCompetition.Models\DistributedCodingCompetition.Models.csproj", "{419497D6-B697-4B5E-9AEC-4A663BE675BA}"
-EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "DistributedCodingCompetition.AuthModels", "DistributedCodingCompetition.AuthModels\DistributedCodingCompetition.AuthModels.csproj", "{5D657FAC-279A-493E-B2C9-008C68A843DD}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "DistributedCodingCompetition.ApiService.Models", "DistributedCodingCompetition.ApiService.Models\DistributedCodingCompetition.ApiService.Models.csproj", "{0321400F-BA37-4094-A7F5-2317F287C418}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "DistributedCodingCompetition.ApiService.Client", "DistributedCodingCompetition.ApiService.Client\DistributedCodingCompetition.ApiService.Client.csproj", "{365530C6-E10E-44E6-B757-2A994720F96F}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -90,14 +92,18 @@ Global
 		{5558F9F2-6E67-416C-8D17-BDE05E1CFDA2}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{5558F9F2-6E67-416C-8D17-BDE05E1CFDA2}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{5558F9F2-6E67-416C-8D17-BDE05E1CFDA2}.Release|Any CPU.Build.0 = Release|Any CPU
-		{419497D6-B697-4B5E-9AEC-4A663BE675BA}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{419497D6-B697-4B5E-9AEC-4A663BE675BA}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{419497D6-B697-4B5E-9AEC-4A663BE675BA}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{419497D6-B697-4B5E-9AEC-4A663BE675BA}.Release|Any CPU.Build.0 = Release|Any CPU
 		{5D657FAC-279A-493E-B2C9-008C68A843DD}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
 		{5D657FAC-279A-493E-B2C9-008C68A843DD}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{5D657FAC-279A-493E-B2C9-008C68A843DD}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{5D657FAC-279A-493E-B2C9-008C68A843DD}.Release|Any CPU.Build.0 = Release|Any CPU
+		{0321400F-BA37-4094-A7F5-2317F287C418}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{0321400F-BA37-4094-A7F5-2317F287C418}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{0321400F-BA37-4094-A7F5-2317F287C418}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{0321400F-BA37-4094-A7F5-2317F287C418}.Release|Any CPU.Build.0 = Release|Any CPU
+		{365530C6-E10E-44E6-B757-2A994720F96F}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{365530C6-E10E-44E6-B757-2A994720F96F}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{365530C6-E10E-44E6-B757-2A994720F96F}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{365530C6-E10E-44E6-B757-2A994720F96F}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

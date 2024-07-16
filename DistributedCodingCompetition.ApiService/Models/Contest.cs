@@ -1,4 +1,4 @@
-﻿namespace DistributedCodingCompetition.Models;
+﻿namespace DistributedCodingCompetition.ApiService.Models;
 
 /// <summary>
 /// Contest model
@@ -133,4 +133,15 @@ public class Contest
     /// The number of points to assign for a problem
     /// </summary>
     public ICollection<ProblemPointValue> CustomProblemPointValues { get; set; } = [];
+
+    internal ContestResponseDTO Serialize() =>
+        new()
+        {
+            Id = Id,
+            Name = Name,
+            Description = Description,
+            RenderedDescription = RenderedDescription,
+            StartTime = StartTime,
+            EndTime = EndTime,
+        };
 }
