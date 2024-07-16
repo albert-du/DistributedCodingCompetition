@@ -37,7 +37,8 @@ jobs:
           password: ${{ secrets.DOCKERHUB_TOKEN }}
 
       - name: tailwindcss
-        run: npx tailwindcss -c ./DistributedCodingCompetition.Web/tailwind.config.js -i ./DistributedCodingCompetition.Web/input.css -o ./DistributedCodingCompetition.Web/wwwroot/css/tailwind.css --minify
+        working-directory: ./DistributedCodingCompetition.Web
+        run: sh ./tailwind-build.sh
 
       - name: Restore
         run: dotnet restore 

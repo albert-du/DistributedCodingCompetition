@@ -2,10 +2,10 @@ services:
   execrunner:
     image: "albertdu/distributedcodingcompetition-execrunner:latest"
     environment:
-      PISTON: "http://piston:2000"
+      PISTON: "http://piston:2000/"
     ports:
     - target: 8080
-      published: 18880
+      published: 18881
     restart: unless-stopped
 
   piston:
