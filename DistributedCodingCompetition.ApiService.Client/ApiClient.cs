@@ -25,6 +25,8 @@ internal class ApiClient<TOwner>(HttpClient httpClient, ILogger<TOwner> logger, 
         {
             var response = await httpClient.PutAsJsonAsync(expanded, data);
             var result = await response.Content.ReadFromJsonAsync<TR>();
+            response.EnsureSuccessStatusCode();
+
             logger.LogDebug("Successfully put {TYPE} to {URL}", typeof(T).Name, expanded);
             return (true, result);
         }
@@ -32,6 +34,23 @@ internal class ApiClient<TOwner>(HttpClient httpClient, ILogger<TOwner> logger, 
         {
             logger.LogError(ex, "Failed to put {TYPE} to {URL}", typeof(T).Name, expanded);
             return (false, default);
+        }
+    }
+
+    internal async Task<bool> PutAsync<T>(string url = "", T? data = default)
+    {
+        var expanded = prefix + url;
+        try
+        {
+            var response = await httpClient.PutAsJsonAsync(expanded, data);
+            response.EnsureSuccessStatusCode();
+            logger.LogDebug("Successfully put {TYPE} to {URL}", typeof(T).Name, expanded);
+            return true;
+        }
+        catch (Exception ex)
+        {
+            logger.LogError(ex, "Failed to put {TYPE} to {URL}", typeof(T).Name, expanded);
+            return false;
         }
     }
 

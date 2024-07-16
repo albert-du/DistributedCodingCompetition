@@ -1,10 +1,9 @@
 ﻿namespace DistributedCodingCompetition.ApiService.Controllers;
 
-using System.Collections.Concurrent;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using DistributedCodingCompetition.ApiService.Models;
-using System.Collections.Frozen;
+using static DistributedCodingCompetition.ApiService.QueryExtensions;
 
 [Route("api/[controller]")]
 [ApiController]
@@ -16,35 +15,8 @@ public class ContestsController(ContestContext context) : ControllerBase
     /// </summary>
     /// <returns></returns>
     [HttpGet]
-    public async Task<PaginateResult<ContestResponseDTO>> GetContests(int page, int count)
-    {
-        var contests = await context.Contests
-            .OrderByDescending(c => c.StartTime)
-            .Skip(count * (page - 1))
-            .Take(count)
-            .Select(c => new { c.Id, c.Name, c.StartTime, c.EndTime, c.Description, c.RenderedDescription })
-            .ToListAsync();
-
-        var total = await context.Contests.CountAsync();
-
-        return new()
-        {
-            Page = page,
-            PageSize = count,
-            TotalCount = total,
-            TotalPages = (int)Math.Ceiling(total / (double)count),
-            Items = contests.Select(c => new ContestResponseDTO()
-            {
-                Id = c.Id,
-                Name = c.Name,
-                StartTime = c.StartTime,
-                EndTime = c.EndTime,
-                Description = c.Description,
-                RenderedDescription = c.RenderedDescription
-            }).ToArray()
-        };
-
-    }
+    public async Task<PaginateResult<ContestResponseDTO>> GetContests(int page, int count) =>
+        await context.Contests.AsNoTracking().PaginateAsync(page, count, q => q.ReadContestsAsync());
 
     // GET: api/Contests/5
     /// <summary>
@@ -55,9 +27,9 @@ public class ContestsController(ContestContext context) : ControllerBase
     [HttpGet("{id}")]
     public async Task<ActionResult<ContestResponseDTO>> GetContest(Guid id)
     {
-        var contest = await context.Contests.FindAsync(id);
+        var contests = await context.Contests.AsNoTracking().Where(c => c.Id == id).ReadContestsAsync();
 
-        return contest is null ? NotFound() : contest.Serialize();
+        return contests.Count == 0 ? NotFound() : contests[0];
     }
 
     // GET: api/contests/joincode/{code}
@@ -72,7 +44,7 @@ public class ContestsController(ContestContext context) : ControllerBase
         var contest = await context.JoinCodes
             .Where(jc => jc.Code == code)
             .Select(jc => jc.Contest)
-            .FirstOrDefaultAsync();
+            .ReadContestsAsync();
 
         return contest is null ? NotFound() : contest.Serialize();
     }
@@ -254,7 +226,7 @@ public class ContestsController(ContestContext context) : ControllerBase
                 .OrderByDescending(c => c.StartTime)
                 .Skip(count * (page - 1))
                 .Take(count)
-                .ToListAsync();
+                .ReadContestsAsync();
 
         var total = await context.Contests.Where(c => c.Public).CountAsync();
 
@@ -264,15 +236,7 @@ public class ContestsController(ContestContext context) : ControllerBase
             PageSize = count,
             TotalCount = total,
             TotalPages = (int)Math.Ceiling(total / (double)count),
-            Items = contests.Select(c => new ContestResponseDTO()
-            {
-                Id = c.Id,
-                Name = c.Name,
-                StartTime = c.StartTime,
-                EndTime = c.EndTime,
-                Description = c.Description,
-                RenderedDescription = c.RenderedDescription
-            }).ToArray()
+            Items = contests
         };
     }
 
@@ -520,10 +484,12 @@ public class ContestsController(ContestContext context) : ControllerBase
     /// <param name="contest"></param>
     /// <returns></returns>
     [HttpPut("{id}")]
-    public async Task<IActionResult> PutContest(Guid id, Contest contest)
+    public async Task<IActionResult> PutContest(Guid id, ContestRequestDTO contestDTO)
     {
-        if (id != contest.Id)
+        if (id != contestDTO.Id)
             return BadRequest();
+        // read the contest
+        var contest = await context.Contests.FindAsync(id);
 
         context.Entry(contest).State = EntityState.Modified;
 

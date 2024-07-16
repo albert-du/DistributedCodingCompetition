@@ -1,39 +1,23 @@
-﻿namespace DistributedCodingCompetition.ApiService.Models;
+namespace DistributedCodingCompetition.ApiService.Models;
 
-/// <summary>
-/// Contest model
-/// </summary>
-public class Contest
+public sealed record ContestRequestDTO
 {
-    /// <summary>
-    /// Id of the contest
-    /// </summary>
     public Guid Id { get; set; } = Guid.NewGuid();
-    /// <summary>
-    /// Name of the contest
-    /// </summary>
-    public string Name { get; set; } = string.Empty;
+    public string? Name { get; set; }
+    public string? Description { get; set; }
+    public string? RenderedDescription { get; set; }
+    public DateTime? StartTime { get; set; }
+    public DateTime? EndTime { get; set; }
+    public bool? Active { get; set; }
+    public Guid? OwnerId { get; set; }
+    public bool? Public { get; set; }
+    public bool? Open { get; set; }
+    public int? MinimumAge { get; set; }
+    public int? DefaultPointsForProblem { get; set; }
+}
 
-    /// <summary>
-    /// Description of the contest in markdown
-    /// </summary>
-    public string Description { get; set; } = string.Empty;
 
-    /// <summary>
-    /// Rendered description of the contest in HTML
-    /// </summary>
-    public string RenderedDescription { get; set; } = string.Empty;
-
-    /// <summary>
-    /// UTC time
-    /// </summary>
-    public DateTime StartTime { get; set; }
-
-    /// <summary>
-    /// UTC time
-    /// </summary>
-    public DateTime EndTime { get; set; }
-
+/*
     /// <summary>
     /// Active status of the contest, set to false to "archive"
     /// </summary>
@@ -47,7 +31,7 @@ public class Contest
     /// <summary>
     /// Owner of the contest
     /// </summary>
-    public User Owner { get; set; } = null!;
+    public User? Owner { get; set; }
 
     /// <summary>
     /// Problems in the contest
@@ -133,4 +117,5 @@ public class Contest
     /// The number of points to assign for a problem
     /// </summary>
     public ICollection<ProblemPointValue> CustomProblemPointValues { get; set; } = [];
-}
+
+*/

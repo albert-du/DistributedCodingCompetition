@@ -55,5 +55,15 @@ public sealed class ContestsService : IContestsService
         _apiClient.GetAsync<ProblemPointValueResponseDTO?>($"/{contestId}/pointvalues/{problemId}");
 
     public Task<(bool, ProblemPointValueResponseDTO?)> TryUpdateContestProblemPointValueAsync(ProblemPointValueRequestDTO data) =>
-        _apiClient.PutAsync<ProblemPointValueRequestDTO, ProblemPointValueResponseDTO>($"/pointvalues", data);
+        _apiClient.PutAsync<ProblemPointValueRequestDTO, ProblemPointValueResponseDTO>($"/{data.ContestId}/pointvalues/{data.ProblemId}", data);
+
+    public Task<(bool, ProblemPointValueResponseDTO?)> TryCreateContestProblemPointValueAsync(ProblemPointValueRequestDTO data) =>
+        _apiClient.PostAsync<ProblemPointValueRequestDTO, ProblemPointValueResponseDTO>($"/{data.ContestId}/pointvalues/{data.ProblemId}", data);
+
+    public Task<(bool, Leaderboard?)> TryReadContestLeaderboardAsync(Guid contestId) =>
+        _apiClient.GetAsync<Leaderboard>($"/{contestId}/leaderboard");
+    
+    public Task<bool> TryUpdateUserContestRoleAsync(Guid contestId, Guid userId, ContestRole role) =>
+        _apiClient.PutAsync($"/{contestId}/role/{userId}", role);
+
 }
