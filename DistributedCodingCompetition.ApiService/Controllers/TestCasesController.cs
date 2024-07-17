@@ -18,8 +18,10 @@ public sealed class TestCasesController(ContestContext context) : ControllerBase
     /// </summary>
     /// <returns></returns>
     [HttpGet]
-    public async Task<ActionResult<IEnumerable<TestCase>>> GetTestCases() =>
-        await context.TestCases.ToListAsync();
+    public async Task<PaginateResult<TestCaseResponseDTO>> GetTestCasesAsync(int page, int count) =>
+        await context.TestCases
+            .AsNoTracking()
+            .PaginateAsync(page, count, q => q.ReadTestCasesAsync());
 
     // GET: api/TestCases/5
     /// <summary>
@@ -28,14 +30,10 @@ public sealed class TestCasesController(ContestContext context) : ControllerBase
     /// <param name="id"></param>
     /// <returns></returns>
     [HttpGet("{id}")]
-    public async Task<ActionResult<TestCase>> GetTestCase(Guid id)
+    public async Task<ActionResult<TestCaseResponseDTO>> GetTestCaseAsync(Guid id)
     {
-        var testCase = await context.TestCases.FindAsync(id);
-
-        if (testCase is null)
-            return NotFound();
-
-        return testCase;
+        var testCases = await context.TestCases.AsNoTracking().Where(t => t.Id == id).ReadTestCasesAsync();
+        return testCases.Count == 0 ? NotFound() : testCases[0];
     }
 
     // PUT: api/TestCases/5
@@ -46,10 +44,21 @@ public sealed class TestCasesController(ContestContext context) : ControllerBase
     /// <param name="testCase"></param>
     /// <returns></returns>
     [HttpPut("{id}")]
-    public async Task<IActionResult> PutTestCase(Guid id, TestCase testCase)
+    public async Task<IActionResult> PutTestCaseAsync(Guid id, TestCaseRequestDTO dto)
     {
-        if (id != testCase.Id)
+        if (id != dto.Id)
             return BadRequest();
+
+        var testCase = await context.TestCases.FindAsync(id);
+        if (testCase is null)
+            return NotFound();
+
+        testCase.Input = dto.Input ?? testCase.Input;
+        testCase.Output = dto.Output ?? testCase.Output;
+        testCase.Description = dto.Description ?? testCase.Description;
+        testCase.Sample = dto.Sample ?? testCase.Sample;
+        testCase.Active = dto.Active ?? testCase.Active;
+        testCase.Weight = dto.Weight ?? testCase.Weight;
 
         context.Entry(testCase).State = EntityState.Modified;
 
@@ -78,8 +87,22 @@ public sealed class TestCasesController(ContestContext context) : ControllerBase
     /// <param name="testCase"></param>
     /// <returns></returns>
     [HttpPost]
-    public async Task<ActionResult<TestCase>> PostTestCase(TestCase testCase)
+    public async Task<ActionResult<TestCase>> PostTestCaseAsync(TestCaseRequestDTO dto)
     {
+        if (dto.ProblemId is null)
+            return BadRequest("ProblemId is required");
+
+        TestCase testCase = new()
+        {
+            Id = dto.Id,
+            ProblemId = dto.ProblemId!.Value,
+            Input = dto.Input ?? string.Empty,
+            Output = dto.Output ?? string.Empty,
+            Description = dto.Description ?? string.Empty,
+            Sample = dto.Sample ?? false,
+            Active = dto.Active ?? true,
+            Weight = dto.Weight ?? 100
+        };
 
         // add testcase to problem
         var problem = await context.Problems.FindAsync(testCase.ProblemId);
@@ -90,12 +113,22 @@ public sealed class TestCasesController(ContestContext context) : ControllerBase
 
         testCase.Problem = problem;
 
-
-        //problem.TestCases.Add(testCase);
-
         await context.SaveChangesAsync();
-        testCase.Problem = null;
-        return CreatedAtAction(nameof(GetTestCase), new { id = testCase.Id }, testCase);
+
+        TestCaseResponseDTO response = new()
+        {
+            Id = testCase.Id,
+            ProblemId = testCase.ProblemId,
+            ProblemName = problem.Name,
+            Input = testCase.Input,
+            Output = testCase.Output,
+            Description = testCase.Description,
+            Sample = testCase.Sample,
+            Active = testCase.Active,
+            Weight = testCase.Weight
+        };
+
+        return CreatedAtAction(nameof(GetTestCaseAsync), new { id = testCase.Id }, response);
     }
 
     // DELETE: api/TestCases/5
@@ -105,7 +138,7 @@ public sealed class TestCasesController(ContestContext context) : ControllerBase
     /// <param name="id"></param>
     /// <returns></returns>
     [HttpDelete("{id}")]
-    public async Task<IActionResult> DeleteTestCase(Guid id)
+    public async Task<IActionResult> DeleteTestCaseAsync(Guid id)
     {
         var testCase = await context.TestCases.FindAsync(id);
         if (testCase is null)

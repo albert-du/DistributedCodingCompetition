@@ -10,7 +10,7 @@ using DistributedCodingCompetition.ApiService.Models;
 /// <param name="context"></param>
 [Route("api/[controller]")]
 [ApiController]
-public class UsersController(ContestContext context) : ControllerBase
+public sealed class UsersController(ContestContext context) : ControllerBase
 {
     // GET: api/Users
     /// <summary>

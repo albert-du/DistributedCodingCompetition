@@ -114,7 +114,7 @@ public interface IContestsService
     /// <param name="contestId"></param>
     /// <param name="problemId"></param>
     /// <returns></returns>
-    Task<(bool, ProblemPointValueResponseDTO?)> TryReadContestProblemPointValueAsync(Guid contestId, Guid problemId);
+    Task<(bool, ProblemPointValueResponseDTO?)> TryReadContestProblemPointValueAsync(Guid contestId, Guid problemId, bool autoGenerate = false);
 
     /// <summary>
     /// Updates a problem point value for a contest.

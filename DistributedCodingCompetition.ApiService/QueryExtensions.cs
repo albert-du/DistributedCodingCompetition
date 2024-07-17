@@ -235,4 +235,46 @@ internal static class QueryExtensions
                 Weight = testCase.Weight
             })
             .ToArrayAsync();
+
+    internal static async Task<IReadOnlyList<TestCaseResultDTO>> ReadTestCaseResultsAsync(this IQueryable<TestCaseResult> result) =>
+        await result
+            .Select(r => new
+            {
+                r.SubmissionId,
+                r.TestCaseId,
+                r.Passed,
+                r.Output,
+                r.ExecutionTime,
+                r.Error
+            })
+            .ToAsyncEnumerable()
+            .Select(r => new TestCaseResultDTO
+            {
+                SubmissionId = r.SubmissionId,
+                TestCaseId = r.TestCaseId,
+                Passed = r.Passed,
+                Output = r.Output,
+                ExecutionTime = r.ExecutionTime,
+                Error = r.Error
+            })
+            .ToArrayAsync();
+
+    internal static async Task<IReadOnlyList<ProblemPointValueResponseDTO>> ReadProblemPointValuesAsync(this IQueryable<ProblemPointValue> pointValues) =>
+        await pointValues
+            .Select(pv => new
+            {
+                pv.Id,
+                pv.ContestId,
+                pv.ProblemId,
+                pv.Points
+            })
+            .ToAsyncEnumerable()
+            .Select(pv => new ProblemPointValueResponseDTO
+            {
+                Id = pv.Id,
+                ContestId = pv.ContestId,
+                ProblemId = pv.ProblemId,
+                Points = pv.Points
+            })
+            .ToArrayAsync();
 }

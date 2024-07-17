@@ -1,9 +1,5 @@
 ﻿namespace DistributedCodingCompetition.ApiService.Controllers;
 
-using Microsoft.AspNetCore.Mvc;
-using Microsoft.EntityFrameworkCore;
-using DistributedCodingCompetition.ApiService.Models;
-
 /// <summary>
 /// Api controller for Submissions
 /// </summary>
@@ -47,6 +43,20 @@ public sealed class SubmissionsController(ContestContext context) : ControllerBa
         return submissions.Count == 0 ? NotFound() : submissions[0];
     }
 
+    [HttpPost("{id}/validate")]
+    public async Task<IActionResult> ValidateSubmissionAsync(Guid id, bool valid)
+    {
+        var submission = await context.Submissions.FindAsync(id);
+        if (submission == null)
+            return NotFound();
+
+        submission.Invalidated = !valid;
+
+        await context.SaveChangesAsync();
+
+        return NoContent();
+    }
+
     // POST: api/Submissions
     /// <summary>
     /// Creates a submission
@@ -72,6 +82,18 @@ public sealed class SubmissionsController(ContestContext context) : ControllerBa
 
         return CreatedAtAction(nameof(GetSubmissionAsync), new { id = submission.Id }, submission);
     }
+
+    /// <summary>
+    /// Reads the results of a submission
+    /// </summary>
+    /// <param name="id"></param>
+    /// <returns></returns>
+    [HttpGet("{id}/results")]
+    public async Task<IReadOnlyList<TestCaseResultDTO>> GetResultsAsync(Guid id) =>
+        await context.TestCaseResults
+            .AsNoTracking()
+            .Where(x => x.SubmissionId == id)
+            .ReadTestCaseResultsAsync();
 
     // api/submissions/{submissionId}/results
     /// <summary>
@@ -128,7 +150,7 @@ public sealed class SubmissionsController(ContestContext context) : ControllerBa
     /// <param name="id"></param>
     /// <returns></returns>
     [HttpDelete("{id}")]
-    public async Task<IActionResult> DeleteSubmission(Guid id)
+    public async Task<IActionResult> DeleteSubmissionAsync(Guid id)
     {
         var submission = await context.Submissions.FindAsync(id);
         if (submission == null)
@@ -139,6 +161,7 @@ public sealed class SubmissionsController(ContestContext context) : ControllerBa
 
         return NoContent();
     }
+
     private bool SubmissionExists(Guid id) =>
         context.Submissions.Any(e => e.Id == id);
 }

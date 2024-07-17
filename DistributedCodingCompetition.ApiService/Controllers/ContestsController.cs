@@ -201,8 +201,11 @@ public sealed class ContestsController(ContestContext context) : ControllerBase
     /// <param name="contestId"></param>
     /// <returns></returns>
     [HttpGet("{contestId}/pointvalues")]
-    public async Task<ActionResult<IEnumerable<ProblemPointValue>>> GetProblemPointValuesAsync(Guid contestId) =>
-        await context.ProblemPointValues.AsNoTracking().Where(ppv => ppv.ContestId == contestId).ToListAsync();
+    public async Task<IEnumerable<ProblemPointValueResponseDTO>> GetProblemPointValuesAsync(Guid contestId) =>
+        await context.ProblemPointValues
+            .AsNoTracking()
+            .Where(ppv => ppv.ContestId == contestId)
+            .ReadProblemPointValuesAsync();
 
     /// <summary>
     /// Get point value for a problem in a contest
@@ -211,11 +214,11 @@ public sealed class ContestsController(ContestContext context) : ControllerBase
     /// <param name="problemId"></param>
     /// <returns></returns>
     [HttpGet("{contestId}/pointvalues/{problemId}")]
-    public async Task<ActionResult<ProblemPointValue>> GetProblemPointValueAsync(Guid contestId, Guid problemId, bool generateIfNotExist = true)
+    public async Task<ActionResult<ProblemPointValueResponseDTO>> GetProblemPointValueAsync(Guid contestId, Guid problemId, bool generateIfNotExist = true)
     {
-        var ppv = await context.ProblemPointValues.AsNoTracking().Where(ppv => ppv.ContestId == contestId && ppv.ProblemId == problemId).FirstOrDefaultAsync();
-        if (ppv is not null)
-            return ppv;
+        var ppv = await context.ProblemPointValues.AsNoTracking().Where(ppv => ppv.ContestId == contestId && ppv.ProblemId == problemId).ReadProblemPointValuesAsync();
+        if (ppv.Count > 0)
+            return ppv[0];
 
         // read the contest max
         var contest = await context.Contests.FindAsync(contestId);
@@ -225,7 +228,7 @@ public sealed class ContestsController(ContestContext context) : ControllerBase
         if (!generateIfNotExist)
             return NotFound();
 
-        return new ProblemPointValue() { Id = Guid.Empty, ContestId = contestId, ProblemId = problemId, Points = contest.DefaultPointsForProblem };
+        return new ProblemPointValueResponseDTO() { Id = Guid.Empty, ContestId = contestId, ProblemId = problemId, Points = contest.DefaultPointsForProblem };
     }
 
     [HttpPost("{contestId}/pointvalues/{problemId}")]
@@ -237,7 +240,9 @@ public sealed class ContestsController(ContestContext context) : ControllerBase
         context.ProblemPointValues.Add(ppv);
         await context.SaveChangesAsync();
 
-        return CreatedAtAction(nameof(GetProblemPointValueAsync), new { contestId, problemId }, ppv);
+        ProblemPointValueResponseDTO response = new() { Id = ppv.Id, ContestId = ppv.ContestId, ProblemId = ppv.ProblemId, Points = ppv.Points };
+
+        return CreatedAtAction(nameof(GetProblemPointValueAsync), new { contestId, problemId }, response);
     }
 
     [HttpPut("{contestId}/pointvalues/{problemId}")]
@@ -435,7 +440,10 @@ public sealed class ContestsController(ContestContext context) : ControllerBase
         context.Contests.Add(contest);
         await context.SaveChangesAsync();
 
-        return CreatedAtAction(nameof(GetContestAsync), new { id = contest.Id }, contest);
+        // just read it back
+        var responseDTOs = await context.Contests.Where(c => c.Id == contest.Id).ReadContestsAsync();
+
+        return CreatedAtAction(nameof(GetContestAsync), new { id = contest.Id }, responseDTOs.Count > 0 ? responseDTOs[0] : null);
     }
 
     // POST: api/contests/{contestId}/problems

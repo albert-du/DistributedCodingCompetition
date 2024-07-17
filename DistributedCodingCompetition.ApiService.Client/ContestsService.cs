@@ -66,7 +66,7 @@ public sealed class ContestsService : IContestsService
         apiClient.GetAsync<IReadOnlyList<ProblemPointValueResponseDTO>>($"/{contestId}/pointvalues");
 
     /// <inheritdoc/>
-    public Task<(bool, ProblemPointValueResponseDTO?)> TryReadContestProblemPointValueAsync(Guid contestId, Guid problemId) =>
+    public Task<(bool, ProblemPointValueResponseDTO?)> TryReadContestProblemPointValueAsync(Guid contestId, Guid problemId, bool autoGenerate) =>
         apiClient.GetAsync<ProblemPointValueResponseDTO?>($"/{contestId}/pointvalues/{problemId}");
 
     /// <inheritdoc/>

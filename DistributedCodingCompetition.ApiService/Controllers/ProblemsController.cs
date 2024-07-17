@@ -111,7 +111,12 @@ public sealed class ProblemsController(ContestContext context) : ControllerBase
 
         context.Problems.Add(problem);
         await context.SaveChangesAsync();
-        return CreatedAtAction(nameof(GetProblemAsync), new { id = problem.Id }, problem);
+
+        // read it back
+
+        var dtos = await context.Problems.AsNoTracking().Where(p => p.Id == problem.Id).ReadProblemsAsync();
+
+        return CreatedAtAction(nameof(GetProblemAsync), new { id = problem.Id }, dtos.Count == 0 ? null : dtos[0]);
     }
 
     // DELETE: api/Problems/5
