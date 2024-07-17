@@ -1,5 +1,4 @@
 global using System.Net.Http.Json;
-global using Microsoft.Extensions.Hosting;
 global using Microsoft.Extensions.DependencyInjection;
 global using Microsoft.Extensions.Logging;
 global using DistributedCodingCompetition.ExecutionShared;
@@ -14,22 +13,22 @@ public static class DependencyInjection
     /// <summary>
     /// Add the DistributedCodingCompetition Code Execution Service to the application.
     /// </summary>
-    /// <param name="applicationBuilder"></param>
+    /// <param name="serviceDescriptors"></param>
     /// <param name="apiAddress"></param>
     /// <returns></returns>
-    public static IHostApplicationBuilder AddDistributedCodingCompetitionCodeExecution(this IHostApplicationBuilder applicationBuilder, Uri apiAddress)
+    public static IServiceCollection AddDistributedCodingCompetitionCodeExecution(this IServiceCollection serviceDescriptors, Uri apiAddress)
     {
-        applicationBuilder.Services.AddSingleton<ICodeExecutionService, CodeExecutionService>();
-        applicationBuilder.Services.AddHttpClient<ICodeExecutionService, CodeExecutionService>(client => client.BaseAddress = apiAddress);
-        return applicationBuilder;
+        serviceDescriptors.AddSingleton<ICodeExecutionService, CodeExecutionService>();
+        serviceDescriptors.AddHttpClient<ICodeExecutionService, CodeExecutionService>(client => client.BaseAddress = apiAddress);
+        return serviceDescriptors;
     }
 
     /// <summary>
     /// Add the DistributedCodingCompetition Code Execution Service to the application.
     /// </summary>
-    /// <param name="applicationBuilder"></param>
+    /// <param name="serviceDescriptors"></param>
     /// <param name="apiAddress"></param>
     /// <returns></returns>
-    public static IHostApplicationBuilder AddDistributedCodingCompetitionCodeExecution(this IHostApplicationBuilder applicationBuilder, string apiAddress) =>
-        applicationBuilder.AddDistributedCodingCompetitionCodeExecution(new Uri(apiAddress));
+    public static IServiceCollection AddDistributedCodingCompetitionCodeExecution(this IServiceCollection serviceDescriptors, string apiAddress) =>
+        serviceDescriptors.AddDistributedCodingCompetitionCodeExecution(new Uri(apiAddress));
 }

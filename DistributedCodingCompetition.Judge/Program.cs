@@ -8,6 +8,10 @@ var builder = WebApplication.CreateBuilder(args);
 
 builder.AddServiceDefaults();
 
+builder.AddDistributedCodingCompetitionAPI("https+http://apiservice");
+builder.AddDistributedCodingCompetitionCodeExecution("https+http://codeexecution");
+builder.AddDistributedCodingCompetitionLiveLeaders("https+http://liveleaders");
+
 // Add services to the container.
 
 builder.Services.AddControllers();
@@ -19,9 +23,6 @@ builder.Services.AddStackExchangeRedisCache(options =>
     options.Configuration = builder.Configuration.GetConnectionString("cache");
     options.InstanceName = "RateLimit";
 });
-builder.AddDistributedCodingCompetitionAPI("https+http://apiservice");
-builder.AddDistributedCodingCompetitionCodeExecution("https+http://codeexecution");
-builder.AddDistributedCodingCompetitionLiveLeaders("https+http://liveleaders");
 
 builder.Services.AddSingleton<IRateLimitService, RateLimitService>();
 

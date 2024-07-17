@@ -1,4 +1,3 @@
-global using Microsoft.Extensions.Hosting;
 global using Microsoft.Extensions.DependencyInjection;
 global using Microsoft.Extensions.Logging;
 
@@ -12,22 +11,22 @@ public static class DependencyInjection
     /// <summary>
     /// Add the DistributedCodingCompetition Judge Service to the application.
     /// </summary>
-    /// <param name="applicationBuilder"></param>
+    /// <param name="serviceDescriptors"></param>
     /// <param name="apiAddress"></param>
     /// <returns></returns>
-    public static IHostApplicationBuilder AddDistributedCodingCompetitionJudge(this IHostApplicationBuilder applicationBuilder, Uri apiAddress)
+    public static IServiceCollection AddDistributedCodingCompetitionJudge(this IServiceCollection serviceDescriptors, Uri apiAddress)
     {
-        applicationBuilder.Services.AddSingleton<IJudgeService, JudgeService>();
-        applicationBuilder.Services.AddHttpClient<IJudgeService, JudgeService>(client => client.BaseAddress = apiAddress);
-        return applicationBuilder;
+        serviceDescriptors.AddSingleton<IJudgeService, JudgeService>();
+        serviceDescriptors.AddHttpClient<IJudgeService, JudgeService>(client => client.BaseAddress = apiAddress);
+        return serviceDescriptors;
     }
 
     /// <summary>
     /// Add the DistributedCodingCompetition Judge Service to the application.
     /// </summary>
-    /// <param name="applicationBuilder"></param>
+    /// <param name="serviceDescriptors"></param>
     /// <param name="apiAddress"></param>
     /// <returns></returns>
-    public static IHostApplicationBuilder AddDistributedCodingCompetitionJudge(this IHostApplicationBuilder applicationBuilder, string apiAddress) =>
-        applicationBuilder.AddDistributedCodingCompetitionJudge(new Uri(apiAddress));
+    public static IServiceCollection AddDistributedCodingCompetitionJudge(this IServiceCollection serviceDescriptors, string apiAddress) =>
+        serviceDescriptors.AddDistributedCodingCompetitionJudge(new Uri(apiAddress));
 }

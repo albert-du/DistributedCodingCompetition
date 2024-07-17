@@ -47,8 +47,8 @@ public class SubmissionsService : ISubmissionsService
         TryInvalidateSubmissionAsync(id, false);
 
     /// <inheritdoc />
-    public Task<(bool, SubmissionResponseDTO?)> TryUpdateSubmissionResultsAsync(Guid id, IEnumerable<TestCaseResultDTO> results) =>
-        apiClient.PostAsync<IEnumerable<TestCaseResultDTO>, SubmissionResponseDTO>($"{id}/results", results);
+    public Task<(bool, SubmissionResponseDTO?)> TryUpdateSubmissionResultsAsync(Guid id, IEnumerable<TestCaseResultDTO> results, int possible, int score) =>
+        apiClient.PostAsync<IEnumerable<TestCaseResultDTO>, SubmissionResponseDTO>($"{id}/results?possible={possible}&score={score}", results);
 
     public Task<(bool, IReadOnlyList<TestCaseResultDTO>?)> TryReadSubmissionResultsAsync(Guid id) =>
         apiClient.GetAsync<IReadOnlyList<TestCaseResultDTO>>($"{id}/results");

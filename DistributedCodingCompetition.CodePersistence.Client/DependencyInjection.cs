@@ -1,5 +1,4 @@
 global using System.Net.Http.Json;
-global using Microsoft.Extensions.Hosting;
 global using Microsoft.Extensions.DependencyInjection;
 global using Microsoft.Extensions.Logging;
 
@@ -13,22 +12,22 @@ public static class DependencyInjection
     /// <summary>
     /// Add the DistributedCodingCompetition Code Persistence Service to the application.
     /// </summary>
-    /// <param name="applicationBuilder"></param>
+    /// <param name="serviceDescriptors"></param>
     /// <param name="apiAddress"></param>
     /// <returns></returns>
-    public static IHostApplicationBuilder AddDistributedCodingCompetitionCodePersistence(this IHostApplicationBuilder applicationBuilder, Uri apiAddress)
+    public static IServiceCollection AddDistributedCodingCompetitionCodePersistence(this IServiceCollection serviceDescriptors, Uri apiAddress)
     {
-        applicationBuilder.Services.AddSingleton<ICodePersistenceService, CodePersistenceService>();
-        applicationBuilder.Services.AddHttpClient<ICodePersistenceService, CodePersistenceService>(client => client.BaseAddress = apiAddress);
-        return applicationBuilder;
+        serviceDescriptors.AddSingleton<ICodePersistenceService, CodePersistenceService>();
+        serviceDescriptors.AddHttpClient<ICodePersistenceService, CodePersistenceService>(client => client.BaseAddress = apiAddress);
+        return serviceDescriptors;
     }
 
     /// <summary>
     /// Add the DistributedCodingCompetition Code Persistence Service to the application.
     /// </summary>
-    /// <param name="applicationBuilder"></param>
+    /// <param name="serviceDescriptors"></param>
     /// <param name="apiAddress"></param>
     /// <returns></returns>
-    public static IHostApplicationBuilder AddDistributedCodingCompetitionCodePersistence(this IHostApplicationBuilder applicationBuilder, string apiAddress) =>
-        applicationBuilder.AddDistributedCodingCompetitionCodePersistence(new Uri(apiAddress));
+    public static IServiceCollection AddDistributedCodingCompetitionCodePersistence(this IServiceCollection serviceDescriptors, string apiAddress) =>
+        serviceDescriptors.AddDistributedCodingCompetitionCodePersistence(new Uri(apiAddress));
 }

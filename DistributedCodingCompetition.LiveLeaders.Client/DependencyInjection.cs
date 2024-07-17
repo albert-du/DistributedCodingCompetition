@@ -1,5 +1,4 @@
 global using System.Net.Http.Json;
-global using Microsoft.Extensions.Hosting;
 global using Microsoft.Extensions.DependencyInjection;
 global using Microsoft.Extensions.Logging;
 global using DistributedCodingCompetition.ApiService.Models;
@@ -14,22 +13,22 @@ public static class DependencyInjection
     /// <summary>
     /// Add the DistributedCodingCompetition LiveLeaders Service to the application.
     /// </summary>
-    /// <param name="applicationBuilder"></param>
+    /// <param name="serviceDescriptors"></param>
     /// <param name="apiAddress"></param>
     /// <returns></returns>
-    public static IHostApplicationBuilder AddDistributedCodingCompetitionLiveLeaders(this IHostApplicationBuilder applicationBuilder, Uri apiAddress)
+    public static IServiceCollection AddDistributedCodingCompetitionLiveLeaders(this IServiceCollection serviceDescriptors, Uri apiAddress)
     {
-        applicationBuilder.Services.AddSingleton<ILiveReportingService, LiveReportingService>();
-        applicationBuilder.Services.AddHttpClient<ILiveReportingService, LiveReportingService>(client => client.BaseAddress = apiAddress);
-        return applicationBuilder;
+        serviceDescriptors.AddSingleton<ILiveReportingService, LiveReportingService>();
+        serviceDescriptors.AddHttpClient<ILiveReportingService, LiveReportingService>(client => client.BaseAddress = apiAddress);
+        return serviceDescriptors;
     }
 
     /// <summary>
     /// Add the DistributedCodingCompetition LiveLeaders Service to the application.
     /// </summary>
-    /// <param name="applicationBuilder"></param>
+    /// <param name="serviceDescriptors"></param>
     /// <param name="apiAddress"></param>
     /// <returns></returns>
-    public static IHostApplicationBuilder AddDistributedCodingCompetitionLiveLeaders(this IHostApplicationBuilder applicationBuilder, string apiAddress) =>
-        applicationBuilder.AddDistributedCodingCompetitionLiveLeaders(new Uri(apiAddress));
+    public static IServiceCollection AddDistributedCodingCompetitionLiveLeaders(this IServiceCollection serviceDescriptors, string apiAddress) =>
+        serviceDescriptors.AddDistributedCodingCompetitionLiveLeaders(new Uri(apiAddress));
 }

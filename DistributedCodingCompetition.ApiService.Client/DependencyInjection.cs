@@ -1,7 +1,6 @@
 global using System.Net.Http.Json;
 global using Microsoft.Extensions.Logging;
 global using Microsoft.Extensions.DependencyInjection;
-global using Microsoft.Extensions.Hosting;
 global using DistributedCodingCompetition.ApiService.Models;
 
 namespace DistributedCodingCompetition.ApiService.Client;
@@ -13,38 +12,38 @@ public static class DependencyInjection
     /// <summary>
     /// Add the DistributedCodingCompetition API Service to the application.
     /// </summary>
-    /// <param name="applicationBuilder"></param>
+    /// <param name="serviceDescriptors"></param>
     /// <param name="apiAddress"></param>
     /// <returns></returns>
-    public static IHostApplicationBuilder AddDistributedCodingCompetitionAPI(this IHostApplicationBuilder applicationBuilder, Uri apiAddress)
+    public static IServiceCollection AddDistributedCodingCompetitionAPI(this IServiceCollection serviceDescriptors, Uri apiAddress)
     {
-        applicationBuilder.Services.AddSingleton<IContestsService, ContestsService>();
-        applicationBuilder.Services.AddHttpClient<IContestsService, ContestsService>(client => client.BaseAddress = apiAddress);
+        serviceDescriptors.AddSingleton<IContestsService, ContestsService>();
+        serviceDescriptors.AddHttpClient<IContestsService, ContestsService>(client => client.BaseAddress = apiAddress);
 
-        applicationBuilder.Services.AddSingleton<IJoinCodesService, JoinCodesService>();
-        applicationBuilder.Services.AddHttpClient<IJoinCodesService, JoinCodesService>(client => client.BaseAddress = apiAddress);
+        serviceDescriptors.AddSingleton<IJoinCodesService, JoinCodesService>();
+        serviceDescriptors.AddHttpClient<IJoinCodesService, JoinCodesService>(client => client.BaseAddress = apiAddress);
 
-        applicationBuilder.Services.AddSingleton<IProblemsService, ProblemsService>();
-        applicationBuilder.Services.AddHttpClient<IProblemsService, ProblemsService>(client => client.BaseAddress = apiAddress);
+        serviceDescriptors.AddSingleton<IProblemsService, ProblemsService>();
+        serviceDescriptors.AddHttpClient<IProblemsService, ProblemsService>(client => client.BaseAddress = apiAddress);
 
-        applicationBuilder.Services.AddSingleton<ISubmissionsService, SubmissionsService>();
-        applicationBuilder.Services.AddHttpClient<ISubmissionsService, SubmissionsService>(client => client.BaseAddress = apiAddress);
+        serviceDescriptors.AddSingleton<ISubmissionsService, SubmissionsService>();
+        serviceDescriptors.AddHttpClient<ISubmissionsService, SubmissionsService>(client => client.BaseAddress = apiAddress);
 
-        applicationBuilder.Services.AddSingleton<ITestCasesService, TestCasesService>();
-        applicationBuilder.Services.AddHttpClient<ITestCasesService, TestCasesService>(client => client.BaseAddress = apiAddress);
+        serviceDescriptors.AddSingleton<ITestCasesService, TestCasesService>();
+        serviceDescriptors.AddHttpClient<ITestCasesService, TestCasesService>(client => client.BaseAddress = apiAddress);
 
-        applicationBuilder.Services.AddSingleton<IUsersService, UsersService>();
-        applicationBuilder.Services.AddHttpClient<IUsersService, UsersService>(client => client.BaseAddress = apiAddress);
+        serviceDescriptors.AddSingleton<IUsersService, UsersService>();
+        serviceDescriptors.AddHttpClient<IUsersService, UsersService>(client => client.BaseAddress = apiAddress);
 
-        return applicationBuilder;
+        return serviceDescriptors;
     }
 
     /// <summary>
     /// Add the DistributedCodingCompetition API Service to the application.
     /// </summary>
-    /// <param name="applicationBuilder"></param>
+    /// <param name="serviceDescriptors"></param>
     /// <param name="apiAddress"></param>
     /// <returns></returns>
-    public static IHostApplicationBuilder AddDistributedCodingCompetitionAPI(this IHostApplicationBuilder applicationBuilder, string apiAddress) =>
-        applicationBuilder.AddDistributedCodingCompetitionAPI(new Uri(apiAddress));
+    public static IServiceCollection AddDistributedCodingCompetitionAPI(this IServiceCollection serviceDescriptors, string apiAddress) =>
+        serviceDescriptors.AddDistributedCodingCompetitionAPI(new Uri(apiAddress));
 }

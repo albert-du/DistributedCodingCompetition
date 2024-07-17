@@ -32,7 +32,7 @@ public sealed class JudgeService : IJudgeService
         catch (HttpRequestException ex)
         {
             _logger.LogError(ex, "Error while judging submission {SubmissionId}", submissionId);
-            return $"An error occured while juding this submission: {ex.StatusCode}";
+            return $"An error occurred while judging this submission: {ex.StatusCode}";
         }
     }
 
@@ -49,7 +49,7 @@ public sealed class JudgeService : IJudgeService
         catch (HttpRequestException ex)
         {
             _logger.LogError(ex, "Error while rejudging submission {SubmissionId}", submissionId);
-            return $"An error occured while rejuding this submission: {ex.StatusCode}";
+            return $"An error occurred while rejudging this submission: {ex.StatusCode}";
         }
     }
 
@@ -65,8 +65,8 @@ public sealed class JudgeService : IJudgeService
         }
         catch (HttpRequestException ex)
         {
-            _logger.LogError(ex, "Error while rejudging probkem {problemId}", problemId);
-            return $"An error occured while rejuding this problem: {ex.StatusCode}";
+            _logger.LogError(ex, "Error while rejudging problem {problemId}", problemId);
+            return $"An error occurred while rejudging this problem: {ex.StatusCode}";
         }
     }
 }

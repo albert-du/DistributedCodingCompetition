@@ -1,11 +1,14 @@
 global using DistributedCodingCompetition.ApiService.Models;
 global using DistributedCodingCompetition.Leaderboard.Services;
+global using DistributedCodingCompetition.ApiService.Client;
+global using DistributedCodingCompetition.LiveLeaders.Client;
 
 var builder = WebApplication.CreateBuilder(args);
 
 builder.AddServiceDefaults();
 
 // Add services to the container.
+
 // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
@@ -15,10 +18,11 @@ builder.Services.AddStackExchangeRedisCache(options =>
     options.InstanceName = "RateLimit";
 });
 
+builder.Services.AddDistributedCodingCompetitionLiveLeaders("https+http://liveleaders");
+builder.Services.AddDistributedCodingCompetitionAPI("https+http://apiservice");
+
 builder.Services.AddSingleton<ILeaderboardService, LeaderboardService>();
-builder.Services.AddHttpClient<ILeaderboardService, LeaderboardService>(client => client.BaseAddress = new("https+http://apiservice"));
-builder.Services.AddSingleton<ILiveReportingService, LiveReportingService>();
-builder.Services.AddHttpClient<ILiveReportingService, LiveReportingService>(client => client.BaseAddress = new("https+http://liveleaders"));
+builder.Services.AddHttpClient<ILeaderboardService, LeaderboardService>();
 
 var app = builder.Build();
 

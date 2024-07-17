@@ -14,9 +14,13 @@
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\DistributedCodingCompetition.AuthModels\DistributedCodingCompetition.AuthModels.csproj" />
-    <ProjectReference Include="..\DistributedCodingCompetition.ExecutionShared\DistributedCodingCompetition.ExecutionShared.csproj" />
     <ProjectReference Include="..\DistributedCodingCompetition.ServiceDefaults\DistributedCodingCompetition.ServiceDefaults.csproj" />
+    <ProjectReference Include="..\DistributedCodingCompetition.ApiService.Client\DistributedCodingCompetition.ApiService.Client.csproj" />
+    <ProjectReference Include="..\DistributedCodingCompetition.AuthService.Client\DistributedCodingCompetition.AuthService.Client.csproj" />
+    <ProjectReference Include="..\DistributedCodingCompetition.CodeExecution.Client\DistributedCodingCompetition.CodeExecution.Client.csproj" />
+    <ProjectReference Include="..\DistributedCodingCompetition.CodePersistence.Client\DistributedCodingCompetition.CodePersistence.Client.csproj" />
+    <ProjectReference Include="..\DistributedCodingCompetition.Judge.Client\DistributedCodingCompetition.Judge.Client.csproj" />
+    <ProjectReference Include="..\DistributedCodingCompetition.Leaderboard.Client\DistributedCodingCompetition.Leaderboard.Client.csproj" />
   </ItemGroup>
 
   <ItemGroup>

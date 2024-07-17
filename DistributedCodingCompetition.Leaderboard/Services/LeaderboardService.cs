@@ -5,7 +5,7 @@ using Microsoft.Extensions.Caching.Distributed;
 using DistributedCodingCompetition.ApiService.Models;
 
 /// <inheritdoc/>
-public class LeaderboardService(ILogger<LeaderboardService> logger, HttpClient httpClient, IDistributedCache distributedCache, ILiveReportingService liveReportingService) : ILeaderboardService
+public class LeaderboardService(ILogger<LeaderboardService> logger, IContestsService contestsService, IDistributedCache distributedCache, ILiveReportingService liveReportingService) : ILeaderboardService
 {
     private static readonly DistributedCacheEntryOptions options = new() { AbsoluteExpirationRelativeToNow = TimeSpan.FromSeconds(30) };
 
@@ -20,7 +20,13 @@ public class LeaderboardService(ILogger<LeaderboardService> logger, HttpClient h
 
         // fetch the leaderboard from the api
         var start = DateTime.UtcNow;
-        var response = await httpClient.GetFromJsonAsync<Leaderboard>($"api/contests/{contest}/leaderboard");
+        var (success, response) = await contestsService.TryReadContestLeaderboardAsync(contest);
+        if (!success || response is null)
+        {
+            logger.LogCritical("Failed to fetch leaderboard for contest {Contest}", contest);
+            return null;
+        }
+
         logger.LogInformation("Fetched leaderboard in {Elapsed}", DateTime.UtcNow - start);
         if (response == null)
             return null;

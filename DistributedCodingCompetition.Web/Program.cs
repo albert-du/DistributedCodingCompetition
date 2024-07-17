@@ -3,6 +3,13 @@ global using DistributedCodingCompetition.Web.Services;
 global using DistributedCodingCompetition.Web.Components;
 global using DistributedCodingCompetition.Web.Models;
 global using Microsoft.Extensions.Options;
+global using DistributedCodingCompetition.ApiService.Client;
+global using DistributedCodingCompetition.AuthService.Client;
+global using DistributedCodingCompetition.CodeExecution.Client;
+global using DistributedCodingCompetition.CodePersistence.Client;
+global using DistributedCodingCompetition.Judge.Client;
+global using DistributedCodingCompetition.Leaderboard.Client;
+
 using Microsoft.AspNetCore.Authentication.Cookies;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -10,6 +17,7 @@ var builder = WebApplication.CreateBuilder(args);
 // Add service defaults & Aspire components.
 builder.AddServiceDefaults();
 builder.AddRedisOutputCache("cache");
+
 
 // Add services to the container.
 builder.Services.AddControllers();
@@ -22,28 +30,21 @@ builder.Services.AddAuthentication(CookieAuthenticationDefaults.AuthenticationSc
 
 builder.Services.AddHttpContextAccessor();
 
-builder.Services.AddSingleton<IMarkdownRenderService, MarkdownRenderService>();
-builder.Services.AddSingleton<IEmailService, EmailService>();
-builder.Services.AddSingleton<CodeExecutionClient>();
-builder.Services.AddSingleton<IApiService, ApiService>();
-builder.Services.AddSingleton<IJudgeService, JudgeService>();
-builder.Services.AddSingleton<ICodePersistenceService, CodePersistenceService>();
-builder.Services.AddSingleton<ILeaderboardService, LeaderboardService>();
+builder.Services.AddDistributedCodingCompetitionAPI("https+http://apiservice");
+builder.Services.AddDistributedCodingCompetitionAuth("https+http://authentication");
+builder.Services.AddDistributedCodingCompetitionLeaderboard("https+http://leaderboard");
+builder.Services.AddDistributedCodingCompetitionCodeExecution("https+http://codeexecution");
+builder.Services.AddDistributedCodingCompetitionJudge("https+http://judge");
+builder.Services.AddDistributedCodingCompetitionCodePersistence("https+http://codepersistence");
 
 builder.Services.AddScoped<IModalService, ModalService>();
-builder.Services.AddScoped<IAuthService, AuthService>();
 builder.Services.AddScoped<IUserStateService, UserStateService>();
 builder.Services.AddScoped<ITimeZoneProvider, TimeZoneProvider>();
 builder.Services.AddScoped<IClipboardService, BrowserClipboardService>();
 builder.Services.AddScoped<ICurrentSavedCodeProvider, CurrentSavedCodeProvider>();
 builder.Services.AddScoped<ISelectedLanguageService, SelectedLanguageService>();
-
-builder.Services.AddHttpClient<CodeExecutionClient>(client => client.BaseAddress = new("https+http://codeexecution"));
-builder.Services.AddHttpClient<ICodePersistenceService, CodePersistenceService>(client => client.BaseAddress = new("https+http://codepersistence"));
-builder.Services.AddHttpClient<IAuthService, AuthService>(client => client.BaseAddress = new("https+http://authentication"));
-builder.Services.AddHttpClient<IApiService, ApiService>(client => client.BaseAddress = new("https+http://apiservice"));
-builder.Services.AddHttpClient<IJudgeService, JudgeService>(client => client.BaseAddress = new("https+http://judge"));
-builder.Services.AddHttpClient<ILeaderboardService, LeaderboardService>(client => client.BaseAddress = new("https+http://leaderboard"));
+builder.Services.AddSingleton<IMarkdownRenderService, MarkdownRenderService>();
+builder.Services.AddSingleton<IEmailService, EmailService>();
 
 builder.Services.AddSingleton(_ =>
 {

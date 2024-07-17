@@ -35,7 +35,7 @@ public interface ISubmissionsService
     /// </summary>
     /// <param name="results"></param>
     /// <returns></returns>
-    Task<(bool, SubmissionResponseDTO?)> TryUpdateSubmissionResultsAsync(Guid id, IEnumerable<TestCaseResultDTO> results);
+    Task<(bool, SubmissionResponseDTO?)> TryUpdateSubmissionResultsAsync(Guid id, IEnumerable<TestCaseResultDTO> results, int possible, int score);
 
     /// <summary>
     /// Reads the results of a submission.

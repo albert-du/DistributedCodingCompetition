@@ -1,5 +1,4 @@
 global using System.Net.Http.Json;
-global using Microsoft.Extensions.Hosting;
 global using Microsoft.Extensions.DependencyInjection;
 global using Microsoft.Extensions.Logging;
 global using DistributedCodingCompetition.AuthService.Models;
@@ -14,22 +13,22 @@ public static class DependencyInjection
     /// <summary>
     /// Add the DistributedCodingCompetition Auth Service to the application.
     /// </summary>
-    /// <param name="applicationBuilder"></param>
+    /// <param name="serviceDescriptors"></param>
     /// <param name="apiAddress"></param>
     /// <returns></returns>
-    public static IHostApplicationBuilder AddDistributedCodingCompetitionAuth(this IHostApplicationBuilder applicationBuilder, Uri apiAddress)
+    public static IServiceCollection AddDistributedCodingCompetitionAuth(this IServiceCollection serviceDescriptors, Uri apiAddress)
     {
-        applicationBuilder.Services.AddSingleton<IAuthService, AuthService>();
-        applicationBuilder.Services.AddHttpClient<IAuthService, AuthService>(client => client.BaseAddress = apiAddress);
-        return applicationBuilder;
+        serviceDescriptors.AddSingleton<IAuthService, AuthService>();
+        serviceDescriptors.AddHttpClient<IAuthService, AuthService>(client => client.BaseAddress = apiAddress);
+        return serviceDescriptors;
     }
 
     /// <summary>
     /// Add the DistributedCodingCompetition Auth Service to the application.
     /// </summary>
-    /// <param name="applicationBuilder"></param>
+    /// <param name="serviceDescriptors"></param>
     /// <param name="apiAddress"></param>
     /// <returns></returns>
-    public static IHostApplicationBuilder AddDistributedCodingCompetitionAuth(this IHostApplicationBuilder applicationBuilder, string apiAddress) =>
-        applicationBuilder.AddDistributedCodingCompetitionAuth(new Uri(apiAddress));
+    public static IServiceCollection AddDistributedCodingCompetitionAuth(this IServiceCollection serviceDescriptors, string apiAddress) =>
+        serviceDescriptors.AddDistributedCodingCompetitionAuth(new Uri(apiAddress));
 }
