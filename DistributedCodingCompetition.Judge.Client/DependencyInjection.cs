@@ -1,4 +1,3 @@
-global using System.Net.Http.Json;
 global using Microsoft.Extensions.Hosting;
 global using Microsoft.Extensions.DependencyInjection;
 global using Microsoft.Extensions.Logging;
@@ -18,6 +17,8 @@ public static class DependencyInjection
     /// <returns></returns>
     public static IHostApplicationBuilder AddDistributedCodingCompetitionJudge(this IHostApplicationBuilder applicationBuilder, Uri apiAddress)
     {
+        applicationBuilder.Services.AddSingleton<IJudgeService, JudgeService>();
+        applicationBuilder.Services.AddHttpClient<IJudgeService, JudgeService>(client => client.BaseAddress = apiAddress);
         return applicationBuilder;
     }
 

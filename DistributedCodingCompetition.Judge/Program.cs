@@ -1,6 +1,8 @@
 
-global using DistributedCodingCompetition.Models;
-using DistributedCodingCompetition.Judge.Services;
+global using DistributedCodingCompetition.ApiService.Client;
+global using DistributedCodingCompetition.CodeExecution.Client;
+global using DistributedCodingCompetition.LiveLeaders.Client;
+global using DistributedCodingCompetition.Judge.Services;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -17,17 +19,9 @@ builder.Services.AddStackExchangeRedisCache(options =>
     options.Configuration = builder.Configuration.GetConnectionString("cache");
     options.InstanceName = "RateLimit";
 });
-
-builder.Services.AddSingleton<ICodeExecutionService, CodeExecutionService>();
-builder.Services.AddHttpClient<ICodeExecutionService, CodeExecutionService>(client => client.BaseAddress = new("https+http://codeexecution"));
-builder.Services.AddSingleton<ISubmissionService, SubmissionService>();
-builder.Services.AddHttpClient<ISubmissionService, SubmissionService>(client => client.BaseAddress = new("https+http://apiservice"));
-builder.Services.AddSingleton<IProblemService, ProblemService>();
-builder.Services.AddHttpClient<IProblemService, ProblemService>(client => client.BaseAddress = new("https+http://apiservice"));
-builder.Services.AddSingleton<IProblemPointValueService, ProblemPointValueService>();
-builder.Services.AddHttpClient<IProblemPointValueService, ProblemPointValueService>(client => client.BaseAddress = new("https+http://apiservice"));
-builder.Services.AddSingleton<ILiveReportingService, LiveReportingService>();
-builder.Services.AddHttpClient<ILiveReportingService, LiveReportingService>(client => client.BaseAddress = new("https+http://liveleaders"));
+builder.AddDistributedCodingCompetitionAPI("https+http://apiservice");
+builder.AddDistributedCodingCompetitionCodeExecution("https+http://codeexecution");
+builder.AddDistributedCodingCompetitionLiveLeaders("https+http://liveleaders");
 
 builder.Services.AddSingleton<IRateLimitService, RateLimitService>();
 

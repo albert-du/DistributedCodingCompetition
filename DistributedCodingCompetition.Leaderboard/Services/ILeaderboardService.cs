@@ -1,6 +1,6 @@
 ﻿namespace DistributedCodingCompetition.Leaderboard.Services;
 
-using DistributedCodingCompetition.Models;
+using DistributedCodingCompetition.ApiService.Models;
 
 /// <summary>
 /// Service for accessing the leaderboard

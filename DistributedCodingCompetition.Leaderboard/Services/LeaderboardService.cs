@@ -2,12 +2,14 @@
 
 using System.Text.Json;
 using Microsoft.Extensions.Caching.Distributed;
-using DistributedCodingCompetition.Models;
+using DistributedCodingCompetition.ApiService.Models;
 
+/// <inheritdoc/>
 public class LeaderboardService(ILogger<LeaderboardService> logger, HttpClient httpClient, IDistributedCache distributedCache, ILiveReportingService liveReportingService) : ILeaderboardService
 {
     private static readonly DistributedCacheEntryOptions options = new() { AbsoluteExpirationRelativeToNow = TimeSpan.FromSeconds(30) };
 
+    /// <inheritdoc/>
     public async Task<Leaderboard?> GetLeaderboardAsync(Guid contest, int page)
     {
         // check the cache for the leaderboard page

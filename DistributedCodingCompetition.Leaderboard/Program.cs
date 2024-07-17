@@ -1,5 +1,5 @@
-using DistributedCodingCompetition.Models;
-using DistributedCodingCompetition.Leaderboard.Services;
+global using DistributedCodingCompetition.ApiService.Models;
+global using DistributedCodingCompetition.Leaderboard.Services;
 
 var builder = WebApplication.CreateBuilder(args);
 

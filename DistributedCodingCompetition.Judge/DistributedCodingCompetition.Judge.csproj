@@ -21,7 +21,9 @@
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\DistributedCodingCompetition.ExecutionShared\DistributedCodingCompetition.ExecutionShared.csproj" />
+    <ProjectReference Include="..\DistributedCodingCompetition.CodeExecution.Client\DistributedCodingCompetition.CodeExecution.Client.csproj" />
+    <ProjectReference Include="..\DistributedCodingCompetition.ApiService.Client\DistributedCodingCompetition.ApiService.Client.csproj" />
+    <ProjectReference Include="..\DistributedCodingCompetition.LiveLeaders.Client\DistributedCodingCompetition.LiveLeaders.Client.csproj" />
     <ProjectReference Include="..\DistributedCodingCompetition.ServiceDefaults\DistributedCodingCompetition.ServiceDefaults.csproj" />
   </ItemGroup>
   

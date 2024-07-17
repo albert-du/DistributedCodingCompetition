@@ -1,15 +1,18 @@
 ﻿namespace DistributedCodingCompetition.Leaderboard.Services;
 
-using DistributedCodingCompetition.Models;
+using DistributedCodingCompetition.ApiService.Models;
 
+/// <inheritdoc/>
 public class LiveReportingService(HttpClient httpClient) : ILiveReportingService
 {
+    /// <inheritdoc/>
     public Task RefreshAsync(Leaderboard leaderboard)
     {
         var bodyStr = string.Join(';', leaderboard.Entries.Select(x => $"{x.UserId},{x.Points}"));
         return httpClient.PostAsJsonAsync($"refresh/{leaderboard.ContestId}?sync={DateTime.UtcNow:O}", bodyStr);
     }
 
+    /// <inheritdoc/>
     public async Task<IReadOnlyList<(Guid, int)>> GetLeadersAsync(Guid contestId)
     {
         var str = await httpClient.GetStringAsync($"leaders/{contestId}");

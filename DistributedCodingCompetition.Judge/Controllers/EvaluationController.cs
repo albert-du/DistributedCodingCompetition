@@ -18,10 +18,10 @@ using Microsoft.EntityFrameworkCore;
 public class EvaluationController(ILogger<EvaluationController> logger,
                                   ICodeExecutionService codeExecutionService,
                                   IRateLimitService rateLimitService,
-                                  ISubmissionService submissionService,
-                                  IProblemService problemService,
+                                  ISubmissionsService submissionService,
+                                  IProblemsService problemService,
                                   ILiveReportingService liveReportingService,
-                                  IProblemPointValueService problemPointValueService) : ControllerBase
+                                  IContestsService problemPointValueService) : ControllerBase
 {
     /// <summary>
     /// Evaluate a submission

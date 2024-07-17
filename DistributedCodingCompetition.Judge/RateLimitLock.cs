@@ -1,6 +1,4 @@
-﻿using DistributedCodingCompetition.Judge.Services;
-
-namespace DistributedCodingCompetition.Judge;
+﻿namespace DistributedCodingCompetition.Judge;
 
 /// <summary>
 /// Rate limit lock
