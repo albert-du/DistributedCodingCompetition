@@ -2,7 +2,6 @@ global using DistributedCodingCompetition.Web;
 global using DistributedCodingCompetition.Web.Services;
 global using DistributedCodingCompetition.Web.Components;
 global using DistributedCodingCompetition.Web.Models;
-global using DistributedCodingCompetition.Models;
 global using Microsoft.Extensions.Options;
 using Microsoft.AspNetCore.Authentication.Cookies;
 

@@ -1,35 +1,40 @@
 namespace DistributedCodingCompetition.ApiService;
 
-using Microsoft.EntityFrameworkCore;
-
+/// <summary>
+/// Extension methods for querying the database.
+/// </summary>
 internal static class QueryExtensions
 {
-    internal static async Task<PaginateResult<TR>> PaginateAsync<T, TR>(this IQueryable<T> query, int page, int count, Func<T, TR> transform)
+    /// <summary>
+    /// Paginate and transform a query.
+    /// </summary>
+    /// <typeparam name="T">Source type</typeparam>
+    /// <typeparam name="TR">Return type</typeparam>
+    /// <param name="query">Source query</param>
+    /// <param name="page">page count starting at 1</param>
+    /// <param name="count">count</param>
+    /// <param name="transform">method to apply after</param>
+    /// <returns></returns>
+    /// <exception cref="ArgumentOutOfRangeException"></exception>
+    internal static Task<PaginateResult<TR>> PaginateAsync<T, TR>(this IQueryable<T> query, int page, int count, Func<T, TR> transform)
     {
-        if (page < 1)
-            throw new ArgumentOutOfRangeException(nameof(page), "Page must be greater than 0.");
+        async Task<IReadOnlyList<TR>> Transform(IQueryable<T> querySection) =>
+            await querySection.AsAsyncEnumerable().Select(transform).ToArrayAsync();
 
-        if (count < 1)
-            throw new ArgumentOutOfRangeException(nameof(count), "Count must be greater than 0.");
-
-        var querySection =
-            query.Skip((page - 1) * count)
-                 .Take(count);
-
-        var length = await query.CountAsync();
-
-        var items = (await querySection.ToArrayAsync()).Select(transform);
-
-        return new PaginateResult<TR>
-        {
-            Page = page,
-            PageSize = count,
-            TotalCount = length,
-            TotalPages = (int)Math.Ceiling((double)length / count),
-            Items = items
-        };
+        return PaginateAsync(query, page, count, Transform);
     }
 
+    /// <summary>
+    /// Paginate and transform a query.
+    /// </summary>
+    /// <typeparam name="T">source type</typeparam>
+    /// <typeparam name="TR">return type</typeparam>
+    /// <param name="query">source query</param>
+    /// <param name="page">page number starting at 1</param>
+    /// <param name="count">number of returned</param>
+    /// <param name="transform">actually perform and transform the query</param>
+    /// <returns></returns>
+    /// <exception cref="ArgumentOutOfRangeException"></exception>
     internal static async Task<PaginateResult<TR>> PaginateAsync<T, TR>(this IQueryable<T> query, int page, int count, Func<IQueryable<T>, Task<IReadOnlyList<TR>>> transform)
     {
         if (page < 1)
@@ -95,20 +100,20 @@ internal static class QueryExtensions
 
     internal static async Task<IReadOnlyList<JoinCodeResponseDTO>> ReadJoinCodesAsync(this IQueryable<JoinCode> joinCodes) =>
         await joinCodes
-            .Select(joinCode => new
+            .Select(jc => new
             {
-                Id = jc.Id,
-                Name = jc.Name,
-                ContestId = jc.ContestId,
-                ContestName = jc.ContestName,
-                CreatorId = jc.CreatorId,
-                CreatorName = jc.CreatorName,
-                Code = jc.Code,
-                Admin = jc.Admin,
-                Active = jc.Active,
-                CloseAfterUse = jc.CloseAfterUse,
-                Uses = jc.Uses,
-                CreatedAt = jc.CreatedAt,
+                jc.Id,
+                jc.Name,
+                jc.ContestId,
+                ContestName = jc.Contest.Name,
+                jc.CreatorId,
+                CreatorName = jc.Creator.Username,
+                jc.Code,
+                jc.Admin,
+                jc.Active,
+                jc.CloseAfterUse,
+                jc.Uses,
+                CreatedAt = jc.Creation
             })
             .ToAsyncEnumerable()
             .Select(jc => new JoinCodeResponseDTO
@@ -166,13 +171,18 @@ internal static class QueryExtensions
                 ContestName = submission.Contest == null ? "" : submission.Contest.Name,
                 submission.ProblemId,
                 ProblemName = submission.Problem.Name,
-                submission.UserId,
-                UserName = submission.User.Username,
+                UserId = submission.SubmitterId,
+                UserName = submission.Submitter.Username,
                 submission.Language,
                 submission.Code,
                 submission.Points,
-                submission.CreatedAt,
-                submission.UpdatedAt
+                CreatedAt = submission.SubmissionTime,
+                submission.EvaluationTime,
+                submission.Score,
+                submission.MaxPossibleScore,
+                submission.Invalidated,
+                submission.PassedTestCases,
+                submission.TotalTestCases
             })
             .ToAsyncEnumerable()
             .Select(submission => new SubmissionResponseDTO
@@ -186,9 +196,14 @@ internal static class QueryExtensions
                 UserName = submission.UserName,
                 Language = submission.Language,
                 Code = submission.Code,
-                Points = submission.Points,
                 CreatedAt = submission.CreatedAt,
-                UpdatedAt = submission.UpdatedAt
+                JudgedAt = submission.EvaluationTime,
+                Score = submission.Score,
+                MaxPossibleScore = submission.MaxPossibleScore,
+                Points = submission.Points,
+                Invalidated = submission.Invalidated,
+                TestCasesPassed = submission.PassedTestCases,
+                TestCasesTotal = submission.TotalTestCases
             })
             .ToArrayAsync();
 }

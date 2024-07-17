@@ -11,7 +11,7 @@ public interface IContestsService
     /// <param name="page">starting a 1</param>
     /// <param name="count">number of contests to see</param>
     /// <returns></returns>
-    Task<(bool, PaginateResult<ContestResponseDTO>?)> TryReadContestsAsync(int page, int count = 50);
+    Task<(bool, PaginateResult<ContestResponseDTO>?)> TryReadContestsAsync(int page = 1, int count = 50);
 
     /// <summary>
     /// Reads a contest by its id.
@@ -34,7 +34,7 @@ public interface IContestsService
     /// <param name="page"></param>
     /// <param name="count"></param>
     /// <returns>success, admins</returns>
-    Task<(bool, PaginateResult<UserResponseDTO>?)> TryReadContestAdmins(Guid contestId, int page, int count);
+    Task<(bool, PaginateResult<UserResponseDTO>?)> TryReadContestAdmins(Guid contestId, int page = 1, int count = 50);
 
     /// <summary>
     /// Reads a paginated list of banned users for a contest.
@@ -43,7 +43,7 @@ public interface IContestsService
     /// <param name="page"></param>
     /// <param name="count"></param>
     /// <returns>success, banned</returns>
-    Task<(bool, PaginateResult<UserResponseDTO>?)> TryReadContestBanned(Guid contestId, int page, int count);
+    Task<(bool, PaginateResult<UserResponseDTO>?)> TryReadContestBanned(Guid contestId, int page = 1, int count = 50);
 
     /// <summary>
     /// Reads a paginated list of participants for a contest.
@@ -52,7 +52,7 @@ public interface IContestsService
     /// <param name="page"></param>
     /// <param name="count"></param>
     /// <returns>success, participants</returns>
-    Task<(bool, PaginateResult<UserResponseDTO>?)> TryReadContestParticipants(Guid contestId, int page, int count);
+    Task<(bool, PaginateResult<UserResponseDTO>?)> TryReadContestParticipants(Guid contestId, int page = 1, int count = 50);
 
     /// <summary>
     /// Reads a list of join codes for a contest.
@@ -75,7 +75,7 @@ public interface IContestsService
     /// <param name="page"></param>
     /// <param name="count"></param>
     /// <returns>success, contests</returns>
-    Task<(bool, PaginateResult<ContestResponseDTO>?)> TryReadPublicContestsAsync(int page, int count);
+    Task<(bool, PaginateResult<ContestResponseDTO>?)> TryReadPublicContestsAsync(int page = 1, int count = 50);
 
     /// <summary>
     /// Reads a list of problems for a contest.
@@ -137,7 +137,7 @@ public interface IContestsService
     /// </summary>
     /// <param name="contestId"></param>
     /// <returns></returns>
-    Task<(bool, Leaderboard?)> TryReadContestLeaderboardAsync(Guid contestId); 
+    Task<(bool, Leaderboard?)> TryReadContestLeaderboardAsync(Guid contestId);
 
     /// <summary>
     /// Updates a user's role in a contest.
@@ -147,4 +147,18 @@ public interface IContestsService
     /// <param name="role"></param>
     /// <returns></returns>
     Task<bool> TryUpdateUserContestRoleAsync(Guid contestId, Guid userId, ContestRole role);
+
+    /// <summary>
+    /// Updates a contest.
+    /// </summary>
+    /// <param name="contest"></param>
+    /// <returns></returns>
+    Task<bool> TryUpdateContestAsync(ContestRequestDTO contest);
+
+    /// <summary>
+    /// Creates a contest.
+    /// </summary>
+    /// <param name="contest"></param>
+    /// <returns></returns>
+    Task<(bool, ContestResponseDTO?)> TryCreateContestAsync(ContestRequestDTO contest);
 }

@@ -18,7 +18,7 @@ public class Submission
     /// <summary>
     /// Navigation Property for the submitter
     /// </summary>
-    public User? Submitter { get; set; }
+    public User Submitter { get; set; } = null!;
 
     /// <summary>
     /// Id of the contest

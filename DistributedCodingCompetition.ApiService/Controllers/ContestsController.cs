@@ -15,7 +15,7 @@ public class ContestsController(ContestContext context) : ControllerBase
     /// </summary>
     /// <returns></returns>
     [HttpGet]
-    public async Task<PaginateResult<ContestResponseDTO>> GetContests(int page, int count) =>
+    public async Task<PaginateResult<ContestResponseDTO>> GetContestsAsync(int page, int count) =>
         await context.Contests.AsNoTracking().PaginateAsync(page, count, q => q.ReadContestsAsync());
 
     // GET: api/Contests/5
@@ -25,7 +25,7 @@ public class ContestsController(ContestContext context) : ControllerBase
     /// <param name="id"></param>
     /// <returns></returns>
     [HttpGet("{id}")]
-    public async Task<ActionResult<ContestResponseDTO>> GetContest(Guid id)
+    public async Task<ActionResult<ContestResponseDTO>> GetContestAsync(Guid id)
     {
         var contests = await context.Contests.AsNoTracking().Where(c => c.Id == id).ReadContestsAsync();
 
@@ -39,7 +39,7 @@ public class ContestsController(ContestContext context) : ControllerBase
     /// <param name="code"></param>
     /// <returns></returns>
     [HttpGet("joincode/{code}")]
-    public async Task<ActionResult<ContestResponseDTO>> GetContestByJoinCode(string code)
+    public async Task<ActionResult<ContestResponseDTO>> GetContestByJoinCodeAsync(string code)
     {
         var contest = await context.JoinCodes
             .AsNoTracking()
@@ -57,7 +57,7 @@ public class ContestsController(ContestContext context) : ControllerBase
     /// <param name="contestId"></param>
     /// <returns></returns>
     [HttpGet("{contestId}/admins")]
-    public Task<PaginateResult<UserResponseDTO>> GetContestAdmins(Guid contestId, int page, int count) =>
+    public Task<PaginateResult<UserResponseDTO>> GetContestAdminsAsync(Guid contestId, int page, int count) =>
         context.Contests
                .AsNoTracking()
                .Where(c => c.Id == contestId)
@@ -71,7 +71,7 @@ public class ContestsController(ContestContext context) : ControllerBase
     /// <param name="contestId"></param>
     /// <returns></returns>
     [HttpGet("{contestId}/joincodes")]
-    public Task<IReadOnlyList<JoinCodeResponseDTO>> GetJoinCodes(Guid contestId) =>
+    public Task<IReadOnlyList<JoinCodeResponseDTO>> GetJoinCodesAsync(Guid contestId) =>
         context.JoinCodes
                .AsNoTracking()
                .Where(jc => jc.ContestId == contestId)
@@ -85,7 +85,7 @@ public class ContestsController(ContestContext context) : ControllerBase
     /// <param name="userId"></param>
     /// <returns></returns>
     [HttpGet("{contestId}/role/{userId}")]
-    public async Task<ActionResult<ContestRole?>> GetUserContestRole(Guid contestId, Guid userId)
+    public async Task<ActionResult<ContestRole?>> GetUserContestRoleAsync(Guid contestId, Guid userId)
     {
         // Check if the user is an admin
         if (await context.Contests.Where(c => c.Id == contestId).SelectMany(c => c.Administrators).AnyAsync(a => a.Id == userId))
@@ -107,7 +107,7 @@ public class ContestsController(ContestContext context) : ControllerBase
     /// <param name="page"></param>
     /// <returns></returns>
     [HttpGet("{contestId}/banned")]
-    public Task<PaginateResult<UserResponseDTO>> GetContestBannedUsers(Guid contestId, int count, int page) =>
+    public Task<PaginateResult<UserResponseDTO>> GetContestBannedUsersAsync(Guid contestId, int count, int page) =>
         context.Contests
                .AsNoTracking()
                .Where(c => c.Id == contestId)
@@ -123,7 +123,7 @@ public class ContestsController(ContestContext context) : ControllerBase
     /// <param name="page"></param>
     /// <returns></returns>
     [HttpGet("{contestId}/participants")]
-    public async Task<PaginateResult<UserResponseDTO>> GetContestParticipants(Guid contestId, int count, int page) =>
+    public async Task<PaginateResult<UserResponseDTO>> GetContestParticipantsAsync(Guid contestId, int count, int page) =>
         await context.Contests
             .AsNoTracking()
             .Where(c => c.Id == contestId)
@@ -138,7 +138,7 @@ public class ContestsController(ContestContext context) : ControllerBase
     /// <param name="page"></param>
     /// <returns></returns>
     [HttpGet("public")]
-    public async Task<PaginateResult<ContestResponseDTO>> GetPublicContests(int count, int page) =>
+    public async Task<PaginateResult<ContestResponseDTO>> GetPublicContestsAsync(int count, int page) =>
         await context.Contests
             .AsNoTracking()
             .Where(c => c.Public)
@@ -152,7 +152,7 @@ public class ContestsController(ContestContext context) : ControllerBase
     /// <param name="contestId"></param>
     /// <returns></returns>
     [HttpGet("{contestId}/problems")]
-    public Task<IReadOnlyList<ProblemResponseDTO>> GetContestProblems(Guid contestId) =>
+    public Task<IReadOnlyList<ProblemResponseDTO>> GetContestProblemsAsync(Guid contestId) =>
         context.Contests
             .AsNoTracking()
             .Where(c => c.Id == contestId)
@@ -167,7 +167,7 @@ public class ContestsController(ContestContext context) : ControllerBase
     /// <param name="userId"></param>
     /// <returns></returns>
     [HttpGet("{contestId}/user/{userId}/solve")]
-    public async Task<IEnumerable<ProblemUserSolveStatus>> GetUserSolveStatusForContest(Guid contestId, Guid userId)
+    public async Task<IEnumerable<ProblemUserSolveStatus>> GetUserSolveStatusForContestAsync(Guid contestId, Guid userId)
     {
         var submissions = await context.Submissions
             .AsNoTracking()
@@ -181,7 +181,7 @@ public class ContestsController(ContestContext context) : ControllerBase
 
     // GET api/contests/{contestId}/user/{userId}/solve/{problemId}
     [HttpGet("{contestId}/user/{userId}/solve/{problemId}")]
-    public async Task<ActionResult<ProblemUserSolveStatus>> GetUserSolveStatusForProblem(Guid contestId, Guid userId, Guid problemId)
+    public async Task<ActionResult<ProblemUserSolveStatus>> GetUserSolveStatusForProblemAsync(Guid contestId, Guid userId, Guid problemId)
     {
         var submission = await context.Submissions
             .AsNoTracking()
@@ -201,7 +201,7 @@ public class ContestsController(ContestContext context) : ControllerBase
     /// <param name="contestId"></param>
     /// <returns></returns>
     [HttpGet("{contestId}/pointvalues")]
-    public async Task<ActionResult<IEnumerable<ProblemPointValue>>> GetProblemPointValues(Guid contestId) =>
+    public async Task<ActionResult<IEnumerable<ProblemPointValue>>> GetProblemPointValuesAsync(Guid contestId) =>
         await context.ProblemPointValues.AsNoTracking().Where(ppv => ppv.ContestId == contestId).ToListAsync();
 
     /// <summary>
@@ -211,7 +211,7 @@ public class ContestsController(ContestContext context) : ControllerBase
     /// <param name="problemId"></param>
     /// <returns></returns>
     [HttpGet("{contestId}/pointvalues/{problemId}")]
-    public async Task<ActionResult<ProblemPointValue>> GetProblemPointValue(Guid contestId, Guid problemId, bool generateIfNotExist = true)
+    public async Task<ActionResult<ProblemPointValue>> GetProblemPointValueAsync(Guid contestId, Guid problemId, bool generateIfNotExist = true)
     {
         var ppv = await context.ProblemPointValues.AsNoTracking().Where(ppv => ppv.ContestId == contestId && ppv.ProblemId == problemId).FirstOrDefaultAsync();
         if (ppv is not null)
@@ -229,7 +229,7 @@ public class ContestsController(ContestContext context) : ControllerBase
     }
 
     [HttpPost("{contestId}/pointvalues/{problemId}")]
-    public async Task<ActionResult<ProblemPointValue>> PostProblemPointValue(Guid contestId, Guid problemId, ProblemPointValue ppv)
+    public async Task<ActionResult<ProblemPointValue>> PostProblemPointValueAsync(Guid contestId, Guid problemId, ProblemPointValue ppv)
     {
         ppv.ContestId = contestId;
         ppv.ProblemId = problemId;
@@ -237,11 +237,11 @@ public class ContestsController(ContestContext context) : ControllerBase
         context.ProblemPointValues.Add(ppv);
         await context.SaveChangesAsync();
 
-        return CreatedAtAction(nameof(GetProblemPointValue), new { contestId, problemId }, ppv);
+        return CreatedAtAction(nameof(GetProblemPointValueAsync), new { contestId, problemId }, ppv);
     }
 
     [HttpPut("{contestId}/pointvalues/{problemId}")]
-    public async Task<IActionResult> PutProblemPointValue(Guid contestId, Guid problemId, ProblemPointValue ppv)
+    public async Task<IActionResult> PutProblemPointValueAsync(Guid contestId, Guid problemId, ProblemPointValue ppv)
     {
         if (contestId != ppv.ContestId || problemId != ppv.ProblemId)
             return BadRequest();
@@ -272,7 +272,7 @@ public class ContestsController(ContestContext context) : ControllerBase
     /// <param name="contestId"></param>
     /// <returns></returns>
     [HttpGet("{contestId}/leaderboard")]
-    public async Task<ActionResult<Leaderboard>> GetLeaderboard(Guid contestId)
+    public async Task<ActionResult<Leaderboard>> GetLeaderboardAsync(Guid contestId)
     {
         var contest = await context.Contests.FindAsync(contestId);
         if (contest is null)
@@ -327,7 +327,7 @@ public class ContestsController(ContestContext context) : ControllerBase
     /// <param name="role"></param>
     /// <returns></returns>
     [HttpPut("{contestId}/role/{userId}")]
-    public async Task<IActionResult> UpdateUserContestRole(Guid contestId, Guid userId, ContestRole role)
+    public async Task<IActionResult> UpdateUserContestRoleAsync(Guid contestId, Guid userId, ContestRole role)
     {
         var contest = await context.Contests.FindAsync(contestId);
         if (contest is null)
@@ -364,7 +364,7 @@ public class ContestsController(ContestContext context) : ControllerBase
     /// <param name="contest"></param>
     /// <returns></returns>
     [HttpPut("{id}")]
-    public async Task<IActionResult> PutContest(Guid id, ContestRequestDTO contestDTO)
+    public async Task<IActionResult> PutContestAsync(Guid id, ContestRequestDTO contestDTO)
     {
         if (id != contestDTO.Id)
             return BadRequest();
@@ -411,7 +411,7 @@ public class ContestsController(ContestContext context) : ControllerBase
     /// <param name="contest"></param>
     /// <returns></returns>
     [HttpPost]
-    public async Task<ActionResult<ContestResponseDTO>> PostContest(ContestRequestDTO dto)
+    public async Task<ActionResult<ContestResponseDTO>> PostContestAsync(ContestRequestDTO dto)
     {
         if (!dto.OwnerId.HasValue)
             return BadRequest("Owner ID is required");
@@ -435,7 +435,7 @@ public class ContestsController(ContestContext context) : ControllerBase
         context.Contests.Add(contest);
         await context.SaveChangesAsync();
 
-        return CreatedAtAction(nameof(GetContest), new { id = contest.Id }, contest);
+        return CreatedAtAction(nameof(GetContestAsync), new { id = contest.Id }, contest);
     }
 
     // POST: api/contests/{contestId}/problems
@@ -446,7 +446,7 @@ public class ContestsController(ContestContext context) : ControllerBase
     /// <param name="problem"></param>
     /// <returns></returns>
     [HttpPost("{contestId}/problems/{problemId}")]
-    public async Task<IActionResult> AddProblemToContest(Guid contestId, Guid problemId)
+    public async Task<IActionResult> AddProblemToContestAsync(Guid contestId, Guid problemId)
     {
         var contest = await context.Contests.FindAsync(contestId);
         if (contest is null)
@@ -490,23 +490,12 @@ public class ContestsController(ContestContext context) : ControllerBase
     /// <param name="page"></param>
     /// <returns></returns>
     [HttpGet("{contestId}/submissions")]
-    public async Task<PaginateResult<SubmissionResponseDTO>> GetContestSubmissions(Guid contestId, int count, int page)
-    {
-        var rv = await context.Submissions
-            .Include(s => s.Problem)
-            .Include(s => s.Submitter)
+    public Task<PaginateResult<SubmissionResponseDTO>> GetContestSubmissionsAsync(Guid contestId, int count, int page) =>
+        context.Submissions
+            .AsNoTracking()
             .Where(s => s.ContestId == contestId)
             .OrderByDescending(s => s.SubmissionTime)
-            .Skip(count * page)
-            .Take(count)
-            .ToListAsync();
-        foreach (var s in rv)
-        {
-            if (s.Submitter?.Submissions is not null)
-                s.Submitter.Submissions = [];
-        }
-        return rv;
-    }
+            .PaginateAsync(page, count, q => q.ReadSubmissionsAsync());
 
     /// <summary>
     /// Check if a contest exists
