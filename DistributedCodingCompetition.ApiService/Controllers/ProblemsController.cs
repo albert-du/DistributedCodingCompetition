@@ -1,8 +1,6 @@
-﻿namespace DistributedCodingCompetition.ApiService.Controllers;
+﻿using Microsoft.AspNetCore.Mvc.RazorPages;
 
-using Microsoft.AspNetCore.Mvc;
-using Microsoft.EntityFrameworkCore;
-using DistributedCodingCompetition.ApiService.Models;
+namespace DistributedCodingCompetition.ApiService.Controllers;
 
 /// <summary>
 /// Api controller for Problems
@@ -16,10 +14,14 @@ public class ProblemsController(ContestContext context) : ControllerBase
     /// <summary>
     /// Gets all problems
     /// </summary>
+    /// <param name="page">page number starting at 1</param>
+    /// <param name="count">count of problems</param>
     /// <returns></returns>
     [HttpGet]
-    public async Task<ActionResult<IEnumerable<Problem>>> GetProblems() =>
-        await context.Problems.ToListAsync();
+    public Task<PaginateResult<ProblemResponseDTO>> GetProblemsAsync(int page, int count) =>
+        context.Problems
+            .AsNoTracking()
+            .PaginateAsync(page, count, q => q.ReadProblemsAsync());
 
     // GET: api/Problems/5
     /// <summary>
@@ -28,17 +30,19 @@ public class ProblemsController(ContestContext context) : ControllerBase
     /// <param name="id"></param>
     /// <returns></returns>
     [HttpGet("{id}")]
-    public async Task<ActionResult<Problem>> GetProblem(Guid id)
+    public async Task<ActionResult<ProblemResponseDTO>> GetProblemAsync(Guid id)
     {
-        var problem = await context.Problems.FindAsync(id);
-
-        return problem == null ? NotFound() : problem;
+        var problems = await context.Problems.AsNoTracking().Where(p => p.Id == id).ReadProblemsAsync();
+        return problems.Count == 0 ? NotFound() : problems[0];
     }
 
 
     [HttpGet("{id}/submissions")]
-    public async Task<ActionResult<IEnumerable<Submission>>> GetSubmissionsForProblem(Guid id) =>
-        await context.Submissions.Where(s => s.ProblemId == id).ToListAsync();
+    public Task<PaginateResult<SubmissionResponseDTO>> GetSubmissionsForProblemAsync(Guid id, int page, int count) =>
+        context.Submissions
+            .AsNoTracking()
+            .Where(s => s.ProblemId == id)
+            .PaginateAsync(page, count, q => q.ReadSubmissionsAsync());
 
     // PUT: api/Problems/5
     /// <summary>
@@ -48,10 +52,25 @@ public class ProblemsController(ContestContext context) : ControllerBase
     /// <param name="problem"></param>
     /// <returns></returns>
     [HttpPut("{id}")]
-    public async Task<IActionResult> PutProblem(Guid id, Problem problem)
+    public async Task<IActionResult> PutProblemAsync(Guid id, ProblemRequestDTO dto)
     {
-        if (id != problem.Id)
+        if (id != dto.Id)
             return BadRequest();
+
+        // find the problem
+        var problem = await context.Problems.FindAsync(id);
+
+        if (problem is null)
+            return NotFound();
+
+        // update the problem
+
+        problem.Name = dto.Name ?? problem.Name;
+        problem.OwnerId = dto.OwnerId ?? problem.OwnerId;
+        problem.TagLine = dto.TagLine ?? problem.TagLine;
+        problem.Description = dto.Description ?? problem.Description;
+        problem.RenderedDescription = dto.RenderedDescription ?? problem.RenderedDescription;
+        problem.Difficulty = dto.Difficulty ?? problem.Difficulty;
 
         context.Entry(problem).State = EntityState.Modified;
 
@@ -76,11 +95,25 @@ public class ProblemsController(ContestContext context) : ControllerBase
     /// <param name="problem"></param>
     /// <returns></returns>
     [HttpPost]
-    public async Task<ActionResult<Problem>> PostProblem(Problem problem)
+    public async Task<ActionResult<Problem>> PostProblemAsync(ProblemRequestDTO dto)
     {
+        if (!dto.OwnerId.HasValue)
+            return BadRequest("Owner Id is required");
+
+        Problem problem = new()
+        {
+            Id = dto.Id,
+            Name = dto.Name ?? "New Problem",
+            OwnerId = dto.OwnerId.Value,
+            TagLine = dto.TagLine ?? "New Problem",
+            Description = dto.Description ?? "New Problem",
+            RenderedDescription = dto.RenderedDescription ?? "New Problem",
+            Difficulty = dto.Difficulty
+        };
+
         context.Problems.Add(problem);
         await context.SaveChangesAsync();
-        return CreatedAtAction(nameof(GetProblem), new { id = problem.Id }, problem);
+        return CreatedAtAction(nameof(GetProblemAsync), new { id = problem.Id }, problem);
     }
 
     // DELETE: api/Problems/5
@@ -90,7 +123,7 @@ public class ProblemsController(ContestContext context) : ControllerBase
     /// <param name="id"></param>
     /// <returns></returns>
     [HttpDelete("{id}")]
-    public async Task<IActionResult> DeleteProblem(Guid id)
+    public async Task<IActionResult> DeleteProblemAsync(Guid id)
     {
         var problem = await context.Problems.FindAsync(id);
         if (problem is null)
@@ -110,25 +143,12 @@ public class ProblemsController(ContestContext context) : ControllerBase
     /// <param name="problemId"></param>
     /// <returns></returns>
     [HttpGet("{problemId}/testcases")]
-    public async Task<ActionResult<IReadOnlyList<TestCase>>> GetTestCasesForProblem(Guid problemId)
-    {
-        try
-        {
-            var problem = await context.Problems.Include(p => p.TestCases).FirstOrDefaultAsync(p => p.Id == problemId);
-            if (problem is null)
-                return NotFound();
-            return problem.TestCases.Select(x =>
-            {
-                x.Problem = null;
-                return x;
-            }).ToList();
-        }
-        catch
-        {
-            throw;
-        }
-    }
-
+    public Task<IReadOnlyList<TestCaseResponseDTO>> GetTestCasesForProblemAsync(Guid problemId) =>
+        context.Problems
+            .AsNoTracking()
+            .Where(p => p.Id == problemId)
+            .SelectMany(p => p.TestCases)
+            .ReadTestCasesAsync();
 
     // POST: api/problems/{problemId}/testcases
     /// <summary>
@@ -138,7 +158,7 @@ public class ProblemsController(ContestContext context) : ControllerBase
     /// <param name="testCase"></param>
     /// <returns></returns>
     [HttpPost("{problemId}/testcases")]
-    public async Task<IActionResult> AddTestCaseToProblem(Guid problemId, TestCase testCase)
+    public async Task<IActionResult> AddTestCaseToProblem(Guid problemId, Guid testCaseId)
     {
         var problem = await context.Problems.FindAsync(problemId);
         if (problem is null)

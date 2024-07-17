@@ -9,17 +9,17 @@ public class TestCase
     /// Id of the test case
     /// </summary>
     public Guid Id { get; set; } = Guid.NewGuid();
-    
+
     /// <summary>
     /// Problem Id
     /// </summary>
     public Guid ProblemId { get; set; }
-    
+
     /// <summary>
     /// Navigation Property for the problem
-    /// </summary>
-    public Problem? Problem { get; set; }
-    
+    /// </summary> 
+    public Problem Problem { get; set; } = null!;
+
     /// <summary>
     /// Input for the test case
     /// </summary>

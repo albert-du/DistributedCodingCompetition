@@ -6,7 +6,7 @@ public sealed class ContestsService : IContestsService
     private readonly ApiClient<ContestsService> _apiClient;
 
     internal ContestsService(HttpClient httpClient, ILogger<ContestsService> logger) =>
-        _apiClient = new ApiClient<ContestsService>(httpClient, logger, "api/contests");
+        _apiClient = new(httpClient, logger, "api/contests");
 
     /// <inheritdoc/>
     public Task<(bool, PaginateResult<ContestResponseDTO>?)> TryReadContestsAsync(int page, int count) =>

@@ -206,4 +206,33 @@ internal static class QueryExtensions
                 TestCasesTotal = submission.TotalTestCases
             })
             .ToArrayAsync();
+
+    internal static async Task<IReadOnlyList<TestCaseResponseDTO>> ReadTestCasesAsync(this IQueryable<TestCase> testCases) =>
+        await testCases
+            .Select(testCase => new
+            {
+                testCase.Id,
+                testCase.ProblemId,
+                ProblemName = testCase.Problem.Name,
+                testCase.Input,
+                testCase.Output,
+                testCase.Description,
+                testCase.Sample,
+                testCase.Active,
+                testCase.Weight
+            })
+            .ToAsyncEnumerable()
+            .Select(testCase => new TestCaseResponseDTO
+            {
+                Id = testCase.Id,
+                ProblemId = testCase.ProblemId,
+                ProblemName = testCase.ProblemName,
+                Input = testCase.Input,
+                Output = testCase.Output,
+                Description = testCase.Description,
+                Sample = testCase.Sample,
+                Active = testCase.Active,
+                Weight = testCase.Weight
+            })
+            .ToArrayAsync();
 }

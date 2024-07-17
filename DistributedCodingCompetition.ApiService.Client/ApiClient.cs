@@ -70,4 +70,38 @@ internal class ApiClient<TOwner>(HttpClient httpClient, ILogger<TOwner> logger, 
             return (false, default);
         }
     }
+
+    internal async Task<bool> PostAsync(string url = "")
+    {
+        var expanded = prefix + url;
+        try
+        {
+            var response = await httpClient.PostAsync(expanded, null);
+            response.EnsureSuccessStatusCode();
+            logger.LogDebug("Successfully posted to {URL}", expanded);
+            return true;
+        }
+        catch (Exception ex)
+        {
+            logger.LogError(ex, "Failed to post to {URL}", expanded);
+            return false;
+        }
+    }
+
+    internal async Task<bool> DeleteAsync(string url = "")
+    {
+        var expanded = prefix + url;
+        try
+        {
+            var response = await httpClient.DeleteAsync(expanded);
+            response.EnsureSuccessStatusCode();
+            logger.LogDebug("Successfully deleted {URL}", expanded);
+            return true;
+        }
+        catch (Exception ex)
+        {
+            logger.LogError(ex, "Failed to delete {URL}", expanded);
+            return false;
+        }
+    }
 }
