@@ -80,7 +80,12 @@ public sealed class SubmissionsController(ContestContext context) : ControllerBa
         context.Submissions.Add(submission);
         await context.SaveChangesAsync();
 
-        return CreatedAtAction(nameof(GetSubmissionAsync), new { id = submission.Id }, submission);
+        var responses = await context.Submissions
+            .AsNoTracking()
+            .Where(x => x.Id == submission.Id)
+            .ReadSubmissionsAsync();
+        
+        return CreatedAtAction(nameof(GetSubmissionAsync), new { id = submission.Id }, responses[0]);
     }
 
     /// <summary>

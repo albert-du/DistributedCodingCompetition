@@ -25,6 +25,9 @@ public static class DependencyInjection
         applicationBuilder.Services.AddSingleton<ISubmissionsService, SubmissionsService>();
         applicationBuilder.Services.AddHttpClient<ISubmissionsService, SubmissionsService>(client => client.BaseAddress = apiAddress);
 
+        applicationBuilder.Services.AddSingleton<ITestCaseService, TestCaseService>();
+        applicationBuilder.Services.AddHttpClient<ITestCaseService, TestCaseService>(client => client.BaseAddress = apiAddress);
+
         return applicationBuilder;
     }
 
