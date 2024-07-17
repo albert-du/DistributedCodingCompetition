@@ -10,7 +10,7 @@ using DistributedCodingCompetition.ApiService.Models;
 /// <param name="context"></param>
 [Route("api/[controller]")]
 [ApiController]
-public class TestCaseResultsController(ContestContext context) : ControllerBase
+public sealed class TestCaseResultsController(ContestContext context) : ControllerBase
 {
     // GET: api/TestCaseResults
     /// <summary>

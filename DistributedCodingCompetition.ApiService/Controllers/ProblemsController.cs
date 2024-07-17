@@ -1,6 +1,4 @@
-﻿using Microsoft.AspNetCore.Mvc.RazorPages;
-
-namespace DistributedCodingCompetition.ApiService.Controllers;
+﻿namespace DistributedCodingCompetition.ApiService.Controllers;
 
 /// <summary>
 /// Api controller for Problems
@@ -8,7 +6,7 @@ namespace DistributedCodingCompetition.ApiService.Controllers;
 /// <param name="context"></param>
 [Route("api/[controller]")]
 [ApiController]
-public class ProblemsController(ContestContext context) : ControllerBase
+public sealed class ProblemsController(ContestContext context) : ControllerBase
 {
     // GET: api/Problems
     /// <summary>
@@ -135,7 +133,6 @@ public class ProblemsController(ContestContext context) : ControllerBase
         return NoContent();
     }
 
-
     // GET: api/problems/{problemId}/testcases
     /// <summary>
     /// Gets all test cases for a problem
@@ -143,12 +140,12 @@ public class ProblemsController(ContestContext context) : ControllerBase
     /// <param name="problemId"></param>
     /// <returns></returns>
     [HttpGet("{problemId}/testcases")]
-    public Task<IReadOnlyList<TestCaseResponseDTO>> GetTestCasesForProblemAsync(Guid problemId) =>
+    public Task<PaginateResult<TestCaseResponseDTO>> GetTestCasesForProblemAsync(Guid problemId) =>
         context.Problems
             .AsNoTracking()
             .Where(p => p.Id == problemId)
             .SelectMany(p => p.TestCases)
-            .ReadTestCasesAsync();
+            .PaginateAsync(1, 50, q => q.ReadTestCasesAsync());
 
     // POST: api/problems/{problemId}/testcases
     /// <summary>
@@ -157,12 +154,18 @@ public class ProblemsController(ContestContext context) : ControllerBase
     /// <param name="problemId"></param>
     /// <param name="testCase"></param>
     /// <returns></returns>
-    [HttpPost("{problemId}/testcases")]
-    public async Task<IActionResult> AddTestCaseToProblem(Guid problemId, Guid testCaseId)
+    [HttpPost("{problemId}/testcases/{testCaseId}")]
+    public async Task<IActionResult> AddTestCaseToProblemAsync(Guid problemId, Guid testCaseId)
     {
         var problem = await context.Problems.FindAsync(problemId);
         if (problem is null)
             return NotFound();
+
+        var testCase = await context.TestCases.FindAsync(testCaseId);
+
+        if (testCase is null)
+            return NotFound();
+
         problem.TestCases.Add(testCase);
 
         var entry = context.Entry(problem);

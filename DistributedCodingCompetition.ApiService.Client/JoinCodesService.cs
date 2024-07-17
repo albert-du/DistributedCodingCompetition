@@ -3,36 +3,41 @@ namespace DistributedCodingCompetition.ApiService.Client;
 /// <inheritdoc/>
 public sealed class JoinCodesService : IJoinCodesService
 {
-    private readonly ApiClient<JoinCodesService> _apiClient;
+    private readonly ApiClient<JoinCodesService> apiClient;
 
+    /// <summary>
+    /// Initializes a new instance of the <see cref="JoinCodesService"/> class.
+    /// </summary>
+    /// <param name="httpClient"></param>
+    /// <param name="logger"></param>
     internal JoinCodesService(HttpClient httpClient, ILogger<JoinCodesService> logger) =>
-        _apiClient = new(httpClient, logger, "api/joincodes");
+        apiClient = new(httpClient, logger, "api/joincodes");
 
     /// <inheritdoc/>
     public Task<(bool, JoinCodeResponseDTO?)> TryCreateJoinCodeAsync(JoinCodeRequestDTO joinCode) =>
-        _apiClient.PostAsync<JoinCodeRequestDTO, JoinCodeResponseDTO>(data: joinCode);
+        apiClient.PostAsync<JoinCodeRequestDTO, JoinCodeResponseDTO>(data: joinCode);
 
     /// <inheritdoc/>
     public Task<bool> TryDeleteJoinCodeAsync(Guid id) =>
-        _apiClient.DeleteAsync($"/{id}");
+        apiClient.DeleteAsync($"/{id}");
 
     /// <inheritdoc/>
     public Task<bool> TryJoinContestAsync(Guid joinCodeId, Guid userId) =>
-        _apiClient.PostAsync($"/{joinCodeId}/join/{userId}");
+        apiClient.PostAsync($"/{joinCodeId}/join/{userId}");
 
     /// <inheritdoc/>
     public Task<(bool, JoinCodeResponseDTO?)> TryReadJoinCodeAsync(Guid id) =>
-        _apiClient.GetAsync<JoinCodeResponseDTO>($"/{id}");
+        apiClient.GetAsync<JoinCodeResponseDTO>($"/{id}");
 
     /// <inheritdoc/>
     public Task<(bool, JoinCodeResponseDTO?)> TryReadJoinCodeByCodeAsync(string code) =>
-        _apiClient.GetAsync<JoinCodeResponseDTO>($"/code/{code}");
+        apiClient.GetAsync<JoinCodeResponseDTO>($"/code/{code}");
 
     /// <inheritdoc/>
     public Task<(bool, PaginateResult<JoinCodeResponseDTO>?)> TryReadJoinCodesAsync(int page = 1, int count = 50) =>
-        _apiClient.GetAsync<PaginateResult<JoinCodeResponseDTO>>($"?page={page}&count={count}");
+        apiClient.GetAsync<PaginateResult<JoinCodeResponseDTO>>($"?page={page}&count={count}");
 
     /// <inheritdoc/>
     public Task<bool> TryUpdateJoinCodeAsync(JoinCodeRequestDTO joinCode) =>
-        _apiClient.PutAsync($"?id={joinCode.Id}", joinCode);
+        apiClient.PutAsync($"?id={joinCode.Id}", joinCode);
 }

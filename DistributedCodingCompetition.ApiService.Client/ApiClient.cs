@@ -1,7 +1,20 @@
 namespace DistributedCodingCompetition.ApiService.Client;
 
+/// <summary>
+/// A client for interacting with the DistributedCodingCompetition API.
+/// </summary>
+/// <typeparam name="TOwner">Owner Service</typeparam>
+/// <param name="httpClient">httpclient to use</param>
+/// <param name="logger">logger</param>
+/// <param name="prefix">url prefix</param>
 internal class ApiClient<TOwner>(HttpClient httpClient, ILogger<TOwner> logger, string prefix)
 {
+    /// <summary>
+    /// Sends a GET request to the API.
+    /// </summary>
+    /// <typeparam name="T"></typeparam>
+    /// <param name="url"></param>
+    /// <returns></returns>
     internal async Task<(bool, T?)> GetAsync<T>(string url = "")
     {
         var expanded = prefix + url;
@@ -18,6 +31,14 @@ internal class ApiClient<TOwner>(HttpClient httpClient, ILogger<TOwner> logger, 
         }
     }
 
+    /// <summary>
+    /// Sends a PUT request to the API.
+    /// </summary>
+    /// <typeparam name="T"></typeparam>
+    /// <typeparam name="TR"></typeparam>
+    /// <param name="url"></param>
+    /// <param name="data"></param>
+    /// <returns></returns>
     internal async Task<(bool, TR?)> PutAsync<T, TR>(string url = "", T? data = default)
     {
         var expanded = prefix + url;
@@ -37,6 +58,13 @@ internal class ApiClient<TOwner>(HttpClient httpClient, ILogger<TOwner> logger, 
         }
     }
 
+    /// <summary>
+    /// Sends a PUT request to the API.
+    /// </summary>
+    /// <typeparam name="T"></typeparam>
+    /// <param name="url"></param>
+    /// <param name="data"></param>
+    /// <returns></returns>
     internal async Task<bool> PutAsync<T>(string url = "", T? data = default)
     {
         var expanded = prefix + url;
@@ -54,6 +82,14 @@ internal class ApiClient<TOwner>(HttpClient httpClient, ILogger<TOwner> logger, 
         }
     }
 
+    /// <summary>
+    /// Sends a POST request to the API.
+    /// </summary>
+    /// <typeparam name="T"></typeparam>
+    /// <typeparam name="TR"></typeparam>
+    /// <param name="url"></param>
+    /// <param name="data"></param>
+    /// <returns></returns>
     internal async Task<(bool, TR?)> PostAsync<T, TR>(string url = "", T? data = default)
     {
         var expanded = prefix + url;
@@ -71,6 +107,11 @@ internal class ApiClient<TOwner>(HttpClient httpClient, ILogger<TOwner> logger, 
         }
     }
 
+    /// <summary>
+    /// Sends a POST request to the API.
+    /// </summary>
+    /// <param name="url"></param>
+    /// <returns></returns>
     internal async Task<bool> PostAsync(string url = "")
     {
         var expanded = prefix + url;
@@ -88,6 +129,11 @@ internal class ApiClient<TOwner>(HttpClient httpClient, ILogger<TOwner> logger, 
         }
     }
 
+    /// <summary>
+    /// Sends a DELETE request to the API.
+    /// </summary>
+    /// <param name="url"></param>
+    /// <returns></returns>
     internal async Task<bool> DeleteAsync(string url = "")
     {
         var expanded = prefix + url;

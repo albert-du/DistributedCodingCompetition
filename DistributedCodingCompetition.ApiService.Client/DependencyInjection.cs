@@ -19,6 +19,12 @@ public static class DependencyInjection
         applicationBuilder.Services.AddSingleton<IJoinCodesService, JoinCodesService>();
         applicationBuilder.Services.AddHttpClient<IJoinCodesService, JoinCodesService>(client => client.BaseAddress = apiAddress);
 
+        applicationBuilder.Services.AddSingleton<IProblemsService, ProblemsService>();
+        applicationBuilder.Services.AddHttpClient<IProblemsService, ProblemsService>(client => client.BaseAddress = apiAddress);
+
+        applicationBuilder.Services.AddSingleton<ISubmissionsService, SubmissionsService>();
+        applicationBuilder.Services.AddHttpClient<ISubmissionsService, SubmissionsService>(client => client.BaseAddress = apiAddress);
+
         return applicationBuilder;
     }
 

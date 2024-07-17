@@ -7,7 +7,7 @@ using static DistributedCodingCompetition.ApiService.QueryExtensions;
 
 [Route("api/[controller]")]
 [ApiController]
-public class ContestsController(ContestContext context) : ControllerBase
+public sealed class ContestsController(ContestContext context) : ControllerBase
 {
     // GET: api/Contests
     /// <summary>

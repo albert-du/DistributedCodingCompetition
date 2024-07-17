@@ -10,7 +10,7 @@ using DistributedCodingCompetition.ApiService.Models;
 /// <param name="context"></param>
 [Route("api/[controller]")]
 [ApiController]
-public class SubmissionsController(ContestContext context) : ControllerBase
+public sealed class SubmissionsController(ContestContext context) : ControllerBase
 {
     // GET: api/Submissions
     /// <summary>
@@ -18,9 +18,9 @@ public class SubmissionsController(ContestContext context) : ControllerBase
     /// </summary>
     /// <returns></returns>
     [HttpGet]
-    public async Task<ActionResult<IEnumerable<Submission>>> GetSubmissions(int page = 1, int pageSize = 10, Guid? contestId = null, Guid? problemId = null, Guid? userId = null)
+    public async Task<PaginateResult<SubmissionResponseDTO>> GetSubmissionsAsync(int page = 1, int pageSize = 60, Guid? contestId = null, Guid? problemId = null, Guid? userId = null)
     {
-        IQueryable<Submission> query = context.Submissions;
+        IQueryable<Submission> query = context.Submissions.AsNoTracking();
         if (contestId != null)
             query = query.Where(x => x.ContestId == contestId);
 
@@ -30,7 +30,8 @@ public class SubmissionsController(ContestContext context) : ControllerBase
         if (userId != null)
             query = query.Where(x => x.SubmitterId == userId);
 
-        return await query.OrderByDescending(x => x.EvaluationTime).Skip((page - 1) * pageSize).Take(pageSize).ToListAsync();
+        return await query.OrderByDescending(x => x.EvaluationTime)
+                          .PaginateAsync(page, pageSize, x => x.ReadSubmissionsAsync());
     }
 
     // GET: api/Submissions/5
@@ -40,39 +41,10 @@ public class SubmissionsController(ContestContext context) : ControllerBase
     /// <param name="id"></param>
     /// <returns></returns>
     [HttpGet("{id}")]
-    public async Task<ActionResult<Submission>> GetSubmission(Guid id)
+    public async Task<ActionResult<SubmissionResponseDTO>> GetSubmissionAsync(Guid id)
     {
-        var submission = await context.Submissions.FindAsync(id);
-        return submission == null ? NotFound() : submission;
-    }
-
-    // PUT: api/Submissions/5
-    /// <summary>
-    /// Updates a submission
-    /// </summary>
-    /// <param name="id"></param>
-    /// <param name="submission"></param>
-    /// <returns></returns>
-    [HttpPut("{id}")]
-    public async Task<IActionResult> PutSubmission(Guid id, Submission submission)
-    {
-        if (id != submission.Id)
-            return BadRequest();
-
-        context.Entry(submission).State = EntityState.Modified;
-
-        try
-        {
-            await context.SaveChangesAsync();
-        }
-        catch (DbUpdateConcurrencyException)
-        {
-            if (!SubmissionExists(id))
-                return NotFound();
-            throw;
-        }
-
-        return NoContent();
+        var submissions = await context.Submissions.AsNoTracking().Where(s => s.Id == id).ReadSubmissionsAsync();
+        return submissions.Count == 0 ? NotFound() : submissions[0];
     }
 
     // POST: api/Submissions
@@ -82,12 +54,23 @@ public class SubmissionsController(ContestContext context) : ControllerBase
     /// <param name="submission"></param>
     /// <returns></returns>
     [HttpPost]
-    public async Task<ActionResult<Submission>> PostSubmission(Submission submission)
+    public async Task<ActionResult<Submission>> PostSubmissionAsync(SubmissionRequestDTO dto)
     {
+        Submission submission = new()
+        {
+            Id = dto.Id,
+            ContestId = dto.ContestId,
+            ProblemId = dto.ProblemId,
+            SubmitterId = dto.UserId,
+            Code = dto.Code,
+            Language = dto.Language,
+            SubmissionTime = DateTime.UtcNow
+        };
+
         context.Submissions.Add(submission);
         await context.SaveChangesAsync();
 
-        return CreatedAtAction("GetSubmission", new { id = submission.Id }, submission);
+        return CreatedAtAction(nameof(GetSubmissionAsync), new { id = submission.Id }, submission);
     }
 
     // api/submissions/{submissionId}/results
@@ -100,7 +83,7 @@ public class SubmissionsController(ContestContext context) : ControllerBase
     /// <param name="results"></param>
     /// <returns></returns>
     [HttpPost("{submissionId}/results")]
-    public async Task<IActionResult> PostResults(Guid submissionId, int possible, int score, [FromBody] IReadOnlyList<TestCaseResult> results)
+    public async Task<IActionResult> PostResultsAsync(Guid submissionId, int possible, int score, [FromBody] IReadOnlyList<TestCaseResultDTO> results)
     {
         var submission = await context.Submissions.FindAsync(submissionId);
         if (submission == null)

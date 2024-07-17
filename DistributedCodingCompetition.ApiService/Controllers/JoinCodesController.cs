@@ -6,7 +6,7 @@
 /// <param name="context"></param>
 [Route("api/[controller]")]
 [ApiController]
-public class JoinCodesController(ContestContext context) : ControllerBase
+public sealed class JoinCodesController(ContestContext context) : ControllerBase
 {
     // GET: api/JoinCodes
     /// <summary>
