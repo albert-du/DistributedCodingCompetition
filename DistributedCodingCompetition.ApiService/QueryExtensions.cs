@@ -277,4 +277,36 @@ internal static class QueryExtensions
                 Points = pv.Points
             })
             .ToArrayAsync();
+
+    internal static async Task<IReadOnlyList<UserResponseDTO>> ReadUsersAsync(this IQueryable<User> users) =>
+        await users
+            .Select(user => new
+            {
+                user.Id,
+                user.Username,
+                user.Email,
+                user.FullName,
+                user.Birthday,
+                Administered = user.AdministeredContests.Count,
+                Owned = user.OwnedContests.Count,
+                Entered = user.EnteredContests.Count,
+                Banned = user.BanId != null,
+                BannedContests = user.BannedContests.Count,
+                CreatedAt = user.Creation
+            })
+            .ToAsyncEnumerable()
+            .Select(user => new UserResponseDTO
+            {
+                Id = user.Id,
+                Username = user.Username,
+                Email = user.Email,
+                ParticipatedContests = user.Entered,
+                OwnedContests = user.Owned,
+                AdministeredContests = user.Administered,
+                FullName = user.FullName,
+                CreatedAt = user.CreatedAt,
+                Banned = user.Banned,
+                BannedContests = user.BannedContests
+            })
+            .ToArrayAsync();
 }

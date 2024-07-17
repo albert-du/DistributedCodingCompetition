@@ -62,7 +62,7 @@ public sealed class ContestsController(ContestContext context) : ControllerBase
                .AsNoTracking()
                .Where(c => c.Id == contestId)
                .SelectMany(c => c.Administrators)
-               .PaginateAsync(page, count, u => u.Serialize());
+               .PaginateAsync(page, count, q => q.ReadUsersAsync());
 
     // GET: api/contests/{contestId}/joincodes
     /// <summary>
@@ -112,7 +112,7 @@ public sealed class ContestsController(ContestContext context) : ControllerBase
                .AsNoTracking()
                .Where(c => c.Id == contestId)
                .SelectMany(c => c.Banned)
-               .PaginateAsync(page, count, u => u.Serialize());
+               .PaginateAsync(page, count, q => q.ReadUsersAsync());
 
     // GET api/contests/{contestId}/participants?count={count}&page={page}
     /// <summary>
@@ -128,7 +128,7 @@ public sealed class ContestsController(ContestContext context) : ControllerBase
             .AsNoTracking()
             .Where(c => c.Id == contestId)
             .SelectMany(c => c.Participants)
-            .PaginateAsync(page, count, u => u.Serialize());
+            .PaginateAsync(page, count, q => q.ReadUsersAsync());
 
     // GET api/contests/public?count={count}&page={page}
     /// <summary>

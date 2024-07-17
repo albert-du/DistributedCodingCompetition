@@ -2,16 +2,16 @@
 namespace DistributedCodingCompetition.ApiService.Client;
 
 /// <inheritdoc/>
-public sealed class TestCaseService : ITestCaseService
+public sealed class TestCasesService : ITestCasesService
 {
-    private readonly ApiClient<TestCaseService> apiClient;
+    private readonly ApiClient<TestCasesService> apiClient;
 
     /// <summary>
     /// Initializes a new instance of the <see cref="TestCaseService"/> class.
     /// </summary>
     /// <param name="httpClient"></param>
     /// <param name="logger"></param>
-    internal TestCaseService(HttpClient httpClient, ILogger<TestCaseService> logger) =>
+    internal TestCasesService(HttpClient httpClient, ILogger<TestCasesService> logger) =>
         apiClient = new(httpClient, logger, "api/testcases");
 
     /// <inheritdoc/>

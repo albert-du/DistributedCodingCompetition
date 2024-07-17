@@ -1,9 +1,5 @@
 ﻿namespace DistributedCodingCompetition.ApiService.Controllers;
 
-using Microsoft.AspNetCore.Mvc;
-using Microsoft.EntityFrameworkCore;
-using DistributedCodingCompetition.ApiService.Models;
-
 /// <summary>
 /// Api controller for TestCases
 /// </summary>

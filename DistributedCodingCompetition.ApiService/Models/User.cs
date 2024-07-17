@@ -76,15 +76,4 @@ public class User
     public ICollection<Problem> Problems { get; set; } = [];
 
     public ICollection<Ban> IssuedBans { get; set; } = [];
-
-    internal UserResponseDTO Serialize() =>
-        new()
-        {
-            Id = Id,
-            Username = Username,
-            Email = Email,
-            FullName = FullName,
-            CreatedAt = Creation,
-            Banned = BanId.HasValue
-        };
 }

@@ -3,7 +3,7 @@ namespace DistributedCodingCompetition.ApiService.Client;
 /// <summary>
 /// Service for interacting with test cases.
 /// </summary>
-public interface ITestCaseService
+public interface ITestCasesService
 {
     /// <summary>
     /// Reads a paginated list of test cases.
