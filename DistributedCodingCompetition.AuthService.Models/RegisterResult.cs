@@ -1,9 +1,9 @@
-﻿namespace DistributedCodingCompetition.AuthModels;
+﻿namespace DistributedCodingCompetition.AuthService.Models;
 
 /// <summary>
 /// Result of a successful registration attempt.
 /// </summary>
-public record RegisterResult
+public sealed record RegisterResult
 {
     /// <summary>
     /// Id of the new auth registry.

@@ -240,7 +240,7 @@ public sealed class UsersController(ContestContext context) : ControllerBase
             .Where(u => u.Id == user.Id)
             .ReadUsersAsync();
 
-        return CreatedAtAction(nameof(GetUser), new { id = user.Id }, users[0]);
+        return CreatedAtAction(nameof(GetUserAsync), new { id = user.Id }, users[0]);
     }
 
     // DELETE: api/Users/5

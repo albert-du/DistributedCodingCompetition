@@ -1,9 +1,9 @@
-namespace DistributedCodingCompetition.AuthModels;
+namespace DistributedCodingCompetition.AuthService.Models;
 
 /// <summary>
 /// Successful validation result.
 /// </summary>
-public record ValidationResult
+public sealed record ValidationResult
 {
     /// <summary>
     /// Id.

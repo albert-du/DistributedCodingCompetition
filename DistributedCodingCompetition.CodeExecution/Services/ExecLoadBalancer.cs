@@ -2,18 +2,26 @@
 
 using DistributedCodingCompetition.CodeExecution.Models;
 using DistributedCodingCompetition.ExecutionShared;
+using Microsoft.EntityFrameworkCore;
 using System.Collections.Frozen;
 
+/// <inheritdoc />
 public class ExecLoadBalancer : IExecLoadBalancer
 {
     private readonly IReadOnlyDictionary<string, List<ExecRunner>> languageRunners;
     private readonly IReadOnlyDictionary<string, int> totalWeights;
+
+    /// <summary>
+    /// Constructor for ExecLoadBalancer.
+    /// </summary>
+    /// <param name="logger"></param>
+    /// <param name="execRunnerContext"></param>
     public ExecLoadBalancer(ILogger<ExecLoadBalancer> logger, ExecRunnerContext execRunnerContext)
     {
         Dictionary<string, int> weights = [];
         Dictionary<string, List<ExecRunner>> allRunners = [];
         Console.WriteLine(execRunnerContext.ExecRunners.Count());
-        foreach (var runner in execRunnerContext.ExecRunners)
+        foreach (var runner in execRunnerContext.ExecRunners.AsNoTracking())
         {
             if (!runner.Live || !runner.Available || !runner.Enabled)
                 continue;
@@ -33,6 +41,8 @@ public class ExecLoadBalancer : IExecLoadBalancer
         totalWeights = weights.ToFrozenDictionary();
 
     }
+
+    /// <inheritdoc />
     public ExecRunner? SelectRunner(ExecutionRequest request)
     {
         var runners = languageRunners[request.Language];
@@ -53,6 +63,7 @@ public class ExecLoadBalancer : IExecLoadBalancer
         return null;
     }
 
+    /// <inheritdoc />
     public IReadOnlyList<(ExecutionRequest, ExecRunner?)> BalanceRequests(IReadOnlyCollection<ExecutionRequest> requests)
     {
         // Balance requests by language.

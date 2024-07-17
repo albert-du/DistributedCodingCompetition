@@ -4,8 +4,10 @@ using System.Net;
 using DistributedCodingCompetition.CodeExecution.Models;
 using DistributedCodingCompetition.ExecutionShared;
 
+/// <inheritdoc />
 public class ExecRunnerService(HttpClient httpClient) : IExecRunnerService
 {
+    /// <inheritdoc />
     public async Task RefreshExecRunnerAsync(ExecRunner runner)
     {
         HttpResponseMessage result;
@@ -21,7 +23,7 @@ public class ExecRunnerService(HttpClient httpClient) : IExecRunnerService
             runner.Status = "Offline";
             return;
         }
-        
+
         if (result.StatusCode is HttpStatusCode.Unauthorized)
         {
             runner.Authenticated = false;
@@ -37,13 +39,14 @@ public class ExecRunnerService(HttpClient httpClient) : IExecRunnerService
         runner.Authenticated = true;
         runner.Live = true;
         runner.Available = status.Ready;
-        runner.Languages = [..status.Languages.Split('\n')];
-        runner.Packages = [..status.Packages.Split('\n')];
+        runner.Languages = [.. status.Languages.Split('\n')];
+        runner.Packages = [.. status.Packages.Split('\n')];
         runner.SystemInfo = status.SystemInfo;
         runner.Status = status.Message;
         runner.Name = status.Name;
     }
 
+    /// <inheritdoc />
     public async Task<IReadOnlyList<string>> FetchAvailablePackagesAsync(ExecRunner runner)
     {
         var result = await httpClient.GetAsync($"{runner.Endpoint}{(runner.Endpoint.EndsWith('/') ? "" : "/")}api/management/available?key={runner.Key}");
@@ -54,6 +57,7 @@ public class ExecRunnerService(HttpClient httpClient) : IExecRunnerService
         return await result.Content.ReadFromJsonAsync<IReadOnlyList<string>>() ?? throw new Exception("execrunner packages empty");
     }
 
+    /// <inheritdoc />
     public async Task SetPackagesAsync(ExecRunner execRunner, IEnumerable<string> packages)
     {
         var result = await httpClient.PostAsJsonAsync($"{execRunner.Endpoint}{(execRunner.Endpoint.EndsWith('/') ? "" : "/")}api/management/packages?key={execRunner.Key}", packages);
@@ -63,6 +67,7 @@ public class ExecRunnerService(HttpClient httpClient) : IExecRunnerService
             throw new Exception("ExecRunner failed to set packages");
     }
 
+    /// <inheritdoc />
     public async Task<ExecutionResult> ExecuteCodeAsync(ExecRunner runner, ExecutionRequest request)
     {
         if (!runner.Available)

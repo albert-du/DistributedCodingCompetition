@@ -32,6 +32,16 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "DistributedCodingCompetitio
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "DistributedCodingCompetition.ApiService.Client", "DistributedCodingCompetition.ApiService.Client\DistributedCodingCompetition.ApiService.Client.csproj", "{365530C6-E10E-44E6-B757-2A994720F96F}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "DistributedCodingCompetition.AuthService.Models", "DistributedCodingCompetition.AuthService.Models\DistributedCodingCompetition.AuthService.Models.csproj", "{0398F661-B455-498B-95B6-DFF5C119D926}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "DistributedCodingCompetition.AuthService.Client", "DistributedCodingCompetition.AuthService.Client\DistributedCodingCompetition.AuthService.Client.csproj", "{04ACBAB9-71CA-404A-8DAA-6FCAD4227DD2}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "DistributedCodingCompetition.CodeExecution.Client", "DistributedCodingCompetition.CodeExecution.Client\DistributedCodingCompetition.CodeExecution.Client.csproj", "{5A1E054D-0453-46FD-8BAB-8BDC9990BD78}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "DistributedCodingCompetition.Judge.Client", "DistributedCodingCompetition.Judge.Client\DistributedCodingCompetition.Judge.Client.csproj", "{C9139317-51B0-4360-A045-A5E04C5E2F95}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "DistributedCodingCompetition.CodePersistence.Client", "DistributedCodingCompetition.CodePersistence.Client\DistributedCodingCompetition.CodePersistence.Client.csproj", "{166645F2-E4E6-4816-8AD9-28C38EB2B153}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -98,6 +108,26 @@ Global
 		{365530C6-E10E-44E6-B757-2A994720F96F}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{365530C6-E10E-44E6-B757-2A994720F96F}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{365530C6-E10E-44E6-B757-2A994720F96F}.Release|Any CPU.Build.0 = Release|Any CPU
+		{0398F661-B455-498B-95B6-DFF5C119D926}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{0398F661-B455-498B-95B6-DFF5C119D926}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{0398F661-B455-498B-95B6-DFF5C119D926}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{0398F661-B455-498B-95B6-DFF5C119D926}.Release|Any CPU.Build.0 = Release|Any CPU
+		{04ACBAB9-71CA-404A-8DAA-6FCAD4227DD2}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{04ACBAB9-71CA-404A-8DAA-6FCAD4227DD2}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{04ACBAB9-71CA-404A-8DAA-6FCAD4227DD2}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{04ACBAB9-71CA-404A-8DAA-6FCAD4227DD2}.Release|Any CPU.Build.0 = Release|Any CPU
+		{5A1E054D-0453-46FD-8BAB-8BDC9990BD78}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{5A1E054D-0453-46FD-8BAB-8BDC9990BD78}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{5A1E054D-0453-46FD-8BAB-8BDC9990BD78}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{5A1E054D-0453-46FD-8BAB-8BDC9990BD78}.Release|Any CPU.Build.0 = Release|Any CPU
+		{C9139317-51B0-4360-A045-A5E04C5E2F95}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{C9139317-51B0-4360-A045-A5E04C5E2F95}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{C9139317-51B0-4360-A045-A5E04C5E2F95}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{C9139317-51B0-4360-A045-A5E04C5E2F95}.Release|Any CPU.Build.0 = Release|Any CPU
+		{166645F2-E4E6-4816-8AD9-28C38EB2B153}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{166645F2-E4E6-4816-8AD9-28C38EB2B153}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{166645F2-E4E6-4816-8AD9-28C38EB2B153}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{166645F2-E4E6-4816-8AD9-28C38EB2B153}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

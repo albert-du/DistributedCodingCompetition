@@ -1,9 +1,9 @@
-﻿namespace DistributedCodingCompetition.AuthModels;
+﻿namespace DistributedCodingCompetition.AuthService.Models;
 
 /// <summary>
-/// Sucessful login result.
+/// Successful login result.
 /// </summary>
-public record LoginResult
+public sealed record LoginResult
 {
     /// <summary>
     /// Token to use for validation.
