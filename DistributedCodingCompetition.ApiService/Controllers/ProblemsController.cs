@@ -114,9 +114,9 @@ public sealed class ProblemsController(ContestContext context) : ControllerBase
 
         // read it back
 
-        var dtos = await context.Problems.AsNoTracking().Where(p => p.Id == problem.Id).ReadProblemsAsync();
+        var dtos = await context.Problems.AsNoTracking().Where(p => p.Id == problem.Id).Take(1).ReadProblemsAsync();
 
-        return CreatedAtAction(nameof(GetProblemAsync), new { id = problem.Id }, dtos.Count == 0 ? null : dtos[0]);
+        return Created(problem.Id.ToString(), dtos[0]);
     }
 
     // DELETE: api/Problems/5

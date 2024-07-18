@@ -36,5 +36,5 @@ public class ProblemsService(ILogger<ProblemsService> logger, HttpClient httpCli
 
     /// <inheritdoc/>
     public Task<bool> TryUpdateProblemAsync(ProblemRequestDTO problem) =>
-        apiClient.PutAsync($"?id={problem.Id}", problem);
+        apiClient.PutAsync($"/{problem.Id}", problem);
 }

@@ -18,7 +18,7 @@ public class TestCaseResult
     /// <summary>
     /// Navigation property for the test case
     /// </summary>
-    public TestCase? TestCase { get; set; }
+    public TestCase TestCase { get; set; } = null!;
 
     /// <summary>
     /// Id of the submission

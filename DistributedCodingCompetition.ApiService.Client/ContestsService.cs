@@ -51,7 +51,7 @@ public sealed class ContestsService(HttpClient httpClient, ILogger<ContestsServi
 
     /// <inheritdoc/>
     public Task<(bool, ProblemUserSolveStatus?)> TryReadContestProblemUserSolveStatusAsync(Guid contestId, Guid problemId, Guid userId) =>
-        apiClient.GetAsync<ProblemUserSolveStatus?>($"/{contestId}/problem/{userId}/solve/{problemId}");
+        apiClient.GetAsync<ProblemUserSolveStatus?>($"/{contestId}/user/{userId}/solve/{problemId}");
 
     /// <inheritdoc/>
     public Task<(bool, IReadOnlyList<ProblemPointValueResponseDTO>?)> TryReadContestProblemPointValuesAsync(Guid contestId) =>

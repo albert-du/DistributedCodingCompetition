@@ -1,3 +1,5 @@
+using System.Text.Json;
+
 namespace DistributedCodingCompetition.ApiService.Client;
 
 /// <summary>
@@ -24,8 +26,14 @@ internal class ApiClient<TOwner>(HttpClient httpClient, ILogger<TOwner> logger, 
             logger.LogDebug("Successfully got {TYPE} from {URL}", typeof(T).Name, expanded);
             return (true, result);
         }
+        catch (JsonException)
+        {
+            return (true, default);
+        }
         catch (Exception ex)
         {
+
+
             logger.LogError(ex, "Failed to get {TYPE} from {URL}", typeof(T).Name, expanded);
             return (false, default);
         }

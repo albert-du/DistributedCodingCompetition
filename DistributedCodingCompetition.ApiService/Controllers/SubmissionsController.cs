@@ -84,8 +84,8 @@ public sealed class SubmissionsController(ContestContext context) : ControllerBa
             .AsNoTracking()
             .Where(x => x.Id == submission.Id)
             .ReadSubmissionsAsync();
-        
-        return CreatedAtAction(nameof(GetSubmissionAsync), new { id = submission.Id }, responses[0]);
+
+        return Created(submission.Id.ToString(), responses[0]);
     }
 
     /// <summary>
@@ -110,11 +110,21 @@ public sealed class SubmissionsController(ContestContext context) : ControllerBa
     /// <param name="results"></param>
     /// <returns></returns>
     [HttpPost("{submissionId}/results")]
-    public async Task<IActionResult> PostResultsAsync(Guid submissionId, int possible, int score, [FromBody] IReadOnlyList<TestCaseResultDTO> results)
+    public async Task<IActionResult> PostResultsAsync(Guid submissionId, int possible, int score, [FromBody] IReadOnlyList<TestCaseResultDTO> dtos)
     {
         var submission = await context.Submissions.FindAsync(submissionId);
         if (submission == null)
             return NotFound();
+
+        var results = dtos.Select(x => new TestCaseResult
+        {
+            SubmissionId = submissionId,
+            TestCaseId = x.TestCaseId,
+            Passed = x.Passed,
+            Output = x.Output,
+            Error = x.Error,
+            ExecutionTime = x.ExecutionTime
+        });
 
         // clean out outdated results
         context.TestCaseResults.RemoveRange(context.TestCaseResults.Where(x => x.SubmissionId == submissionId));
@@ -139,8 +149,8 @@ public sealed class SubmissionsController(ContestContext context) : ControllerBa
         submission.Points = points;
         submission.MaxPossibleScore = possible;
         submission.Score = score;
-        submission.TotalTestCases = results.Count;
-        submission.PassedTestCases = results.Count(x => x.Passed);
+        submission.TotalTestCases = dtos.Count;
+        submission.PassedTestCases = dtos.Count(x => x.Passed);
         submission.EvaluationTime = DateTime.UtcNow;
 
         await context.SaveChangesAsync();

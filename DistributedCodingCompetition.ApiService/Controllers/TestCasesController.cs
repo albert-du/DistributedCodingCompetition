@@ -124,7 +124,7 @@ public sealed class TestCasesController(ContestContext context) : ControllerBase
             Weight = testCase.Weight
         };
 
-        return CreatedAtAction(nameof(GetTestCaseAsync), new { id = testCase.Id }, response);
+        return Created(testCase.Id.ToString(), response);
     }
 
     // DELETE: api/TestCases/5

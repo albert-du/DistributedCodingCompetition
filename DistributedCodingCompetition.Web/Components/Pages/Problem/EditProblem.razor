@@ -120,7 +120,7 @@ else
             };
 
         if (!await ProblemsService.TryUpdateProblemAsync(request))
-            ModalService.ShowError("Failed to create problem", "Internal error");
+            ModalService.ShowError("Failed to update problem", "Internal error");
         else
             ModalService.ShowInfo("Problem saved", "");
     }

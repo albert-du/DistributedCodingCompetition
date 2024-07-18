@@ -47,7 +47,7 @@ public sealed class ContestsController(ContestContext context) : ControllerBase
             .Select(jc => jc.Contest)
             .ReadContestsAsync();
 
-        return contest.Count == 0 ? NotFound() : contest[1];
+        return contest.Count == 0 ? NotFound() : contest[0];
     }
 
     // GET: api/contests/{contestId}/admins
@@ -181,7 +181,7 @@ public sealed class ContestsController(ContestContext context) : ControllerBase
 
     // GET api/contests/{contestId}/user/{userId}/solve/{problemId}
     [HttpGet("{contestId}/user/{userId}/solve/{problemId}")]
-    public async Task<ActionResult<ProblemUserSolveStatus>> GetUserSolveStatusForProblemAsync(Guid contestId, Guid userId, Guid problemId)
+    public async Task<ProblemUserSolveStatus?> GetUserSolveStatusForProblemAsync(Guid contestId, Guid userId, Guid problemId)
     {
         var submission = await context.Submissions
             .AsNoTracking()
@@ -190,7 +190,7 @@ public sealed class ContestsController(ContestContext context) : ControllerBase
             .FirstOrDefaultAsync();
 
         if (submission is null)
-            return NotFound();
+            return null;
 
         return new ProblemUserSolveStatus(submission.ProblemId, submission.Points, submission.Score, submission.MaxPossibleScore, submission.PassedTestCases, submission.TotalTestCases);
     }
@@ -242,7 +242,7 @@ public sealed class ContestsController(ContestContext context) : ControllerBase
 
         ProblemPointValueResponseDTO response = new() { Id = ppv.Id, ContestId = ppv.ContestId, ProblemId = ppv.ProblemId, Points = ppv.Points };
 
-        return CreatedAtAction(nameof(GetProblemPointValueAsync), new { contestId, problemId }, response);
+        return Created(response.Id.ToString(), response);
     }
 
     [HttpPut("{contestId}/pointvalues/{problemId}")]
@@ -443,7 +443,7 @@ public sealed class ContestsController(ContestContext context) : ControllerBase
         // just read it back
         var responseDTOs = await context.Contests.Where(c => c.Id == contest.Id).ReadContestsAsync();
 
-        return CreatedAtAction(nameof(GetContestAsync), new { id = contest.Id }, responseDTOs.Count > 0 ? responseDTOs[0] : null);
+        return Created(contest.Id.ToString(), responseDTOs[0]);
     }
 
     // POST: api/contests/{contestId}/problems

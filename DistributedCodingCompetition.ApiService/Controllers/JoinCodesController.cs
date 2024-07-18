@@ -134,7 +134,13 @@ public sealed class JoinCodesController(ContestContext context) : ControllerBase
         context.JoinCodes.Add(joinCode);
         await context.SaveChangesAsync();
 
-        return CreatedAtAction("GetJoinCode", new { id = joinCode.Id }, joinCode);
+        var joinCodes = await context.JoinCodes
+            .AsNoTracking()
+            .Where(j => j.Id == joinCode.Id)
+            .Take(1)
+            .ReadJoinCodesAsync();
+
+        return Created(joinCode.Id.ToString(), joinCodes[0]);
     }
 
     // POST: api/joincodes/{joinCodeId}/join/{userId}
