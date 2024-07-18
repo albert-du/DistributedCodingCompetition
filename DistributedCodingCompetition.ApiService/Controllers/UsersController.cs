@@ -227,8 +227,8 @@ public sealed class UsersController(ContestContext context) : ControllerBase
             Id = dto.Id,
             Email = dto.Email,
             Username = dto.Username,
-            FullName = dto.FullName
-
+            FullName = dto.FullName,
+            Birthday = dto.Birthday,
         };
 
         context.Users.Add(user);

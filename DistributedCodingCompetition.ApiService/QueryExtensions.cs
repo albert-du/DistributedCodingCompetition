@@ -77,7 +77,13 @@ internal static class QueryExtensions
                 contest.Public,
                 contest.Open,
                 contest.MinimumAge,
-                contest.DefaultPointsForProblem
+                contest.DefaultPointsForProblem,
+                TotalSubmissions = contest.Submissions.Count,
+                TotalProblems = contest.Problems.Count,
+                TotalParticipants = contest.Participants.Count,
+                TotalBanned = contest.Banned.Count,
+                TotalJoinCodes = contest.JoinCodes.Count,
+                TotalAdmins = contest.Administrators.Count
             })
             .ToAsyncEnumerable()
             .Select(contest => new ContestResponseDTO
@@ -94,7 +100,13 @@ internal static class QueryExtensions
                 Public = contest.Public,
                 Open = contest.Open,
                 MinimumAge = contest.MinimumAge,
-                DefaultPointsForProblem = contest.DefaultPointsForProblem
+                DefaultPointsForProblem = contest.DefaultPointsForProblem,
+                TotalSubmissions = contest.TotalSubmissions,
+                TotalProblems = contest.TotalProblems,
+                TotalParticipants = contest.TotalParticipants,
+                TotalBanned = contest.TotalBanned,
+                TotalJoinCodes = contest.TotalJoinCodes,
+                TotalAdmins = contest.TotalAdmins
             })
             .ToArrayAsync();
 
@@ -113,7 +125,8 @@ internal static class QueryExtensions
                 jc.Active,
                 jc.CloseAfterUse,
                 jc.Uses,
-                CreatedAt = jc.Creation
+                CreatedAt = jc.Creation,
+                jc.Expiration
             })
             .ToAsyncEnumerable()
             .Select(jc => new JoinCodeResponseDTO
@@ -130,6 +143,7 @@ internal static class QueryExtensions
                 CloseAfterUse = jc.CloseAfterUse,
                 Uses = jc.Uses,
                 CreatedAt = jc.CreatedAt,
+                Expiration = jc.Expiration
             })
             .ToArrayAsync();
 
@@ -182,7 +196,7 @@ internal static class QueryExtensions
                 submission.MaxPossibleScore,
                 submission.Invalidated,
                 submission.PassedTestCases,
-                submission.TotalTestCases
+                submission.TotalTestCases,
             })
             .ToAsyncEnumerable()
             .Select(submission => new SubmissionResponseDTO
@@ -292,7 +306,7 @@ internal static class QueryExtensions
                 Entered = user.EnteredContests.Count,
                 Banned = user.BanId != null,
                 BannedContests = user.BannedContests.Count,
-                CreatedAt = user.Creation
+                CreatedAt = user.Creation,
             })
             .ToAsyncEnumerable()
             .Select(user => new UserResponseDTO

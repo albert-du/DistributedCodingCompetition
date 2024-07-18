@@ -7,10 +7,8 @@ public sealed class ModalService : IModalService
     public event Action<IModalService.ModalMessage>? OnShow;
     public event Action<IModalService.IntegerModalMessage>? OnShowInteger;
 
-    public void AskInteger(string title, string message, int min, int max, Action<int?> onResult)
-    {
+    public void AskInteger(string title, string message, int min, int max, Action<int?> onResult) =>
         OnShowInteger?.Invoke(new(title, message, min, max, onResult));
-    }
 
     /// <inheritdoc/>
     public void ShowError(string title, string message) =>

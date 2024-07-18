@@ -26,15 +26,15 @@ public sealed class ContestsService : IContestsService
         apiClient.GetAsync<ContestResponseDTO>($"/joincode/{code}");
 
     /// <inheritdoc/>
-    public Task<(bool, PaginateResult<UserResponseDTO>?)> TryReadContestAdmins(Guid contestId, int page, int count) =>
+    public Task<(bool, PaginateResult<UserResponseDTO>?)> TryReadContestAdminsAsync(Guid contestId, int page, int count) =>
         apiClient.GetAsync<PaginateResult<UserResponseDTO>>($"/{contestId}/admins?page={page}&count={count}");
 
     /// <inheritdoc/>
-    public Task<(bool, PaginateResult<UserResponseDTO>?)> TryReadContestBanned(Guid contestId, int page, int count) =>
+    public Task<(bool, PaginateResult<UserResponseDTO>?)> TryReadContestBannedAsync(Guid contestId, int page, int count) =>
         apiClient.GetAsync<PaginateResult<UserResponseDTO>>($"/{contestId}/banned?page={page}&count={count}");
 
     /// <inheritdoc/>
-    public Task<(bool, PaginateResult<UserResponseDTO>?)> TryReadContestParticipants(Guid contestId, int page, int count) =>
+    public Task<(bool, PaginateResult<UserResponseDTO>?)> TryReadContestParticipantsAsync(Guid contestId, int page, int count) =>
         apiClient.GetAsync<PaginateResult<UserResponseDTO>>($"/{contestId}/participants?page={page}&count={count}");
 
     /// <inheritdoc/>

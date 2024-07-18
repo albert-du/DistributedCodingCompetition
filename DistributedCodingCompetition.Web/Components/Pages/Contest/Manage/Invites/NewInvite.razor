@@ -2,7 +2,8 @@
     Create a new invite join code for a contest.
 *@
 @page "/contest/{contestId:guid}/manage/invites/new"
-@inject IApiService ApiService
+@inject IContestsService ContestsService
+@inject IJoinCodesService JoinCodesService
 @inject IModalService ModalService
 @inject NavigationManager NavigationManager
 @inject IUserStateService UserStateService
@@ -54,7 +55,7 @@
 
     protected override async Task OnInitializedAsync()
     {
-        var (success, contest) = await ApiService.TryReadContestAsync(ContestId);
+        var (success, contest) = await ContestsService.TryReadContestAsync(ContestId);
         if (!success || contest is null)
             ModalService.ShowError("Failed to load contest", "Internal error");
         else
@@ -63,25 +64,24 @@
 
     async Task SubmitAsync()
     {
-        if (await UserStateService.UserAsync() is not User user)
+        if (await UserStateService.UserAsync() is not UserResponseDTO user)
         {
             // shouldnt actually happen because of authcheck
             ModalService.ShowError("You are not logged in", "Please log in to create a join code");
             return;
         }
-        JoinCode joinCode = new()
+        JoinCodeRequestDTO joinCode = new()
             {
                 ContestId = ContestId,
                 Code = model.Code,
                 Name = model.Name,
-                Creation = DateTime.UtcNow,
                 Expiration = DateTime.UtcNow.AddDays(model.DaysToExpire),
                 CloseAfterUse = model.CloseAfterUse,
                 CreatorId = user.Id,
                 Active = true,
             };
 
-        var (success, id) = await ApiService.TryCreateJoinCodeAsync(joinCode);
+        var (success, id) = await JoinCodesService.TryCreateJoinCodeAsync(joinCode);
         if (!success || id is null)
         {
             ModalService.ShowError("Failed to create join code", "Internal error");

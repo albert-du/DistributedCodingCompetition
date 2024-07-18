@@ -25,4 +25,9 @@ public sealed record UserRequestDTO
     /// The full name of the user.
     /// </summary>
     public string? FullName { get; init; }
+
+    /// <summary>
+    /// The birthday of the user.
+    /// </summary>
+    public DateTime Birthday { get; init; }
 }

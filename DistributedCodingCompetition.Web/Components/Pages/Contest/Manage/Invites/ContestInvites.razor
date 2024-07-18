@@ -5,7 +5,8 @@
 @page "/contest/{id:guid}/manage/invites"
 @inject NavigationManager NavigationManager
 @inject IClipboardService ClipboardService
-@inject IApiService ApiService
+@inject IContestsService ContestsService
+@inject IJoinCodesService JoinCodesService
 @inject IModalService ModalService
 
 <AuthCheck Contest=Id Admin />
@@ -57,13 +58,13 @@
     [Parameter]
     public Guid Id { get; set; }
 
-    IReadOnlyList<JoinCode> joinCodes = [];
-    IReadOnlyList<JoinCode> adminJoinCodes = [];
+    IReadOnlyList<JoinCodeResponseDTO> joinCodes = [];
+    IReadOnlyList<JoinCodeResponseDTO> adminJoinCodes = [];
     string contestName = string.Empty;
 
     protected override async Task OnInitializedAsync()
     {
-        var (success, codes) = await ApiService.TryReadContestJoinCodesAsync(Id);
+        var (success, codes) = await ContestsService.TryReadContestJoinCodesAsync(Id);
         if (!success || codes is null)
         {
             ModalService.ShowError("Failed to load join codes", "Internal error");
@@ -73,7 +74,7 @@
         joinCodes = codes.Where(x => !x.Admin).ToArray();
         adminJoinCodes = codes.Where(x => x.Admin).ToArray();
 
-        (success, var contest) = await ApiService.TryReadContestAsync(Id);
+        (success, var contest) = await ContestsService.TryReadContestAsync(Id);
         if (!success || contest is null)
             ModalService.ShowError("Failed to load contest", "Internal error");
         else
@@ -82,12 +83,12 @@
 
     async Task DeleteAsync(Guid id)
     {
-        if (!await ApiService.TryDeleteJoinCodeAsync(id))
+        if (!await JoinCodesService.TryDeleteJoinCodeAsync(id))
             ModalService.ShowError("Failed to delete join code", "Internal error");
         else
             joinCodes = joinCodes.Where(x => x.Id != id).ToArray();
     }
 
-    Task CopyAsync(JoinCode code) =>
+    Task CopyAsync(JoinCodeResponseDTO code) =>
          ClipboardService.SetClipboardAsync($"{NavigationManager.BaseUri}join/{code.Code}");
 }

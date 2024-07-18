@@ -64,4 +64,9 @@ public sealed record JoinCodeResponseDTO
     /// The UTC time the join code was created.
     /// </summary>
     public required DateTime CreatedAt { get; init; }
+
+    /// <summary>
+    /// The UTC time the join code will expire.
+    /// </summary>
+    public required DateTime Expiration { get; init; }
 }

@@ -1,13 +1,12 @@
 ﻿@*
     Registration page
 *@
-@using DistributedCodingCompetition.AuthModels
 @page "/auth/register"
 @inject NavigationManager NavigationManager
 @inject IJSRuntime JSRuntime
 @inject IEmailService EmailService
 @inject IAuthService AuthService
-@inject IApiService ApiService
+@inject IUsersService UsersService
 
 <PageTitle>Register</PageTitle>
 
@@ -178,7 +177,7 @@
         await InvokeAsync(StateHasChanged);
         try
         {
-            var (success, user) = await ApiService.TryReadUserByEmailAsync(model.Email);
+            var (success, user) = await UsersService.TryReadUserByEmailAsync(model.Email);
             if (!success)
                 // request failed
                 return;
@@ -236,7 +235,7 @@
         try
         {
             // make sure user doesn't exist
-            var (success, existing) = await ApiService.TryReadUserByUsername(model2.Username);
+            var (success, existing) = await UsersService.TryReadUserByUsernameAsync(model2.Username);
             if (!success)
             {
                 error = "Failed to check if user exists.";
@@ -255,13 +254,13 @@
                 return;
             }
 
-            if (!await ApiService.TryCreateUserAsync(new()
+            if (await UsersService.TryCreateUserAsync(new()
                 {
                     Id = id,
                     Email = model.Email,
                     Username = model2.Username,
                     Birthday = model2.Birthday.ToUniversalTime()
-                }))
+                }) is not (true, UserResponseDTO userResponseDTO))
             {
                 error = "Failed to create user.";
                 return;

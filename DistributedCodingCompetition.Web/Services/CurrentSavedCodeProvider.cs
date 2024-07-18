@@ -1,6 +1,7 @@
 ﻿namespace DistributedCodingCompetition.Web.Services;
 
 using Microsoft.AspNetCore.Components;
+using DistributedCodingCompetition.ApiService.Models;
 
 /// <summary>
 /// Current saved code provider

@@ -7,10 +7,7 @@ public class SelectedLanguageService(IJSRuntime jSRuntime, IUserStateService use
     public async Task<string?> GetSelectedLanguage()
     {
         var user = await userStateService.UserAsync();
-        if (user is null)
-            return null;
-
-        return await jSRuntime.InvokeAsync<string>("localStorage.getItem", GetKey(user.Id));
+        return user is null ? null : await jSRuntime.InvokeAsync<string>("localStorage.getItem", GetKey(user.Id));
     }
 
     public async Task ReportLanguageSwitch(string language)

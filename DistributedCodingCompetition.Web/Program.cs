@@ -3,6 +3,7 @@ global using DistributedCodingCompetition.Web.Services;
 global using DistributedCodingCompetition.Web.Components;
 global using DistributedCodingCompetition.Web.Models;
 global using Microsoft.Extensions.Options;
+global using DistributedCodingCompetition.ApiService.Models;
 global using DistributedCodingCompetition.ApiService.Client;
 global using DistributedCodingCompetition.AuthService.Client;
 global using DistributedCodingCompetition.CodeExecution.Client;

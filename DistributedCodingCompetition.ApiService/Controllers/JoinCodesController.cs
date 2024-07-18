@@ -82,6 +82,7 @@ public sealed class JoinCodesController(ContestContext context) : ControllerBase
         joinCode.Admin = joinCodeDTO.Admin ?? joinCode.Admin;
         joinCode.Active = joinCodeDTO.Active ?? joinCode.Active;
         joinCode.CloseAfterUse = joinCodeDTO.CloseAfterUse ?? joinCode.CloseAfterUse;
+        joinCode.Expiration = joinCodeDTO.Expiration ?? joinCode.Expiration;
 
         context.Entry(joinCode).State = EntityState.Modified;
 
@@ -127,6 +128,7 @@ public sealed class JoinCodesController(ContestContext context) : ControllerBase
             Admin = dto.Admin ?? false,
             Active = dto.Active ?? true,
             CloseAfterUse = dto.CloseAfterUse ?? false,
+            Expiration = dto.Expiration ?? DateTime.UtcNow.AddHours(1)
         };
 
         context.JoinCodes.Add(joinCode);

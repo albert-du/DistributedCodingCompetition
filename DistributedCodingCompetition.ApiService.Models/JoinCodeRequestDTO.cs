@@ -45,4 +45,9 @@ public sealed record JoinCodeRequestDTO
     /// Whether the join code should close after use.
     /// </summary>
     public bool? CloseAfterUse { get; init; }
+
+    /// <summary>
+    /// The UTC date and time the join code will end.
+    /// </summary>
+    public DateTime? Expiration { get; init; }
 }

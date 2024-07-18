@@ -1,5 +1,7 @@
 namespace DistributedCodingCompetition.ApiService.Models;
 
+using System.Text.Json.Serialization;
+
 /// <summary>
 /// Pagination result representation.
 /// </summary>
@@ -25,9 +27,21 @@ public sealed record PaginateResult<T>
     /// The total number of pages.
     /// </summary>
     public required int TotalPages { get; init; }
-    
+
     /// <summary>
     /// The items.
     /// </summary>
     public required IReadOnlyList<T> Items { get; init; }
+
+    /// <summary>
+    /// Whether there is a next page.
+    /// </summary>
+    [JsonIgnore]
+    public bool NextEnabled => Page < TotalPages;
+
+    /// <summary>
+    /// Whether there is a previous page.
+    /// </summary>
+    [JsonIgnore]
+    public bool PreviousEnabled => Page > 1;
 }

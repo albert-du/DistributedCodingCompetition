@@ -5,7 +5,6 @@
 @using BlazorMonaco
 @using BlazorMonaco.Editor
 @using BlazorMonaco.Languages
-@inject IJSRuntime JSRuntime
 
 <StandaloneCodeEditor @ref=editor CssClass="h-full" ConstructionOptions=EditorConstructionOptions OnKeyDown=EditorModelChangedAsync />
 
@@ -44,5 +43,4 @@
         Code = string.Join('\n', await model.GetLinesContent());
         await CodeChanged.InvokeAsync(Code);
     }
-
 }

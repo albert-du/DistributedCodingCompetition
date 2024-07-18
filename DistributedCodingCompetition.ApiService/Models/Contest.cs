@@ -55,19 +55,9 @@ public class Contest
     public ICollection<Problem> Problems { get; set; } = [];
 
     /// <summary>
-    /// Problem count
-    /// </summary>
-    public int ProblemsCount => Problems.Count;
-
-    /// <summary>
     /// Participants in the contest
     /// </summary>
     public ICollection<User> Participants { get; set; } = [];
-
-    /// <summary>
-    /// Number of participants
-    /// </summary>
-    public int ParticipantsCount => Participants.Count;
 
     /// <summary>
     /// Administrators of the contest
@@ -75,19 +65,9 @@ public class Contest
     public ICollection<User> Administrators { get; set; } = [];
 
     /// <summary>
-    /// Number of administrators
-    /// </summary>
-    public int AdministratorsCount => Administrators.Count;
-
-    /// <summary>
     /// Banned users from the contest
     /// </summary>
     public ICollection<User> Banned { get; set; } = [];
-
-    /// <summary>
-    /// Number of banned users
-    /// </summary>
-    public int BannedCount => Banned.Count;
 
     /// <summary>
     /// Submissions in the contest
@@ -95,19 +75,9 @@ public class Contest
     public ICollection<Submission> Submissions { get; set; } = [];
 
     /// <summary>
-    /// Number of submissions
-    /// </summary>
-    public int SubmissionsCount => Submissions.Count;
-
-    /// <summary>
     /// Join codes for the contest
     /// </summary>
     public ICollection<JoinCode> JoinCodes { get; set; } = [];
-
-    /// <summary>
-    /// Number of join codes
-    /// </summary>
-    public int JoinCodesCount => JoinCodes.Count;
 
     /// <summary>
     /// Public status of the contest, whether to list on the homepage/not require a join code

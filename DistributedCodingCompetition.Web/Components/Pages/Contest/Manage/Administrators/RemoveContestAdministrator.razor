@@ -2,25 +2,24 @@
     TODO Implement
 *@
 @page "/contest/{id:guid}/manage/administrators/remove"
-@inject IApiService ApiService
+@inject IContestsService ContestsService
 <AuthCheck Contest=Id Admin />
 
 <PageTitle>Remove Contest Administrator</PageTitle>
 
 @code {
-    Contest? contest;
-    List<User> administrators = new List<User>();
+    ContestResponseDTO? contest;
+    PaginateResult<UserResponseDTO>? administrators;
 
     [Parameter]
     public Guid Id { get; set; }
 
     protected override async Task OnInitializedAsync()
     {
-        (var success, contest) = await ApiService.TryReadContestAsync(Id);
+        (var success, contest) = await ContestsService.TryReadContestAsync(Id);
         if (!success)
             return;
 
-        (_, var admins) = await ApiService.TryReadContestAdminsAsync(Id);
-        administrators = [.. admins];
+        (_, var admins) = await ContestsService.TryReadContestAdminsAsync(Id);
     }
 }

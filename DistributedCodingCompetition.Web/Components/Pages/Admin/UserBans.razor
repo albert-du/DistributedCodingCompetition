@@ -1,5 +1,5 @@
 ﻿@page "/admin/banned"
-@inject IApiService ApiService
+@inject IUsersService UsersService
 @inject IModalService ModalService
 @inject NavigationManager NavigationManager
 <AuthCheck Admin />
@@ -14,13 +14,6 @@
         <div class="flex gap-x-2">
             <div>
                 @($"{user.FullName} @{user.Username}")
-            </div>
-            <div>
-                Reason: @user.Ban?.Reason
-            </div>
-
-            <div>
-                Ends: @user.Ban?.End
             </div>
 
             <div>
@@ -40,7 +33,7 @@
 
     int page => Page ?? 1;
 
-    IReadOnlyList<User> banned = [];
+    IReadOnlyList<UserResponseDTO> banned = [];
 
     bool NextEnabled => banned.Count == 50;
 
@@ -49,33 +42,30 @@
     void Next()
     {
         if (!NextEnabled)
-        {
             return;
-        }
         NavigationManager.NavigateTo($"/admin/banned?page={page + 1}");
     }
 
     void Prev()
     {
         if (!PrevEnabled)
-        {
             return;
-        }
         NavigationManager.NavigateTo($"/admin/banned?page={page - 1}");
     }
 
-    async Task UnbanUserAsync(User user)
+    async Task UnbanUserAsync(UserResponseDTO user)
     {
-        if (!await ApiService.TryUnbanUserAsync(user.Id))
-        {
-            ModalService.ShowError("Failed to unban user", "Internal error");
-            return;
-        }
+        // TODO implement
+        // if (!await UsersService.TryUnbanUserAsync(user.Id))
+        // {
+        //     ModalService.ShowError("Failed to unban user", "Internal error");
+        //     return;
+        // }
     }
 
     protected override async Task OnParametersSetAsync()
     {
-        var (success, banned_) = await ApiService.TryReadBannedUsersAsync(page, 50);
+        var (success, banned_) = await UsersService.TryReadBannedUsersAsync(page, 50);
         if (!success || banned_ is null)
         {
             ModalService.ShowError("Failed to load banned users", "Internal error");

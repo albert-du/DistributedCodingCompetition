@@ -1,5 +1,5 @@
 ﻿@page "/admin/users"
-@inject IApiService ApiService
+@inject IUsersService UsersService
 @inject IModalService ModalService
 @inject NavigationManager NavigationManager
 <AuthCheck Admin />
@@ -38,33 +38,30 @@
     void Next()
     {
         if (!NextEnabled)
-        {
             return;
-        }
         NavigationManager.NavigateTo($"/admin/banned?page={page + 1}");
     }
 
     void Prev()
     {
         if (!PrevEnabled)
-        {
             return;
-        }
         NavigationManager.NavigateTo($"/admin/banned?page={page - 1}");
     }
 
-    async Task UnbanUserAsync(User user)
+    async Task UnbanUserAsync(UserResponseDTO user)
     {
-        if (!await ApiService.TryUnbanUserAsync(user.Id))
-        {
-            ModalService.ShowError("Failed to unban user", "Internal error");
-            return;
-        }
+        // TODO implement
+        // if (!await ApiService.TryUnbanUserAsync(user.Id))
+        // {
+        //     ModalService.ShowError("Failed to unban user", "Internal error");
+        //     return;
+        // }
     }
 
     protected override async Task OnParametersSetAsync()
     {
-        var (success, users_) = await ApiService.TryReadUsersAsync(page, 50);
+        var (success, users_) = await UsersService.TryReadUsersAsync(page, 50);
         if (!success || users_ is null)
         {
             ModalService.ShowError("Failed to load users", "Internal error");

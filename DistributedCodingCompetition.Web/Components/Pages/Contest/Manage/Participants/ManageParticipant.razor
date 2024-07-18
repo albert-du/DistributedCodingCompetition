@@ -1,7 +1,9 @@
 ﻿@page "/contest/{contestId:guid}/manage/participants/{participantId:guid}"
 @inject IModalService ModalService
-@inject IApiService ApiService
 @inject IJudgeService JudgeService
+@inject IContestsService ContestsService
+@inject IUsersService UsersService
+@inject ISubmissionsService SubmissionsService
 
 <AuthCheck Contest=ContestId Admin />
 
@@ -10,47 +12,54 @@
 <h1 class="text-3xl">@($"{participant?.FullName} @{participant?.Username}") </h1>
 <h2 class="text-2xl">Participant</h2>
 
-<div>This account was created: @participant?.Creation.ToShortDateString()</div>
+<div>This account was created: @participant?.CreatedAt.ToShortDateString()</div>
 
-<div>
-    <h2>Contests</h2>
-    <ul>
-        @foreach (var submission in submissions)
-        {
-            <tr>
-                <td>@submission.SubmissionTime</td>
-                <td>@submission.Language</td>
-                <td>@submission.Score</td>
-                <td>@submission.Problem</td>
-                <td>@submission.EvaluationTime</td>
-                <td>@submission.Problem</td>
-                <td>@(submission.Submitter?.Username ?? "?username?")</td>
-                <td><a href="submission/@submission.Id">View</a></td>
-                @if (!judging.Contains(submission.Id))
-                {
-                    <td><button @onclick="() => RejudgeAsync(submission)">Rejudge</button></td>
-                }
-                else
-                {
-                    <td><button disabled>Rejudging...</button></td>
-                }
-                @if (submission.Invalidated)
-                {
-                    <td><button @onclick="() => RevalidateAsync(submission)">Revalidate</button></td>
-
-                }
-                else
-                {
-                    <td><button @onclick="() => InvalidateAsync(submission)">Invalidate</button></td>
-                }
-            </tr>
-        }
-    </ul>
+@if (submissions is null)
+{
+    <LoadingSpinner />
+}
+else
+{
     <div>
-        <button @onclick="() => page--" enabled="@(page > 1)">Last</button>
-        <button @onclick="() => page++" enabled="@(submissions.Count > 0)">Next</button>
+        <h2>Submissions</h2>
+        <ul>
+            @foreach (var submission in submissions.Items)
+            {
+                <tr>
+                    <td>@submission.CreatedAt</td>
+                    <td>@submission.Language</td>
+                    <td>@submission.Score</td>
+                    <td>@submission.ProblemName</td>
+                    <td>@submission.JudgedAt</td>
+                    <td>@submission.ProblemName</td>
+                    <td>@submission.UserName</td>
+                    <td><a href="submission/@submission.Id">View</a></td>
+                    @if (!judging.Contains(submission.Id))
+                    {
+                        <td><button @onclick="() => RejudgeAsync(submission)">Rejudge</button></td>
+                    }
+                    else
+                    {
+                        <td><button disabled>Rejudging...</button></td>
+                    }
+                    @if (submission.Invalidated)
+                    {
+                        <td><button @onclick="() => RevalidateAsync(submission)">Revalidate</button></td>
+
+                    }
+                    else
+                    {
+                        <td><button @onclick="() => InvalidateAsync(submission)">Invalidate</button></td>
+                    }
+                </tr>
+            }
+        </ul>
+        <div>
+            <button @onclick="() => page--" enabled="@(page > 1)">Last</button>
+            <button @onclick="() => page++" enabled="@(submissions.Count > 0)">Next</button>
+        </div>
     </div>
-</div>
+}
 
 @code {
     [Parameter]
@@ -59,24 +68,24 @@
     [Parameter]
     public Guid ParticipantId { get; set; }
 
-    Contest? contest;
-    User? participant;
+    ContestResponseDTO? contest;
+    UserResponseDTO? participant;
     HashSet<Guid> judging = [];
 
-    IReadOnlyList<Submission> submissions = [];
+    PaginateResult<SubmissionResponseDTO>? submissions;
 
     int page = 1;
 
     protected override async Task OnInitializedAsync()
     {
-        (var success, contest) = await ApiService.TryReadContestAsync(ContestId);
+        (var success, contest) = await ContestsService.TryReadContestAsync(ContestId);
         if (!success || contest is null)
         {
             ModalService.ShowError("Failed to load contest", "Internal error");
             return;
         }
 
-        (success, participant) = await ApiService.TryReadUserAsync(ParticipantId);
+        (success, participant) = await UsersService.TryReadUserAsync(ParticipantId);
         if (!success || participant is null)
         {
             ModalService.ShowError("Failed to load participant", "Internal error");
@@ -87,7 +96,7 @@
     }
 
 
-    async Task RejudgeAsync(Submission submission)
+    async Task RejudgeAsync(SubmissionResponseDTO submission)
     {
         if (judging.Contains(submission.Id))
             return;
@@ -108,30 +117,29 @@
         }
     }
 
-    async Task InvalidateAsync(Submission submission)
+    async Task InvalidateAsync(SubmissionResponseDTO submission)
     {
         submission.Invalidated = true;
-        if (!await ApiService.TryUpdateSubmissionAsync(submission))
+        if (!await SubmissionsService.TryInvalidateSubmissionAsync(submission.Id))
         {
             ModalService.ShowError("Failed to invalidate submission", "Internal error");
             submission.Invalidated = false;
         }
     }
 
-    async Task RevalidateAsync(Submission submission)
+    async Task RevalidateAsync(SubmissionResponseDTO submission)
     {
         submission.Invalidated = false;
-        if (!await ApiService.TryUpdateSubmissionAsync(submission))
+        if (!await SubmissionsService.TryRevalidateSubmissionAsync(submission.Id))
         {
             ModalService.ShowError("Failed to revalidate submission", "Internal error");
             submission.Invalidated = true;
         }
     }
 
-
     async Task LoadSubmissionsAsync()
     {
-        (var success, var subs) = await ApiService.TryReadUserContestSubmissionsAsync(ContestId, participant!.Id, page, 50);
+        (var success, var subs) = await SubmissionsService.TryReadSubmissionsAsync(page: page, contestId: ContestId, userId: ParticipantId);
         if (!success || subs is null)
         {
             ModalService.ShowError("Failed to load submissions", "Internal error");

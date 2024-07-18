@@ -1,13 +1,12 @@
 ﻿@*
     Login page for the user to login to the system.
 *@
-@using DistributedCodingCompetition.AuthModels
 @page "/auth/login"
 @inject NavigationManager NavigationManager
 @inject AuthenticationStateProvider AuthenticationStateProvider
 @inject IJSRuntime JSRuntime
 @inject IAuthService AuthService
-@inject IApiService ApiService
+@inject IUsersService UsersService
 
 <PageTitle>Login</PageTitle>
 
@@ -87,7 +86,7 @@
 
         try
         {
-            var (success, user) = await ApiService.TryReadUserByEmailAsync(model.Email);
+            var (success, user) = await UsersService.TryReadUserByEmailAsync(model.Email);
             if (!success || user is null)
             {
                 error = "Failed to login.";

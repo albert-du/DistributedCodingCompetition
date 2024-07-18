@@ -3,7 +3,8 @@
 *@
 @page "/contest/{contestId:guid}/manage/invites/{joinCodeId}"
 @inject NavigationManager NavigationManager
-@inject IApiService ApiService
+@inject IJoinCodesService JoinCodesService
+@inject IContestsService ContestsService
 @inject IModalService ModalService
 
 <AuthCheck Contest=ContestId Admin />
@@ -48,18 +49,18 @@ else
 
     string contestName = string.Empty;
 
-    JoinCode? joinCode;
+    JoinCodeResponseDTO? joinCode;
 
     protected override async Task OnInitializedAsync()
     {
-        (var success, var code) = await ApiService.TryReadJoinCodeAsync(JoinCodeId);
+        (var success, var code) = await JoinCodesService.TryReadJoinCodeAsync(JoinCodeId);
         if (!success || code is null)
         {
             ModalService.ShowError("Failed to load join codes", "Internal error");
             return;
         }
 
-        (success, var contest) = await ApiService.TryReadContestAsync(ContestId);
+        (success, var contest) = await ContestsService.TryReadContestAsync(ContestId);
         if (!success || contest is null)
         {
             ModalService.ShowError("Failed to load contest", "Internal error");
@@ -79,7 +80,7 @@ else
 
     async Task DeleteAsync()
     {
-        if (await ApiService.TryDeleteJoinCodeAsync(JoinCodeId))
+        if (await JoinCodesService.TryDeleteJoinCodeAsync(JoinCodeId))
             ModalService.ShowInfo("Invite deleted", "");
         else
             ModalService.ShowError("Failed to delete invite", "Internal error");
@@ -90,9 +91,13 @@ else
         if (joinCode is null)
             return;
 
-        joinCode.Active = active;
+        JoinCodeRequestDTO request = new()
+        {
+            Id = joinCode.Id,
+            Active = active
+        };
 
-        if (await ApiService.TryUpdateJoinCodeAsync(joinCode))
+        if (await JoinCodesService.TryUpdateJoinCodeAsync(request))
             ModalService.ShowInfo("Invite updated", "");
         else
             ModalService.ShowError("Failed to update invite", "Internal error");
