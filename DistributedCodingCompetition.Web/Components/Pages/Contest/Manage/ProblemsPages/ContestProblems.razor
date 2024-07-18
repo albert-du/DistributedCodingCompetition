@@ -3,9 +3,9 @@
 *@
 @page "/contest/{id:guid}/manage/problems"
 @inject NavigationManager NavigationManager
-@inject IApiService ApiService
+@inject IProblemsService ProblemsService
+@inject IContestsService ContestsService
 @inject IModalService ModalService
-@using DistributedCodingCompetition.Models
 <AuthCheck Contest=Id Admin />
 
 <PageTitle>Contest Problems</PageTitle>
@@ -37,13 +37,13 @@
     [Parameter]
     public Guid Id { get; set; }
 
-    IReadOnlyList<Problem> problems = [];
+    IReadOnlyList<ProblemResponseDTO> problems = [];
 
     string contestName = string.Empty;
 
     protected override async Task OnInitializedAsync()
     {
-        var (success, p) = await ApiService.TryReadContestProblemsAsync(Id);
+        var (success, p) = await ContestsService.TryReadContestProblemsAsync(Id);
         if (!success || p is null)
         {
             ModalService.ShowError("Failed to load problems", "Internal Error");
@@ -51,7 +51,7 @@
             return;
         }
 
-        (success, var c) = await ApiService.TryReadContestAsync(Id);
+        (success, var c) = await ContestsService.TryReadContestAsync(Id);
 
         if (!success || c is null)
         {
@@ -66,7 +66,7 @@
 
     async Task DeleteProblemAsync(Guid id)
     {
-        if (!await ApiService.TryDeleteProblemAsync(id))
+        if (!await ProblemsService.TryDeleteProblemAsync(id))
             ModalService.ShowError("Failed to delete problem", "Internal Error");
         else
             problems = problems.Where(p => p.Id != id).ToList();

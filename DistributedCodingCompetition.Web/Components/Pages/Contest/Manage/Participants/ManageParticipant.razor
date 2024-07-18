@@ -4,6 +4,7 @@
 @inject IContestsService ContestsService
 @inject IUsersService UsersService
 @inject ISubmissionsService SubmissionsService
+@inject NavigationManager NavigationManager
 
 <AuthCheck Contest=ContestId Admin />
 
@@ -55,8 +56,8 @@ else
             }
         </ul>
         <div>
-            <button @onclick="() => page--" enabled="@(page > 1)">Last</button>
-            <button @onclick="() => page++" enabled="@(submissions.Count > 0)">Next</button>
+            <button @onclick=LastPage enabled=@submissions?.PreviousEnabled>Previous</button>
+            <button @onclick=NextPage enabled=@submissions?.NextEnabled>Next</button>
         </div>
     </div>
 }
@@ -74,7 +75,17 @@ else
 
     PaginateResult<SubmissionResponseDTO>? submissions;
 
-    int page = 1;
+    [SupplyParameterFromQuery]
+    public int? Page { get; set; }
+
+    void NextPage() =>
+        NavigationManager.NavigateTo($"contest/{ContestId}/manage/participants/{ParticipantId}?page={(Page ?? 1) + 1}");
+
+    void LastPage()
+    {
+        if (Page > 1)
+            NavigationManager.NavigateTo($"contest/{ContestId}/manage/participants/{ParticipantId}?page={(Page ?? 1) - 1}");
+    }
 
     protected override async Task OnInitializedAsync()
     {
@@ -92,6 +103,9 @@ else
             return;
         }
 
+    }
+    protected override async Task OnParametersSetAsync()
+    {
         await LoadSubmissionsAsync();
     }
 
@@ -139,7 +153,7 @@ else
 
     async Task LoadSubmissionsAsync()
     {
-        (var success, var subs) = await SubmissionsService.TryReadSubmissionsAsync(page: page, contestId: ContestId, userId: ParticipantId);
+        (var success, var subs) = await SubmissionsService.TryReadSubmissionsAsync(page: Page ?? 1, contestId: ContestId, userId: ParticipantId);
         if (!success || subs is null)
         {
             ModalService.ShowError("Failed to load submissions", "Internal error");

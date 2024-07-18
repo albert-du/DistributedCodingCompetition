@@ -4,6 +4,7 @@
 @page "/contest/{id:guid}/manage"
 @inject IUserStateService UserStateService
 @inject IContestsService ContestsService
+@inject ISubmissionsService SubmissionsService
 @inject IMarkdownRenderService MarkdownRenderService
 @inject IModalService ModalService
 @inject NavigationManager NavigationManager
@@ -477,12 +478,12 @@ else
                 StartTime = TimeOnly.FromDateTime((await TimeZoneProvider.GetLocalDateTimeAsync(contest.StartTime)).UtcDateTime),
                 EndTime = TimeOnly.FromDateTime((await TimeZoneProvider.GetLocalDateTimeAsync(contest.EndTime)).UtcDateTime),
                 MinimumAge = contest.MinimumAge,
-                Administrators = contest.Ad,
-                Participants = contest.ParticipantsCount,
-                Banned = contest.BannedCount,
-                Submissions = contest.SubmissionsCount,
-                Problems = contest.ProblemsCount,
-                JoinCodes = contest.JoinCodesCount,
+                Administrators = contest.TotalAdmins,
+                Participants = contest.TotalParticipants,
+                Banned = contest.TotalBanned,
+                Submissions = contest.TotalSubmissions,
+                Problems = contest.TotalProblems,
+                JoinCodes = contest.TotalJoinCodes,
                 Active = contest.Active,
                 Public = contest.Public,
                 Open = contest.Open
@@ -507,35 +508,26 @@ else
         }
 
         // fire off all requests
-        var a = ApiService.TryReadContestAdminsAsync(Id);
-        var p = ApiService.TryReadContestParticipantsAsync(Id, 10, participantsPage);
-        var b = ApiService.TryReadContestBannedAsync(Id, 10, bannedPage);
-        var j = ApiService.TryReadContestJoinCodesAsync(Id);
-        var pr = ApiService.TryReadContestProblemsAsync(Id);
-        var s = ApiService.TryReadContestSubmissionsAsync(Id, 10, 1);
+        var a = ContestsService.TryReadContestAdminsAsync(Id);
+        var p = ContestsService.TryReadContestParticipantsAsync(Id, participantsPage, 10);
+        var b = ContestsService.TryReadContestBannedAsync(Id, bannedPage, 10);
+        var j = ContestsService.TryReadContestJoinCodesAsync(Id);
+        var pr = ContestsService.TryReadContestProblemsAsync(Id);
+        var s = SubmissionsService.TryReadSubmissionsAsync(contestId: Id, count: 10);
 
         // wait for all requests to finish and save
-        (var success, var aa) = await a;
+        (var success, var administrators) = await a;
         if (!success) ModalService.ShowError("Failed to load administrators", "Internal error");
-        (success, var pp) = await p;
+        (success, var participants) = await p;
         if (!success) ModalService.ShowError("Failed to load participants", "Internal error");
-        (success, var bb) = await b;
+        (success, var banned) = await b;
         if (!success) ModalService.ShowError("Failed to load banned participants", "Internal error");
-        (success, var jj) = await j;
+        (success, var joinCodes) = await j;
         if (!success) ModalService.ShowError("Failed to load join codes", "Internal error");
-        (success, var prr) = await pr;
+        (success, var problems) = await pr;
         if (!success) ModalService.ShowError("Failed to load problems", "Internal error");
-        (success, var ss) = await s;
+        (success, var submissions) = await s;
         if (!success) ModalService.ShowError("Failed to load submissions", "Internal error");
-
-        // save results
-        administrators = aa ?? [];
-        participants = pp ?? [];
-        banned = bb ?? [];
-        joinCodes = jj ?? [];
-        problems = prr ?? [];
-        submissions = ss ?? [];
-
     }
 
     class ContestModel

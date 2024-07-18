@@ -2,7 +2,9 @@
     View all the submissions for a contest. This page is only accessible to contest admins.
 *@
 @page "/contest/{id:guid}/manage/submissions"
-@inject IApiService ApiService
+@inject ISubmissionsService SubmissionsService
+@inject IContestsService ContestsService
+@inject ISubmissionsService SubmissionsService
 @inject IModalService ModalService
 @inject IUserStateService UserStateService
 @inject IJudgeService JudgeService
@@ -14,79 +16,85 @@
 
 <h1 class="text-3xl">@contest?.Name Submissions</h1>
 
-<table class="table-auto">
-    <thead>
-        <tr>
-            <th>Problem</th>
-            <th>Time (UTC)</th>
-            <th>Judged (UTC)</th>
-            <th>Language</th>
-            <th>
-                <div>
-                    Score
-                </div>
-                <div>
-                    @("Cases|Score|Points")
-                </div>
-            </th>
-            <th>Participant</th>
-        </tr>
-    </thead>
-    <tbody>
-        @foreach (var submission in Submissions)
-        {
+@if (submissions is null)
+{
+    <LoadingSpinner />
+}
+else
+{
+    <table class="table-auto">
+        <thead>
             <tr>
-                <td>
-                    <a class="text-violet-800 hover:underline italic" href="problem/@submission.Problem?.Id/edit">
-                        @(submission.Problem?.Name ?? "no problem")
-                    </a>
-                </td>
-                <td>@submission.SubmissionTime</td>
-                <td>@submission.EvaluationTime</td>
-                <td>@submission.Language</td>
-                <td>
-                    @($"{submission.PassedTestCases}/{submission.TotalTestCases}|{submission.Score}/{submission.MaxPossibleScore}|{submission.Points}")
-                </td>
-                <td>@(submission.Submitter?.Username ?? "?username?")</td>
-                <td><a href="submission/@submission.Id?admin=true">View</a></td>
-                @if (!judging.Contains(submission.Id))
-                {
-                    <td><button @onclick="() => RejudgeAsync(submission)">Rejudge</button></td>
-                }
-                else
-                {
-                    <td><button disabled>Rejudging...</button></td>
-                }
-                @if (submission.Invalidated)
-                {
-                    <td><button @onclick="() => RevalidateAsync(submission)">Revalidate</button></td>
-
-                }
-                else
-                {
-                    <td><button @onclick="() => InvalidateAsync(submission)">Invalidate</button></td>
-                }
+                <th>Problem</th>
+                <th>Time (UTC)</th>
+                <th>Judged (UTC)</th>
+                <th>Language</th>
+                <th>
+                    <div>
+                        Score
+                    </div>
+                    <div>
+                        @("Cases|Score|Points")
+                    </div>
+                </th>
+                <th>Participant</th>
             </tr>
-        }
-    </tbody>
-</table>
+        </thead>
+        <tbody>
+            @foreach (var submission in submissions.Items)
+            {
+                <tr>
+                    <td>
+                        <a class="text-violet-800 hover:underline italic" href="problem/@submission.Problem?.Id/edit">
+                            @submission.ProblemName
+                        </a>
+                    </td>
+                    <td>@submission.CreatedAt</td>
+                    <td>@submission.JudgedAt</td>
+                    <td>@submission.Language</td>
+                    <td>
+                        @($"{submission.TestCasesPassed}/{submission.TestCasesTotal}|{submission.Score}/{submission.MaxPossibleScore}|{submission.Points}")
+                    </td>
+                    <td>@submission.UserName</td>
+                    <td><a href="submission/@submission.Id?admin=true">View</a></td>
+                    @if (!judging.Contains(submission.Id))
+                    {
+                        <td><button @onclick="() => RejudgeAsync(submission)">Rejudge</button></td>
+                    }
+                    else
+                    {
+                        <td><button disabled>Rejudging...</button></td>
+                    }
+                    @if (submission.Invalidated)
+                    {
+                        <td><button @onclick="() => RevalidateAsync(submission)">Revalidate</button></td>
 
+                    }
+                    else
+                    {
+                        <td><button @onclick="() => InvalidateAsync(submission)">Invalidate</button></td>
+                    }
+                </tr>
+            }
+        </tbody>
+    </table>
+}
 
 @code {
     [Parameter]
     public Guid Id { get; set; }
 
-    [SupplyParameterFromQuery(Name = "p")]
+    [SupplyParameterFromQuery]
     public int? Page { get; set; }
 
-    [SupplyParameterFromQuery(Name = "s")]
-    public int? PageSize { get; set; }
+    [SupplyParameterFromQuery]
+    public int? Count { get; set; }
 
     int page => Page ?? 1;
-    int pageSize => PageSize ?? 50;
+    int count => Count ?? 50;
 
-    List<Submission> Submissions = [];
-    Contest? contest;
+    PaginateResult<SubmissionResponseDTO>? submissions;
+    ContestResponseDTO? contest;
     HashSet<Guid> judging = [];
 
     protected override async Task OnParametersSetAsync()
@@ -97,24 +105,20 @@
 
     void NextPage()
     {
-        NavigationManager.NavigateTo($"/contest/{Id}/manage/submissions?p={page + 1}&s={pageSize}");
+        NavigationManager.NavigateTo($"/contest/{Id}/manage/submissions?page={page + 1}&count={count}");
     }
 
     void PrevPage()
     {
         if (Page > 1)
-            NavigationManager.NavigateTo($"/contest/{Id}/manage/submissions?p={page - 1}&s={pageSize}");
+            NavigationManager.NavigateTo($"/contest/{Id}/manage/submissions?page={page - 1}&count={count}");
     }
-
 
     private async Task LoadAsync()
     {
-        Console.WriteLine(PageSize);
-        Console.WriteLine(Page);
-
-        var sub = ApiService.TryReadContestSubmissionsAsync(Id, pageSize, page );
-        var cont = ApiService.TryReadContestAsync(Id);
-        (var success, var submissions) = await sub;
+        var sub = SubmissionsService.TryReadSubmissionsAsync(contestId: Id, page: page, count: count);
+        var cont = ContestsService.TryReadContestAsync(Id);
+        (var success, submissions) = await sub;
         if (!success || submissions is null)
         {
             ModalService.ShowError("Failed to load submissions", "Internal error");
@@ -133,13 +137,9 @@
             ModalService.ShowError("Contest not found", "");
             return;
         }
-
-        Submissions = [.. submissions];
-        Console.WriteLine($"Loaded {Submissions.Count} submissions");
-
     }
 
-    async Task RejudgeAsync(Submission submission)
+    async Task RejudgeAsync(SubmissionResponseDTO submission)
     {
         if (judging.Contains(submission.Id))
             return;
@@ -160,20 +160,20 @@
         }
     }
 
-    async Task InvalidateAsync(Submission submission)
+    async Task InvalidateAsync(SubmissionResponseDTO submission)
     {
         submission.Invalidated = true;
-        if (!await ApiService.TryUpdateSubmissionAsync(submission))
+        if (!await SubmissionsService.TryInvalidateSubmissionAsync(submission.Id))
         {
             ModalService.ShowError("Failed to invalidate submission", "Internal error");
             submission.Invalidated = false;
         }
     }
 
-    async Task RevalidateAsync(Submission submission)
+    async Task RevalidateAsync(SubmissionResponseDTO submission)
     {
         submission.Invalidated = false;
-        if (!await ApiService.TryUpdateSubmissionAsync(submission))
+        if (!await SubmissionsService.TryRevalidateSubmissionAsync(submission.Id))
         {
             ModalService.ShowError("Failed to revalidate submission", "Internal error");
             submission.Invalidated = true;

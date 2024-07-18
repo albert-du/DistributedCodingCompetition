@@ -1,7 +1,6 @@
 ﻿@page "/contest/{id:guid}/manage/points"
 @inject IModalService ModalService
-@inject IApiService ApiService
-
+@inject IContestsService ContestsService
 <AuthCheck Contest=Id Admin />
 
 <PageTitle>Contest Points</PageTitle>
@@ -39,22 +38,22 @@ else
     public Guid Id { get; set; }
 
     IReadOnlyDictionary<Guid, int> points = new Dictionary<Guid, int>();
-    IReadOnlyDictionary<Guid, ProblemPointValue> ppvs = new Dictionary<Guid, ProblemPointValue>();
+    IReadOnlyDictionary<Guid, ProblemPointValueResponseDTO> ppvs = new Dictionary<Guid, ProblemPointValueResponseDTO>();
 
-    IReadOnlyList<Problem> problems = [];
+    IReadOnlyList<ProblemResponseDTO> problems = [];
 
-    Contest? contest;
+    ContestResponseDTO? contest;
 
     protected override async Task OnInitializedAsync()
     {
-        (var success, contest) = await ApiService.TryReadContestAsync(Id);
+        (var success, contest) = await ContestsService.TryReadContestAsync(Id);
         if (!success || contest is null)
         {
             ModalService.ShowError("Failed to load contest", "Internal error");
             return;
         }
 
-        var (success2, probs) = await ApiService.TryReadContestProblemsAsync(Id);
+        var (success2, probs) = await ContestsService.TryReadContestProblemsAsync(Id);
         if (!success2 || probs is null)
         {
             ModalService.ShowError("Failed to load problems", "Internal error");
@@ -62,16 +61,17 @@ else
         }
         problems = probs;
 
-        var (success3, ppvs) = await ApiService.TryReadContestProblemPointValues(Id);
-        if (!success3 || ppvs is null)
+        var (success3, ppvs2) = await ContestsService.TryReadContestProblemPointValuesAsync(Id);
+        if (!success3 || ppvs2 is null)
         {
             ModalService.ShowError("Failed to load points", "Internal error");
             return;
         }
-        points = ppvs.ToFrozenDictionary(x => x.Id, x => x.Points);
+        points = ppvs2.ToFrozenDictionary(x => x.Id, x => x.Points);
+        ppvs = ppvs2.ToFrozenDictionary(x => x.ProblemId, x => x);
     }
 
-    void SetPoints(Problem prob)
+    void SetPoints(ProblemResponseDTO prob)
     {
         ModalService.AskInteger("Set points", "Enter points", 0, 100, async (value) =>
         {
@@ -81,20 +81,37 @@ else
             if (ppvs.TryGetValue(prob.Id, out var ppv))
             {
                 // update
-                ppv.Points = value.Value;
-                var success = await ApiService.TryUpdateProblemPointValueAsync(ppv);
+                ProblemPointValueRequestDTO request = new()
+                    {
+                        ProblemId = prob.Id,
+                        Points = value.Value,
+                        ContestId = Id,
+                        Id = ppv.Id
+                    };
+                var success = await ContestsService.TryUpdateContestProblemPointValueAsync(request);
+                // reload
             }
             else
             {
                 // create
-                ppv = new()
+                ProblemPointValueRequestDTO request = new()
                     {
-                        ContestId = Id,
+                        Id = Guid.NewGuid(),
                         ProblemId = prob.Id,
-                        Points = value.Value
+                        Points = value.Value,
+                        ContestId = Id,
                     };
-                var success = await ApiService.TryCreateProblemPointValueAsync(ppv);
+                var success = await ContestsService.TryCreateContestProblemPointValueAsync(request);
             }
+            var (success2, ppvs2) = await ContestsService.TryReadContestProblemPointValuesAsync(Id);
+            if (!success2 || ppvs2 is null)
+            {
+                ModalService.ShowError("Failed to load points", "Internal error");
+                return;
+            }
+            points = ppvs2.ToFrozenDictionary(x => x.Id, x => x.Points);
+            ppvs = ppvs2.ToFrozenDictionary(x => x.ProblemId, x => x);
+            await InvokeAsync(StateHasChanged);
         });
     }
 }

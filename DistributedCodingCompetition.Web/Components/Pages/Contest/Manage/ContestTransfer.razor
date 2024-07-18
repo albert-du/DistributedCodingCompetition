@@ -3,7 +3,7 @@
 *@
 
 @page "/contest/{id:guid}/manage/transfer"
-@inject IApiService ApiService
+@inject IContestsService ContestsService
 @inject IModalService ModalService
 @inject IUserStateService UserStateService
 @inject NavigationManager NavigationManager
@@ -49,17 +49,17 @@
     [Parameter]
     public Guid Id { get; set; }
 
-    Contest? contest;
+    ContestResponseDTO? contest;
 
     string sanity = string.Empty;
 
-    List<User> administrators = [];
+    PaginateResult<UserResponseDTO>? administrators;
 
-    User? newOwner;
+    UserResponseDTO? newOwner;
 
     protected override async Task OnInitializedAsync()
     {
-        (var success, contest) = await ApiService.TryReadContestAsync(Id);
+        (var success, contest) = await ContestsService.TryReadContestAsync(Id);
         if (!success)
         {
             ModalService.ShowError("Failed to load contest", "");
@@ -82,11 +82,12 @@
             NavigationManager.NavigateTo("dashboard");
             return;
         }
-        (_, var admins) = await ApiService.TryReadContestAdminsAsync(Id);
-        administrators = [.. admins];
+        (_, administrators) = await ContestsService.TryReadContestAdminsAsync(Id, page: page);
     }
 
-    void SelectAdmin(User admin)
+    int page = 1;
+
+    void SelectAdmin(UserResponseDTO admin)
     {
         newOwner = admin;
     }
@@ -97,8 +98,6 @@
         if (submitted)
             return;
         submitted = true;
-        var oldOwner = contest!.Owner;
-        contest.OwnerId = newOwner!.Id;
-        var success = await ApiService.TryUpdateContestAsync(contest);
+        // TODO implement
     }
 }
