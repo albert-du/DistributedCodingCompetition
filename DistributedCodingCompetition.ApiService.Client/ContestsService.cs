@@ -1,17 +1,9 @@
 namespace DistributedCodingCompetition.ApiService.Client;
 
 /// <inheritdoc/>
-public sealed class ContestsService : IContestsService
+public sealed class ContestsService(HttpClient httpClient, ILogger<ContestsService> logger) : IContestsService
 {
-    private readonly ApiClient<ContestsService> apiClient;
-
-    /// <summary>
-    /// Initializes a new instance of the <see cref="ContestsService"/> class.
-    /// </summary>
-    /// <param name="httpClient"></param>
-    /// <param name="logger"></param>
-    internal ContestsService(HttpClient httpClient, ILogger<ContestsService> logger) =>
-        apiClient = new(httpClient, logger, "api/contests");
+    private readonly ApiClient<ContestsService> apiClient = new(httpClient, logger, "api/contests");
 
     /// <inheritdoc/>
     public Task<(bool, PaginateResult<ContestResponseDTO>?)> TryReadContestsAsync(int page, int count) =>

@@ -2,12 +2,9 @@
 namespace DistributedCodingCompetition.ApiService.Client;
 
 /// <inheritdoc/>
-public sealed class UsersService : IUsersService
+public sealed class UsersService(HttpClient httpClient, ILogger<UsersService> logger) : IUsersService
 {
-    private readonly ApiClient<UsersService> apiClient;
-
-    internal UsersService(HttpClient httpClient, ILogger<UsersService> logger) =>
-        apiClient = new(httpClient, logger, "api/users");
+    private readonly ApiClient<UsersService> apiClient = new(httpClient, logger, "api/users");
 
     /// <inheritdoc/>
     public Task<(bool, UserResponseDTO?)> TryCreateUserAsync(UserRequestDTO user) =>

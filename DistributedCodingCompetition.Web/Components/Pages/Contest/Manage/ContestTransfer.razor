@@ -12,14 +12,14 @@
 <PageTitle>Transfer Contest Ownership</PageTitle>
 
 <h1 class="">Transfer Ownership of @(contest?.Name ?? "Unknown")</h1>
-@if (contest is not null)
+@if (contest is not null && administrators is not null)
 {
     <div>Confirm this the contest you want to transfer, type the name of the contest</div>
     <input type="text" @bind="sanity" />
 
     <h2>Select New Owner</h2>
     <ul class="flex flex-col gap-y-2">
-        @foreach (var admin in administrators)
+        @foreach (var admin in administrators.Items)
         {
             <button @onclick="() => SelectAdmin(admin)" class="flex bg-">
                 <div>

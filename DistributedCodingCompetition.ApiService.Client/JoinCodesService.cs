@@ -1,17 +1,9 @@
 namespace DistributedCodingCompetition.ApiService.Client;
 
 /// <inheritdoc/>
-public sealed class JoinCodesService : IJoinCodesService
+public sealed class JoinCodesService(HttpClient httpClient, ILogger<JoinCodesService> logger) : IJoinCodesService
 {
-    private readonly ApiClient<JoinCodesService> apiClient;
-
-    /// <summary>
-    /// Initializes a new instance of the <see cref="JoinCodesService"/> class.
-    /// </summary>
-    /// <param name="httpClient"></param>
-    /// <param name="logger"></param>
-    internal JoinCodesService(HttpClient httpClient, ILogger<JoinCodesService> logger) =>
-        apiClient = new(httpClient, logger, "api/joincodes");
+    private readonly ApiClient<JoinCodesService> apiClient = new(httpClient, logger, "api/joincodes");
 
     /// <inheritdoc/>
     public Task<(bool, JoinCodeResponseDTO?)> TryCreateJoinCodeAsync(JoinCodeRequestDTO joinCode) =>

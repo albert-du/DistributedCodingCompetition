@@ -8,24 +8,31 @@
 
 <h1 class="text-2xl">Application-wide Bans</h1>
 
-<div class="flex flex-col gap-y-1">
-    @foreach (var user in banned)
-    {
-        <div class="flex gap-x-2">
-            <div>
-                @($"{user.FullName} @{user.Username}")
-            </div>
+@if (banned is null)
+{
+    <LoadingSpinner />
+}
+else
+{
+    <div class="flex flex-col gap-y-1">
+        @foreach (var user in banned.Items)
+        {
+            <div class="flex gap-x-2">
+                <div>
+                    @($"{user.FullName} @{user.Username}")
+                </div>
 
-            <div>
-                <button class="rounded-lg px-2 py-1 bg-rose-500 text-slate-200" @onclick="() => UnbanUserAsync(user)">Unban</button>
+                <div>
+                    <button class="rounded-lg px-2 py-1 bg-rose-500 text-slate-200" @onclick="() => UnbanUserAsync(user)">Unban</button>
+                </div>
             </div>
+        }
+        <div class="flex">
+            <button class="rounded-lg px-2 py-1 bg-rose-500 text-slate-200" @onclick=Next enabled=@banned.NextEnabled>Next</button>
+            <button class="rounded-lg px-2 py-1 bg-rose-500 text-slate-200" @onclick=Prev enabled=@banned.PreviousEnabled>Prev</button>
         </div>
-    }
-    <div class="flex">
-        <button class="rounded-lg px-2 py-1 bg-rose-500 text-slate-200" @onclick=Next disabled="@(!NextEnabled)">Next</button>
-        <button class="rounded-lg px-2 py-1 bg-rose-500 text-slate-200" @onclick=Prev disabled="@(!PrevEnabled)">Prev</button>
     </div>
-</div>
+}
 
 @code {
     [SupplyParameterFromQuery]
@@ -37,16 +44,14 @@
 
     void Next()
     {
-        if (!NextEnabled)
-            return;
-        NavigationManager.NavigateTo($"/admin/banned?page={page + 1}");
+        if (banned?.NextEnabled is true)
+            NavigationManager.NavigateTo($"/admin/banned?page={page + 1}");
     }
 
     void Prev()
     {
-        if (!PrevEnabled)
-            return;
-        NavigationManager.NavigateTo($"/admin/banned?page={page - 1}");
+        if (banned?.PreviousEnabled is true)
+            NavigationManager.NavigateTo($"/admin/banned?page={page - 1}");
     }
 
     async Task UnbanUserAsync(UserResponseDTO user)
@@ -61,7 +66,7 @@
 
     protected override async Task OnParametersSetAsync()
     {
-        var (success, banned_) = await UsersService.TryReadBannedUsersAsync(page, 50);
+        var (success, banned_) = await UsersService.TryReadBannedUsersAsync(page);
         if (!success || banned_ is null)
         {
             ModalService.ShowError("Failed to load banned users", "Internal error");

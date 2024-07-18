@@ -1,31 +1,22 @@
 namespace DistributedCodingCompetition.AuthService.Client;
 
 /// <inheritdoc/>
-public sealed class AuthService : IAuthService
+public sealed class AuthService(HttpClient httpClient, ILogger<AuthService> logger) : IAuthService
 {
-    private readonly HttpClient _httpClient;
-    private readonly ILogger<AuthService> _logger;
-
-    internal AuthService(HttpClient httpClient, ILogger<AuthService> logger)
-    {
-        _httpClient = httpClient;
-        _logger = logger;
-    }
-
     /// <inheritdoc/>
     public async Task<Guid?> TryRegisterAsync(string email, string password)
     {
         try
         {
             var encodedPassword = Uri.EscapeDataString(password);
-            var resp = await _httpClient.PostAsync("api/auth/register?password=" + encodedPassword, null);
+            var resp = await httpClient.PostAsync("api/auth/register?password=" + encodedPassword, null);
             resp.EnsureSuccessStatusCode();
             var res = await resp.Content.ReadFromJsonAsync<RegisterResult>();
             return res?.Id;
         }
         catch (Exception ex)
         {
-            _logger.LogError(ex, "Failed to register");
+            logger.LogError(ex, "Failed to register");
             return null;
         }
     }
@@ -44,13 +35,13 @@ public sealed class AuthService : IAuthService
         var queryString = await urlEncoded.ReadAsStringAsync();
         try
         {
-            var resp = await _httpClient.PostAsync($"api/auth/login?{queryString}", null);
+            var resp = await httpClient.PostAsync($"api/auth/login?{queryString}", null);
             resp.EnsureSuccessStatusCode();
             return await resp.Content.ReadFromJsonAsync<LoginResult>();
         }
         catch (Exception ex)
         {
-            _logger.LogError(ex, "Failed to login");
+            logger.LogError(ex, "Failed to login");
             return null;
         }
     }
@@ -60,13 +51,13 @@ public sealed class AuthService : IAuthService
     {
         try
         {
-            var resp = await _httpClient.PostAsync($"api/auth/validate?token={token}", null);
+            var resp = await httpClient.PostAsync($"api/auth/validate?token={token}", null);
             resp.EnsureSuccessStatusCode();
             return await resp.Content.ReadFromJsonAsync<ValidationResult>();
         }
         catch (Exception ex)
         {
-            _logger.LogError(ex, "Failed to validate token");
+            logger.LogError(ex, "Failed to validate token");
             return null;
         }
     }
@@ -84,13 +75,13 @@ public sealed class AuthService : IAuthService
         var queryString = await urlEncoded.ReadAsStringAsync();
         try
         {
-            var resp = await _httpClient.PostAsync($"api/auth/changePassword?{queryString}", null);
+            var resp = await httpClient.PostAsync($"api/auth/changePassword?{queryString}", null);
             resp.EnsureSuccessStatusCode();
             return true;
         }
         catch (Exception ex)
         {
-            _logger.LogError(ex, "Failed to change password");
+            logger.LogError(ex, "Failed to change password");
             return false;
         }
     }
@@ -107,13 +98,13 @@ public sealed class AuthService : IAuthService
         var queryString = await urlEncoded.ReadAsStringAsync();
         try
         {
-            var resp = await _httpClient.PostAsync($"api/auth/changePassword?{queryString}", null);
+            var resp = await httpClient.PostAsync($"api/auth/changePassword?{queryString}", null);
             resp.EnsureSuccessStatusCode();
             return true;
         }
         catch (Exception ex)
         {
-            _logger.LogError(ex, "Failed to change password");
+            logger.LogError(ex, "Failed to change password");
             return false;
         }
     }

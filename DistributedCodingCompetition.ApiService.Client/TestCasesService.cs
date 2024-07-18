@@ -2,17 +2,9 @@
 namespace DistributedCodingCompetition.ApiService.Client;
 
 /// <inheritdoc/>
-public sealed class TestCasesService : ITestCasesService
+public sealed class TestCasesService(HttpClient httpClient, ILogger<TestCasesService> logger) : ITestCasesService
 {
-    private readonly ApiClient<TestCasesService> apiClient;
-
-    /// <summary>
-    /// Initializes a new instance of the <see cref="TestCaseService"/> class.
-    /// </summary>
-    /// <param name="httpClient"></param>
-    /// <param name="logger"></param>
-    internal TestCasesService(HttpClient httpClient, ILogger<TestCasesService> logger) =>
-        apiClient = new(httpClient, logger, "api/testcases");
+    private readonly ApiClient<TestCasesService> apiClient = new(httpClient, logger, "api/testcases");
 
     /// <inheritdoc/>
     public Task<(bool, TestCaseResponseDTO?)> TryCreateTestCaseAsync(TestCaseRequestDTO testCase) =>

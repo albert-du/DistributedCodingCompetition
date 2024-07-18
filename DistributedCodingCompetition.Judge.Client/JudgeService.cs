@@ -1,26 +1,12 @@
 namespace DistributedCodingCompetition.Judge.Client;
 
 /// <inheritdoc/>
-public sealed class JudgeService : IJudgeService
+public sealed class JudgeService(HttpClient httpClient, ILogger<JudgeService> logger) : IJudgeService
 {
-    private readonly HttpClient _httpClient;
-    private readonly ILogger<JudgeService> _logger;
-
-    /// <summary>
-    /// Initializes a new instance of the <see cref="JudgeService"/> class.
-    /// </summary>
-    /// <param name="httpClient"></param>
-    /// <param name="logger"></param>
-    internal JudgeService(HttpClient httpClient, ILogger<JudgeService> logger)
-    {
-        _httpClient = httpClient;
-        _logger = logger;
-    }
-
     /// <inheritdoc/>
     public async Task<string?> JudgeAsync(Guid submissionId)
     {
-        var response = await _httpClient.PostAsync("evaluation?submissionId=" + submissionId, null);
+        var response = await httpClient.PostAsync("evaluation?submissionId=" + submissionId, null);
         if (response.StatusCode == System.Net.HttpStatusCode.TooManyRequests)
             return "Please wait before trying again";
 
@@ -31,7 +17,7 @@ public sealed class JudgeService : IJudgeService
         }
         catch (HttpRequestException ex)
         {
-            _logger.LogError(ex, "Error while judging submission {SubmissionId}", submissionId);
+            logger.LogError(ex, "Error while judging submission {SubmissionId}", submissionId);
             return $"An error occurred while judging this submission: {ex.StatusCode}";
         }
     }
@@ -39,7 +25,7 @@ public sealed class JudgeService : IJudgeService
     /// <inheritdoc/>
     public async Task<string?> RejudgeAsync(Guid submissionId)
     {
-        var response = await _httpClient.PostAsync("evaluation/rejudge?submissionId=" + submissionId, null);
+        var response = await httpClient.PostAsync("evaluation/rejudge?submissionId=" + submissionId, null);
 
         try
         {
@@ -48,7 +34,7 @@ public sealed class JudgeService : IJudgeService
         }
         catch (HttpRequestException ex)
         {
-            _logger.LogError(ex, "Error while rejudging submission {SubmissionId}", submissionId);
+            logger.LogError(ex, "Error while rejudging submission {SubmissionId}", submissionId);
             return $"An error occurred while rejudging this submission: {ex.StatusCode}";
         }
     }
@@ -56,7 +42,7 @@ public sealed class JudgeService : IJudgeService
     /// <inheritdoc/>
     public async Task<string?> RejudgeProblemAsync(Guid problemId)
     {
-        var response = await _httpClient.PostAsync("evaluation/problem?problemId=" + problemId, null);
+        var response = await httpClient.PostAsync("evaluation/problem?problemId=" + problemId, null);
 
         try
         {
@@ -65,7 +51,7 @@ public sealed class JudgeService : IJudgeService
         }
         catch (HttpRequestException ex)
         {
-            _logger.LogError(ex, "Error while rejudging problem {problemId}", problemId);
+            logger.LogError(ex, "Error while rejudging problem {problemId}", problemId);
             return $"An error occurred while rejudging this problem: {ex.StatusCode}";
         }
     }
