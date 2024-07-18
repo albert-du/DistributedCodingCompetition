@@ -1,5 +1,7 @@
 ﻿@page "/contest/{contestId:guid}/solve/{problemId:guid}/submissions"
-@inject IApiService ApiService
+@inject IContestsService ContestsService
+@inject IProblemsService ProblemsService
+@inject ISubmissionsService SubmissionsService
 @inject IModalService ModalService
 @inject ITimeZoneProvider TimeZoneProvider
 @inject IUserStateService UserStateService
@@ -13,25 +15,32 @@
 <p>Submissions for @username</p>
 <a class="italic hover:underline text-violet-800" href="contest/@ContestId/solve/@ProblemId">Back to problem</a>
 
-<div class="flex flex-col gap-y-1">
-    @foreach (var submission in submissions)
-    {
-        <div class="p-4 bg-white rounded-lg shadow-md">
-            <div class="flex justify-between">
-                <div>@submission.Language</div>
-                <div>@submission.SubmissionTime.Add(tzOffset).ToString("yyyy-MM-dd HH:mm:ss")</div>
+@if (submissions is null)
+{
+    <LoadingSpinner />
+}
+else
+{
+    <div class="flex flex-col gap-y-1">
+        @foreach (var submission in submissions.Items)
+        {
+            <div class="p-4 bg-white rounded-lg shadow-md">
+                <div class="flex justify-between">
+                    <div>@submission.Language</div>
+                    <div>@submission.CreatedAt.Add(tzOffset).ToString("yyyy-MM-dd HH:mm:ss")</div>
+                </div>
+                <div class="border p-2 h-32">
+                    <CodeEditor ReadOnly Language=@(submission.Language.Split('=').FirstOrDefault()??"text") Code=@submission.Code />
+                </div>
+                <div>
+                    <div>Testcases: @submission.TestCasesPassed out of @submission.TestCasesTotal</div>
+                    <div>Score: @submission.Score out of @submission.MaxPossibleScore</div>
+                    <div>Points: @submission.Points</div>
+                </div>
             </div>
-            <div class="border p-2 h-32">
-                <CodeEditor ReadOnly Language=@(submission.Language.Split('=').FirstOrDefault()??"text") Code=@submission.Code />
-            </div>
-            <div>
-                <div>Testcases: @submission.PassedTestCases out of @submission.TotalTestCases</div>
-                <div>Score: @submission.Score out of @submission.MaxPossibleScore</div>
-                <div>Points: @submission.Points</div>
-            </div>
-        </div>
-    }
-</div>
+        }
+    </div>
+}
 
 @code {
     [Parameter]
@@ -41,18 +50,22 @@
     public Guid ProblemId { get; set; }
 
     [SupplyParameterFromQuery]
-    public int Page { get; set; } = 1;
+    public int? Page { get; set; }
 
     [SupplyParameterFromQuery]
-    public int PageSize { get; set; } = 50;
+    public int? Count { get; set; }
+
+    int page => Page ?? 1;
+
+    int count => Count ?? 50;
+
+    TimeSpan tzOffset;
+
+    PaginateResult<SubmissionResponseDTO>? submissions;
 
     string contestName = string.Empty;
     string problemName = string.Empty;
     string username = string.Empty;
-
-    TimeSpan tzOffset;
-
-    IReadOnlyList<Submission> submissions = [];
 
     protected override async Task OnInitializedAsync()
     {
@@ -64,7 +77,7 @@
         }
         username = user.Username;
 
-        var (success, contest) = await ApiService.TryReadContestAsync(ContestId);
+        var (success, contest) = await ContestsService.TryReadContestAsync(ContestId);
         if (!success || contest is null)
         {
             ModalService.ShowError("Failed to load contest", "Internal error");
@@ -73,14 +86,14 @@
 
         contestName = contest.Name;
 
-        var (success2, problem) = await ApiService.TryReadProblemAsync(ProblemId);
+        var (success2, problem) = await ProblemsService.TryReadProblemAsync(ProblemId);
         if (!success2 || problem is null)
         {
             ModalService.ShowError("Failed to load problem", "Internal error");
             return;
         }
         problemName = problem.Name;
-        var (success3, subs) = await ApiService.TryReadUserProblemSubmissionsAsync(ContestId, ProblemId, user.Id, Page, PageSize);
+        var (success3, subs) = await SubmissionsService.TryReadSubmissionsAsync(contestId: ContestId, problemId: ProblemId, userId: user.Id, page: page, count: 50);
         if (!success3 || subs is null)
         {
             ModalService.ShowError("Failed to load submissions", "Internal error");

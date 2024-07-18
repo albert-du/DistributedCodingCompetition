@@ -3,7 +3,8 @@
 *@
 @page "/join/{code}"
 @inject NavigationManager NavigationManager
-@inject IApiService ApiService
+@inject IContestsService ContestsService
+@inject IJoinCodesService JoinCodesService
 @inject IUserStateService UserStateService
 @inject IModalService ModalService
 
@@ -85,8 +86,8 @@ else
     [Parameter]
     public string Code { get; set; } = string.Empty;
 
-    Contest? contest;
-    JoinCode? joinCode;
+    ContestResponseDTO? contest;
+    JoinCodeResponseDTO? joinCode;
 
     string username = string.Empty;
     int age = int.MaxValue;
@@ -96,11 +97,11 @@ else
 
     protected override async Task OnParametersSetAsync()
     {
-        (var success, contest) = await ApiService.TryReadContestByJoinCodeAsync(Code);
+        (var success, contest) = await ContestsService.TryReadContestByJoinCodeAsync(Code);
         if (!success || contest is null)
             return;
 
-        (success, joinCode) = await ApiService.TryReadJoinCodeAsync(Code);
+        (success, joinCode) = await JoinCodesService.TryReadJoinCodeByCodeAsync(Code);
         if (!success || joinCode is null)
             return;
 
@@ -111,7 +112,7 @@ else
         username = user.Username;
         age = Age(user.Birthday);
 
-        (success, var role) = await ApiService.TryReadUserContestRoleAsync(contest.Id, user.Id);
+        (success, var role) = await ContestsService.TryReadContestUserRoleAsync(contest.Id, user.Id);
         if (!success || role is null)
             return;
 
@@ -121,7 +122,7 @@ else
 
     async Task JoinAsync()
     {
-        if (await UserStateService.UserAsync() is not User user)
+        if (await UserStateService.UserAsync() is not UserResponseDTO user)
         {
             ModalService.ShowError("You are not logged in", "Please log in to join the contest");
             return;
@@ -133,7 +134,7 @@ else
             return;
         }
 
-        if (!await ApiService.TryJoinContestAsync(joinCode.Id, user.Id))
+        if (!await JoinCodesService.TryJoinContestAsync(joinCode.Id, user.Id))
         {
             ModalService.ShowError("Failed to join contest", "Internal error");
             return;
@@ -141,11 +142,11 @@ else
 
         if (joinCode.Admin)
         {
-            NavigationManager.NavigateTo($"/contest/{contest!.Id}/manage");
+            NavigationManager.NavigateTo($"contest/{contest!.Id}/manage");
             return;
         }
 
-        NavigationManager.NavigateTo($"/contest/{contest!.Id}");
+        NavigationManager.NavigateTo($"contest/{contest!.Id}");
     }
 
     static int Age(DateTime birthDate)

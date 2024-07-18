@@ -3,7 +3,7 @@
 *@
 @page "/contest/{id:guid}"
 @inject NavigationManager NavigationManager
-@inject IApiService ApiService
+@inject IContestsService ContestsService
 @inject IModalService ModalService
 @inject ITimeZoneProvider TimeZoneProvider
 <AuthCheck Contest=Id />
@@ -39,13 +39,13 @@ else
     [Parameter]
     public Guid Id { get; set; }
 
-    Contest? contest;
+    ContestResponseDTO? contest;
 
     bool open;
 
     protected override async Task OnInitializedAsync()
     {
-        var (success, c) = await ApiService.TryReadContestAsync(Id);
+        var (success, c) = await ContestsService.TryReadContestAsync(Id);
 
         if (!success || c is null)
         {

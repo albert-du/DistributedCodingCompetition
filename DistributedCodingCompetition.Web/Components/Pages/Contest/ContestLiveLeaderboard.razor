@@ -1,6 +1,6 @@
 ﻿@page "/contest/{id:guid}/leaderboard/live"
 @inject NavigationManager NavigationManager
-@inject IApiService ApiService
+@inject IContestsService ContestsService
 @inject IModalService ModalService
 @inject ILeaderboardService LeaderboardService
 
@@ -48,13 +48,13 @@ else
     [Parameter]
     public Guid Id { get; set; }
 
-    Contest? contest;
+    ContestResponseDTO? contest;
 
     Leaderboard? leaderboard;
 
     protected override async Task OnParametersSetAsync()
     {
-        (var success, contest) = await ApiService.TryReadContestAsync(Id);
+        (var success, contest) = await ContestsService.TryReadContestAsync(Id);
         if (!success || contest is null)
         {
             ModalService.ShowError("Failed to load contest", "Internal error");

@@ -320,7 +320,8 @@ internal static class QueryExtensions
                 FullName = user.FullName,
                 CreatedAt = user.CreatedAt,
                 Banned = user.Banned,
-                BannedContests = user.BannedContests
+                BannedContests = user.BannedContests,
+                Birthday = user.Birthday
             })
             .ToArrayAsync();
 }

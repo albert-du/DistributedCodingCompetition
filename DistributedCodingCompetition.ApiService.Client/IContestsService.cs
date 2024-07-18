@@ -161,4 +161,12 @@ public interface IContestsService
     /// <param name="contest"></param>
     /// <returns></returns>
     Task<(bool, ContestResponseDTO?)> TryCreateContestAsync(ContestRequestDTO contest);
+
+    /// <summary>
+    /// Adds a problem to a contest.
+    /// </summary>
+    /// <param name="contestId"></param>
+    /// <param name="problemId"></param>
+    /// <returns></returns>
+    Task<bool> TryAddProblemToContest(Guid contestId, Guid problemId);
 }

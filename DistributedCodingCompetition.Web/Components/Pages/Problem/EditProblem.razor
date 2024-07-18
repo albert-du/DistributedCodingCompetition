@@ -5,11 +5,10 @@
 @inject NavigationManager NavigationManager
 @inject IUserStateService UserStateService
 @inject IModalService ModalService
-@inject IApiService ApiService
+@inject IProblemsService ProblemsService
 @inject IMarkdownRenderService MarkdownRenderService
 
 <PageTitle>Edit Problem</PageTitle>
-
 
 @if (model is null)
 {
@@ -101,40 +100,29 @@ else
     [Parameter]
     public Guid Id { get; set; }
 
-    Problem? problem;
+    ProblemResponseDTO? problem;
     ProblemModel? model;
     Guid userId;
 
     async Task SubmitAsync()
     {
         if (model is null || problem is null)
-        {
             return;
-        }
 
-        problem.Name = model.Name;
-        problem.Description = model.Description;
-        problem.RenderedDescription = MarkdownRenderService.Render(model.Description);
-        problem.Difficulty = model.Difficulty;
-        problem.TestCases = [..model.TestCases.Select(tc => new TestCase
-        {
-            Id = tc.Id,
-            Input = tc.Input,
-            Output = tc.Output,
-            Description = tc.Description,
-            Sample = tc.Sample,
-            Active = tc.Active,
-            Weight = tc.Weight
-        })];
+        ProblemRequestDTO request = new()
+            {
+                Id = Id,
+                Name = model.Name,
+                TagLine = model.Tagline,
+                Description = model.Description,
+                RenderedDescription = MarkdownRenderService.Render(model.Description),
+                Difficulty = model.Difficulty,
+            };
 
-        (var success, _) = await ApiService.TryUpdateProblemAsync(problem);
-
-        if (!success)
-        {
+        if (!await ProblemsService.TryUpdateProblemAsync(request))
             ModalService.ShowError("Failed to create problem", "Internal error");
-            return;
-        }
-        ModalService.ShowInfo("Problem saved", "");
+        else
+            ModalService.ShowInfo("Problem saved", "");
     }
 
     protected override async Task OnInitializedAsync()
@@ -149,20 +137,13 @@ else
         }
         userId = user.Id;
 
-        var (success, prob) = await ApiService.TryReadProblemAsync(Id);
-        if (!success)
+        if (await ProblemsService.TryReadProblemAsync(Id) is not (true, ProblemResponseDTO prob))
         {
             ModalService.ShowError("Failed to load problem", "Internal error");
             return;
         }
 
-        if (prob is null)
-        {
-            ModalService.ShowError("Problem not found", "404");
-            return;
-        }
-
-        (success, var cases) = await ApiService.TryReadProblemTestCases(Id);
+        var (success, cases) = await ProblemsService.TryReadProblemTestCasesAsync(Id, count: 10_000);
         if (!success || cases is null)
         {
             ModalService.ShowError("Failed to load test cases", "Internal error");
@@ -175,7 +156,7 @@ else
                 Name = prob.Name,
                 Description = prob.Description,
                 Difficulty = prob.Difficulty ?? string.Empty,
-                TestCases = [..cases.Select(tc => new TestcaseModel
+                TestCases = [..cases.Items.Select(tc => new TestcaseModel
                 {
                     Id = tc.Id,
                     Input = tc.Input,

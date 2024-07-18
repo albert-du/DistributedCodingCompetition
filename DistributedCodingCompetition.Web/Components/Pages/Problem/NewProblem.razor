@@ -3,10 +3,11 @@
 *@
 @page "/problem/new"
 @inject NavigationManager NavigationManager
-@inject IApiService ApiService
+@inject IProblemsService ProblemsService
 @inject IMarkdownRenderService MarkdownRenderService
 @inject IUserStateService UserStateService
 @inject IModalService ModalService
+@inject IContestsService ContestsService
 @inject IMarkdownRenderService MarkdownRenderService
 
 <PageTitle>New Problem</PageTitle>
@@ -74,30 +75,26 @@ else
         {
             return;
         }
-        Problem problem = new()
+        if (await ProblemsService.TryCreateProblemAsync(new()
             {
                 Name = model.Name,
                 Description = model.Description,
                 RenderedDescription = MarkdownRenderService.Render(model.Description),
                 Difficulty = string.IsNullOrWhiteSpace(model.Difficulty) ? null : model.Difficulty,
                 OwnerId = user.Id
-            };
-        (var success, _) = await ApiService.TryCreateProblemAsync(problem);
-        if (!success)
+            }) is not (true, ProblemResponseDTO problem))
         {
             ModalService.ShowError("Failed to create problem", "Internal error");
             return;
         }
+
         if (ContestId.HasValue)
         {
-            if (!await ApiService.TryAddProblemToContestAsync(ContestId.Value, problem))
-            {
+            if (!await ContestsService.TryAddProblemToContest(ContestId.Value, problem.Id))
                 ModalService.ShowError("Failed to create and add problem to contest", "Internal error");
-            }
         }
         NavigationManager.NavigateTo($"problem/{problem.Id}/edit");
     }
-
 
     class ProblemModel
     {

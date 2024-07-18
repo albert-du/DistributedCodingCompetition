@@ -4,7 +4,7 @@
 @page "/dashboard"
 @inject AuthenticationStateProvider AuthenticationStateProvider
 @inject IUserStateService UserStateService
-@inject IApiService ApiService
+@inject IUsersService UsersService
 @inject IModalService ModalService
 @inject IOptions<ContestOptions> ContestOptions
 
@@ -14,7 +14,7 @@
 
 <h1 class="text-3xl">Dashboard</h1>
 
-@if (user is null)
+@if (user is null || enteredContests is null || administered is null)
 {
     <LoadingSpinner />
 }
@@ -24,14 +24,14 @@ else
 
     <div class="mb-4">
         <h2 class="text-xl">Entered Contests</h2>
-        @if (enteredContests.Count == 0)
+        @if (enteredContests.TotalPages == 0)
         {
             <p>You are not in any contests.</p>
         }
         else
         {
             <ul class="flex flex-col gap-y-3">
-                @foreach (var contest in enteredContests)
+                @foreach (var contest in enteredContests.Items)
                 {
                     <li class="flex p-2 border rounded-md border-violet-300 gap-x-3">
                         <a class="text-xl hover:underline text-slate-700" href="contest/@contest.Id">@contest.Name</a>
@@ -54,12 +54,12 @@ else
         </AuthorizeView>
     }
 
-    @if (administered.Count > 0)
+    @if (administered.TotalCount > 0)
     {
         <div>
             <h2 class="text-xl">Administered Contests</h2>
             <ul class="flex flex-col gap-y-2">
-                @foreach (var contest in administered)
+                @foreach (var contest in administered.Items)
                 {
                     <li class="flex p-2 border rounded-md border-violet-300 gap-x-3">
                         <a class="text-xl hover:underline text-slate-700" href="contest/@contest.Id/manage">@contest.Name</a>
@@ -74,10 +74,11 @@ else
 
 @code {
     // current user
-    User? user;
+    UserResponseDTO? user;
 
-    IReadOnlyList<DistributedCodingCompetition.Models.Contest> administered = [];
-    IReadOnlyList<DistributedCodingCompetition.Models.Contest> enteredContests = [];
+    PaginateResult<ContestResponseDTO>? administered;
+
+    PaginateResult<ContestResponseDTO>? enteredContests;
 
     // pagination
     int administeredPage = 1;
@@ -95,20 +96,18 @@ else
         }
 
         // Get user's administered and entered contests.
-        var (success, administra) = await ApiService.TryReadUserAdministratedContestsAsync(user.Id, 10, administeredPage);
-        if (!success || administra is null)
+        if (await UsersService.TryReadAdministeredContestsAsync(user.Id, administeredPage, 10) is not (true, var a) || a is null)
         {
             ModalService.ShowError("Failed to load contests", "Internal error");
             return;
         }
+        administered = a;
 
-        administered = administra;
-
-        (success, var entered) = await ApiService.TryReadUserEnteredContestsAsync(user.Id, 10, enteredContestsPage);
-
-        if (!success || entered is null)
+        if (await UsersService.TryReadEnteredContestsAsync(user.Id, administeredPage, 10) is not (true, var e) || e is null)
+        {
             ModalService.ShowError("Failed to load contests", "Internal error");
-        else
-            enteredContests = entered;
+            return;
+        }
+        enteredContests = e;
     }
 }

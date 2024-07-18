@@ -33,11 +33,7 @@
 
     int page => Page ?? 1;
 
-    IReadOnlyList<UserResponseDTO> banned = [];
-
-    bool NextEnabled => banned.Count == 50;
-
-    bool PrevEnabled => page > 1;
+    PaginateResult<UserResponseDTO>? banned;
 
     void Next()
     {

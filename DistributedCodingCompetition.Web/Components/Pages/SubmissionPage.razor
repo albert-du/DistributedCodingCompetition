@@ -1,5 +1,8 @@
 ﻿@page "/submission/{id:guid}"
-@inject IApiService ApiService
+@inject ISubmissionsService SubmissionsService
+@inject IContestsService ContestsService
+@inject IProblemsService ProblemsService
+@inject IUsersService UsersService
 @inject IModalService ModalService
 
 @if (submission is null || user is null)
@@ -14,17 +17,17 @@ else
     }
     else if (submission.ContestId is null)
     {
-        <AuthCheck Id=submission.SubmitterId />
+        <AuthCheck Id=submission.UserId />
     }
     else
     {
-        <AuthCheck Contest=submission.ContestId Id=submission.SubmitterId />
+        <AuthCheck Contest=submission.ContestId Id=submission.UserId />
     }
 
     <h1 class="text-3xl">Submission</h1>
     <div class="text-2xl">@contestName: @problemName</div>
-    <p>Time UTC: @submission.SubmissionTime</p>
-    <p>Judge Time UTC: @submission.EvaluationTime</p>
+    <p>Time UTC: @submission.CreatedAt</p>
+    <p>Judge Time UTC: @submission.JudgedAt</p>
     <p>Language: @submission.Language</p>
     <p>Score: @submission.Score / @submission.MaxPossibleScore</p>
     <p>Contestant: @($"{user.FullName} @{user.Username}")</p>
@@ -64,19 +67,19 @@ else
     [SupplyParameterFromQuery]
     public bool Admin { get; set; }
 
-    Submission? submission;
+    SubmissionResponseDTO? submission;
     string problemName = string.Empty;
     string contestName = string.Empty;
-    User? user;
+    UserResponseDTO? user;
 
     bool displayTestCases;
 
-    IReadOnlyList<TestCaseResult> results = [];
-    IReadOnlyList<TestCase> testcases = [];
+    IReadOnlyList<TestCaseResultDTO> results = [];
+    IReadOnlyList<TestCaseResponseDTO> testcases = [];
 
     protected override async Task OnInitializedAsync()
     {
-        (var success, submission) = await ApiService.TryReadSubmissionAsync(Id);
+        (var success, submission) = await SubmissionsService.TryReadSubmissionAsync(Id);
         if (!success || submission is null)
         {
             ModalService.ShowError("Failed to load submission", "Internal error");
@@ -84,12 +87,10 @@ else
         }
 
         if (!submission.ContestId.HasValue)
-        {
             displayTestCases = true;
-        }
         else
         {
-            (success, var contest) = await ApiService.TryReadContestAsync(submission.ContestId.Value);
+            (success, var contest) = await ContestsService.TryReadContestAsync(submission.ContestId.Value);
             if (!success || contest is null)
             {
                 ModalService.ShowError("Failed to load contest", "Internal error");
@@ -102,7 +103,7 @@ else
 
         // load problem name
 
-        (success, var problem) = await ApiService.TryReadProblemAsync(submission.ProblemId);
+        (success, var problem) = await ProblemsService.TryReadProblemAsync(submission.ProblemId);
         if (!success || problem is null)
         {
             ModalService.ShowError("Failed to load problem", "Internal error");
@@ -113,7 +114,7 @@ else
 
         // load user
 
-        (success, user) = await ApiService.TryReadUserAsync(submission.SubmitterId);
+        (success, user) = await UsersService.TryReadUserAsync(submission.UserId);
 
         if (!success || user is null)
         {
@@ -121,12 +122,20 @@ else
             return;
         }
 
-        (success, var res) = await ApiService.TryReadTestCaseResultsAsync(Id);
+        (success, var res) = await ProblemsService.TryReadProblemTestCasesAsync(Id, count: 10_000);
         if (!success || res is null)
         {
             ModalService.ShowError("Failed to load test case results", "Internal error");
             return;
         }
-        results = res;
+        testcases = res.Items;
+
+        (success, var res2) = await SubmissionsService.TryReadSubmissionResultsAsync(Id);
+        if (!success || res2 is null)
+        {
+            ModalService.ShowError("Failed to load test case results", "Internal error");
+            return;
+        }
+        results = res2;
     }
 }

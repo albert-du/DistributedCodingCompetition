@@ -86,10 +86,14 @@ public sealed class ContestsService : IContestsService
         apiClient.PutAsync($"/{contestId}/role/{userId}", role);
 
     /// <inheritdoc/>
-    public async Task<bool> TryUpdateContestAsync(ContestRequestDTO contest) =>
-        await apiClient.PutAsync($"/{contest.Id}", contest);
+    public Task<bool> TryUpdateContestAsync(ContestRequestDTO contest) =>
+         apiClient.PutAsync($"/{contest.Id}", contest);
 
     /// <inheritdoc/>
-    public async Task<(bool, ContestResponseDTO?)> TryCreateContestAsync(ContestRequestDTO contest) =>
-        await apiClient.PostAsync<ContestRequestDTO, ContestResponseDTO>(data: contest);
+    public Task<(bool, ContestResponseDTO?)> TryCreateContestAsync(ContestRequestDTO contest) =>
+         apiClient.PostAsync<ContestRequestDTO, ContestResponseDTO>(data: contest);
+
+    /// <inheritdoc/>
+    public Task<bool> TryAddProblemToContest(Guid contestId, Guid problemId) =>
+         apiClient.PostAsync($"/{contestId}/problems/{problemId}");
 }

@@ -2,10 +2,9 @@
     This component displays a list of problems in a contest.
     It also shows the user's solve status for each problem.
 *@
-@using System.Collections.Frozen
 @page "/contest/{id:guid}/solve"
 @inject NavigationManager NavigationManager
-@inject IApiService ApiService
+@inject IContestsService ContestsService
 @inject IModalService ModalService
 @inject ITimeZoneProvider TimeZoneProvider
 @inject IUserStateService UserStateService
@@ -69,9 +68,9 @@ else
     [Parameter]
     public Guid Id { get; set; }
 
-    Contest? contest;
+    ContestResponseDTO? contest;
 
-    IReadOnlyList<Problem> problems = [];
+    IReadOnlyList<ProblemResponseDTO> problems = [];
 
     IReadOnlyDictionary<Guid, ProblemUserSolveStatus> userSolveStatus = new Dictionary<Guid, ProblemUserSolveStatus>();
 
@@ -79,7 +78,7 @@ else
 
     protected override async Task OnInitializedAsync()
     {
-        (var success, contest) = await ApiService.TryReadContestAsync(Id);
+        (var success, contest) = await ContestsService.TryReadContestAsync(Id);
 
         if (!success || contest is null)
         {
@@ -90,7 +89,7 @@ else
 
         open = contest.StartTime < DateTime.UtcNow && contest.EndTime > DateTime.UtcNow;
 
-        (success, var p) = await ApiService.TryReadContestProblemsAsync(Id);
+        (success, var p) = await ContestsService.TryReadContestProblemsAsync(Id);
         if (!success || p is null)
         {
             ModalService.ShowError("Failed to load contest problems", "Internal error");
@@ -99,14 +98,14 @@ else
         }
         problems = p;
 
-        if (await UserStateService.UserAsync() is not User user)
+        if (await UserStateService.UserAsync() is not UserResponseDTO user)
         {
             ModalService.ShowError("Failed to load user", "Internal error");
             NavigationManager.NavigateTo("dashboard");
             return;
         }
 
-        (success, var s) = await ApiService.TryReadUserSolveStatusForContestAsync(Id, user.Id);
+        (success, var s) = await ContestsService.TryReadContestUserSolveStatusAsync(Id, user.Id);
         if (!success || s is null)
         {
             ModalService.ShowError("Failed to load user solve status", "Internal error");

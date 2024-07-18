@@ -22,7 +22,7 @@
 <div>
     @if (executing)
     {
-        <div>Executing</div>   
+        <div>Executing</div>
     }
     else
     {
@@ -41,8 +41,8 @@
                 AutomaticLayout = true,
                 Language = "javascript",
                 Value = "function xyz() {\n" +
-                                        "   console.log(\"Hello world!\");\n" +
-                                        "}",
+                                                    "   console.log(\"Hello world!\");\n" +
+                                                    "}",
             };
     }
 
@@ -66,11 +66,11 @@
 
             var lines = await model.GetLinesContent();
             var code = string.Join('\n', lines);
-            var res = await CodeExecutionClient.ExecuteCodeAsync(new()
-            {
-                Code = code,
-                Language = selectedLanguage
-            });
+            var res = await CodeExecutionService.TryExecuteCodeAsync(new()
+                {
+                    Code = code,
+                    Language = selectedLanguage
+                });
             if (res is null)
             {
                 result = "Failed";
@@ -93,7 +93,7 @@
 
     protected override async Task OnInitializedAsync()
     {
-        languages = await CodeExecutionClient.AvailableLanguagesAsync();
-        selectedLanguage = languages.FirstOrDefault() ;
+        languages = await CodeExecutionService.AvailableLanguagesAsync();
+        selectedLanguage = languages.FirstOrDefault();
     }
 }

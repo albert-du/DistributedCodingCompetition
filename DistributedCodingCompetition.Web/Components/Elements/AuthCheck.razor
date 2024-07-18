@@ -11,7 +11,7 @@
     System admins can view any page, so they are never redirected.
 *@
 @inject NavigationManager NavigationManager
-@inject IApiService ApiService
+@inject IContestsService ContestsService
 @inject IUserStateService UserStateService
 @code {
     [Parameter]
@@ -48,7 +48,7 @@
         {
             // Contest Admin
             var user = (await UserStateService.UserAsync())?.Id;
-            (var success, var role) = await ApiService.TryReadUserContestRoleAsync(Contest.Value, user!.Value);
+            (var success, var role) = await ContestsService.TryReadContestUserRoleAsync(Contest.Value, user!.Value);
             if (success && (role is ContestRole.Admin || !Admin && role is ContestRole.Participant))
                 return;
         }

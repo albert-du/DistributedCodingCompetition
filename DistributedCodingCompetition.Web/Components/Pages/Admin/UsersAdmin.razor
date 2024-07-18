@@ -8,20 +8,27 @@
 
 <h1 class="text-2xl">Application Users</h1>
 
-<div class="flex flex-col gap-y-1">
-    @foreach (var user in users)
-    {
-        <div class="flex gap-x-2">
-            <div>
-                @($"{user.FullName} @{user.Username}")
+@if (users is null)
+{
+    <LoadingSpinner />
+}
+else
+{
+    <div class="flex flex-col gap-y-1">
+        @foreach (var user in users.Items)
+        {
+            <div class="flex gap-x-2">
+                <div>
+                    @($"{user.FullName} @{user.Username}")
+                </div>
             </div>
+        }
+        <div class="flex">
+            <button class="rounded-lg px-2 py-1 bg-rose-500 text-slate-200" @onclick=Next enableds="@(users.NextEnabled)">Next</button>
+            <button class="rounded-lg px-2 py-1 bg-rose-500 text-slate-200" @onclick=Prev enableds="@(users.PreviousEnabled)">Prev</button>
         </div>
-    }
-    <div class="flex">
-        <button class="rounded-lg px-2 py-1 bg-rose-500 text-slate-200" @onclick=Next disabled="@(!NextEnabled)">Next</button>
-        <button class="rounded-lg px-2 py-1 bg-rose-500 text-slate-200" @onclick=Prev disabled="@(!PrevEnabled)">Prev</button>
     </div>
-</div>
+}
 
 @code {
     [SupplyParameterFromQuery]
@@ -29,24 +36,19 @@
 
     int page => Page ?? 1;
 
-    IReadOnlyList<User> users = [];
+    PaginateResult<UserResponseDTO>? users;
 
-    bool NextEnabled => users.Count == 50;
-
-    bool PrevEnabled => page > 1;
 
     void Next()
     {
-        if (!NextEnabled)
-            return;
-        NavigationManager.NavigateTo($"/admin/banned?page={page + 1}");
+        if (users?.NextEnabled is true)
+            NavigationManager.NavigateTo($"/admin/banned?page={page + 1}");
     }
 
     void Prev()
     {
-        if (!PrevEnabled)
-            return;
-        NavigationManager.NavigateTo($"/admin/banned?page={page - 1}");
+        if (users?.PreviousEnabled is true)
+            NavigationManager.NavigateTo($"/admin/banned?page={page - 1}");
     }
 
     async Task UnbanUserAsync(UserResponseDTO user)

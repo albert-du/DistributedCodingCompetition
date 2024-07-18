@@ -54,4 +54,9 @@ public sealed record UserResponseDTO
     /// The number of administered contests.
     /// </summary>
     public required int AdministeredContests { get; init; }
+
+    /// <summary>
+    /// The birthday of the user.
+    /// </summary>
+    public required DateTime Birthday { get; init; }
 }

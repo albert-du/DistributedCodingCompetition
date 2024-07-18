@@ -44,4 +44,16 @@ public sealed record PaginateResult<T>
     /// </summary>
     [JsonIgnore]
     public bool PreviousEnabled => Page > 1;
+
+    /// <summary>
+    /// An empty pagination result.
+    /// </summary>
+    public static PaginateResult<T> Empty => new()
+    {
+        Page = 1,
+        PageSize = 0,
+        TotalCount = 0,
+        TotalPages = 1,
+        Items = []
+    };
 }

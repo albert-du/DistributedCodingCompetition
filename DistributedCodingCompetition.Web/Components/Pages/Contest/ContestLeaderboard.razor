@@ -1,7 +1,7 @@
 ﻿@page "/contest/{id:guid}/leaderboard"
 @inject NavigationManager NavigationManager
-@inject IApiService ApiService
 @inject IModalService ModalService
+@inject IContestsService ContestsService
 @inject ILeaderboardService LeaderboardService
 
 <AuthCheck Contest=Id />
@@ -55,10 +55,9 @@ else
     public int? Page { get; set; }
 
     int page => Page ?? 1;
-    Contest? contest;
+    ContestResponseDTO? contest;
 
     Leaderboard? leaderboard;
-
 
     bool NextEnabled => leaderboard?.Count is 50;
     bool PrevEnabled => page > 1;
@@ -74,7 +73,7 @@ else
 
     protected override async Task OnParametersSetAsync()
     {
-        (var success, contest) = await ApiService.TryReadContestAsync(Id);
+        (var success, contest) = await ContestsService.TryReadContestAsync(Id);
         if (!success || contest is null)
         {
             ModalService.ShowError("Failed to load contest", "Internal error");

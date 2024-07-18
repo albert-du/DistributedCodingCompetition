@@ -7,8 +7,9 @@
 @page "/problem/{problemId:guid}/testcase/{testCaseId:guid}/edit"
 @inject NavigationManager NavigationManager
 @inject IModalService ModalService
-@inject IApiService ApiService
+@inject ITestCasesService TestCasesService
 @inject IUserStateService UserStateService
+@inject IProblemsService ProblemsService
 @inject IMarkdownRenderService MarkdownRenderService
 @inject IJudgeService JudgeService
 
@@ -88,39 +89,38 @@
     public Guid TestCaseId { get; set; }
 
     ProblemTestCaseModel model { get; set; } = new();
-    TestCase? testCase;
+
+    TestCaseResponseDTO? testCase;
+
     Guid userId;
+
     bool submitting;
 
     async Task SubmitAsync()
     {
-        if (submitting)
+        if (submitting || testCase is null)
             return;
 
         try
         {
-            var user = await UserStateService.UserAsync();
-            if (user is null || testCase is null)
-                return;
-
-            // Load the test case
-            testCase.Input = model.Input;
-            testCase.Output = model.Output;
-            testCase.Description = model.Description;
-            testCase.Sample = model.Sample;
-            testCase.Active = model.Active;
-            testCase.Weight = model.Weight;
-
-            if (!await ApiService.TryUpdateTestCaseAsync(testCase))
-            {
+            if (!await TestCasesService.TryUpdateTestCaseAsync(new()
+                {
+                    Id = testCase.Id,
+                    ProblemId = ProblemId,
+                    Input = model.Input,
+                    Output = model.Output,
+                    Description = model.Description,
+                    Sample = model.Sample,
+                    Active = model.Active,
+                    Weight = model.Weight
+                }))
                 ModalService.ShowError("Failed to update test case", "Internal error");
-                return;
+            else
+            {
+                await JudgeService.RejudgeProblemAsync(ProblemId);
+
+                NavigationManager.NavigateTo($"/problem/{ProblemId}/edit");
             }
-
-            await JudgeService.RejudgeProblemAsync(ProblemId);
-
-
-            NavigationManager.NavigateTo($"/problem/{ProblemId}/edit");
         }
         finally
         {
@@ -131,7 +131,7 @@
 
     protected override async Task OnInitializedAsync()
     {
-        var (success, problem) = await ApiService.TryReadProblemAsync(ProblemId);
+        var (success, problem) = await ProblemsService.TryReadProblemAsync(ProblemId);
         if (problem is null || !success)
         {
             ModalService.ShowError("Failed to load problem", "Internal error");
@@ -139,7 +139,7 @@
             return;
         }
 
-        if (await UserStateService.UserAsync() is not User user)
+        if (await UserStateService.UserAsync() is not UserResponseDTO user)
         {
             ModalService.ShowError("Failed to load user", "Internal error");
             NavigationManager.NavigateTo("/dashboard");
@@ -148,7 +148,7 @@
 
         userId = user.Id;
 
-        (success, testCase) = await ApiService.TryReadTestCaseAsync(TestCaseId);
+        (success, testCase) = await TestCasesService.TryReadTestCaseAsync(TestCaseId);
         if (!success || testCase is null)
         {
             ModalService.ShowError("Failed to load test cases", "Internal error");

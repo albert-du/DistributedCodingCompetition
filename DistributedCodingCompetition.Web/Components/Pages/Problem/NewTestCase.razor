@@ -1,6 +1,7 @@
 ﻿@page "/problem/{id:guid}/testcase/new"
 @inject IModalService ModalService
-@inject IApiService ApiService
+@inject ITestCasesService TestCasesService
+@inject IProblemsService ProblemsService
 @inject NavigationManager NavigationManager
 @inject IUserStateService UserStateService
 @inject IMarkdownRenderService MarkdownRenderService
@@ -90,18 +91,19 @@
 
     Guid? userId;
 
+    string problemName = string.Empty;
+
     protected override async Task OnInitializedAsync()
     {
-        var (success, problem) = await ApiService.TryReadProblemAsync(Id);
-        if (problem is null || !success)
+        if (await ProblemsService.TryReadProblemAsync(Id) is not (true, ProblemResponseDTO problem))
         {
             ModalService.ShowError("Failed to load problem", "Internal error");
             NavigationManager.NavigateTo("/dashboard");
             return;
         }
+        problemName = problem.Name;
 
-        var user = await UserStateService.UserAsync();
-        if (user is null)
+        if (await UserStateService.UserAsync() is not UserResponseDTO user)
         {
             ModalService.ShowError("Failed to load user", "Internal error");
             NavigationManager.NavigateTo("/dashboard");
@@ -109,7 +111,9 @@
         }
         userId = user.Id;
     }
+
     bool submitting;
+
     async Task SubmitAsync()
     {
         if (submitting)
@@ -125,7 +129,7 @@
                 return;
 
             // Create the test case
-            TestCase testCase = new()
+            if (await TestCasesService.TryCreateTestCaseAsync(new()
                 {
                     Input = model.Input,
                     Output = model.Output,
@@ -134,25 +138,19 @@
                     Active = model.Active,
                     Weight = model.Weight,
                     ProblemId = Id
-                };
-
-            // write
-            var (success, testCaseId) = await ApiService.TryCreateProblemTestCaseAsync(testCase);
-            if (!success || !testCaseId.HasValue)
-            {
+                }) is not (true, TestCaseResponseDTO))
                 ModalService.ShowError("Failed to create test case", "Internal error");
-                return;
+            else
+            {
+                await JudgeService.RejudgeProblemAsync(Id);
+
+                NavigationManager.NavigateTo($"/problem/{Id}/edit");
             }
-
-            await JudgeService.RejudgeProblemAsync(Id);
-
-            NavigationManager.NavigateTo($"/problem/{Id}/edit");
         }
         finally
         {
             submitting = false;
         }
-
     }
 
     class ProblemTestCaseModel

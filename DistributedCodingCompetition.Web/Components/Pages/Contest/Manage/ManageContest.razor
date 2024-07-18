@@ -14,7 +14,7 @@
 
 <PageTitle>@contest?.Name</PageTitle>
 
-@if (contest is null || model is null)
+@if (contest is null || model is null || administrators is null || participants is null || banned is null || joinCodes is null || problems is null || submissions is null)
 {
     <LoadingSpinner />
 }
@@ -22,7 +22,7 @@ else
 {
     <h1 class="text-3xl">@(model.Name)</h1>
     <h2 class="font-mono">@(contest.Id)</h2>
-    <div>Owner: @ownerName</div>
+    <div>Owner: @contest.OwnerName</div>
 
     <div class="flex justify-between">
         <EditForm Model=model OnValidSubmit="SubmitAsync" class="flex flex-col w-1/2 gap-y-2">
@@ -187,7 +187,7 @@ else
                 <div class="px-2 py-4">
                     <h3 class="text-semibold">Administrators</h3>
                     <div class="flex flex-col px-1 rounded-lg gap-y-1 bg-violet-200 text-slate-600">
-                        @foreach (var admin in administrators)
+                        @foreach (var admin in administrators.Items)
                         {
                             <div>@($"@{admin.Username} {admin.FullName}")</div>
                         }
@@ -197,16 +197,16 @@ else
                 <div class="px-2 py-4">
                     <h3 class="text-semibold">Participants</h3>
                     <div>
-                        Showing @participants.Count participants<br />page @participantsPage
+                        Showing @participants.TotalCount participants<br />page @participantsPage
                     </div>
                     <div class="flex flex-col px-1 bg-indigo-200 rounded-lg gap-y-1 text-slate-600">
-                        @if (participants.Count == 0)
+                        @if (participants.TotalCount == 0)
                         {
                             <div>No participants</div>
                         }
                         else
                         {
-                            @foreach (var participant in participants)
+                            @foreach (var participant in participants.Items)
                             {
                                 <div>@($"@{participant.Username} {participant.FullName}")</div>
                             }
@@ -222,16 +222,16 @@ else
                 <div class="px-2 py-4">
                     <h3 class="text-semibold">Banned</h3>
                     <div>
-                        Showing @banned.Count banned users<br />page @bannedPage
+                        Showing @banned.TotalCount banned users<br />page @bannedPage
                     </div>
                     <div class="flex flex-col px-1 rounded-lg gap-y-1 bg-rose-200 text-slate-600">
-                        @if (banned.Count == 0)
+                        @if (banned.TotalCount == 0)
                         {
                             <div>No banned users</div>
                         }
                         else
                         {
-                            @foreach (var ban in banned)
+                            @foreach (var ban in banned.Items)
                             {
                                 <div>@($"@{ban.Username} {ban.FullName}")</div>
                             }
@@ -276,7 +276,7 @@ else
         <div class="flex flex-col gap-y-1">
             <h2 class="text-2xl">Problems</h2>
             <div class="flex flex-wrap w-full gap-1 px-1 my-2 bg-blue-200 rounded-lg text-slate-600">
-                @if (problems.Count == 0)
+                @if (problems.Count is 0)
                 {
                     <div>No Problems</div>
                 }
@@ -299,19 +299,19 @@ else
         <div class="flex flex-col gap-y-1">
             <h2 class="text-2xl">Submissions</h2>
             <div class="flex flex-wrap w-full gap-1 px-1 my-2 bg-blue-200 rounded-lg text-slate-600">
-                @if (submissions.Count == 0)
+                @if (submissions.TotalCount is 0)
                 {
                     <div>No Problems</div>
                 }
                 else
                 {
                     <div class="flex flex-col gap-y-1">
-                        @foreach (var sub in submissions)
+                        @foreach (var sub in submissions.Items)
                         {
                             <div class="flex gap-x-4">
-                                <div>@sub.SubmissionTime</div>
-                                <div>@sub.Problem?.Name</div>
-                                <div>@sub.PassedTestCases / @sub.TotalTestCases</div>
+                                <div>@sub.CreatedAt</div>
+                                <div>@sub.ProblemName</div>
+                                <div>@sub.TestCasesPassed / @sub.TestCasesTotal</div>
                             </div>
                         }
                     </div>
@@ -346,8 +346,8 @@ else
     PaginateResult<UserResponseDTO>? participants;
     PaginateResult<UserResponseDTO>? banned;
 
-    PaginateResult<JoinCodeResponseDTO>? joinCodes;
-    PaginateResult<ProblemResponseDTO>? problems;
+    IReadOnlyList<JoinCodeResponseDTO>? joinCodes;
+    IReadOnlyList<ProblemResponseDTO>? problems;
     PaginateResult<SubmissionResponseDTO>? submissions;
 
     // Pagination methods
@@ -516,17 +516,17 @@ else
         var s = SubmissionsService.TryReadSubmissionsAsync(contestId: Id, count: 10);
 
         // wait for all requests to finish and save
-        (var success, var administrators) = await a;
+        (var success, administrators) = await a;
         if (!success) ModalService.ShowError("Failed to load administrators", "Internal error");
-        (success, var participants) = await p;
+        (success, participants) = await p;
         if (!success) ModalService.ShowError("Failed to load participants", "Internal error");
-        (success, var banned) = await b;
+        (success, banned) = await b;
         if (!success) ModalService.ShowError("Failed to load banned participants", "Internal error");
-        (success, var joinCodes) = await j;
+        (success, joinCodes) = await j;
         if (!success) ModalService.ShowError("Failed to load join codes", "Internal error");
-        (success, var problems) = await pr;
+        (success, problems) = await pr;
         if (!success) ModalService.ShowError("Failed to load problems", "Internal error");
-        (success, var submissions) = await s;
+        (success, submissions) = await s;
         if (!success) ModalService.ShowError("Failed to load submissions", "Internal error");
     }
 

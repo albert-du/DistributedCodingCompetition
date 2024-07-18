@@ -1,5 +1,7 @@
 ﻿@page "/contest/{contestId:guid}/solve/{problemId:guid}"
-@inject IApiService ApiService
+@inject IContestsService ContestsService
+@inject IProblemsService ProblemsService
+@inject ISubmissionsService SubmissionsService
 @inject IModalService ModalService
 @inject NavigationManager NavigationManager
 @inject CodeExecutionClient CodeExecutionClient
@@ -62,7 +64,6 @@ else
 
             <a class="italic hover:underline text-violet-800" href="contest/@ContestId/solve/@ProblemId/submissions">View your submissions</a>
         }
-
     </div>
 }
 
@@ -76,7 +77,7 @@ else
     string contestName = string.Empty;
     DateTime contestEndTimeUTC;
 
-    Problem? problem;
+    ProblemResponseDTO? problem;
 
     IReadOnlyList<string> languages = [];
 
@@ -126,7 +127,7 @@ else
 
     protected override async Task OnInitializedAsync()
     {
-        (var success, var contest) = await ApiService.TryReadContestAsync(ContestId);
+        (var success, var contest) = await ContestsService.TryReadContestAsync(ContestId);
         if (!success || contest is null)
         {
             ModalService.ShowError("Failed to load contest", "Internal error");
@@ -135,7 +136,7 @@ else
         }
         contestName = contest.Name;
         contestEndTimeUTC = contest.EndTime;
-        (success, problem) = await ApiService.TryReadProblemAsync(ProblemId);
+        (success, problem) = await ProblemsService.TryReadProblemAsync(ProblemId);
         if (!success || problem is null)
         {
             ModalService.ShowError("Failed to load problem", "Internal error");
@@ -160,7 +161,7 @@ else
             return;
         }
 
-        (success, latestScore) = await ApiService.TryReadUserSolveStatusAsync(ContestId, user.Id, ProblemId);
+        (success, latestScore) = await ContestsService.TryReadContestProblemUserSolveStatusAsync(contestId: ContestId, problemId: ProblemId, userId: user.Id);
         if (!success)
         {
             ModalService.ShowError("Failed to load user solve status", "Internal error");
@@ -184,33 +185,32 @@ else
             };
 
             // Save the submission through the api service.
-            Submission submission = new()
+            SubmissionRequestDTO request = new()
                 {
-                    SubmitterId = userId,
+                    UserId = userId,
                     ProblemId = ProblemId,
                     ContestId = ContestId,
                     Language = language,
                     Code = source,
-                    SubmissionTime = DateTime.UtcNow,
                 };
-            if (!await ApiService.TryCreateSubmissionAsync(submission))
+            if (await SubmissionsService.TryCreateSubmissionAsync(request) is not (true, SubmissionResponseDTO))
             {
                 ModalService.ShowError("Failed to save submission", "Internal error");
                 return;
             }
-            if (await JudgeService.JudgeAsync(submission.Id) is string error)
+            if (await JudgeService.JudgeAsync(request.Id) is string error)
             {
                 ModalService.ShowError("Failed to judge submission", error);
                 return;
             }
-            (var success, var sub) = await ApiService.TryReadSubmissionAsync(submission.Id);
+            var (success, sub) = await SubmissionsService.TryReadSubmissionAsync(request.Id);
             if (!success || sub is null)
             {
                 ModalService.ShowError("Failed to load latest", "Internal error");
                 return;
             }
             await delay;
-            latestScore = new(sub.ProblemId, sub.Points, sub.Score, sub.MaxPossibleScore, sub.PassedTestCases, sub.TotalTestCases);
+            latestScore = new(sub.ProblemId, sub.Points, sub.Score, sub.MaxPossibleScore, sub.TestCasesPassed, sub.TestCasesTotal);
         }
         finally
         {
@@ -234,7 +234,6 @@ else
                 language = await SelectedLanguageService.GetSelectedLanguage() ?? string.Empty;
                 await InvokeAsync(StateHasChanged);
             }
-
 
             using PeriodicTimer periodicTimer = new(TimeSpan.FromMilliseconds(500));
             while (await periodicTimer.WaitForNextTickAsync())
