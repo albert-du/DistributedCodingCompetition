@@ -52,6 +52,7 @@ builder.AddProject<Projects.DistributedCodingCompetition_Web>("webfrontend")
        .WithReference(leaderboard)
        .WithReference(codeExecution);
 
-builder.AddProject<Projects.DistributedCodingCompetition_ApiService_MigrationService>("apimigrations");
+builder.AddProject<Projects.DistributedCodingCompetition_ApiService_MigrationService>("apimigrations")
+       .WithReference(contestDatabase);
 
 builder.Build().Run();

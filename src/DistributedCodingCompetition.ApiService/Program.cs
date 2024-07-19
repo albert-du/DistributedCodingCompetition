@@ -33,25 +33,6 @@ if (app.Environment.IsDevelopment())
 {
     app.UseSwagger();
     app.UseSwaggerUI();
-    // migrate delayed
-    _ = Task.Run(async () =>
-    {
-        await Task.Delay(5000);
-        using var scope = app.Services.CreateScope();
-        var context = scope.ServiceProvider.GetRequiredService<ContestContext>();
-        await context.Database.MigrateAsync();
-        await Seeding.SeedDataAsync(context);
-    });
-}
-else
-{
-    _ = Task.Run(async () =>
-    {
-        await Task.Delay(5000);
-        using var scope = app.Services.CreateScope();
-        var context = scope.ServiceProvider.GetRequiredService<ContestContext>();
-        await context.Database.MigrateAsync();
-    });
 }
 
 app.Run();

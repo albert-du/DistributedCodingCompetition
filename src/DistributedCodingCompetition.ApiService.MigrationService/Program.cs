@@ -1,9 +1,15 @@
 using DistributedCodingCompetition.ApiService.MigrationService;
+using DistributedCodingCompetition.ApiService.Data.Contexts;
 
 var builder = Host.CreateApplicationBuilder(args);
 
 builder.AddServiceDefaults();
 builder.Services.AddHostedService<Worker>();
+
+builder.Services.AddOpenTelemetry()
+    .WithTracing(tracing => tracing.AddSource(Worker.ActivitySourceName));
+
+builder.AddNpgsqlDbContext<ContestContext>("contestdb");
 
 var host = builder.Build();
 host.Run();

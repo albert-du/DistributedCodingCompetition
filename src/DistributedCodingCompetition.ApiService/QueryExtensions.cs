@@ -110,6 +110,11 @@ internal static class QueryExtensions
             })
             .ToArrayAsync();
 
+    /// <summary>
+    /// Read join codes from the database.
+    /// </summary>
+    /// <param name="joinCodes"></param>
+    /// <returns></returns>
     internal static async Task<IReadOnlyList<JoinCodeResponseDTO>> ReadJoinCodesAsync(this IQueryable<JoinCode> joinCodes) =>
         await joinCodes
             .Select(jc => new
@@ -176,6 +181,11 @@ internal static class QueryExtensions
             })
             .ToArrayAsync();
 
+    /// <summary>
+    /// Read submissions from the database.
+    /// </summary>
+    /// <param name="submissions"></param>
+    /// <returns></returns>
     internal static async Task<IReadOnlyList<SubmissionResponseDTO>> ReadSubmissionsAsync(this IQueryable<Submission> submissions) =>
         await submissions
             .Select(submission => new
@@ -221,6 +231,11 @@ internal static class QueryExtensions
             })
             .ToArrayAsync();
 
+    /// <summary>
+    /// Read test cases from the database.
+    /// </summary>
+    /// <param name="testCases"></param>
+    /// <returns></returns>
     internal static async Task<IReadOnlyList<TestCaseResponseDTO>> ReadTestCasesAsync(this IQueryable<TestCase> testCases) =>
         await testCases
             .Select(testCase => new
@@ -250,6 +265,11 @@ internal static class QueryExtensions
             })
             .ToArrayAsync();
 
+    /// <summary>
+    /// Read test case results from the database.
+    /// </summary>
+    /// <param name="result"></param>
+    /// <returns></returns>
     internal static async Task<IReadOnlyList<TestCaseResultDTO>> ReadTestCaseResultsAsync(this IQueryable<TestCaseResult> result) =>
         await result
             .Select(r => new
@@ -273,6 +293,11 @@ internal static class QueryExtensions
             })
             .ToArrayAsync();
 
+    /// <summary>
+    /// Read problem point values from the database.
+    /// </summary>
+    /// <param name="pointValues"></param>
+    /// <returns></returns>
     internal static async Task<IReadOnlyList<ProblemPointValueResponseDTO>> ReadProblemPointValuesAsync(this IQueryable<ProblemPointValue> pointValues) =>
         await pointValues
             .Select(pv => new
@@ -292,6 +317,11 @@ internal static class QueryExtensions
             })
             .ToArrayAsync();
 
+    /// <summary>
+    /// Read users from the database.
+    /// </summary>
+    /// <param name="users"></param>
+    /// <returns></returns>
     internal static async Task<IReadOnlyList<UserResponseDTO>> ReadUsersAsync(this IQueryable<User> users) =>
         await users
             .Select(user => new

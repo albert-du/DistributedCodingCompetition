@@ -17,7 +17,7 @@
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\DistributedCodingCompetition.AppHost\DistributedCodingCompetition.AppHost.csproj" />
+    <ProjectReference Include="..\..\src\DistributedCodingCompetition.AppHost\DistributedCodingCompetition.AppHost.csproj" />
   </ItemGroup>
 
   <ItemGroup>
