@@ -1,4 +1,4 @@
-﻿namespace DistributedCodingCompetition.ApiService.Models;
+﻿namespace DistributedCodingCompetition.ApiService.Data.Models;
 
 /// <summary>
 /// Code to join a contest.

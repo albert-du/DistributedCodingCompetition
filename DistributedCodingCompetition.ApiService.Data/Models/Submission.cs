@@ -1,4 +1,4 @@
-﻿namespace DistributedCodingCompetition.ApiService.Models;
+﻿namespace DistributedCodingCompetition.ApiService.Data.Models;
 
 /// <summary>
 /// Submission
@@ -24,7 +24,7 @@ public class Submission
     /// Id of the contest
     /// </summary>
     public Guid? ContestId { get; set; }
-    
+
     /// <summary>
     /// Navigation Property for the contest
     /// </summary>

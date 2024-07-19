@@ -1,6 +1,7 @@
-﻿namespace DistributedCodingCompetition.ApiService.Models;
+﻿namespace DistributedCodingCompetition.ApiService.Data.Contexts;
 
 using Microsoft.EntityFrameworkCore;
+using DistributedCodingCompetition.ApiService.Data.Models;
 
 public class ContestContext(DbContextOptions<ContestContext> options) : DbContext(options)
 {

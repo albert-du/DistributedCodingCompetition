@@ -10,6 +10,7 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <ProjectReference Include="..\DistributedCodingCompetition.ApiService.MigrationService\DistributedCodingCompetition.ApiService.MigrationService.csproj" />
     <ProjectReference Include="..\DistributedCodingCompetition.ApiService\DistributedCodingCompetition.ApiService.csproj" />
     <ProjectReference Include="..\DistributedCodingCompetition.AuthService\DistributedCodingCompetition.AuthService.csproj" />
     <ProjectReference Include="..\DistributedCodingCompetition.CodeExecution\DistributedCodingCompetition.CodeExecution.csproj" />

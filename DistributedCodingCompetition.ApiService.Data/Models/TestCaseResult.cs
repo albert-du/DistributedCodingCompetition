@@ -1,4 +1,4 @@
-﻿namespace DistributedCodingCompetition.ApiService.Models;
+﻿namespace DistributedCodingCompetition.ApiService.Data.Models;
 
 /// <summary>
 /// Result of a test case
@@ -29,12 +29,12 @@ public class TestCaseResult
     /// Navigation property for the submission
     /// </summary>
     public Submission? Submission { get; set; }
-    
+
     /// <summary>
     /// Input for the test case
     /// </summary>
     public string Output { get; set; } = string.Empty;
-    
+
     /// <summary>
     /// Output for the test case
     /// </summary>

@@ -3,7 +3,7 @@ using Microsoft.EntityFrameworkCore.Migrations;
 
 #nullable disable
 
-namespace DistributedCodingCompetition.ApiService.Migrations
+namespace DistributedCodingCompetition.ApiService.Data.Migrations
 {
     /// <inheritdoc />
     public partial class InitCreate : Migration
@@ -180,9 +180,11 @@ namespace DistributedCodingCompetition.ApiService.Migrations
                     Id = table.Column<Guid>(type: "uuid", nullable: false),
                     Name = table.Column<string>(type: "text", nullable: false),
                     OwnerId = table.Column<Guid>(type: "uuid", nullable: false),
+                    TagLine = table.Column<string>(type: "text", nullable: false),
                     Description = table.Column<string>(type: "text", nullable: false),
                     RenderedDescription = table.Column<string>(type: "text", nullable: false),
                     Difficulty = table.Column<string>(type: "text", nullable: true),
+                    ScoringFactorsChanged = table.Column<DateTime>(type: "timestamp with time zone", nullable: false),
                     ContestId = table.Column<Guid>(type: "uuid", nullable: true)
                 },
                 constraints: table =>
@@ -215,7 +217,10 @@ namespace DistributedCodingCompetition.ApiService.Migrations
                     Score = table.Column<int>(type: "integer", nullable: false),
                     MaxPossibleScore = table.Column<int>(type: "integer", nullable: false),
                     Points = table.Column<int>(type: "integer", nullable: false),
-                    EvaluationTime = table.Column<DateTime>(type: "timestamp with time zone", nullable: true)
+                    EvaluationTime = table.Column<DateTime>(type: "timestamp with time zone", nullable: true),
+                    Invalidated = table.Column<bool>(type: "boolean", nullable: false),
+                    PassedTestCases = table.Column<int>(type: "integer", nullable: false),
+                    TotalTestCases = table.Column<int>(type: "integer", nullable: false)
                 },
                 constraints: table =>
                 {

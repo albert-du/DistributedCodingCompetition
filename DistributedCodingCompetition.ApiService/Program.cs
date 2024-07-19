@@ -2,8 +2,9 @@ global using Microsoft.AspNetCore.Mvc;
 global using Microsoft.EntityFrameworkCore;
 global using DistributedCodingCompetition.ApiService;
 global using DistributedCodingCompetition.ApiService.Models;
-
-
+global using DistributedCodingCompetition.ApiService.Data;
+global using DistributedCodingCompetition.ApiService.Data.Models;
+global using DistributedCodingCompetition.ApiService.Data.Contexts;
 
 var builder = WebApplication.CreateBuilder(args);
 

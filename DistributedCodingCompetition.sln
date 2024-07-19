@@ -1,4 +1,5 @@
-﻿Microsoft Visual Studio Solution File, Format Version 12.00
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio Version 17
 VisualStudioVersion = 17.10.35013.160
 MinimumVisualStudioVersion = 10.0.40219.1
@@ -28,23 +29,41 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "DistributedCodingCompetitio
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "DistributedCodingCompetition.LiveLeaders", "DistributedCodingCompetition.LiveLeaders\DistributedCodingCompetition.LiveLeaders.csproj", "{5558F9F2-6E67-416C-8D17-BDE05E1CFDA2}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "DistributedCodingCompetition.ApiService.Models", "DistributedCodingCompetition.ApiService.Models\DistributedCodingCompetition.ApiService.Models.csproj", "{0321400F-BA37-4094-A7F5-2317F287C418}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "DistributedCodingCompetition.ApiService.Models", "DistributedCodingCompetition.ApiService.Models\DistributedCodingCompetition.ApiService.Models.csproj", "{0321400F-BA37-4094-A7F5-2317F287C418}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "DistributedCodingCompetition.ApiService.Client", "DistributedCodingCompetition.ApiService.Client\DistributedCodingCompetition.ApiService.Client.csproj", "{365530C6-E10E-44E6-B757-2A994720F96F}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "DistributedCodingCompetition.ApiService.Client", "DistributedCodingCompetition.ApiService.Client\DistributedCodingCompetition.ApiService.Client.csproj", "{365530C6-E10E-44E6-B757-2A994720F96F}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "DistributedCodingCompetition.AuthService.Models", "DistributedCodingCompetition.AuthService.Models\DistributedCodingCompetition.AuthService.Models.csproj", "{0398F661-B455-498B-95B6-DFF5C119D926}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "DistributedCodingCompetition.AuthService.Models", "DistributedCodingCompetition.AuthService.Models\DistributedCodingCompetition.AuthService.Models.csproj", "{0398F661-B455-498B-95B6-DFF5C119D926}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "DistributedCodingCompetition.AuthService.Client", "DistributedCodingCompetition.AuthService.Client\DistributedCodingCompetition.AuthService.Client.csproj", "{04ACBAB9-71CA-404A-8DAA-6FCAD4227DD2}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "DistributedCodingCompetition.AuthService.Client", "DistributedCodingCompetition.AuthService.Client\DistributedCodingCompetition.AuthService.Client.csproj", "{04ACBAB9-71CA-404A-8DAA-6FCAD4227DD2}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "DistributedCodingCompetition.CodeExecution.Client", "DistributedCodingCompetition.CodeExecution.Client\DistributedCodingCompetition.CodeExecution.Client.csproj", "{5A1E054D-0453-46FD-8BAB-8BDC9990BD78}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "DistributedCodingCompetition.CodeExecution.Client", "DistributedCodingCompetition.CodeExecution.Client\DistributedCodingCompetition.CodeExecution.Client.csproj", "{5A1E054D-0453-46FD-8BAB-8BDC9990BD78}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "DistributedCodingCompetition.Judge.Client", "DistributedCodingCompetition.Judge.Client\DistributedCodingCompetition.Judge.Client.csproj", "{C9139317-51B0-4360-A045-A5E04C5E2F95}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "DistributedCodingCompetition.Judge.Client", "DistributedCodingCompetition.Judge.Client\DistributedCodingCompetition.Judge.Client.csproj", "{C9139317-51B0-4360-A045-A5E04C5E2F95}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "DistributedCodingCompetition.CodePersistence.Client", "DistributedCodingCompetition.CodePersistence.Client\DistributedCodingCompetition.CodePersistence.Client.csproj", "{166645F2-E4E6-4816-8AD9-28C38EB2B153}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "DistributedCodingCompetition.CodePersistence.Client", "DistributedCodingCompetition.CodePersistence.Client\DistributedCodingCompetition.CodePersistence.Client.csproj", "{166645F2-E4E6-4816-8AD9-28C38EB2B153}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "DistributedCodingCompetition.Leaderboard.Client", "DistributedCodingCompetition.Leaderboard.Client\DistributedCodingCompetition.Leaderboard.Client.csproj", "{850166FF-18AC-453E-98E7-CDB5336FF027}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "DistributedCodingCompetition.Leaderboard.Client", "DistributedCodingCompetition.Leaderboard.Client\DistributedCodingCompetition.Leaderboard.Client.csproj", "{850166FF-18AC-453E-98E7-CDB5336FF027}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "DistributedCodingCompetition.LiveLeaders.Client", "DistributedCodingCompetition.LiveLeaders.Client\DistributedCodingCompetition.LiveLeaders.Client.csproj", "{5246BD42-9734-4079-A42D-A645EAFA34E0}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "DistributedCodingCompetition.LiveLeaders.Client", "DistributedCodingCompetition.LiveLeaders.Client\DistributedCodingCompetition.LiveLeaders.Client.csproj", "{5246BD42-9734-4079-A42D-A645EAFA34E0}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "ApiService", "ApiService", "{A521F175-205A-407B-964C-04F247C4C88C}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "AuthService", "AuthService", "{9D4F2D3C-106D-4C3C-812E-D3130E0E79BA}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "CodeExecution", "CodeExecution", "{E30B6100-DE36-42C8-A494-C240EF581999}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "CodePersistence", "CodePersistence", "{E0B9D47D-5D99-4DED-B866-3741F0E0F105}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Judge", "Judge", "{02BD6F13-F3FB-4BC2-93EA-D480E7CAC0A4}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Leaderboard", "Leaderboard", "{9EFA556D-7181-4990-B53F-140FD8CAD6FD}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "LiveLeaders", "LiveLeaders", "{549B7FF5-068A-4DF5-A02B-E88B609F9FA4}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "DistributedCodingCompetition.ApiService.MigrationService", "DistributedCodingCompetition.ApiService.MigrationService\DistributedCodingCompetition.ApiService.MigrationService.csproj", "{E3356F27-B7FA-4792-AB72-5B31BAD23491}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "DistributedCodingCompetition.ApiService.Data", "DistributedCodingCompetition.ApiService.Data\DistributedCodingCompetition.ApiService.Data.csproj", "{4FA6BD6C-3F67-457C-9671-9C04F82346F9}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -140,9 +159,39 @@ Global
 		{5246BD42-9734-4079-A42D-A645EAFA34E0}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{5246BD42-9734-4079-A42D-A645EAFA34E0}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{5246BD42-9734-4079-A42D-A645EAFA34E0}.Release|Any CPU.Build.0 = Release|Any CPU
+		{E3356F27-B7FA-4792-AB72-5B31BAD23491}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{E3356F27-B7FA-4792-AB72-5B31BAD23491}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{E3356F27-B7FA-4792-AB72-5B31BAD23491}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{E3356F27-B7FA-4792-AB72-5B31BAD23491}.Release|Any CPU.Build.0 = Release|Any CPU
+		{4FA6BD6C-3F67-457C-9671-9C04F82346F9}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{4FA6BD6C-3F67-457C-9671-9C04F82346F9}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{4FA6BD6C-3F67-457C-9671-9C04F82346F9}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{4FA6BD6C-3F67-457C-9671-9C04F82346F9}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(NestedProjects) = preSolution
+		{DBFEDFD8-AEC2-4CFB-B400-BC9BBB64E571} = {A521F175-205A-407B-964C-04F247C4C88C}
+		{2459C841-C1AC-49DF-AEC7-012678D8F440} = {E30B6100-DE36-42C8-A494-C240EF581999}
+		{1D2D7FA8-557B-4196-BECE-10AB80166058} = {02BD6F13-F3FB-4BC2-93EA-D480E7CAC0A4}
+		{01242147-9D15-4A9C-91BF-BC898D29226C} = {E30B6100-DE36-42C8-A494-C240EF581999}
+		{681566E2-498C-40F3-A492-BC14F600187F} = {E30B6100-DE36-42C8-A494-C240EF581999}
+		{7739CF6E-76D9-4A5A-93AF-3534CAA97ED0} = {9D4F2D3C-106D-4C3C-812E-D3130E0E79BA}
+		{01B4DE1E-F769-43FA-9E88-D0BCF3F9BE25} = {E0B9D47D-5D99-4DED-B866-3741F0E0F105}
+		{A563693B-2616-415C-89B5-9A196E2D27A0} = {9EFA556D-7181-4990-B53F-140FD8CAD6FD}
+		{5558F9F2-6E67-416C-8D17-BDE05E1CFDA2} = {549B7FF5-068A-4DF5-A02B-E88B609F9FA4}
+		{0321400F-BA37-4094-A7F5-2317F287C418} = {A521F175-205A-407B-964C-04F247C4C88C}
+		{365530C6-E10E-44E6-B757-2A994720F96F} = {A521F175-205A-407B-964C-04F247C4C88C}
+		{0398F661-B455-498B-95B6-DFF5C119D926} = {9D4F2D3C-106D-4C3C-812E-D3130E0E79BA}
+		{04ACBAB9-71CA-404A-8DAA-6FCAD4227DD2} = {9D4F2D3C-106D-4C3C-812E-D3130E0E79BA}
+		{5A1E054D-0453-46FD-8BAB-8BDC9990BD78} = {E30B6100-DE36-42C8-A494-C240EF581999}
+		{C9139317-51B0-4360-A045-A5E04C5E2F95} = {02BD6F13-F3FB-4BC2-93EA-D480E7CAC0A4}
+		{166645F2-E4E6-4816-8AD9-28C38EB2B153} = {E0B9D47D-5D99-4DED-B866-3741F0E0F105}
+		{850166FF-18AC-453E-98E7-CDB5336FF027} = {9EFA556D-7181-4990-B53F-140FD8CAD6FD}
+		{5246BD42-9734-4079-A42D-A645EAFA34E0} = {549B7FF5-068A-4DF5-A02B-E88B609F9FA4}
+		{E3356F27-B7FA-4792-AB72-5B31BAD23491} = {A521F175-205A-407B-964C-04F247C4C88C}
+		{4FA6BD6C-3F67-457C-9671-9C04F82346F9} = {A521F175-205A-407B-964C-04F247C4C88C}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {D27D9E1A-CBE2-47C5-9C7F-18D5154A0902}
