@@ -104,6 +104,7 @@ internal class ApiClient<TOwner>(HttpClient httpClient, ILogger<TOwner> logger, 
         try
         {
             var response = await httpClient.PostAsJsonAsync(expanded, data);
+            response.EnsureSuccessStatusCode();
             var result = await response.Content.ReadFromJsonAsync<TR>();
             logger.LogDebug("Successfully posted {TYPE} to {URL}", typeof(T).Name, expanded);
             return (true, result);

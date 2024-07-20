@@ -13,7 +13,7 @@ using DistributedCodingCompetition.ApiService.Data.Contexts;
 /// </summary>
 /// <param name="serviceProvider"></param>
 /// <param name="hostApplicationLifetime"></param>
-public sealed class Worker(IServiceProvider serviceProvider, IHostApplicationLifetime hostApplicationLifetime) : BackgroundService
+public sealed class Worker(IServiceProvider serviceProvider, IHostApplicationLifetime hostApplicationLifetime, IConfiguration configuration) : BackgroundService
 {
     public const string ActivitySourceName = "API Migrations";
 
@@ -30,7 +30,9 @@ public sealed class Worker(IServiceProvider serviceProvider, IHostApplicationLif
 
             await EnsureDatabaseAsync(dbContext, cancellationToken);
             await RunMigrationAsync(dbContext, cancellationToken);
-            await SeedDataAsync(dbContext, cancellationToken);
+
+            if (configuration["Seed"] is "true")
+                await SeedDataAsync(dbContext, cancellationToken);
         }
         catch (Exception ex)
         {

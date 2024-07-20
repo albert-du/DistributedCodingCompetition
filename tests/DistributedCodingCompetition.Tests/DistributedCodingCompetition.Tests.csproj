@@ -17,7 +17,13 @@
   </ItemGroup>
 
   <ItemGroup>
+    <ProjectReference Include="..\..\src\DistributedCodingCompetition.ApiService.Client\DistributedCodingCompetition.ApiService.Client.csproj" />
     <ProjectReference Include="..\..\src\DistributedCodingCompetition.AppHost\DistributedCodingCompetition.AppHost.csproj" />
+    <ProjectReference Include="..\..\src\DistributedCodingCompetition.AuthService.Client\DistributedCodingCompetition.AuthService.Client.csproj" />
+    <ProjectReference Include="..\..\src\DistributedCodingCompetition.CodeExecution.Client\DistributedCodingCompetition.CodeExecution.Client.csproj" />
+    <ProjectReference Include="..\..\src\DistributedCodingCompetition.CodePersistence.Client\DistributedCodingCompetition.CodePersistence.Client.csproj" />
+    <ProjectReference Include="..\..\src\DistributedCodingCompetition.Judge.Client\DistributedCodingCompetition.Judge.Client.csproj" />
+    <ProjectReference Include="..\..\src\DistributedCodingCompetition.Leaderboard.Client\DistributedCodingCompetition.Leaderboard.Client.csproj" />
   </ItemGroup>
 
   <ItemGroup>

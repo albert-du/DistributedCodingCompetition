@@ -228,10 +228,11 @@ public sealed class UsersController(ContestContext context) : ControllerBase
             Email = dto.Email,
             Username = dto.Username,
             FullName = dto.FullName,
-            Birthday = dto.Birthday,
+
+            Birthday = dto.Birthday.ToUniversalTime(),
         };
 
-        context.Users.Add(user);
+        await context.Users.AddAsync(user);
         await context.SaveChangesAsync();
 
         // read it back
