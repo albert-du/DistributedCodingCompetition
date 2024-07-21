@@ -13,8 +13,11 @@ public class ApiTests(ApiFixture fixture) : IClassFixture<ApiFixture>
         var authService = api.AuthService;
         var usersService = api.UsersService;
 
-        var email = "joe@example.com";
+        Faker faker = new();
+
+        var email = faker.Person.Email;
         var password = "reallySecurePassword";
+        var username = $"JoeBiden{Random.Shared.Next()}";
 
         // auth registration
         var id = await authService.TryRegisterAsync(email, password);
@@ -27,8 +30,8 @@ public class ApiTests(ApiFixture fixture) : IClassFixture<ApiFixture>
         {
             Id = id!.Value,
             Email = email,
-            FullName = "Joe Biden",
-            Username = "JoeBiden",
+            FullName = faker.Person.FullName,
+            Username = username,
             Birthday = new(1942, 11, 20),
         });
 
@@ -36,8 +39,8 @@ public class ApiTests(ApiFixture fixture) : IClassFixture<ApiFixture>
 
         Assert.NotNull(user);
 
-        Assert.Equal("Joe Biden", user?.FullName);
-        Assert.Equal("JoeBiden", user?.Username);
+        Assert.Equal(faker.Person.FullName, user?.FullName);
+        Assert.Equal(username, user?.Username);
 
         Assert.True(user?.Birthday == new DateTime(1942, 11, 20).ToUniversalTime());
         Assert.True(DateTime.UtcNow - user.CreatedAt < TimeSpan.FromSeconds(5));
@@ -254,6 +257,7 @@ public class ApiTests(ApiFixture fixture) : IClassFixture<ApiFixture>
             Username = "kdlsadfjlk",
             Birthday = faker.Person.DateOfBirth,
         });
+        Assert.NotNull(user);
 
         faker = new();
 
@@ -292,11 +296,13 @@ public class ApiTests(ApiFixture fixture) : IClassFixture<ApiFixture>
         Assert.NotNull(contest);
         // create a join code
 
+        var cd = $"code{Random.Shared.Next()}";
+
         (success, var joinCode) = await joinCodesService.TryCreateJoinCodeAsync(new()
         {
             Name = "Test Join Code",
             ContestId = contest!.Id,
-            Code = "test",
+            Code = cd,
             CreatorId = user.Id,
             CloseAfterUse = true
         });
@@ -375,7 +381,7 @@ public class ApiTests(ApiFixture fixture) : IClassFixture<ApiFixture>
         (success, joinCode) = await joinCodesService.TryReadJoinCodeAsync(joinCode!.Id);
         Assert.True(success);
         Assert.NotNull(joinCode);
-        Assert.True(joinCode!.Active);
+        Assert.False(joinCode!.Active);
         Assert.Equal(2, joinCode.Uses);
 
         // delete the join code
@@ -392,7 +398,7 @@ public class ApiTests(ApiFixture fixture) : IClassFixture<ApiFixture>
 
         // make sure the user can see the contest
 
-        (success, var contest2) = await usersService.TryReadEnteredContestsAsync(contest.Id);
+        (success, var contest2) = await usersService.TryReadEnteredContestsAsync(participant.Id);
         Assert.True(success);
         Assert.NotNull(contest2);
         Assert.Single(contest2.Items);
@@ -407,7 +413,6 @@ public class ApiTests(ApiFixture fixture) : IClassFixture<ApiFixture>
         var usersService = api.UsersService;
         var contestsService = api.ContestsService;
         var problemsService = api.ProblemsService;
-        var testCasesService = api.TestCasesService;
 
         Faker faker = new();
         // create a user, no auth needed
@@ -417,7 +422,7 @@ public class ApiTests(ApiFixture fixture) : IClassFixture<ApiFixture>
             Id = (await authService.TryRegisterAsync(faker.Person.Email, "password"))!.Value,
             Email = faker.Person.Email,
             FullName = faker.Person.FullName,
-            Username = "asdfoi44",
+            Username = "asdffffsasdfoi44",
             Birthday = faker.Person.DateOfBirth,
         });
 
@@ -493,7 +498,7 @@ public class ApiTests(ApiFixture fixture) : IClassFixture<ApiFixture>
             Id = (await authService.TryRegisterAsync(faker.Person.Email, "password"))!.Value,
             Email = faker.Person.Email,
             FullName = faker.Person.FullName,
-            Username = "asdfoi44",
+            Username = "asdf23rgdfsg",
             Birthday = faker.Person.DateOfBirth,
         });
 
@@ -527,12 +532,15 @@ public class ApiTests(ApiFixture fixture) : IClassFixture<ApiFixture>
 
         for (var i = 0; i < 10; i++)
         {
-            await testCasesService.TryCreateTestCaseAsync(new()
+            (success, var testCase) = await testCasesService.TryCreateTestCaseAsync(new()
             {
                 ProblemId = problem!.Id,
                 Input = faker.Lorem.Sentence(),
                 Output = faker.Lorem.Sentence(),
             });
+            Assert.True(success);
+            Assert.NotNull(testCase);
+            testCases.Add(testCase!.Id);
         }
 
         // read the test cases
@@ -549,5 +557,86 @@ public class ApiTests(ApiFixture fixture) : IClassFixture<ApiFixture>
         }
         // make sure all test cases were found
         Assert.Empty(testCases);
+    }
+
+    [Fact]
+    public async Task ProblemCanRemoveTestCases()
+    {
+        var api = await fixture.APIs;
+        var authService = api.AuthService;
+        var usersService = api.UsersService;
+        var contestsService = api.ContestsService;
+        var problemsService = api.ProblemsService;
+        var testCasesService = api.TestCasesService;
+
+        Faker faker = new();
+        // create a user, no auth needed
+
+        (_, var user) = await usersService.TryCreateUserAsync(new()
+        {
+            Id = (await authService.TryRegisterAsync(faker.Person.Email, "password"))!.Value,
+            Email = faker.Person.Email,
+            FullName = faker.Person.FullName,
+            Username = "asdfoi44",
+            Birthday = faker.Person.DateOfBirth,
+        });
+
+        Assert.NotNull(user);
+
+        (_, var contest) = await contestsService.TryCreateContestAsync(new()
+        {
+            Name = "Test Contest 1",
+            Description = "This is a test contest",
+            StartTime = DateTime.UtcNow,
+            EndTime = DateTime.UtcNow + TimeSpan.FromDays(1),
+            OwnerId = user!.Id,
+        });
+
+        Assert.NotNull(contest);
+
+        // create a new problem
+
+        var (success, problem) = await problemsService.TryCreateProblemAsync(new()
+        {
+            Name = "Test Problem 1",
+            TagLine = "test problem",
+            Description = "This is a test problem",
+            OwnerId = user!.Id,
+        });
+
+        Assert.True(success);
+        Assert.NotNull(problem);
+
+        HashSet<Guid> testCases = [];
+
+        for (var i = 0; i < 10; i++)
+            await testCasesService.TryCreateTestCaseAsync(new()
+            {
+                ProblemId = problem!.Id,
+                Input = faker.Lorem.Sentence(),
+                Output = faker.Lorem.Sentence(),
+            });
+
+        // read the test cases
+        (success, var cases) = await problemsService.TryReadProblemTestCasesAsync(problem.Id);
+        Assert.True(success);
+        Assert.NotNull(cases);
+
+        // remove 5 test cases
+        for (var i = 0; i < 5; i++)
+            testCases.Add(cases.Items[i].Id);
+
+        foreach (var testCase in testCases)
+            await testCasesService.TryDeleteTestCaseAsync(testCase);
+
+        // read the test cases
+        (success, cases) = await problemsService.TryReadProblemTestCasesAsync(problem.Id);
+        Assert.True(success);
+        Assert.NotNull(cases);
+        Assert.Equal(5, cases.TotalCount);
+        Assert.Equal(5, cases.Items.Count);
+
+        for (var i = 0; i < 5; i++)
+            Assert.DoesNotContain(cases.Items[i].Id, testCases);
     }
 }

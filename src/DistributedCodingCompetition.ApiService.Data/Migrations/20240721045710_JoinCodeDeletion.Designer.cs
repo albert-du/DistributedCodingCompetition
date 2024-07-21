@@ -3,6 +3,7 @@ using System;
 using DistributedCodingCompetition.ApiService.Data.Contexts;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 
@@ -11,9 +12,11 @@ using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 namespace DistributedCodingCompetition.ApiService.Data.Migrations
 {
     [DbContext(typeof(ContestContext))]
-    partial class ContestContextModelSnapshot : ModelSnapshot
+    [Migration("20240721045710_JoinCodeDeletion")]
+    partial class JoinCodeDeletion
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder

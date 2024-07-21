@@ -69,4 +69,10 @@ public class JoinCode
     /// Admin user who created the code.
     /// </summary>
     public User Creator { get; set; } = null!;
+
+
+    /// <summary>
+    /// Date and time the code was deleted. UTC
+    /// </summary>
+    public DateTime? DeletionTime { get; set; }
 }

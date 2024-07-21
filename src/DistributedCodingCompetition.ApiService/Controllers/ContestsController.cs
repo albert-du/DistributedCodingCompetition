@@ -59,6 +59,8 @@ public sealed class ContestsController(ContestContext context) : ControllerBase
     /// Get all admins for a contest
     /// </summary>
     /// <param name="contestId"></param>
+    /// <param name="count"></param>
+    /// <param name="page"></param>
     /// <returns></returns>
     [HttpGet("{contestId}/admins")]
     public Task<PaginateResult<UserResponseDTO>> GetContestAdminsAsync(Guid contestId, int page, int count) =>
@@ -231,6 +233,7 @@ public sealed class ContestsController(ContestContext context) : ControllerBase
     /// </summary>
     /// <param name="contestId"></param>
     /// <param name="problemId"></param>
+    /// <param name="generateIfNotExist"></param>
     /// <returns></returns>
     [HttpGet("{contestId}/pointvalues/{problemId}")]
     public async Task<ActionResult<ProblemPointValueResponseDTO>> GetProblemPointValueAsync(Guid contestId, Guid problemId, bool generateIfNotExist = true)

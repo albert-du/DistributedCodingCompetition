@@ -40,8 +40,8 @@ public class ApiFixture : IAsyncDisposable
             ProblemsService problemsService = new(httpClient, loggerFactory.CreateLogger<ProblemsService>());
             TestCasesService testCasesService = new(httpClient, loggerFactory.CreateLogger<TestCasesService>());
 
-            // wait 5 seconds for the database migrations to run
-            await Task.Delay(5000);
+            // wait 8 seconds for the database migrations to run
+            await Task.Delay(8000);
             return new APIs(authService, usersService, contestsService, joinCodesService, problemsService, testCasesService);
         });
     }

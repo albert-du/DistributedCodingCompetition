@@ -19,6 +19,7 @@ public sealed class JoinCodesController(ContestContext context) : ControllerBase
     public async Task<PaginateResult<JoinCodeResponseDTO>> GetJoinCodesAsync(int page, int count) =>
         await context.JoinCodes
             .AsNoTracking()
+            .Where(j => j.DeletionTime == null)
             .PaginateAsync(page, count, q => q.ReadJoinCodesAsync());
 
     // GET: api/JoinCodes/Code/5
@@ -32,7 +33,7 @@ public sealed class JoinCodesController(ContestContext context) : ControllerBase
     {
         var joinCodes = await context.JoinCodes
             .AsNoTracking()
-            .Where(j => j.Code == code)
+            .Where(j => j.Code == code && j.DeletionTime == null)
             .ReadJoinCodesAsync();
 
         return joinCodes.Count == 0 ? NotFound() : joinCodes[0];
@@ -49,7 +50,7 @@ public sealed class JoinCodesController(ContestContext context) : ControllerBase
     {
         var joinCodes = await context.JoinCodes
             .AsNoTracking()
-            .Where(j => j.Id == id)
+            .Where(j => j.Id == id && j.DeletionTime == null)
             .ReadJoinCodesAsync();
 
         return joinCodes.Count == 0 ? NotFound() : joinCodes[0];
@@ -60,7 +61,7 @@ public sealed class JoinCodesController(ContestContext context) : ControllerBase
     /// Updates a join code
     /// </summary>
     /// <param name="id"></param>
-    /// <param name="joinCode"></param>
+    /// <param name="joinCodeDTO"></param>
     /// <returns></returns>
     [HttpPut("{id}")]
     public async Task<IActionResult> PutJoinCodeAsync(Guid id, JoinCodeRequestDTO joinCodeDTO)
@@ -71,7 +72,7 @@ public sealed class JoinCodesController(ContestContext context) : ControllerBase
         // find the joincode
         var joinCode = await context.JoinCodes.FindAsync(id);
 
-        if (joinCode is null)
+        if (joinCode is null || joinCode.DeletionTime is not null)
             return NotFound();
 
         // update the join code
@@ -104,7 +105,7 @@ public sealed class JoinCodesController(ContestContext context) : ControllerBase
     /// <summary>
     /// Creates a new join code
     /// </summary>
-    /// <param name="joinCode"></param>
+    /// <param name="dto"></param>
     /// <returns></returns>
     [HttpPost]
     public async Task<ActionResult<JoinCodeResponseDTO>> PostJoinCodeAsync(JoinCodeRequestDTO dto)
@@ -154,7 +155,7 @@ public sealed class JoinCodesController(ContestContext context) : ControllerBase
     public async Task<ActionResult<JoinCode>> JoinContestAsync(Guid joinCodeId, Guid userId)
     {
         var joinCode = await context.JoinCodes.FindAsync(joinCodeId);
-        if (joinCode is null)
+        if (joinCode is null || joinCode.DeletionTime is not null)
             return NotFound();
 
         if (!joinCode.Active)
@@ -203,12 +204,14 @@ public sealed class JoinCodesController(ContestContext context) : ControllerBase
         if (joinCode == null)
             return NotFound();
 
-        context.JoinCodes.Remove(joinCode);
+        // mark delete
+        joinCode.DeletionTime = DateTime.UtcNow.ToUniversalTime();
+
         await context.SaveChangesAsync();
 
         return NoContent();
     }
 
     private bool JoinCodeExists(Guid id) =>
-        context.JoinCodes.Any(e => e.Id == id);
+        context.JoinCodes.Where(jc => jc.DeletionTime == null).Any(e => e.Id == id);
 }

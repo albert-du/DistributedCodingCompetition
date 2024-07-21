@@ -31,5 +31,5 @@ public sealed class JoinCodesService(HttpClient httpClient, ILogger<JoinCodesSer
 
     /// <inheritdoc/>
     public Task<bool> TryUpdateJoinCodeAsync(JoinCodeRequestDTO joinCode) =>
-        apiClient.PutAsync($"?id={joinCode.Id}", joinCode);
+        apiClient.PutAsync($"/{joinCode.Id}", joinCode);
 }

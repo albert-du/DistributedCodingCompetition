@@ -96,6 +96,13 @@ public class AuthController(IPasswordService passwordService, IMongoClient mongo
         return res is null ? Unauthorized() : res;
     }
 
+    /// <summary>
+    /// Changes a user's password
+    /// </summary>
+    /// <param name="id"></param>
+    /// <param name="oldPassword"></param>
+    /// <param name="newPassword"></param>
+    /// <returns></returns>
     [HttpPost("changePassword")]
     public async Task<ActionResult> ChangePassword(Guid id, string oldPassword, string newPassword)
     {
@@ -112,6 +119,12 @@ public class AuthController(IPasswordService passwordService, IMongoClient mongo
         return Ok();
     }
 
+    /// <summary>
+    /// Resets a user's password
+    /// </summary>
+    /// <param name="id"></param>
+    /// <param name="newPassword"></param>
+    /// <returns></returns>
     [HttpPost("resetPassword")]
     public async Task<ActionResult> ChangePassword(Guid id, string newPassword)
     {
