@@ -34,7 +34,13 @@ public sealed class ProblemsController(ContestContext context) : ControllerBase
         return problems.Count == 0 ? NotFound() : problems[0];
     }
 
-
+    /// <summary>
+    /// Gets all submissions for a problem
+    /// </summary>
+    /// <param name="id"></param>
+    /// <param name="page"></param>
+    /// <param name="count"></param>
+    /// <returns></returns>
     [HttpGet("{id}/submissions")]
     public Task<PaginateResult<SubmissionResponseDTO>> GetSubmissionsForProblemAsync(Guid id, int page, int count) =>
         context.Submissions
@@ -47,7 +53,7 @@ public sealed class ProblemsController(ContestContext context) : ControllerBase
     /// Updates a problem
     /// </summary>
     /// <param name="id"></param>
-    /// <param name="problem"></param>
+    /// <param name="dto"></param>
     /// <returns></returns>
     [HttpPut("{id}")]
     public async Task<IActionResult> PutProblemAsync(Guid id, ProblemRequestDTO dto)
@@ -90,7 +96,7 @@ public sealed class ProblemsController(ContestContext context) : ControllerBase
     /// <summary>
     /// Creates a problem in the database
     /// </summary>
-    /// <param name="problem"></param>
+    /// <param name="dto"></param>
     /// <returns></returns>
     [HttpPost]
     public async Task<ActionResult<Problem>> PostProblemAsync(ProblemRequestDTO dto)
@@ -157,7 +163,7 @@ public sealed class ProblemsController(ContestContext context) : ControllerBase
     /// Adds a test case to a problem
     /// </summary>
     /// <param name="problemId"></param>
-    /// <param name="testCase"></param>
+    /// <param name="testCaseId"></param>
     /// <returns></returns>
     [HttpPost("{problemId}/testcases/{testCaseId}")]
     public async Task<IActionResult> AddTestCaseToProblemAsync(Guid problemId, Guid testCaseId)

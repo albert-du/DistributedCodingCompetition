@@ -129,7 +129,7 @@ internal static class QueryExtensions
                 jc.Admin,
                 jc.Active,
                 jc.CloseAfterUse,
-                jc.Uses,
+                Uses = jc.Users.Count,
                 CreatedAt = jc.Creation,
                 jc.Expiration
             })

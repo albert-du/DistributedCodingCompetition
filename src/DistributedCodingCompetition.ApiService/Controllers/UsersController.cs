@@ -134,8 +134,8 @@ public sealed class UsersController(ContestContext context) : ControllerBase
     /// <summary>
     /// Updates a user
     /// </summary>
-    /// <param name="id"></param>
-    /// <param name="user"></param>
+    /// <param name="id">id of the user</param>
+    /// <param name="dto">request parameters</param>
     /// <returns></returns>
     [HttpPut("{id}")]
     public async Task<IActionResult> PutUserAsync(Guid id, UserRequestDTO dto)
@@ -187,7 +187,7 @@ public sealed class UsersController(ContestContext context) : ControllerBase
     /// <summary>
     /// Creates a user
     /// </summary>
-    /// <param name="user"></param>
+    /// <param name="dto">user</param>
     /// <returns></returns>
     [HttpPost]
     public async Task<ActionResult<UserResponseDTO>> PostUserAsync(UserRequestDTO dto)

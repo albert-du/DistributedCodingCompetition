@@ -1,4 +1,5 @@
 ﻿using Bogus;
+using DistributedCodingCompetition.AuthService.Client;
 
 namespace DistributedCodingCompetition.Tests;
 
@@ -66,7 +67,6 @@ public class ApiTests(ApiFixture fixture) : IClassFixture<ApiFixture>
         var usersService = api.UsersService;
         var authService = api.AuthService;
 
-
         var email = "joe2@example.com";
         var password = "reallySecurePassword";
 
@@ -118,20 +118,23 @@ public class ApiTests(ApiFixture fixture) : IClassFixture<ApiFixture>
     public async Task CreateContest()
     {
         var api = await fixture.APIs;
+        var authService = api.AuthService;
         var usersService = api.UsersService;
         var contestsService = api.ContestsService;
 
         Faker faker = new();
         // create a user, no auth needed
 
-        (_, var user) = await usersService.TryCreateUserAsync(new()
+        var (success, user) = await usersService.TryCreateUserAsync(new()
         {
-            Id = Guid.NewGuid(),
+            Id = (await authService.TryRegisterAsync(faker.Person.Email, "password"))!.Value,
             Email = faker.Person.Email,
             FullName = faker.Person.FullName,
-            Username = faker.Person.UserName,
+            Username = "kdlsadfjlkfsda",
             Birthday = faker.Person.DateOfBirth,
         });
+        Assert.True(success);
+        Assert.NotNull(user);
 
         faker = new();
 
@@ -145,13 +148,14 @@ public class ApiTests(ApiFixture fixture) : IClassFixture<ApiFixture>
         });
 
         //  create a contest
-        var (success, contest) = await contestsService.TryCreateContestAsync(new()
+        (success, var contest) = await contestsService.TryCreateContestAsync(new()
         {
             Name = "Test Contest 1",
             Description = "This is a test contest",
             StartTime = DateTime.UtcNow,
             EndTime = DateTime.UtcNow + TimeSpan.FromDays(1),
             OwnerId = user!.Id,
+            Public = true,
         });
 
         Assert.True(success);
@@ -159,9 +163,17 @@ public class ApiTests(ApiFixture fixture) : IClassFixture<ApiFixture>
         Assert.Equal("Test Contest 1", contest?.Name);
         Assert.Equal("This is a test contest", contest?.Description);
         Assert.Equal(user.Id, contest?.OwnerId);
+        Assert.True(contest?.Public);
 
-        // assert the user is on the admin list
-        Assert.Equal(1, contest!.TotalAdmins);
+        // assert the user is not on the admin list
+        Assert.Equal(0, contest!.TotalAdmins);
+
+        // assert that the user's role is owner
+
+        (success, var role) = await contestsService.TryReadContestUserRoleAsync(contest!.Id, user.Id);
+        Assert.True(success);
+        Assert.NotNull(role);
+        Assert.Equal(ApiService.Models.ContestRole.Owner, role);
 
         // assert there are 0 participants
 
@@ -200,8 +212,190 @@ public class ApiTests(ApiFixture fixture) : IClassFixture<ApiFixture>
         (success, var admins) = await contestsService.TryReadContestAdminsAsync(contest.Id);
         Assert.True(success);
         Assert.NotNull(admins);
-        Assert.Single(admins.Items);
-        Assert.Equal(user.Id, admins.Items[0].Id);
-        Assert.Equal(user.Username, admins.Items[0].Username);
+        Assert.Empty(admins.Items);
+        Assert.Equal(0, admins.TotalCount);
+
+        // try to add a participant
+        success = await contestsService.TryJoinPublicContestAsync(contest.Id, participant!.Id);
+        Assert.True(success);
+
+        // reread the contest
+        (success, participants) = await contestsService.TryReadContestParticipantsAsync(contest.Id);
+        Assert.True(success);
+        Assert.NotNull(participants);
+        Assert.Single(participants.Items);
+        Assert.Equal(1, participants.TotalCount);
+        Assert.Equal(participant.Id, participants.Items[0].Id);
+        Assert.Equal(participant.Username, participants.Items[0].Username);
+
+        (success, contest) = await contestsService.TryReadContestAsync(contest.Id);
+        Assert.True(success);
+        Assert.NotNull(contest);
+        Assert.Equal(1, contest!.TotalParticipants);
+    }
+
+    [Fact]
+    public async Task ContestJoinable()
+    {
+        var api = await fixture.APIs;
+        var authService = api.AuthService;
+        var usersService = api.UsersService;
+        var contestsService = api.ContestsService;
+        var joinCodesService = api.JoinCodesService;
+
+        Faker faker = new();
+        // create a user, no auth needed
+
+        (_, var user) = await usersService.TryCreateUserAsync(new()
+        {
+            Id = (await authService.TryRegisterAsync(faker.Person.Email, "password"))!.Value,
+            Email = faker.Person.Email,
+            FullName = faker.Person.FullName,
+            Username = "kdlsadfjlk",
+            Birthday = faker.Person.DateOfBirth,
+        });
+
+        faker = new();
+
+        (_, var participant) = await usersService.TryCreateUserAsync(new()
+        {
+            Id = Guid.NewGuid(),
+            Email = faker.Person.Email,
+            FullName = faker.Person.FullName,
+            Username = faker.Person.Email,
+            Birthday = faker.Person.DateOfBirth,
+        });
+
+        faker = new();
+
+
+        (_, var participant2) = await usersService.TryCreateUserAsync(new()
+        {
+            Id = Guid.NewGuid(),
+            Email = faker.Person.Email,
+            FullName = faker.Person.FullName,
+            Username = faker.Person.Email,
+            Birthday = faker.Person.DateOfBirth,
+        });
+
+        //  create a contest
+        var (success, contest) = await contestsService.TryCreateContestAsync(new()
+        {
+            Name = "Test Contest 1",
+            Description = "This is a test contest",
+            StartTime = DateTime.UtcNow,
+            EndTime = DateTime.UtcNow + TimeSpan.FromDays(1),
+            OwnerId = user!.Id,
+        });
+
+        Assert.True(success);
+        Assert.NotNull(contest);
+        // create a join code
+
+        (success, var joinCode) = await joinCodesService.TryCreateJoinCodeAsync(new()
+        {
+            Name = "Test Join Code",
+            ContestId = contest!.Id,
+            Code = "test",
+            CreatorId = user.Id,
+            CloseAfterUse = true
+        });
+
+        Assert.True(success);
+        Assert.NotNull(joinCode);
+
+        // make sure can read the join code
+
+        (success, var joinCode2) = await joinCodesService.TryReadJoinCodeAsync(joinCode!.Id);
+
+        Assert.True(success);
+        Assert.NotNull(joinCode2);
+        Assert.Equal(joinCode, joinCode2);
+        Assert.True(joinCode!.Active);
+        Assert.Equal(0, joinCode.Uses);
+
+        // make sure can read the join code by code
+
+        (success, var joinCode3) = await joinCodesService.TryReadJoinCodeByCodeAsync(joinCode!.Code);
+
+        Assert.True(success);
+        Assert.NotNull(joinCode3);
+        Assert.Equal(joinCode, joinCode3);
+
+        // try joining the contest with the join code
+
+        success = await joinCodesService.TryJoinContestAsync(joinCode!.Id, participant!.Id);
+        Assert.True(success);
+
+        // make sure only 1 participant is in the contest
+
+        (success, var participants) = await contestsService.TryReadContestParticipantsAsync(contest.Id);
+        Assert.True(success);
+        Assert.NotNull(participants);
+        Assert.Single(participants.Items);
+        Assert.Equal(1, participants.TotalCount);
+        Assert.Equal(participant.Id, participants.Items[0].Id);
+
+        // read the join code again
+        (success, joinCode) = await joinCodesService.TryReadJoinCodeAsync(joinCode!.Id);
+        Assert.True(success);
+        Assert.NotNull(joinCode);
+        Assert.False(joinCode!.Active);
+        Assert.Equal(1, joinCode.Uses);
+
+        // make sure user 2 can't join the contest
+        success = await joinCodesService.TryJoinContestAsync(joinCode!.Id, participant2!.Id);
+        Assert.False(success);
+
+        // make sure the uses are still 1
+
+        (success, joinCode) = await joinCodesService.TryReadJoinCodeAsync(joinCode!.Id);
+
+        Assert.True(success);
+        Assert.NotNull(joinCode);
+        Assert.False(joinCode!.Active);
+        Assert.Equal(1, joinCode.Uses);
+
+        // test reopening the join code
+
+        success = await joinCodesService.TryUpdateJoinCodeAsync(new()
+        {
+            Id = joinCode.Id,
+            Active = true,
+        });
+
+        Assert.True(success);
+
+        // participant 2 should be able to join now
+        success = await joinCodesService.TryJoinContestAsync(joinCode.Id, participant2.Id);
+
+        Assert.True(success);
+
+        // reread
+        (success, joinCode) = await joinCodesService.TryReadJoinCodeAsync(joinCode!.Id);
+        Assert.True(success);
+        Assert.NotNull(joinCode);
+        Assert.True(joinCode!.Active);
+        Assert.Equal(2, joinCode.Uses);
+
+        // delete the join code
+
+        success = await joinCodesService.TryDeleteJoinCodeAsync(joinCode.Id);
+
+        Assert.True(success);
+
+        // make sure it's not readable
+
+        (success, joinCode) = await joinCodesService.TryReadJoinCodeAsync(joinCode.Id);
+        Assert.False(success);
+        Assert.Null(joinCode);
+
+        // make sure the user can see the contest
+
+        (success, var contest2) = await usersService.TryReadEnteredContestsAsync(contest.Id);
+        Assert.True(success);
+        Assert.NotNull(contest2);
+        Assert.Single(contest2.Items);
+        Assert.Equal(contest.Id, contest2.Items[0].Id);
     }
 }

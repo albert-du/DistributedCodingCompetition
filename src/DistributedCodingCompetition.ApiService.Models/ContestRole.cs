@@ -14,4 +14,14 @@ public enum ContestRole
     /// Participant of the contest
     /// </summary>
     Participant,
+
+    /// <summary>
+    /// No role in the contest
+    /// </summary>
+    None,
+
+    /// <summary>
+    /// The owner of the contest
+    /// </summary>
+    Owner
 }

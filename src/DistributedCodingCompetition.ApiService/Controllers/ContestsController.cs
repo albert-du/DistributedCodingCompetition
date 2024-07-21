@@ -5,6 +5,10 @@ using Microsoft.EntityFrameworkCore;
 using DistributedCodingCompetition.ApiService.Models;
 using static DistributedCodingCompetition.ApiService.QueryExtensions;
 
+/// <summary>
+/// Api controller for Contests
+/// </summary>
+/// <param name="context"></param>
 [Route("api/[controller]")]
 [ApiController]
 public sealed class ContestsController(ContestContext context) : ControllerBase
@@ -85,8 +89,16 @@ public sealed class ContestsController(ContestContext context) : ControllerBase
     /// <param name="userId"></param>
     /// <returns></returns>
     [HttpGet("{contestId}/role/{userId}")]
-    public async Task<ActionResult<ContestRole?>> GetUserContestRoleAsync(Guid contestId, Guid userId)
+    public async Task<ActionResult<ContestRole>> GetUserContestRoleAsync(Guid contestId, Guid userId)
     {
+        // read the contest for the owner
+        var contest = await context.Contests.FindAsync(contestId);
+        if (contest is null)
+            return NotFound();
+
+        if (contest.OwnerId == userId)
+            return ContestRole.Owner;
+
         // Check if the user is an admin
         if (await context.Contests.Where(c => c.Id == contestId).SelectMany(c => c.Administrators).AnyAsync(a => a.Id == userId))
             return ContestRole.Admin;
@@ -95,7 +107,7 @@ public sealed class ContestsController(ContestContext context) : ControllerBase
         if (await context.Contests.Where(c => c.Id == contestId).SelectMany(c => c.Participants).AnyAsync(a => a.Id == userId))
             return ContestRole.Participant;
 
-        return NotFound();
+        return ContestRole.None;
     }
 
     // GET api/contests/{contestId}/banned?count={count}&page={page}
@@ -180,6 +192,13 @@ public sealed class ContestsController(ContestContext context) : ControllerBase
     }
 
     // GET api/contests/{contestId}/user/{userId}/solve/{problemId}
+    /// <summary>
+    /// Get user solve status for a problem in a contest
+    /// </summary>
+    /// <param name="contestId"></param>
+    /// <param name="userId"></param>
+    /// <param name="problemId"></param>
+    /// <returns></returns>
     [HttpGet("{contestId}/user/{userId}/solve/{problemId}")]
     public async Task<ProblemUserSolveStatus?> GetUserSolveStatusForProblemAsync(Guid contestId, Guid userId, Guid problemId)
     {
@@ -231,6 +250,13 @@ public sealed class ContestsController(ContestContext context) : ControllerBase
         return new ProblemPointValueResponseDTO() { Id = Guid.Empty, ContestId = contestId, ProblemId = problemId, Points = contest.DefaultPointsForProblem };
     }
 
+    /// <summary>
+    /// Add a point value for a problem in a contest
+    /// </summary>
+    /// <param name="contestId"></param>
+    /// <param name="problemId"></param>
+    /// <param name="ppv"></param>
+    /// <returns></returns>
     [HttpPost("{contestId}/pointvalues/{problemId}")]
     public async Task<ActionResult<ProblemPointValue>> PostProblemPointValueAsync(Guid contestId, Guid problemId, ProblemPointValue ppv)
     {
@@ -245,6 +271,13 @@ public sealed class ContestsController(ContestContext context) : ControllerBase
         return Created(response.Id.ToString(), response);
     }
 
+    /// <summary>
+    /// Update a point value for a problem in a contest
+    /// </summary>
+    /// <param name="contestId"></param>
+    /// <param name="problemId"></param>
+    /// <param name="ppv"></param>
+    /// <returns></returns>
     [HttpPut("{contestId}/pointvalues/{problemId}")]
     public async Task<IActionResult> PutProblemPointValueAsync(Guid contestId, Guid problemId, ProblemPointValue ppv)
     {
@@ -366,7 +399,7 @@ public sealed class ContestsController(ContestContext context) : ControllerBase
     /// Update a contest
     /// </summary>
     /// <param name="id"></param>
-    /// <param name="contest"></param>
+    /// <param name="contestDTO"></param>
     /// <returns></returns>
     [HttpPut("{id}")]
     public async Task<IActionResult> PutContestAsync(Guid id, ContestRequestDTO contestDTO)
@@ -413,7 +446,7 @@ public sealed class ContestsController(ContestContext context) : ControllerBase
     /// <summary>
     /// Create a contest
     /// </summary>
-    /// <param name="contest"></param>
+    /// <param name="dto"></param>
     /// <returns></returns>
     [HttpPost]
     public async Task<ActionResult<ContestResponseDTO>> PostContestAsync(ContestRequestDTO dto)
@@ -451,7 +484,7 @@ public sealed class ContestsController(ContestContext context) : ControllerBase
     /// Add a problem to a contest
     /// </summary>
     /// <param name="contestId"></param>
-    /// <param name="problem"></param>
+    /// <param name="problemId"></param>
     /// <returns></returns>
     [HttpPost("{contestId}/problems/{problemId}")]
     public async Task<IActionResult> AddProblemToContestAsync(Guid contestId, Guid problemId)
@@ -505,16 +538,22 @@ public sealed class ContestsController(ContestContext context) : ControllerBase
             .OrderByDescending(s => s.SubmissionTime)
             .PaginateAsync(page, count, q => q.ReadSubmissionsAsync());
 
-    [HttpPost]
+    /// <summary>
+    /// Try to join a public contest
+    /// </summary>
+    /// <param name="contestId"></param>
+    /// <param name="userId"></param>
+    /// <returns></returns>
+    [HttpPost("{contestId}/join/{userId}")]
     public async Task<IActionResult> TryJoinPublicContestAsync(Guid contestId, Guid userId)
     {
         // find the contest
-        var contest = context.Contests.Find(contestId);
+        var contest = await context.Contests.FindAsync(contestId);
         if (contest is null)
             return NotFound();
 
         // find the user
-        var user = context.Users.Find(userId);
+        var user = await context.Users.FindAsync(userId);
         if (user is null)
             return NotFound();
 

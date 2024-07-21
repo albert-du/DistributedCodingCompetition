@@ -51,11 +51,6 @@ public class JoinCode
     public bool CloseAfterUse { get; set; }
 
     /// <summary>
-    /// Number of times the code has been used.
-    /// </summary>
-    public int Uses => Users.Count;
-
-    /// <summary>
     /// Users who used this code.
     /// </summary>
     public ICollection<User> Users { get; set; } = [];

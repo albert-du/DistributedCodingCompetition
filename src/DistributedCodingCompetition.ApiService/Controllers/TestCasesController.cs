@@ -37,7 +37,7 @@ public sealed class TestCasesController(ContestContext context) : ControllerBase
     /// Updates a test case
     /// </summary>
     /// <param name="id"></param>
-    /// <param name="testCase"></param>
+    /// <param name="dto">testcase dto</param>
     /// <returns></returns>
     [HttpPut("{id}")]
     public async Task<IActionResult> PutTestCaseAsync(Guid id, TestCaseRequestDTO dto)
@@ -80,7 +80,7 @@ public sealed class TestCasesController(ContestContext context) : ControllerBase
     /// <summary>
     /// Creates a test case
     /// </summary>
-    /// <param name="testCase"></param>
+    /// <param name="dto"></param>
     /// <returns></returns>
     [HttpPost]
     public async Task<ActionResult<TestCase>> PostTestCaseAsync(TestCaseRequestDTO dto)

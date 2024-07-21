@@ -61,7 +61,7 @@ public sealed class SubmissionsController(ContestContext context) : ControllerBa
     /// <summary>
     /// Creates a submission
     /// </summary>
-    /// <param name="submission"></param>
+    /// <param name="dto"></param>
     /// <returns></returns>
     [HttpPost]
     public async Task<ActionResult<Submission>> PostSubmissionAsync(SubmissionRequestDTO dto)
@@ -107,7 +107,7 @@ public sealed class SubmissionsController(ContestContext context) : ControllerBa
     /// <param name="submissionId"></param>
     /// <param name="possible"></param>
     /// <param name="score"></param>
-    /// <param name="results"></param>
+    /// <param name="dtos"></param>
     /// <returns></returns>
     [HttpPost("{submissionId}/results")]
     public async Task<IActionResult> PostResultsAsync(Guid submissionId, int possible, int score, [FromBody] IReadOnlyList<TestCaseResultDTO> dtos)

@@ -90,7 +90,7 @@ public class Contest
     public bool Open { get; set; }
 
     /// <summary>
-    /// Minimum age to participate in the contest Age <= MinimumAge
+    /// Minimum age to participate in the contest Age is less than or equal to MinimumAge
     /// </summary>
     public int MinimumAge { get; set; }
 

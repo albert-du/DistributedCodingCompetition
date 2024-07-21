@@ -32,8 +32,6 @@ internal class ApiClient<TOwner>(HttpClient httpClient, ILogger<TOwner> logger, 
         }
         catch (Exception ex)
         {
-
-
             logger.LogError(ex, "Failed to get {TYPE} from {URL}", typeof(T).Name, expanded);
             return (false, default);
         }
