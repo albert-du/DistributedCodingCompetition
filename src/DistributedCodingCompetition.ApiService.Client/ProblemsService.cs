@@ -2,7 +2,7 @@
 namespace DistributedCodingCompetition.ApiService.Client;
 
 /// <inheritdoc/>
-public class ProblemsService(ILogger<ProblemsService> logger, HttpClient httpClient) : IProblemsService
+public class ProblemsService(HttpClient httpClient, ILogger<ProblemsService> logger) : IProblemsService
 {
     private readonly ApiClient<ProblemsService> apiClient = new(httpClient, logger, "api/problems");
 

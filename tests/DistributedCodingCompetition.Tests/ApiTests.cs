@@ -398,4 +398,156 @@ public class ApiTests(ApiFixture fixture) : IClassFixture<ApiFixture>
         Assert.Single(contest2.Items);
         Assert.Equal(contest.Id, contest2.Items[0].Id);
     }
+
+    [Fact]
+    public async Task ProblemCanCreateAndEdit()
+    {
+        var api = await fixture.APIs;
+        var authService = api.AuthService;
+        var usersService = api.UsersService;
+        var contestsService = api.ContestsService;
+        var problemsService = api.ProblemsService;
+        var testCasesService = api.TestCasesService;
+
+        Faker faker = new();
+        // create a user, no auth needed
+
+        (_, var user) = await usersService.TryCreateUserAsync(new()
+        {
+            Id = (await authService.TryRegisterAsync(faker.Person.Email, "password"))!.Value,
+            Email = faker.Person.Email,
+            FullName = faker.Person.FullName,
+            Username = "asdfoi44",
+            Birthday = faker.Person.DateOfBirth,
+        });
+
+        Assert.NotNull(user);
+
+        (_, var contest) = await contestsService.TryCreateContestAsync(new()
+        {
+            Name = "Test Contest 1",
+            Description = "This is a test contest",
+            StartTime = DateTime.UtcNow,
+            EndTime = DateTime.UtcNow + TimeSpan.FromDays(1),
+            OwnerId = user!.Id,
+        });
+
+        Assert.NotNull(contest);
+
+        // create a new problem
+
+        var (success, problem) = await problemsService.TryCreateProblemAsync(new()
+        {
+            Name = "Test Problem 1",
+            TagLine = "test problem",
+            Description = "This is a test problem",
+            OwnerId = user!.Id,
+        });
+
+        Assert.True(success);
+        Assert.NotNull(problem);
+
+        Assert.Equal("Test Problem 1", problem!.Name);
+        Assert.Equal("test problem", problem!.TagLine);
+        Assert.Equal("This is a test problem", problem!.Description);
+        Assert.Equal(user.Id, problem!.OwnerId);
+
+        // read the problem
+        (success, var problem1) = await problemsService.TryReadProblemAsync(problem.Id);
+        Assert.True(success);
+        Assert.NotNull(problem1);
+        Assert.Equal(problem, problem1);
+
+        // try editing the problem
+        success = await problemsService.TryUpdateProblemAsync(new()
+        {
+            Id = problem.Id,
+            Description = "This is a test problem 2",
+        });
+
+        Assert.True(success);
+
+        // reread
+
+        (success, problem) = await problemsService.TryReadProblemAsync(problem.Id);
+        Assert.True(success);
+        Assert.NotNull(problem);
+        Assert.Equal("This is a test problem 2", problem!.Description);
+    }
+
+    [Fact]
+    public async Task ProblemCanAddTestCases()
+    {
+        var api = await fixture.APIs;
+        var authService = api.AuthService;
+        var usersService = api.UsersService;
+        var contestsService = api.ContestsService;
+        var problemsService = api.ProblemsService;
+        var testCasesService = api.TestCasesService;
+
+        Faker faker = new();
+        // create a user, no auth needed
+
+        (_, var user) = await usersService.TryCreateUserAsync(new()
+        {
+            Id = (await authService.TryRegisterAsync(faker.Person.Email, "password"))!.Value,
+            Email = faker.Person.Email,
+            FullName = faker.Person.FullName,
+            Username = "asdfoi44",
+            Birthday = faker.Person.DateOfBirth,
+        });
+
+        Assert.NotNull(user);
+
+        (_, var contest) = await contestsService.TryCreateContestAsync(new()
+        {
+            Name = "Test Contest 1",
+            Description = "This is a test contest",
+            StartTime = DateTime.UtcNow,
+            EndTime = DateTime.UtcNow + TimeSpan.FromDays(1),
+            OwnerId = user!.Id,
+        });
+
+        Assert.NotNull(contest);
+
+        // create a new problem
+
+        var (success, problem) = await problemsService.TryCreateProblemAsync(new()
+        {
+            Name = "Test Problem 1",
+            TagLine = "test problem",
+            Description = "This is a test problem",
+            OwnerId = user!.Id,
+        });
+
+        Assert.True(success);
+        Assert.NotNull(problem);
+
+        HashSet<Guid> testCases = [];
+
+        for (var i = 0; i < 10; i++)
+        {
+            await testCasesService.TryCreateTestCaseAsync(new()
+            {
+                ProblemId = problem!.Id,
+                Input = faker.Lorem.Sentence(),
+                Output = faker.Lorem.Sentence(),
+            });
+        }
+
+        // read the test cases
+        (success, var cases) = await problemsService.TryReadProblemTestCasesAsync(problem.Id);
+        Assert.True(success);
+        Assert.NotNull(cases);
+        Assert.Equal(10, cases.TotalCount);
+        Assert.Equal(10, cases.Items.Count);
+        for (var i = 0; i < 10; i++)
+        {
+            // remove from the testcases set
+            Assert.Contains(cases.Items[i].Id, testCases);
+            testCases.Remove(cases.Items[i].Id);
+        }
+        // make sure all test cases were found
+        Assert.Empty(testCases);
+    }
 }
