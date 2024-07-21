@@ -4,7 +4,7 @@ using DistributedCodingCompetition.ApiService.Client;
 using DistributedCodingCompetition.AuthService.Client;
 using Microsoft.Extensions.Logging;
 
-public record struct APIs(IAuthService AuthService, IUsersService UsersService);
+public record struct APIs(IAuthService AuthService, IUsersService UsersService, IContestsService ContestsService);
 
 public class ApiFixture : IAsyncDisposable
 {
@@ -35,10 +35,11 @@ public class ApiFixture : IAsyncDisposable
 
             AuthService authService = new(authHttpClient, loggerFactory.CreateLogger<AuthService>());
             UsersService usersService = new(httpClient, loggerFactory.CreateLogger<UsersService>());
+            ContestsService contestsService = new(httpClient, loggerFactory.CreateLogger<ContestsService>());
 
             // wait 5 seconds for the database migrations to run
             await Task.Delay(5000);
-            return new APIs(authService, usersService);
+            return new APIs(authService, usersService, contestsService);
         });
     }
 

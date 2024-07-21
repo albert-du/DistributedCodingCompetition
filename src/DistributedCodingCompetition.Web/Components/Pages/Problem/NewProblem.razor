@@ -90,7 +90,7 @@ else
 
         if (ContestId.HasValue)
         {
-            if (!await ContestsService.TryAddProblemToContest(ContestId.Value, problem.Id))
+            if (!await ContestsService.TryAddProblemToContestAsync(ContestId.Value, problem.Id))
                 ModalService.ShowError("Failed to create and add problem to contest", "Internal error");
         }
         NavigationManager.NavigateTo($"problem/{problem.Id}/edit");

@@ -168,5 +168,13 @@ public interface IContestsService
     /// <param name="contestId"></param>
     /// <param name="problemId"></param>
     /// <returns></returns>
-    Task<bool> TryAddProblemToContest(Guid contestId, Guid problemId);
+    Task<bool> TryAddProblemToContestAsync(Guid contestId, Guid problemId);
+
+    /// <summary>
+    /// Tries to join a public contest.
+    /// </summary>
+    /// <param name="contestId"></param>
+    /// <param name="userId"></param>
+    /// <returns></returns>
+    Task<bool> TryJoinPublicContestAsync(Guid contestId, Guid userId);
 }

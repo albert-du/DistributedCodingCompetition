@@ -505,6 +505,25 @@ public sealed class ContestsController(ContestContext context) : ControllerBase
             .OrderByDescending(s => s.SubmissionTime)
             .PaginateAsync(page, count, q => q.ReadSubmissionsAsync());
 
+    [HttpPost]
+    public async Task<IActionResult> TryJoinPublicContestAsync(Guid contestId, Guid userId)
+    {
+        // find the contest
+        var contest = context.Contests.Find(contestId);
+        if (contest is null)
+            return NotFound();
+
+        // find the user
+        var user = context.Users.Find(userId);
+        if (user is null)
+            return NotFound();
+
+        // add the user to the contest
+        contest.Participants.Add(user);
+        await context.SaveChangesAsync();
+        return NoContent();
+    }
+
     /// <summary>
     /// Check if a contest exists
     /// </summary>
