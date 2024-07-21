@@ -118,6 +118,22 @@ public sealed class UsersController(ContestContext context) : ControllerBase
             .OrderByDescending(contest => contest.StartTime)
             .PaginateAsync(page, count, q => q.ReadContestsAsync());
 
+    // GET: api/users/{userId}/owned?count={count}&page={page}
+    /// <summary>
+    /// Returns the contests owned by user
+    /// </summary>
+    /// <param name="userId"></param>
+    /// <param name="page"></param>
+    /// <param name="count"></param>
+    /// <returns></returns>
+    [HttpGet("{userId}/owned")]
+    public Task<PaginateResult<ContestResponseDTO>> GetOwnedContestsAsync(Guid userId, int page, int count) =>
+        context.Users.Where(user => user.Id == userId)
+            .AsNoTracking()
+            .SelectMany(user => user.OwnedContests)
+            .OrderByDescending(contest => contest.StartTime)
+            .PaginateAsync(page, count, q => q.ReadContestsAsync());
+
     /// <summary>
     /// Returns all banned users
     /// </summary>

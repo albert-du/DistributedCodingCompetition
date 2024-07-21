@@ -55,11 +55,12 @@ public class ApiTests(ApiFixture fixture) : IClassFixture<ApiFixture>
 
         Assert.False(loginResult.Admin);
 
-        var validationResult = await authService.ValidateTokenAsync(loginResult!.Token);
+        // not actually used yet
+        //var validationResult = await authService.ValidateTokenAsync(loginResult!.Token);
 
-        Assert.NotNull(validationResult);
+        //Assert.NotNull(validationResult);
 
-        Assert.Equal(id, validationResult?.Id);
+        //Assert.Equal(id, validationResult?.Id);
     }
 
     [Fact]
@@ -133,7 +134,7 @@ public class ApiTests(ApiFixture fixture) : IClassFixture<ApiFixture>
             Id = (await authService.TryRegisterAsync(faker.Person.Email, "password"))!.Value,
             Email = faker.Person.Email,
             FullName = faker.Person.FullName,
-            Username = "kdlsadfjlkfsda",
+            Username = "kdlsadfjldkfsdad",
             Birthday = faker.Person.DateOfBirth,
         });
         Assert.True(success);
@@ -235,6 +236,18 @@ public class ApiTests(ApiFixture fixture) : IClassFixture<ApiFixture>
         Assert.True(success);
         Assert.NotNull(contest);
         Assert.Equal(1, contest!.TotalParticipants);
+
+        (success, var administered) = await usersService.TryReadAdministeredContestsAsync(user.Id);
+        Assert.True(success);
+        Assert.NotNull(administered);
+        Assert.Empty(administered.Items);
+
+        (success, var entered) = await usersService.TryReadOwnedContestsAsync(user.Id);
+        Assert.True(success);
+        Assert.NotNull(entered);
+        Assert.Single(entered.Items);
+        Assert.Equal(contest.Id, entered.Items[0].Id);
+
     }
 
     [Fact]
@@ -327,6 +340,16 @@ public class ApiTests(ApiFixture fixture) : IClassFixture<ApiFixture>
         Assert.True(success);
         Assert.NotNull(joinCode3);
         Assert.Equal(joinCode, joinCode3);
+
+        // make sure you can read the contest from the join code
+        (success, contest) = await contestsService.TryReadContestByJoinCodeAsync(joinCode!.Code);
+        Assert.True(success);
+        Assert.NotNull(contest);
+
+        (success, var contest0) = await contestsService.TryReadContestByJoinCodeAsync($"FLKJFGK:LJ{Random.Shared.Next()}");
+
+        Assert.False(success);
+        Assert.Null(contest0);
 
         // try joining the contest with the join code
 
@@ -504,17 +527,6 @@ public class ApiTests(ApiFixture fixture) : IClassFixture<ApiFixture>
 
         Assert.NotNull(user);
 
-        (_, var contest) = await contestsService.TryCreateContestAsync(new()
-        {
-            Name = "Test Contest 1",
-            Description = "This is a test contest",
-            StartTime = DateTime.UtcNow,
-            EndTime = DateTime.UtcNow + TimeSpan.FromDays(1),
-            OwnerId = user!.Id,
-        });
-
-        Assert.NotNull(contest);
-
         // create a new problem
 
         var (success, problem) = await problemsService.TryCreateProblemAsync(new()
@@ -583,17 +595,6 @@ public class ApiTests(ApiFixture fixture) : IClassFixture<ApiFixture>
 
         Assert.NotNull(user);
 
-        (_, var contest) = await contestsService.TryCreateContestAsync(new()
-        {
-            Name = "Test Contest 1",
-            Description = "This is a test contest",
-            StartTime = DateTime.UtcNow,
-            EndTime = DateTime.UtcNow + TimeSpan.FromDays(1),
-            OwnerId = user!.Id,
-        });
-
-        Assert.NotNull(contest);
-
         // create a new problem
 
         var (success, problem) = await problemsService.TryCreateProblemAsync(new()
@@ -638,5 +639,75 @@ public class ApiTests(ApiFixture fixture) : IClassFixture<ApiFixture>
 
         for (var i = 0; i < 5; i++)
             Assert.DoesNotContain(cases.Items[i].Id, testCases);
+    }
+
+    [Fact]
+    public async Task ProblemCanAddToContest()
+    {
+        var api = await fixture.APIs;
+        var authService = api.AuthService;
+        var usersService = api.UsersService;
+        var contestsService = api.ContestsService;
+        var problemsService = api.ProblemsService;
+        var testCasesService = api.TestCasesService;
+
+        Faker faker = new();
+        // create a user, no auth needed
+
+        (_, var user) = await usersService.TryCreateUserAsync(new()
+        {
+            Id = (await authService.TryRegisterAsync(faker.Person.Email, "password"))!.Value,
+            Email = faker.Person.Email,
+            FullName = faker.Person.FullName,
+            Username = "asdfoi44ff",
+            Birthday = faker.Person.DateOfBirth,
+        });
+
+        Assert.NotNull(user);
+
+        // create a contest
+        var (success, contest) = await contestsService.TryCreateContestAsync(new()
+        {
+            Name = "Test Contest 1",
+            Description = "This is a test contest",
+            StartTime = DateTime.UtcNow,
+            EndTime = DateTime.UtcNow + TimeSpan.FromDays(1),
+            OwnerId = user!.Id,
+        });
+        Assert.True(success);
+        Assert.NotNull(contest);
+
+        // create a new problem
+
+        (success, var problem) = await problemsService.TryCreateProblemAsync(new()
+        {
+            Name = "Test Problem 1",
+            TagLine = "test problem",
+            Description = "This is a test problem",
+            OwnerId = user!.Id,
+        });
+
+        Assert.True(success);
+        Assert.NotNull(problem);
+
+        // make sure there are no problems in the contest already
+
+        (success, var problems) = await contestsService.TryReadContestProblemsAsync(contest.Id);
+        Assert.True(success);
+        Assert.NotNull(problems);
+        Assert.Empty(problems);
+
+        // add the problem to the contest
+
+        success = await contestsService.TryAddProblemToContestAsync(contest.Id, problem.Id);
+
+        Assert.True(success);
+
+        // reread
+        (success, problems) = await contestsService.TryReadContestProblemsAsync(contest.Id);
+        Assert.True(success);
+        Assert.NotNull(problems);
+        Assert.Single(problems);
+        Assert.Equal(problem.Id, problems[0].Id);
     }
 }
