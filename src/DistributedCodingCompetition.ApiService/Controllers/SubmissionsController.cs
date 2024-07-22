@@ -72,6 +72,12 @@ public sealed class SubmissionsController(ContestContext context) : ControllerBa
     [HttpPost]
     public async Task<ActionResult<Submission>> PostSubmissionAsync(SubmissionRequestDTO dto)
     {
+        // make sure a contest exists with the problem and user
+        var exists = await context.Contests.AsNoTracking().Where(c => c.Participants.Any(p => p.Id == dto.UserId) && c.Problems.Any(p => p.Id == dto.ProblemId)).AnyAsync();
+
+        if (!exists)
+            return BadRequest("Contest, problem, or user does not exist");
+
         Submission submission = new()
         {
             Id = dto.Id,
