@@ -3,6 +3,7 @@
 using DistributedCodingCompetition.ApiService.Client;
 using DistributedCodingCompetition.AuthService.Client;
 using Microsoft.Extensions.Logging;
+using System.Diagnostics;
 
 public record struct APIs(IAuthService AuthService,
                           IUsersService UsersService,
@@ -20,6 +21,9 @@ public class ApiFixture : IAsyncDisposable
 
     DistributedApplication? app;
 
+    Process? execRunner;
+    Process? piston;
+
     public ApiFixture()
     {
         apis = Task.Run(async () =>
@@ -36,6 +40,22 @@ public class ApiFixture : IAsyncDisposable
             // Act
             var httpClient = app.CreateHttpClient("apiservice");
             var authHttpClient = app.CreateHttpClient("authentication");
+
+            // new process, start an execrunner and a piston simulating service
+            piston = Process.Start(new ProcessStartInfo
+            {
+                FileName = "dotnet",
+                Arguments = "run --urls=http://localhost:5228/",
+                WorkingDirectory = Path.GetFullPath($"{Environment.CurrentDirectory}\\..\\..\\..\\..\\PistonSimulator\\"),
+            });
+
+            execRunner = Process.Start(new ProcessStartInfo
+            {
+                FileName = "dotnet",
+                Arguments = "run --urls=http://localhost:5227/ -- Piston=http://localhost:5228/",
+                WorkingDirectory = Path.GetFullPath($"{Environment.CurrentDirectory}\\..\\..\\..\\..\\..\\src\\DistributedCodingCompetition.ExecRunner\\"),
+
+            });
 
             // Build service
 
@@ -58,5 +78,7 @@ public class ApiFixture : IAsyncDisposable
         GC.SuppressFinalize(this);
         if (app is not null)
             await app.DisposeAsync();
+        execRunner?.Dispose();
+        piston?.Dispose();
     }
 }

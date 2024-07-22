@@ -763,6 +763,7 @@ public class ApiTests(ApiFixture fixture) : IClassFixture<ApiFixture>
             StartTime = DateTime.UtcNow,
             EndTime = DateTime.UtcNow + TimeSpan.FromDays(1),
             OwnerId = user!.Id,
+            Public = true
         });
         Assert.True(success);
         Assert.NotNull(contest);
@@ -780,8 +781,6 @@ public class ApiTests(ApiFixture fixture) : IClassFixture<ApiFixture>
         Assert.True(success);
         Assert.NotNull(problem);
 
-        // add the problem to the contest
-        success = await contestsService.TryAddProblemToContestAsync(contest.Id, problem.Id);
 
         Assert.True(success);
 
@@ -809,14 +808,150 @@ public class ApiTests(ApiFixture fixture) : IClassFixture<ApiFixture>
             Code = "test1",
         });
 
+        // should fail because neither problem nor user are in the contest
+        Assert.False(success);
+        Assert.Null(submission);
+
+        // add the problem to the contest
+        success = await contestsService.TryAddProblemToContestAsync(contest.Id, problem.Id);
+        Assert.True(success);
+
+        (success, submission) = await submissionsService.TryCreateSubmissionAsync(new()
+        {
+            Language = "test",
+            ProblemId = problem!.Id,
+            ContestId = contest!.Id,
+            UserId = participant!.Id,
+            Code = "test1",
+        });
+
+        // still should not work
+        Assert.False(success);
+        Assert.Null(submission);
+
+        // add the user to the contest
+        success = await contestsService.TryJoinPublicContestAsync(contest.Id, participant.Id);
+        Assert.True(success);
+
+        // now should be creatable
+
+        (success, submission) = await submissionsService.TryCreateSubmissionAsync(new()
+        {
+            Language = "test",
+            ProblemId = problem!.Id,
+            ContestId = contest!.Id,
+            UserId = participant!.Id,
+            Code = "test1",
+        });
         Assert.True(success);
         Assert.NotNull(submission);
 
-        // make sure it can be read back
 
+        // read it back 
         (success, var submission2) = await submissionsService.TryReadSubmissionAsync(submission!.Id);
         Assert.True(success);
         Assert.NotNull(submission2);
         Assert.Equal(submission, submission2);
+    }
+
+    [Fact]
+    public async Task CanJudgeSubmission()
+    {
+        var api = await fixture.APIs;
+        var authService = api.AuthService;
+        var usersService = api.UsersService;
+        var contestsService = api.ContestsService;
+        var problemsService = api.ProblemsService;
+        var testCasesService = api.TestCasesService;
+        var submissionsService = api.SubmissionsService;
+
+        Faker faker = new();
+        // create a user, no auth needed
+
+        (_, var user) = await usersService.TryCreateUserAsync(new()
+        {
+            Id = (await authService.TryRegisterAsync(faker.Person.Email, "password"))!.Value,
+            Email = faker.Person.Email,
+            FullName = faker.Person.FullName,
+            Username = $"user{Random.Shared.Next()}",
+            Birthday = faker.Person.DateOfBirth,
+        });
+
+        faker = new();
+        (_, var participant) = await usersService.TryCreateUserAsync(new()
+        {
+            Id = Guid.NewGuid(),
+            Email = faker.Person.Email,
+            FullName = faker.Person.FullName,
+            Username = $"participant{Random.Shared.Next()}",
+            Birthday = faker.Person.DateOfBirth,
+        });
+
+        Assert.NotNull(user);
+
+        // create a contest
+        var (success, contest) = await contestsService.TryCreateContestAsync(new()
+        {
+            Name = "Test Contest 1",
+            Description = "This is a test contest",
+            StartTime = DateTime.UtcNow,
+            EndTime = DateTime.UtcNow + TimeSpan.FromDays(1),
+            OwnerId = user!.Id,
+            Public = true
+        });
+        Assert.True(success);
+        Assert.NotNull(contest);
+
+        // create a new problem
+
+        (success, var problem) = await problemsService.TryCreateProblemAsync(new()
+        {
+            Name = "Test Problem 1",
+            TagLine = "test problem",
+            Description = "This is a test problem",
+            OwnerId = user!.Id,
+        });
+
+        Assert.True(success);
+        Assert.NotNull(problem);
+
+
+        Assert.True(success);
+
+        // create a few testcases
+
+        for (var i = 0; i < 10; i++)
+        {
+            var x = faker.Lorem.Sentence();
+            (success, var testCase) = await testCasesService.TryCreateTestCaseAsync(new()
+            {
+                ProblemId = problem!.Id,
+                Input = x,
+                Output = x,
+            });
+            Assert.True(success);
+            Assert.NotNull(testCase);
+        }
+
+        // add the problem to the contest
+        success = await contestsService.TryAddProblemToContestAsync(contest.Id, problem.Id);
+        Assert.True(success);
+
+        // add the user to the contest
+        success = await contestsService.TryJoinPublicContestAsync(contest.Id, participant!.Id);
+        Assert.True(success);
+
+        // create a submission
+        // using 'test1' which puts stdin back in stdout
+        (success, var submission) = await submissionsService.TryCreateSubmissionAsync(new()
+        {
+            Language = "test",
+            ProblemId = problem!.Id,
+            ContestId = contest!.Id,
+            UserId = participant!.Id,
+            Code = "test1",
+        });
+
+
     }
 }
