@@ -12,6 +12,8 @@ using DistributedCodingCompetition.ApiService.Models;
 /// <param name="rateLimitService"></param>
 /// <param name="submissionService"></param>
 /// <param name="problemService"></param>
+/// <param name="contestsService"></param>
+/// <param name="liveReportingService"></param>
 [ApiController]
 [Route("[controller]")]
 public class EvaluationController(ILogger<EvaluationController> logger,

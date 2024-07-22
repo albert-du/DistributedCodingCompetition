@@ -54,6 +54,8 @@ public interface IProblemsService
     /// Reads the list of test cases for a problem.
     /// </summary>
     /// <param name="problemId"></param>
+    /// <param name="count"></param>
+    /// <param name="page"></param>
     /// <returns></returns>
     Task<(bool, PaginateResult<TestCaseResponseDTO>?)> TryReadProblemTestCasesAsync(Guid problemId, int page = 1, int count = 50);
 

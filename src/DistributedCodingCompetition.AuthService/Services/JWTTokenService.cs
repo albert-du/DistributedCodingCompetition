@@ -12,6 +12,7 @@ using MongoDB.Driver;
 /// </summary>
 /// <param name="configuration"></param>
 /// <param name="logger"></param>
+/// <param name="mongoClient"></param>
 public class JWTTokenService(IConfiguration configuration, ILogger<JWTTokenService> logger, IMongoClient mongoClient) : ITokenService
 {
     private readonly IMongoCollection<UserAuth> collection = mongoClient.GetDatabase("authdb").GetCollection<UserAuth>(nameof(UserAuth));

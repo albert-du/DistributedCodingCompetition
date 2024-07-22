@@ -113,6 +113,7 @@ public interface IContestsService
     /// </summary>
     /// <param name="contestId"></param>
     /// <param name="problemId"></param>
+    /// <param name="autoGenerate">generate a result if one doesn't exist</param>
     /// <returns></returns>
     Task<(bool, ProblemPointValueResponseDTO?)> TryReadContestProblemPointValueAsync(Guid contestId, Guid problemId, bool autoGenerate = false);
 
@@ -169,6 +170,14 @@ public interface IContestsService
     /// <param name="problemId"></param>
     /// <returns></returns>
     Task<bool> TryAddProblemToContestAsync(Guid contestId, Guid problemId);
+
+    /// <summary>
+    /// Removes a problem from a contest.
+    /// </summary>
+    /// <param name="contestId"></param>
+    /// <param name="problemId"></param>
+    /// <returns></returns>
+    Task<bool> TryRemoveProblemFromContestAsync(Guid contestId, Guid problemId);
 
     /// <summary>
     /// Tries to join a public contest.

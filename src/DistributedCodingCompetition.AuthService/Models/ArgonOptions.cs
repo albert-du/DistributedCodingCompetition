@@ -5,7 +5,11 @@
 /// </summary>
 public class ArgonOptions
 {
+    /// <summary>
+    /// config string
+    /// </summary>
     public const string Argon = nameof(Argon);
+
     /// <summary>
     /// Degree of parallelism to use for Argon2
     /// </summary>

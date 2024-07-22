@@ -44,6 +44,7 @@ public class Argon2Service(IOptions<ArgonOptions> options) : IPasswordService
         return $"argon2id:{_options.DegreeOfParallelism};{_options.MemorySize};{_options.Iterations};{Convert.ToBase64String(salt)};{Convert.ToBase64String(key)}";
     }
 
+    /// <inheritdoc/>
     public (bool, string?) VerifyPassword(string password, string hash)
     {
         var parts = hash.Split(':');

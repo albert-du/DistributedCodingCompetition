@@ -14,7 +14,12 @@ using Microsoft.AspNetCore.Mvc;
 public class ExecutionController(IExecutionService executionService, IConfiguration configuration) : ControllerBase
 {
     private static int execCount = 0;
+
+    /// <summary>
+    /// Counter of system executions
+    /// </summary>
     public static int ExecutionCount => execCount;
+
     /// <summary>
     /// Execute code
     /// </summary>
@@ -28,10 +33,10 @@ public class ExecutionController(IExecutionService executionService, IConfigurat
             return Unauthorized();
 
         var result = await executionService.ExecuteCodeAsync(request);
-        
+
         // interlock increment the execution count
         Interlocked.Increment(ref execCount);
-        
+
         return Ok(result);
     }
 }

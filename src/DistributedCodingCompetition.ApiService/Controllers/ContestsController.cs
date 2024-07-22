@@ -506,6 +506,33 @@ public sealed class ContestsController(ContestContext context) : ControllerBase
         return NoContent();
     }
 
+    // DELETE api/contests/{contestId}/problems
+    /// <summary>
+    /// Remove a problem from a contest
+    /// </summary>
+    /// <param name="contestId"></param>
+    /// <param name="problemId"></param>
+    /// <returns></returns>
+    [HttpDelete("{contestId}/problems/{problemId}")]
+    public async Task<IActionResult> RemoveProblemFromContestAsync(Guid contestId, Guid problemId)
+    {
+        var contest = await context.Contests.FindAsync(contestId);
+        if (contest is null)
+            return NotFound();
+
+        var problem = await context.Problems.FindAsync(problemId);
+        if (problem is null)
+            return NotFound();
+
+        if (!contest.Problems.Contains(problem))
+            return BadRequest();
+
+        contest.Problems.Remove(problem);
+        await context.SaveChangesAsync();
+
+        return NoContent();
+    }
+
     // DELETE: api/Contests/5
     /// <summary>
     /// Delete a contest

@@ -11,6 +11,7 @@ public interface IRefreshEventService
     /// Send refresh event
     /// </summary>
     /// <param name="sender"></param>
+    /// <param name="execRunners"></param>
     void Refresh(object sender, IReadOnlyList<ExecRunner> execRunners);
 
     /// <summary>

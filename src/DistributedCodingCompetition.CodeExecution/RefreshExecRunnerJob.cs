@@ -4,6 +4,12 @@ using Quartz;
 using DistributedCodingCompetition.CodeExecution.Services;
 using DistributedCodingCompetition.CodeExecution.Models;
 
+/// <summary>
+/// Cron Job to refresh the exec runner instances
+/// </summary>
+/// <param name="execRunnerService"></param>
+/// <param name="refreshEventService"></param>
+/// <param name="serviceScopeFactory"></param>
 public class RefreshExecRunnerJob(IExecRunnerService execRunnerService, IRefreshEventService refreshEventService, IServiceScopeFactory serviceScopeFactory) : IJob
 {
     /// <summary>

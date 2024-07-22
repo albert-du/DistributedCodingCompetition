@@ -14,7 +14,7 @@ public sealed class SubmissionsController(ContestContext context) : ControllerBa
     /// </summary>
     /// <returns></returns>
     [HttpGet]
-    public async Task<PaginateResult<SubmissionResponseDTO>> GetSubmissionsAsync(int page = 1, int pageSize = 60, Guid? contestId = null, Guid? problemId = null, Guid? userId = null)
+    public async Task<PaginateResult<SubmissionResponseDTO>> GetSubmissionsAsync(int page = 1, int count = 50, Guid? contestId = null, Guid? problemId = null, Guid? userId = null)
     {
         IQueryable<Submission> query = context.Submissions.AsNoTracking();
         if (contestId != null)
@@ -27,7 +27,7 @@ public sealed class SubmissionsController(ContestContext context) : ControllerBa
             query = query.Where(x => x.SubmitterId == userId);
 
         return await query.OrderByDescending(x => x.EvaluationTime)
-                          .PaginateAsync(page, pageSize, x => x.ReadSubmissionsAsync());
+                          .PaginateAsync(page, count, x => x.ReadSubmissionsAsync());
     }
 
     // GET: api/Submissions/5
@@ -43,6 +43,12 @@ public sealed class SubmissionsController(ContestContext context) : ControllerBa
         return submissions.Count == 0 ? NotFound() : submissions[0];
     }
 
+    /// <summary>
+    /// Validates a submission
+    /// </summary>
+    /// <param name="id"></param>
+    /// <param name="valid"></param>
+    /// <returns></returns>
     [HttpPost("{id}/validate")]
     public async Task<IActionResult> ValidateSubmissionAsync(Guid id, bool valid)
     {
@@ -176,7 +182,4 @@ public sealed class SubmissionsController(ContestContext context) : ControllerBa
 
         return NoContent();
     }
-
-    private bool SubmissionExists(Guid id) =>
-        context.Submissions.Any(e => e.Id == id);
 }

@@ -33,7 +33,10 @@ public interface ISubmissionsService
     /// <summary>
     /// Updates a submission with results.
     /// </summary>
+    /// <param name="id"></param>
+    /// <param name="possible"></param>
     /// <param name="results"></param>
+    /// <param name="score"></param>
     /// <returns></returns>
     Task<(bool, SubmissionResponseDTO?)> TryUpdateSubmissionResultsAsync(Guid id, IReadOnlyList<TestCaseResultDTO> results, int possible, int score);
 

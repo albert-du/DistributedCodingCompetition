@@ -3,6 +3,7 @@
 using Microsoft.Extensions.Caching.Distributed;
 using Microsoft.Extensions.Logging;
 
+/// <inheritdoc/>
 public class LeadersService(ILogger<LeadersService> logger, IDistributedCache cache) : ILeadersService
 {
     /// <summary>
@@ -32,6 +33,7 @@ public class LeadersService(ILogger<LeadersService> logger, IDistributedCache ca
             await cache.RemoveAsync($"leaderboard:{contest}:{leader}");
     }
 
+    /// <inheritdoc/>
     public async Task ReportJudgingAsync(Guid contest, Guid leader, int points, DateTime sync)
     {
         logger.LogInformation("Reporting judging for {Leader} in {Contest}", leader, contest);
@@ -55,6 +57,7 @@ public class LeadersService(ILogger<LeadersService> logger, IDistributedCache ca
         await cache.SetAsync($"leaderboard:{contest}:{leader}", BitConverter.GetBytes(BitConverter.ToInt32(current) + points), options);
     }
 
+    /// <inheritdoc/>
     public async Task<IReadOnlyList<(Guid, int)>> GetLeadersAsync(Guid contest, int count)
     {
         logger.LogInformation("Getting leaders for {Contest}", contest);

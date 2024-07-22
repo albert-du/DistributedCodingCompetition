@@ -4,6 +4,9 @@ using MongoDB.Driver;
 using DistributedCodingCompetition.AuthService.Models;
 using DistributedCodingCompetition.AuthService.Services;
 
+/// <summary>
+/// Seeding
+/// </summary>
 public static class Seeding
 {
     /// <summary>

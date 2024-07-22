@@ -509,7 +509,6 @@ public class ApiTests(ApiFixture fixture) : IClassFixture<ApiFixture>
         var api = await fixture.APIs;
         var authService = api.AuthService;
         var usersService = api.UsersService;
-        var contestsService = api.ContestsService;
         var problemsService = api.ProblemsService;
         var testCasesService = api.TestCasesService;
 
@@ -577,7 +576,6 @@ public class ApiTests(ApiFixture fixture) : IClassFixture<ApiFixture>
         var api = await fixture.APIs;
         var authService = api.AuthService;
         var usersService = api.UsersService;
-        var contestsService = api.ContestsService;
         var problemsService = api.ProblemsService;
         var testCasesService = api.TestCasesService;
 
@@ -649,7 +647,6 @@ public class ApiTests(ApiFixture fixture) : IClassFixture<ApiFixture>
         var usersService = api.UsersService;
         var contestsService = api.ContestsService;
         var problemsService = api.ProblemsService;
-        var testCasesService = api.TestCasesService;
 
         Faker faker = new();
         // create a user, no auth needed
@@ -709,5 +706,17 @@ public class ApiTests(ApiFixture fixture) : IClassFixture<ApiFixture>
         Assert.NotNull(problems);
         Assert.Single(problems);
         Assert.Equal(problem.Id, problems[0].Id);
+
+        // test removal
+
+        success = await contestsService.TryRemoveProblemFromContestAsync(contest.Id, problem.Id);
+        Assert.True(success);
+
+        // reread and make sure it's gone
+
+        (success, problems) = await contestsService.TryReadContestProblemsAsync(contest.Id);
+        Assert.True(success);
+        Assert.NotNull(problems);
+        Assert.Empty(problems);
     }
 }

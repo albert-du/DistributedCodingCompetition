@@ -3,18 +3,61 @@
 using Microsoft.EntityFrameworkCore;
 using DistributedCodingCompetition.ApiService.Data.Models;
 
+/// <summary>
+/// Data context for contest API
+/// </summary>
+/// <param name="options"></param>
 public class ContestContext(DbContextOptions<ContestContext> options) : DbContext(options)
 {
+    /// <summary>
+    /// Contests
+    /// </summary>
     public DbSet<Contest> Contests => Set<Contest>();
+
+    /// <summary>
+    /// Problems
+    /// </summary>
     public DbSet<Problem> Problems => Set<Problem>();
+
+    /// <summary>
+    /// Submissions
+    /// </summary>
     public DbSet<Submission> Submissions => Set<Submission>();
+
+    /// <summary>
+    /// Users
+    /// </summary>
     public DbSet<User> Users => Set<User>();
+
+    /// <summary>
+    /// Join Codes
+    /// </summary>
     public DbSet<JoinCode> JoinCodes => Set<JoinCode>();
+
+    /// <summary>
+    /// Test Cases
+    /// </summary>
     public DbSet<TestCase> TestCases => Set<TestCase>();
+
+    /// <summary>
+    /// Test Case Results
+    /// </summary>
     public DbSet<TestCaseResult> TestCaseResults => Set<TestCaseResult>();
+
+    /// <summary>
+    /// System Bans
+    /// </summary>
     public DbSet<Ban> Bans => Set<Ban>();
+
+    /// <summary>
+    /// Problem Point Values
+    /// </summary>
     public DbSet<ProblemPointValue> ProblemPointValues => Set<ProblemPointValue>();
 
+    /// <summary>
+    /// create the ef data model
+    /// </summary>
+    /// <param name="modelBuilder"></param>
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
         modelBuilder.Entity<User>()

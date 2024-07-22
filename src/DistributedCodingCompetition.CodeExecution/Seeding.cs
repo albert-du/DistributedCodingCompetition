@@ -2,6 +2,9 @@
 
 using DistributedCodingCompetition.CodeExecution.Models;
 
+/// <summary>
+/// Seeds the database with a default ExecRunner for development purposes
+/// </summary>
 public static class Seeding
 {
     /// <summary>

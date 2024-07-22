@@ -4,8 +4,21 @@ using DistributedCodingCompetition.ExecutionShared;
 using DistributedCodingCompetition.ExecRunner.Models;
 using System.Net.Http.Json;
 
+/// <summary>
+/// Executes code using the piston API
+/// </summary>
+/// <param name="httpClient"></param>
+/// <param name="logger"></param>
+/// <param name="configuration"></param>
 public class PistonExecutionService(HttpClient httpClient, ILogger<PistonExecutionService> logger, IConfiguration configuration) : IExecutionService
 {
+    /// <summary>
+    /// Executes code using the piston API
+    /// </summary>
+    /// <param name="request"></param>
+    /// <returns></returns>
+    /// <exception cref="ArgumentException"></exception>
+    /// <exception cref="Exception"></exception>
     public async Task<ExecutionResult> ExecuteCodeAsync(ExecutionRequest request)
     {
         var components = request.Language.Split('=');

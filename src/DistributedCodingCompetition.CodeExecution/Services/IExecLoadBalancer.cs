@@ -14,7 +14,6 @@ public interface IExecLoadBalancer
     /// Don't use for batched requests.
     /// Does not execute.
     /// </summary>
-    /// <param name="runners"></param>
     /// <param name="request"></param>
     /// <returns>Assigned Execution Runner</returns>
     ExecRunner? SelectRunner(ExecutionRequest request);
@@ -23,7 +22,6 @@ public interface IExecLoadBalancer
     /// Balences requests for group of requests.
     /// Does not execute.
     /// </summary>
-    /// <param name="runners"></param>
     /// <param name="requests"></param>
     /// <returns>Assigned Execution Runners</returns>
     IReadOnlyList<(ExecutionRequest, ExecRunner?)> BalanceRequests(IReadOnlyCollection<ExecutionRequest> requests);

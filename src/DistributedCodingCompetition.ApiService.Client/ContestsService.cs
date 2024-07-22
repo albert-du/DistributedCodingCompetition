@@ -90,6 +90,10 @@ public sealed class ContestsService(HttpClient httpClient, ILogger<ContestsServi
          apiClient.PostAsync($"/{contestId}/problems/{problemId}");
 
     /// <inheritdoc/>
+    public Task<bool> TryRemoveProblemFromContestAsync(Guid contestId, Guid problemId) =>
+        apiClient.DeleteAsync($"/{contestId}/problems/{problemId}");
+
+    /// <inheritdoc/>
     public async Task<bool> TryJoinPublicContestAsync(Guid contestId, Guid userId) =>
         await apiClient.PostAsync($"/{contestId}/join/{userId}");
 

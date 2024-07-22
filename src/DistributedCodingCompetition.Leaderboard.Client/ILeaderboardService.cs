@@ -12,6 +12,7 @@ public interface ILeaderboardService
     /// page is 1-indexed
     /// </summary>
     /// <param name="page"></param>
+    /// <param name="contestId"></param>
     /// <returns></returns>
     Task<Leaderboard?> TryGetLeaderboardAsync(Guid contestId, int page);
 

@@ -11,6 +11,7 @@ public class RefreshEventService : IRefreshEventService
     /// Send refresh event
     /// </summary>
     /// <param name="sender"></param>
+    /// <param name="execRunners"></param>
     public void Refresh(object sender, IReadOnlyList<ExecRunner> execRunners) =>
         RefreshEvent?.Invoke(sender, new(execRunners));
 

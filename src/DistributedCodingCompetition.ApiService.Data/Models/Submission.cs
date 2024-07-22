@@ -88,6 +88,13 @@ public class Submission
     /// </summary>
     public bool Invalidated { get; set; }
 
+    /// <summary>
+    /// Number of test cases that have passed
+    /// </summary>
     public int PassedTestCases { get; set; }
+
+    /// <summary>
+    /// number of test cases in total
+    /// </summary>
     public int TotalTestCases { get; set; }
 }
