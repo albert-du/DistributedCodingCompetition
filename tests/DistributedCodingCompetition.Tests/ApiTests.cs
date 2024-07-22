@@ -864,6 +864,7 @@ public class ApiTests(ApiFixture fixture) : IClassFixture<ApiFixture>
         var problemsService = api.ProblemsService;
         var testCasesService = api.TestCasesService;
         var submissionsService = api.SubmissionsService;
+        var judgeService = api.JudgeService;
 
         Faker faker = new();
         // create a user, no auth needed
@@ -897,7 +898,8 @@ public class ApiTests(ApiFixture fixture) : IClassFixture<ApiFixture>
             StartTime = DateTime.UtcNow,
             EndTime = DateTime.UtcNow + TimeSpan.FromDays(1),
             OwnerId = user!.Id,
-            Public = true
+            Public = true,
+            DefaultPointsForProblem = Random.Shared.Next(100, 200)
         });
         Assert.True(success);
         Assert.NotNull(contest);
@@ -945,13 +947,43 @@ public class ApiTests(ApiFixture fixture) : IClassFixture<ApiFixture>
         // using 'test1' which puts stdin back in stdout
         (success, var submission) = await submissionsService.TryCreateSubmissionAsync(new()
         {
-            Language = "test",
+            Language = "test=1.0",
             ProblemId = problem!.Id,
             ContestId = contest!.Id,
             UserId = participant!.Id,
             Code = "test1",
         });
 
+        Assert.True(success);
+        Assert.NotNull(submission);
 
+        var error = await judgeService.JudgeAsync(submission!.Id);
+        Assert.Null(error);
+
+        // reread the submission
+        (success, var submission2) = await submissionsService.TryReadSubmissionAsync(submission!.Id);
+        Assert.True(success);
+        Assert.NotNull(submission2);
+        Assert.NotEqual(submission, submission2);
+
+        Assert.Equal(submission!.Id, submission2!.Id);
+        Assert.Equal(submission!.ProblemId, submission2!.ProblemId);
+        Assert.Equal(submission!.ContestId, submission2!.ContestId);
+        Assert.Equal(submission!.UserId, submission2!.UserId);
+        Assert.Equal(submission!.Code, submission2!.Code);
+        Assert.Equal(submission!.Language, submission2!.Language);
+
+        // make sure the submission was judged
+        Assert.NotNull(submission2!.JudgedAt);
+        // make sure the submission was judged after it was created
+        Assert.True(submission2!.JudgedAt > submission2.CreatedAt);
+        // make sure the submission was judged before now
+        Assert.True(submission2!.JudgedAt < DateTime.UtcNow);
+
+        // make sure the submission was judged successfully
+        Assert.True(submission2!.Score == submission2!.MaxPossibleScore);
+
+        // make sure the points match the default
+        Assert.Equal(contest.DefaultPointsForProblem, submission2.Points);
     }
 }

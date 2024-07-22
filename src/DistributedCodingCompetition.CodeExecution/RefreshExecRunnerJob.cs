@@ -19,9 +19,9 @@ public class RefreshExecRunnerJob(IExecRunnerService execRunnerService, IRefresh
     /// <returns></returns>
     public async Task Execute(IJobExecutionContext context)
     {
+        await Task.Delay(5000);
         using var scope = serviceScopeFactory.CreateScope();
         var db = scope.ServiceProvider.GetRequiredService<ExecRunnerContext>();
-        await Task.Delay(15000);
         foreach (var runner in db.ExecRunners)
             await execRunnerService.RefreshExecRunnerAsync(runner);
         await db.SaveChangesAsync();

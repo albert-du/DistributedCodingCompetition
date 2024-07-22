@@ -53,7 +53,7 @@ if (app.Environment.IsDevelopment())
     // migrate delayed
     _ = Task.Run(async () =>
     {
-        await Task.Delay(5000);
+        await Task.Delay(3000);
         using var scope = app.Services.CreateScope();
         var context = scope.ServiceProvider.GetRequiredService<ExecRunnerContext>();
         await context.Database.MigrateAsync();

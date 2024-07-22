@@ -2,6 +2,7 @@
 
 using DistributedCodingCompetition.ApiService.Client;
 using DistributedCodingCompetition.AuthService.Client;
+using DistributedCodingCompetition.Judge.Client;
 using Microsoft.Extensions.Logging;
 using System.Diagnostics;
 
@@ -11,7 +12,8 @@ public record struct APIs(IAuthService AuthService,
                           IJoinCodesService JoinCodesService,
                           IProblemsService ProblemsService,
                           ITestCasesService TestCasesService,
-                          ISubmissionsService SubmissionsService);
+                          ISubmissionsService SubmissionsService,
+                          IJudgeService JudgeService);
 
 public class ApiFixture : IAsyncDisposable
 {
@@ -40,6 +42,7 @@ public class ApiFixture : IAsyncDisposable
             // Act
             var httpClient = app.CreateHttpClient("apiservice");
             var authHttpClient = app.CreateHttpClient("authentication");
+            var judgeHttpClient = app.CreateHttpClient("judge");
 
             // new process, start an execrunner and a piston simulating service
             piston = Process.Start(new ProcessStartInfo
@@ -60,6 +63,7 @@ public class ApiFixture : IAsyncDisposable
             // Build service
 
             AuthService authService = new(authHttpClient, loggerFactory.CreateLogger<AuthService>());
+
             UsersService usersService = new(httpClient, loggerFactory.CreateLogger<UsersService>());
             ContestsService contestsService = new(httpClient, loggerFactory.CreateLogger<ContestsService>());
             JoinCodesService joinCodesService = new(httpClient, loggerFactory.CreateLogger<JoinCodesService>());
@@ -67,9 +71,11 @@ public class ApiFixture : IAsyncDisposable
             TestCasesService testCasesService = new(httpClient, loggerFactory.CreateLogger<TestCasesService>());
             SubmissionsService submissionsService = new(httpClient, loggerFactory.CreateLogger<SubmissionsService>());
 
+            JudgeService judgeService = new(judgeHttpClient, loggerFactory.CreateLogger<JudgeService>());
+
             // wait 8 seconds for the database migrations to run
             await Task.Delay(8000);
-            return new APIs(authService, usersService, contestsService, joinCodesService, problemsService, testCasesService, submissionsService);
+            return new APIs(authService, usersService, contestsService, joinCodesService, problemsService, testCasesService, submissionsService, judgeService);
         });
     }
 
