@@ -23,6 +23,12 @@ builder.Services.AddAntiforgery();
 builder.Services.AddRazorComponents()
     .AddInteractiveServerComponents();
 
+builder.Services.AddStackExchangeRedisCache(options =>
+{
+    options.Configuration = builder.Configuration.GetConnectionString("cache");
+    options.InstanceName = "CodeExecution";
+});
+
 builder.Services.AddQuartz(q =>
 {
     JobKey jobKey = new("RefreshExecRunnerJob");

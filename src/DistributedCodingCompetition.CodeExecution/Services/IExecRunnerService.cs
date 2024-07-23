@@ -13,7 +13,7 @@ public interface IExecRunnerService
     /// </summary>
     /// <param name="runner"></param>
     /// <returns></returns>
-    Task RefreshExecRunnerAsync(ExecRunner runner);
+    Task<RunnerStatus> RefreshExecRunnerAsync(ExecRunner runner);
 
     /// <summary>
     /// Execute code.

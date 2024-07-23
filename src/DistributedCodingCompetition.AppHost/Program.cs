@@ -22,6 +22,7 @@ var codePersistence = builder.AddProject<Projects.DistributedCodingCompetition_C
 
 var codeExecution = builder.AddProject<Projects.DistributedCodingCompetition_CodeExecution>("codeexecution")
                            .WithExternalHttpEndpoints()
+                           .WithReference(cache)
                            .WithReference(executorDatabase);
 
 var apiService = builder.AddProject<Projects.DistributedCodingCompetition_ApiService>("apiservice")
