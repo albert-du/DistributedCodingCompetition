@@ -65,13 +65,7 @@ public class ActiveRunnersService(IDistributedCache distributedCache, IExecRunne
     /// <inheritdoc/>
     public async Task<ExecRunner?> FindExecRunnerAsync(string language)
     {
-        // read the synchronous check
-        var languages = await distributedCache.GetStringAsync("languages");
-
-        if (languages is null)
-            await IndexExecRunnersAsync();
-
-        languages = await distributedCache.GetStringAsync("languages") ?? "";
+        var languages = await GetLanguagesAsync();
 
         if (!languages.Contains(language))
             return null;
@@ -103,5 +97,71 @@ public class ActiveRunnersService(IDistributedCache distributedCache, IExecRunne
             }
         }
         return null;
+    }
+    public async Task<IReadOnlyList<(ExecutionRequest request, ExecRunner? runner)>> BalanceRequestsAsync(IReadOnlyCollection<ExecutionRequest> requests)
+    {
+        var languages = await GetLanguagesAsync();
+
+        var byLang = requests.GroupBy(request => request.Language).ToDictionary(group => group.Key, group => group.ToArray());
+
+        List<(ExecutionRequest, ExecRunner?)> results = [];
+
+        foreach (var (language, reqs) in byLang)
+        {
+            if (!languages.Contains(language))
+            {
+                foreach (var req in reqs)
+                    results.Add((req, null));
+                continue;
+            }
+
+            // pull the exec runners from cache
+            var execRunnerString = await distributedCache.GetStringAsync(language);
+            if (execRunnerString is null)
+            {
+                foreach (var req in reqs)
+                    results.Add((req, null));
+                continue;
+            }
+
+            var parts = execRunnerString.Split(';');
+            var totalWeight = int.Parse(parts[0]);
+            var execRunners = parts[1].Split(',').Select(part =>
+            {
+                var pair = part.Split('=');
+                return (Guid.Parse(pair[0]), int.Parse(pair[1]));
+            }).ToArray();
+            // select a random exec runner
+
+            foreach (var req in reqs)
+            {
+                var target = Random.Shared.Next(totalWeight);
+                foreach (var (id, weight) in execRunners)
+                {
+                    target -= weight;
+                    if (target < 0)
+                    {
+                        var runnerString = await distributedCache.GetStringAsync(id.ToString());
+                        if (runnerString is null)
+                            results.Add((req, null));
+                        else
+                            results.Add((req, JsonSerializer.Deserialize<ExecRunner>(runnerString)));
+                        break;
+                    }
+                }
+            }
+        }
+
+        return results;
+    }
+
+    /// <inheritdoc/>
+    public async Task<IEnumerable<string>> GetLanguagesAsync()
+    {
+        var languages = await distributedCache.GetStringAsync("languages");
+        if (languages is null)
+            await IndexExecRunnersAsync();
+        languages = await distributedCache.GetStringAsync("languages");
+        return languages?.Split(';') ?? [];
     }
 }
