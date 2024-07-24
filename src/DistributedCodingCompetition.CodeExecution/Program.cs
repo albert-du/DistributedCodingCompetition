@@ -27,7 +27,7 @@ builder.Services.AddStackExchangeRedisCache(options =>
 
 builder.Services.AddSingleton<IExecRunnerService, ExecRunnerService>();
 builder.Services.AddSingleton<IActiveRunnersService, ActiveRunnersService>();
-builder.Services.AddScoped<IExecRunnerRepository, ExecRunnerRepository>();
+builder.Services.AddSingleton<IExecRunnerRepository, ExecRunnerRepository>();
 
 var app = builder.Build();
 

@@ -84,6 +84,10 @@ public class ApiFixture : IAsyncDisposable
         GC.SuppressFinalize(this);
         if (app is not null)
             await app.DisposeAsync();
+
+        execRunner?.Kill();
+        piston?.Kill();
+
         execRunner?.Dispose();
         piston?.Dispose();
     }

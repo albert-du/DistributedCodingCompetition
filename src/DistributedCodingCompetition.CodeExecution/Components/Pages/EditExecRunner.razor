@@ -92,15 +92,16 @@
     protected override async Task OnInitializedAsync()
     {
         if (ExecRunnerId.HasValue && await ExecRunnerRepository.ReadExecRunnerAsync(ExecRunnerId.Value) is ExecRunner runner)
+        {
             execRunner = runner;
-
-        status = await ExecRunnerService.RefreshExecRunnerAsync(execRunner);
-        installedPackages = status.Packages.Split('\n').ToList();
+            status = await ExecRunnerService.RefreshExecRunnerAsync(execRunner);
+            installedPackages = status.Packages.Split('\n').ToList();
+        }
     }
 
     protected override async Task OnAfterRenderAsync(bool firstRender)
     {
-        if (firstRender && ExecRunnerId.HasValue && status is not null)
+        if (firstRender && ExecRunnerId.HasValue)
         {
             var set = installedPackages.ToFrozenSet();
             availablePackages = (await ExecRunnerService.FetchAvailablePackagesAsync(execRunner)).Where(x => !set.Contains(x)).ToList();

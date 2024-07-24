@@ -21,6 +21,8 @@ public class ManagementController(IConfiguration configuration, HttpClient httpC
 
     static bool Available => !installing && selfCheck;
 
+    static string? installationResult;
+
     /// <summary>
     /// Get the status of the runner
     /// </summary>
@@ -107,15 +109,31 @@ public class ManagementController(IConfiguration configuration, HttpClient httpC
             return BadRequest("Bad Spec");
         if (installing)
             return BadRequest("Already installing");
+        var oldSpec = (await httpClient.GetFromJsonAsync<IReadOnlyList<Package>>(configuration["Piston"] + "api/v2/packages") ?? []).Where(x => x.Installed).Select(x => $"{x.Name}={x.Version}").Where(x => !string.IsNullOrWhiteSpace(x));
+
+        HashSet<string> removed = new(oldSpec);
+        removed.ExceptWith(lines);
+
+        HashSet<string> installed = new(lines);
+        installed.ExceptWith(oldSpec);
+
+        if (installed.Count == 0 && removed.Count == 0)
+            return Ok("No changes");
+
+        // fire and forget
+        _ = InstallAsync(installed, removed);
+
         installing = true;
+        return Ok("Installation started");
+    }
+
+    private async Task InstallAsync(IEnumerable<string> install, IEnumerable<string> remove)
+    {
         try
         {
-            var oldSpec = (await httpClient.GetFromJsonAsync<IReadOnlyList<Package>>(configuration["Piston"] + "api/v2/packages") ?? []).Where(x => x.Installed).Select(x => $"{x.Name}={x.Version}").Where(x => !string.IsNullOrWhiteSpace(x));
-            HashSet<string> removed = new(oldSpec);
-            removed.ExceptWith(lines);
             List<string> response = [];
             // Uninstall removed packages
-            foreach (var package in removed)
+            foreach (var package in remove)
             {
                 var tokens = package.Split('=');
                 var name = tokens[0];
@@ -133,10 +151,8 @@ public class ManagementController(IConfiguration configuration, HttpClient httpC
                     response.Add($"ERROR: Could not remove {name}={version}; {await resp.Content.ReadAsStringAsync()}");
             }
 
-            HashSet<string> installed = new(lines);
-            installed.ExceptWith(oldSpec);
             // Install new packages
-            foreach (var package in installed)
+            foreach (var package in install)
             {
                 var tokens = package.Split('=');
                 var name = tokens[0];
@@ -154,12 +170,14 @@ public class ManagementController(IConfiguration configuration, HttpClient httpC
                 else
                     response.Add($"ERROR: Could not install {name}={version}; {await resp.Content.ReadAsStringAsync()}");
             }
-            return Ok(response.Count is 0 ? "Already to spec" : string.Join('\n', response));
+            installationResult = string.Join('\n', response);
         }
         finally
         {
             installing = false;
         }
+        await Task.Delay(30_000);
+        installationResult = null;
     }
 
     /// <summary>

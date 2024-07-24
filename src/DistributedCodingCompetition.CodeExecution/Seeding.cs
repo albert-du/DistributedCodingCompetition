@@ -15,7 +15,7 @@ public static class Seeding
     /// <returns></returns>
     public static async Task SeedDataAsync(IExecRunnerRepository execRunnerRepository)
     {
-        if ((await execRunnerRepository.GetExecRunnersAsync()).Any())
+        if (!(await execRunnerRepository.GetExecRunnersAsync()).Any())
             await execRunnerRepository.CreateExecRunnerAsync(new()
             {
                 Id = Guid.NewGuid(),

@@ -3,7 +3,7 @@
 @inject IExecRunnerRepository ExecRunnerRepository
 @inject NavigationManager NavigationManager
 @inject IActiveRunnersService ActiveRunnersService
-@inject ExecRunnerService ExecRunnerService
+@inject IExecRunnerService ExecRunnerService
 @using DistributedCodingCompetition.ExecutionShared
 
 <div class="mx-12 mt-4">
@@ -96,6 +96,7 @@
     async Task DeleteRunnerAsync(Guid runnerId)
     {
         await ExecRunnerRepository.DeleteExecRunnerAsync(runnerId);
+        await ActiveRunnersService.IndexExecRunnersAsync();
         await RefreshRunnersAsync();
     }
 
@@ -118,5 +119,6 @@
         await Task.WhenAll(statuses);
         runners = execRunners.Select((r, i) => (r, statuses[i].Result)).ToList();
         totalWeight = runners.Where(x => x.Item2.Ready && x.Item1.Enabled).Sum(x => x.Item1.Weight);
+        await InvokeAsync(StateHasChanged);
     }
 }
