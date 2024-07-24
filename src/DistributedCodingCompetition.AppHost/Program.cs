@@ -6,7 +6,7 @@ var postgres = builder.AddPostgres("postgres").WithPgAdmin();
 
 var mongo = builder.AddMongoDB("mongo");
 
-var executorDatabase = postgres.AddDatabase("evaluationdb");
+var executorDatabase = mongo.AddDatabase("evaluationdb");
 
 var contestDatabase = postgres.AddDatabase("contestdb");
 

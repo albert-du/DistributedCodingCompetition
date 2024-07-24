@@ -1,5 +1,7 @@
 ﻿namespace DistributedCodingCompetition.CodeExecution.Models;
 
+using MongoDB.Bson.Serialization.Attributes;
+
 /// <summary>
 /// Data Model for exec runner
 /// </summary>
@@ -8,6 +10,7 @@ public class ExecRunner
     /// <summary>
     /// Id of the Exec Runner
     /// </summary>
+    [BsonId]
     public Guid Id { get; set; } = Guid.NewGuid();
 
     /// <summary>

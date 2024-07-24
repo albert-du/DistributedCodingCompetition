@@ -4,7 +4,6 @@ using Microsoft.AspNetCore.Mvc;
 using DistributedCodingCompetition.CodeExecution.Models;
 using DistributedCodingCompetition.CodeExecution.Services;
 using DistributedCodingCompetition.ExecutionShared;
-using Microsoft.EntityFrameworkCore;
 
 /// <summary>
 /// Controller for code execution.
@@ -15,7 +14,7 @@ using Microsoft.EntityFrameworkCore;
 /// <param name="execRunnerContext"></param>
 [ApiController]
 [Route("[controller]")]
-public class ExecutionController(ILogger<ExecutionController> logger, IExecLoadBalancer execLoadBalancer, IExecRunnerService execRunnerService, ExecRunnerContext execRunnerContext) : ControllerBase
+public class ExecutionController(ILogger<ExecutionController> logger, IActiveRunnersService activeRunnersService, IExecRunnerService execRunnerService) : ControllerBase
 {
     /// <summary>
     /// Executes code.
@@ -25,7 +24,7 @@ public class ExecutionController(ILogger<ExecutionController> logger, IExecLoadB
     [HttpPost]
     public async Task<ActionResult<ExecutionResult>> PostAsync([FromBody] ExecutionRequest request)
     {
-        var execRunner = execLoadBalancer.SelectRunner(request);
+        var execRunner = await activeRunnersService.FindExecRunnerAsync(request.Language);
         if (execRunner == null)
         {
             logger.LogWarning("No available runners for requested language: \"{Language}\"", request.Language);

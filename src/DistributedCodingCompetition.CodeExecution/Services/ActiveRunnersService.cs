@@ -6,6 +6,7 @@ using DistributedCodingCompetition.CodeExecution.Models;
 using DistributedCodingCompetition.ExecutionShared;
 using System.Text.Json;
 
+/// <inheritdoc/>
 public class ActiveRunnersService(IDistributedCache distributedCache, IExecRunnerRepository execRunnerRepository, IExecRunnerService execRunnerService) : IActiveRunnersService
 {
     private async Task IndexExecRunnersAsync()
@@ -61,6 +62,7 @@ public class ActiveRunnersService(IDistributedCache distributedCache, IExecRunne
         distributedCache.SetString("languages", string.Join(';', languageMap.Keys), options);
     }
 
+    /// <inheritdoc/>
     public async Task<ExecRunner?> FindExecRunnerAsync(string language)
     {
         // read the synchronous check
