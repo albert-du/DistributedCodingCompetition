@@ -9,7 +9,8 @@ using System.Text.Json;
 /// <inheritdoc/>
 public class ActiveRunnersService(IDistributedCache distributedCache, IExecRunnerRepository execRunnerRepository, IExecRunnerService execRunnerService) : IActiveRunnersService
 {
-    private async Task IndexExecRunnersAsync()
+/// <inheritdoc/>
+    public async Task IndexExecRunnersAsync()
     {
         DistributedCacheEntryOptions options = new()
         {

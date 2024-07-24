@@ -1,5 +1,4 @@
 using DistributedCodingCompetition.CodeExecution;
-using DistributedCodingCompetition.CodeExecution.Models;
 using DistributedCodingCompetition.CodeExecution.Components;
 using DistributedCodingCompetition.CodeExecution.Services;
 
@@ -26,7 +25,6 @@ builder.Services.AddStackExchangeRedisCache(options =>
     options.InstanceName = "CodeExecution";
 });
 
-
 builder.Services.AddSingleton<IExecRunnerService, ExecRunnerService>();
 builder.Services.AddSingleton<IActiveRunnersService, ActiveRunnersService>();
 builder.Services.AddScoped<IExecRunnerRepository, ExecRunnerRepository>();
@@ -40,6 +38,9 @@ if (app.Environment.IsDevelopment())
 {
     app.UseSwagger();
     app.UseSwaggerUI();
+
+    // seed the database with a default exec runner
+    await Seeding.SeedDataAsync(app.Services.GetRequiredService<IExecRunnerRepository>());
 }
 else
 {

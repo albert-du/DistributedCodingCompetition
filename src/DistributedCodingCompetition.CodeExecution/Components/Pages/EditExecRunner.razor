@@ -24,7 +24,7 @@
         </h3>
     }
 
-    <EditForm Model="@execRunner" class="flex flex-col gap-y-2 gap-x-3">
+    <EditForm Model=@execRunner class="flex flex-col gap-y-2 gap-x-3">
         <div>
             <label for="Endpoint">Endpoint</label>
             <InputText class="rounded-md px-2 py-1 bg-gray-100" id="Endpoint" placeholder="http://execrunner:2000/" @bind-Value="execRunner.Endpoint" />
@@ -45,7 +45,7 @@
         @if (ExecRunnerId.HasValue)
         {
             <div>
-                @foreach (var package in execRunner.Packages)
+                @foreach (var package in installedPackages)
                 {
                     <div class="w-64 flex justify-between ">
                         <div>
@@ -132,6 +132,8 @@
             await ExecRunnerRepository.UpdateExecRunnerAsync(execRunner);
         else
             await ExecRunnerRepository.CreateExecRunnerAsync(execRunner);
+
+        await ActiveRunnersService.IndexExecRunnersAsync();
 
         NavigationManager.NavigateTo("");
     }

@@ -14,7 +14,6 @@ public class ExecRunnerService(HttpClient httpClient) : IExecRunnerService
         try
         {
             result = await httpClient.GetAsync($"{runner.Endpoint}{(runner.Endpoint.EndsWith('/') ? "" : "/")}api/management?key={runner.Key}");
-
         }
         catch (HttpRequestException)
         {

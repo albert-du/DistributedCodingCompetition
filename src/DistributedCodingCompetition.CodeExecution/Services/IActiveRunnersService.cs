@@ -9,6 +9,12 @@ using DistributedCodingCompetition.ExecutionShared;
 public interface IActiveRunnersService
 {
     /// <summary>
+    /// Immediately triggers a refresh of the exec runners.
+    /// </summary>
+    /// <returns></returns>
+    Task IndexExecRunnersAsync();
+
+    /// <summary>
     /// Find an exec runner by language.
     /// </summary>
     /// <param name="language"></param>
