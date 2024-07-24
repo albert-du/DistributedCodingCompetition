@@ -1,11 +1,12 @@
 ﻿@rendermode InteractiveServer
 @page "/execrunner"
 @page "/execrunner/{execRunnerId:guid?}"
-@inject ExecRunnerContext ExecRunnerContext
+@inject IExecRunnerRepository ExecRunnerRepository
 @inject IExecRunnerService ExecRunnerService
 @inject NavigationManager NavigationManager
-@inject IRefreshEventService RefreshEventService
+@inject IActiveRunnersService ActiveRunnersService
 @using System.Collections.Frozen
+@using DistributedCodingCompetition.ExecutionShared
 
 <div class="sm:w-1/2 mx-auto">
     <a class="hover:underline italic my-2 py-1" href="/">back</a>
@@ -22,7 +23,6 @@
             New Runner
         </h3>
     }
-
 
     <EditForm Model="@execRunner" class="flex flex-col gap-y-2 gap-x-3">
         <div>
@@ -79,24 +79,30 @@
 
 @code
 {
-    private ExecRunner execRunner = new();
+    ExecRunner execRunner = new();
 
-    private List<string> availablePackages = [];
+    RunnerStatus? status;
+
+    List<string> availablePackages = [];
+    List<string> installedPackages = [];
 
     [Parameter]
     public Guid? ExecRunnerId { get; set; }
 
-    protected override void OnInitialized()
+    protected override async Task OnInitializedAsync()
     {
-        if (ExecRunnerId.HasValue && ExecRunnerContext.ExecRunners.Find(ExecRunnerId) is ExecRunner runner)
+        if (ExecRunnerId.HasValue && await ExecRunnerRepository.ReadExecRunnerAsync(ExecRunnerId.Value) is ExecRunner runner)
             execRunner = runner;
+
+        status = await ExecRunnerService.RefreshExecRunnerAsync(execRunner);
+        installedPackages = status.Packages.Split('\n').ToList();
     }
 
     protected override async Task OnAfterRenderAsync(bool firstRender)
     {
-        if (firstRender && ExecRunnerId.HasValue)
+        if (firstRender && ExecRunnerId.HasValue && status is not null)
         {
-            var set = execRunner.Packages.ToFrozenSet();
+            var set = installedPackages.ToFrozenSet();
             availablePackages = (await ExecRunnerService.FetchAvailablePackagesAsync(execRunner)).Where(x => !set.Contains(x)).ToList();
             await InvokeAsync(StateHasChanged);
         }
@@ -104,14 +110,14 @@
     bool modified = false;
     private void AddPackage(string name)
     {
-        execRunner.Packages.Add(name);
+        installedPackages.Add(name);
         availablePackages.Remove(name);
         modified = true;
     }
 
     private void RemovePackage(string name)
     {
-        execRunner.Packages.Remove(name);
+        installedPackages.Remove(name);
         availablePackages.Add(name);
         modified = true;
     }
@@ -119,16 +125,14 @@
     private async Task SaveRunnerAsync()
     {
         if (modified)
-            _ = ExecRunnerService.SetPackagesAsync(execRunner, execRunner.Packages);
+            _ = ExecRunnerService.SetPackagesAsync(execRunner, installedPackages);
 
-        await ExecRunnerService.RefreshExecRunnerAsync(execRunner);
+        status = await ExecRunnerService.RefreshExecRunnerAsync(execRunner);
         if (ExecRunnerId.HasValue)
-            ExecRunnerContext.ExecRunners.Update(execRunner);
+            await ExecRunnerRepository.UpdateExecRunnerAsync(execRunner);
         else
-            ExecRunnerContext.ExecRunners.Add(execRunner);
+            await ExecRunnerRepository.CreateExecRunnerAsync(execRunner);
 
-        ExecRunnerContext.SaveChanges();
-        RefreshEventService.Refresh(this, [.. ExecRunnerContext.ExecRunners]);
         NavigationManager.NavigateTo("");
     }
 }

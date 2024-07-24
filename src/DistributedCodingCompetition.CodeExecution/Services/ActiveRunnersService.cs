@@ -98,6 +98,8 @@ public class ActiveRunnersService(IDistributedCache distributedCache, IExecRunne
         }
         return null;
     }
+
+    /// <inheritdoc/>
     public async Task<IReadOnlyList<(ExecutionRequest request, ExecRunner? runner)>> BalanceRequestsAsync(IReadOnlyCollection<ExecutionRequest> requests)
     {
         var languages = await GetLanguagesAsync();
