@@ -8,7 +8,7 @@ using DistributedCodingCompetition.ExecutionShared;
 public class ExecRunnerService(HttpClient httpClient) : IExecRunnerService
 {
     /// <inheritdoc />
-    public async Task<RunnerStatus> RefreshExecRunnerAsync(ExecRunner runner)
+    public async Task<RunnerStatus?> RefreshExecRunnerAsync(ExecRunner runner)
     {
         HttpResponseMessage result;
         try
@@ -17,19 +17,7 @@ public class ExecRunnerService(HttpClient httpClient) : IExecRunnerService
         }
         catch (HttpRequestException)
         {
-            return new()
-            {
-                Name = runner.Name,
-                Version = "Unknown",
-                Uptime = TimeSpan.Zero,
-                Ready = false,
-                TimeStamp = DateTime.UtcNow,
-                Message = "Failed to connect to this execution runner",
-                Languages = string.Empty,
-                Packages = string.Empty,
-                SystemInfo = string.Empty,
-                ExecutionCount = 0
-            };
+            return null;
         }
 
         if (result.StatusCode is HttpStatusCode.Unauthorized)
@@ -47,19 +35,7 @@ public class ExecRunnerService(HttpClient httpClient) : IExecRunnerService
                 ExecutionCount = 0
             };
         if (result.StatusCode is not HttpStatusCode.OK)
-            return new()
-            {
-                Name = runner.Name,
-                Version = "Unknown",
-                Uptime = TimeSpan.Zero,
-                Ready = false,
-                TimeStamp = DateTime.UtcNow,
-                Message = $"Failed to connect to this execution runner {result.StatusCode}",
-                Languages = string.Empty,
-                Packages = string.Empty,
-                SystemInfo = string.Empty,
-                ExecutionCount = 0
-            };
+            return null;
         return await result.Content.ReadFromJsonAsync<RunnerStatus>() ?? throw new Exception("execrunner status empty");
     }
 

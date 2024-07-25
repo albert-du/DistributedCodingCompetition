@@ -95,7 +95,7 @@
         {
             execRunner = runner;
             status = await ExecRunnerService.RefreshExecRunnerAsync(execRunner);
-            installedPackages = status.Packages.Split('\n').ToList();
+            installedPackages = status?.Packages.Split('\n').ToList() ?? [];
         }
     }
 

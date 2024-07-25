@@ -5,15 +5,19 @@ using DistributedCodingCompetition.ExecutionShared;
 using System.Text;
 using System.Net.Http;
 using System.Text.Json.Serialization;
+using Microsoft.Extensions.Logging;
+using Microsoft.Extensions.DependencyInjection;
 
 /// <summary>
 /// Management Controller for ExecRunner
 /// </summary>
 /// <param name="configuration"></param>
 /// <param name="httpClient"></param>
+/// <param name="logger"></param>
+/// <param name="serviceScopeFactory"></param>
 [Route("api/[controller]")]
 [ApiController]
-public class ManagementController(IConfiguration configuration, HttpClient httpClient) : ControllerBase
+public class ManagementController(IConfiguration configuration, HttpClient httpClient, ILogger<ManagementController> logger, IServiceScopeFactory serviceScopeFactory) : ControllerBase
 {
     private readonly static DateTime startTime = DateTime.UtcNow;
     static bool installing = false;
@@ -33,6 +37,25 @@ public class ManagementController(IConfiguration configuration, HttpClient httpC
     {
         if (key != configuration["Key"])
             return Unauthorized();
+
+        if (installing)
+        {
+            logger.LogInformation("Installation in progress");
+            return new RunnerStatus
+            {
+                Languages = string.Empty,
+                Packages = string.Empty,
+                TimeStamp = DateTime.UtcNow,
+                SystemInfo = SystemInfo(),
+                Version = "1.0.0",
+                Ready = false,
+                Message = "Installation in progress",
+                Name = configuration["Name"] ?? "EXEC",
+                Uptime = DateTime.UtcNow - startTime,
+                ExecutionCount = ExecutionController.ExecutionCount,
+            };
+        }
+
         string? languages = null;
         string packages = string.Empty;
         selfCheck = true;
@@ -51,7 +74,7 @@ public class ManagementController(IConfiguration configuration, HttpClient httpC
             TimeStamp = DateTime.UtcNow,
             Version = "1.0.0",
             Ready = Available,
-            Message = installing ? "Installation in progress" : !selfCheck ? "Self Check Failed" : "Ready",
+            Message = installationResult ?? (installing ? "Installation in progress" : !selfCheck ? "Self Check Failed" : "Ready"),
             Name = configuration["Name"] ?? "EXEC",
             Uptime = DateTime.UtcNow - startTime,
             Languages = languages ?? string.Empty,
@@ -121,20 +144,27 @@ public class ManagementController(IConfiguration configuration, HttpClient httpC
             return Ok("No changes");
 
         // fire and forget
-        _ = InstallAsync(installed, removed);
+        _ = Task.Run(async () =>
+        {
+            using var scope = serviceScopeFactory.CreateScope();
+            var httpClient = scope.ServiceProvider.GetRequiredService<HttpClient>();
+            await InstallAsync(installed, removed, httpClient);
+        });
 
-        installing = true;
         return Ok("Installation started");
     }
 
-    private async Task InstallAsync(IEnumerable<string> install, IEnumerable<string> remove)
+    private async Task InstallAsync(IEnumerable<string> install, IEnumerable<string> remove, HttpClient httpClient)
     {
+        Console.WriteLine("Starting installation");
+        installing = true;
         try
         {
             List<string> response = [];
             // Uninstall removed packages
             foreach (var package in remove)
             {
+                Console.WriteLine($"Removing {package}");
                 var tokens = package.Split('=');
                 var name = tokens[0];
                 var version = tokens[1];
@@ -154,6 +184,7 @@ public class ManagementController(IConfiguration configuration, HttpClient httpC
             // Install new packages
             foreach (var package in install)
             {
+                Console.WriteLine($"Installing {package}");
                 var tokens = package.Split('=');
                 var name = tokens[0];
                 var version = tokens[1];
@@ -176,6 +207,7 @@ public class ManagementController(IConfiguration configuration, HttpClient httpC
         {
             installing = false;
         }
+        Console.WriteLine("Installation complete");
         await Task.Delay(30_000);
         installationResult = null;
     }

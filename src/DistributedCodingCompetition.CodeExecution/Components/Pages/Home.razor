@@ -37,29 +37,36 @@
                     <tr class="border border-slate-400 ">
                         <td class="border border-slate-300">@runner.Name</td>
                         <td class="border border-slate-300">@runner.Endpoint</td>
-                        <td class="border border-slate-300">
-                            @((status.Ready && runner.Enabled ? runner.Weight : 0) *
-                                100 / totalWeight) &percnt;
-                        </td>
+                        @if (totalWeight != 0)
+                        {
+                            <td class="border border-slate-300">
+                                @((status?.Ready is true && runner.Enabled ? runner.Weight : 0) *
+                                    100 / totalWeight) &percnt;
+                            </td>
+                        }
+                        else
+                        {
+                            <td class="border border-slate-300">0%</td>
+                        }
                         <td class="border border-slate-300">@runner.Enabled</td>
-                        <td class="border border-slate-300">@status.Ready</td>
-                        <td class="border border-slate-300">@status.Message</td>
-                        <td class="border border-slate-300">@status.Name</td>
+                        <td class="border border-slate-300">@(status?.Ready is true)</td>
+                        <td class="border border-slate-300">@(status is not null)</td>
+                        <td class="border border-slate-300">@status?.Message</td>
                         <td class="border border-slate-300">
-                            @foreach (var line in status.SystemInfo.Split('\n'))
+                            @foreach (var line in status?.SystemInfo.Split('\n') ?? [])
                             {
                                 <div>@line</div>
                             }
 
                         </td>
                         <td class="border border-slate-300">
-                            @foreach (var p in status.Packages.Split('\n'))
+                            @foreach (var p in status?.Packages.Split('\n') ?? [])
                             {
                                 <div>@p</div>
                             }
                         </td>
                         <td class="border border-slate-300">
-                            @foreach (var l in status.Languages.Split('\n'))
+                            @foreach (var l in status?.Languages.Split('\n') ?? [])
                             {
                                 <div>@l</div>
                             }
@@ -85,7 +92,7 @@
 @code {
     int totalWeight = -1;
 
-    IReadOnlyList<(ExecRunner, RunnerStatus)>? runners;
+    IReadOnlyList<(ExecRunner, RunnerStatus?)>? runners;
 
     void AddRunner() =>
         NavigationManager.NavigateTo("execrunner");
@@ -112,13 +119,21 @@
         totalWeight = 0;
         await InvokeAsync(StateHasChanged);
         var execRunners = await ExecRunnerRepository.GetExecRunnersAsync();
-        var statuses = new Task<RunnerStatus>[execRunners.Count];
+        var statuses = new Task<RunnerStatus?>[execRunners.Count];
         for (int i = 0; i < execRunners.Count; i++)
             statuses[i] = ExecRunnerService.RefreshExecRunnerAsync(execRunners[i]);
 
         await Task.WhenAll(statuses);
-        runners = execRunners.Select((r, i) => (r, statuses[i].Result)).ToList();
-        totalWeight = runners.Where(x => x.Item2.Ready && x.Item1.Enabled).Sum(x => x.Item1.Weight);
+        List<(ExecRunner, RunnerStatus?)> rv = new();
+        for (var i = 0; i < execRunners.Count; i++)
+        {
+            var runner = execRunners[i];
+            var status = await statuses[i];
+            rv.Add((runner, status));
+            if (status?.Ready is true && runner.Enabled)
+                totalWeight += runner.Weight;
+        }
+        runners = rv;
         await InvokeAsync(StateHasChanged);
     }
 }

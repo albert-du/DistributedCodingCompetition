@@ -9,7 +9,7 @@ using System.Text.Json;
 /// <inheritdoc/>
 public class ActiveRunnersService(IDistributedCache distributedCache, IExecRunnerRepository execRunnerRepository, IExecRunnerService execRunnerService) : IActiveRunnersService
 {
-/// <inheritdoc/>
+    /// <inheritdoc/>
     public async Task IndexExecRunnersAsync()
     {
         DistributedCacheEntryOptions options = new()
@@ -20,7 +20,7 @@ public class ActiveRunnersService(IDistributedCache distributedCache, IExecRunne
         // read all the exec runners
         var runners = await execRunnerRepository.GetExecRunnersAsync(enabled: true);
         var tasks = runners.Select(execRunnerService.RefreshExecRunnerAsync).ToArray();
-        List<RunnerStatus> statuses = [];
+        List<RunnerStatus?> statuses = [];
         foreach (var task in tasks)
             statuses.Add(await task);
 
@@ -29,7 +29,7 @@ public class ActiveRunnersService(IDistributedCache distributedCache, IExecRunne
         {
             var status = statuses[i];
             var runner = runners[i];
-            if (status.Ready)
+            if (status?.Ready is true)
                 foreach (var language in status.Languages.Split('\n'))
                 {
                     if (!languageMap.ContainsKey(language))
