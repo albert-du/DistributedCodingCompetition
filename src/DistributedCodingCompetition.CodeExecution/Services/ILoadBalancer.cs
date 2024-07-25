@@ -12,7 +12,7 @@ public interface ILoadBalancer<T, U> where U : IWeighted
     /// <param name="requests"></param>
     /// <param name="runners"></param>
     /// <returns></returns>
-    IEnumerable<(T request, U? runner)> BalanceRequests(IReadOnlyCollection<U> runners, IReadOnlyCollection<T> requests);
+    IEnumerable<(T Request, U? Runner)> BalanceRequests(IReadOnlyCollection<U> runners, IReadOnlyCollection<T> requests);
 
     /// <summary>
     /// Balance a single request across exec runners.
@@ -21,5 +21,5 @@ public interface ILoadBalancer<T, U> where U : IWeighted
     /// <param name="request"></param>
     /// <param name="runners"></param>
     /// <returns></returns>
-    U? BalanceRequest(IReadOnlyCollection<U> runners, T request);
+    U? BalanceRequest(IReadOnlyCollection<U> runners);
 }

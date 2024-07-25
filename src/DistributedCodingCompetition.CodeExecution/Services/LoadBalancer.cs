@@ -1,10 +1,10 @@
 ﻿namespace DistributedCodingCompetition.CodeExecution.Services;
 
 /// <inheritdoc/>
-public class LoadBalancer<T, U> where U : IWeighted, ILoadBalancer<T, U>
+public class LoadBalancer<T, U> : ILoadBalancer<T, U> where U : IWeighted
 {
     /// <inheritdoc/>
-    public IEnumerable<(T request, U? runner)> BalanceRequests(IReadOnlyCollection<U> runners, IReadOnlyCollection<T> requests)
+    public IEnumerable<(T Request, U? Runner)> BalanceRequests(IReadOnlyCollection<U> runners, IReadOnlyCollection<T> requests)
     {
         var totalWeight = runners.Sum(runner => runner.Weight);
 
@@ -24,7 +24,7 @@ public class LoadBalancer<T, U> where U : IWeighted, ILoadBalancer<T, U>
     }
 
     /// <inheritdoc/>
-    public U? BalanceRequest(IReadOnlyCollection<U> runners, T request)
+    public U? BalanceRequest(IReadOnlyCollection<U> runners)
     {
         var totalWeight = runners.Sum(runner => runner.Weight);
         var target = Random.Shared.Next(totalWeight);

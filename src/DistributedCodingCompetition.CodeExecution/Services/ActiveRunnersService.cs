@@ -9,6 +9,7 @@ using System.Text.Json;
 /// <inheritdoc/>
 public class ActiveRunnersService(IDistributedCache distributedCache, IExecRunnerRepository execRunnerRepository, IExecRunnerService execRunnerService) : IActiveRunnersService
 {
+
     /// <inheritdoc/>
     public async Task IndexExecRunnersAsync()
     {
@@ -83,21 +84,18 @@ public class ActiveRunnersService(IDistributedCache distributedCache, IExecRunne
             var pair = part.Split('=');
             return (Guid.Parse(pair[0]), int.Parse(pair[1]));
         }).ToArray();
-        // select a random exec runner
 
-        var target = Random.Shared.Next(totalWeight);
-        foreach (var (id, weight) in execRunners)
-        {
-            target -= weight;
-            if (target < 0)
-            {
-                var runnerString = await distributedCache.GetStringAsync(id.ToString());
-                if (runnerString is null)
-                    return null;
-                return JsonSerializer.Deserialize<ExecRunner>(runnerString);
-            }
-        }
-        return null;
+        // select a random exec runner
+        LoadBalancer<ExecutionRequest, RunnerWeight> balancer = new();
+
+        var id = balancer.BalanceRequest([.. execRunners.Select(x => new RunnerWeight(x.Item1, x.Item2))]);
+
+        var runnerString = await distributedCache.GetStringAsync(id.ToString());
+
+        if (runnerString is null)
+            return null;
+
+        return JsonSerializer.Deserialize<ExecRunner>(runnerString);
     }
 
     /// <inheritdoc/>
@@ -136,22 +134,16 @@ public class ActiveRunnersService(IDistributedCache distributedCache, IExecRunne
             }).ToArray();
             // select a random exec runner
 
-            foreach (var req in reqs)
+            var runners = execRunners.Select(x => new RunnerWeight(x.Item1, x.Item2)).ToArray();
+            LoadBalancer<ExecutionRequest, RunnerWeight> balancer = new();
+            var pairs = balancer.BalanceRequests(runners, reqs);
+            foreach (var (request, runner) in pairs)
             {
-                var target = Random.Shared.Next(totalWeight);
-                foreach (var (id, weight) in execRunners)
-                {
-                    target -= weight;
-                    if (target < 0)
-                    {
-                        var runnerString = await distributedCache.GetStringAsync(id.ToString());
-                        if (runnerString is null)
-                            results.Add((req, null));
-                        else
-                            results.Add((req, JsonSerializer.Deserialize<ExecRunner>(runnerString)));
-                        break;
-                    }
-                }
+                var runnerString = await distributedCache.GetStringAsync(runner.Id.ToString());
+                if (runnerString is not null)
+                    results.Add((request, JsonSerializer.Deserialize<ExecRunner>(runnerString)));
+                else
+                    results.Add((request, null));
             }
         }
 
@@ -167,4 +159,6 @@ public class ActiveRunnersService(IDistributedCache distributedCache, IExecRunne
         languages = await distributedCache.GetStringAsync("languages");
         return languages?.Split(';') ?? [];
     }
+
+    private record struct RunnerWeight(Guid Id, int Weight) : IWeighted;
 }
