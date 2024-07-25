@@ -14,7 +14,7 @@ public class ActiveRunnersService(IDistributedCache distributedCache, IExecRunne
     {
         DistributedCacheEntryOptions options = new()
         {
-            AbsoluteExpirationRelativeToNow = TimeSpan.FromMinutes(5)
+            AbsoluteExpirationRelativeToNow = TimeSpan.FromSeconds(30)
         };
 
         // read all the exec runners

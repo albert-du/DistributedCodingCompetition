@@ -5,7 +5,7 @@ using MongoDB.Bson.Serialization.Attributes;
 /// <summary>
 /// Data Model for exec runner
 /// </summary>
-public class ExecRunner
+public class ExecRunner : IWeighted
 {
     /// <summary>
     /// Id of the Exec Runner
