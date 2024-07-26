@@ -49,7 +49,7 @@
             // Contest Admin
             var user = (await UserStateService.UserAsync())?.Id;
             (var success, var role) = await ContestsService.TryReadContestUserRoleAsync(Contest.Value, user!.Value);
-            if (success && (role is ContestRole.Admin || !Admin && role is ContestRole.Participant))
+            if (success && (role is ContestRole.Admin || role is ContestRole.Owner || !Admin && role is ContestRole.Participant))
                 return;
         }
 

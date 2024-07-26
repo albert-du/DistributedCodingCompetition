@@ -13,7 +13,8 @@ using DistributedCodingCompetition.ApiService.Data.Contexts;
 /// </summary>
 /// <param name="serviceProvider"></param>
 /// <param name="hostApplicationLifetime"></param>
-public sealed class Worker(IServiceProvider serviceProvider, IHostApplicationLifetime hostApplicationLifetime, IConfiguration configuration) : BackgroundService
+/// <param name="configuration"></param>
+public sealed class Worker(IServiceProvider serviceProvider, IHostApplicationLifetime hostApplicationLifetime, IConfiguration configuration, ILogger<Worker> logger) : BackgroundService
 {
     public const string ActivitySourceName = "API Migrations";
 
@@ -22,7 +23,6 @@ public sealed class Worker(IServiceProvider serviceProvider, IHostApplicationLif
     protected override async Task ExecuteAsync(CancellationToken cancellationToken)
     {
         using var activity = s_activitySource.StartActivity("Migrating database", ActivityKind.Client);
-
         try
         {
             using var scope = serviceProvider.CreateScope();
@@ -31,7 +31,7 @@ public sealed class Worker(IServiceProvider serviceProvider, IHostApplicationLif
             await EnsureDatabaseAsync(dbContext, cancellationToken);
             await RunMigrationAsync(dbContext, cancellationToken);
 
-            if (configuration["Seed"] is "true")
+            if (Convert.ToBoolean(configuration["Seed"]))
                 await SeedDataAsync(dbContext, cancellationToken);
         }
         catch (Exception ex)
@@ -69,8 +69,9 @@ public sealed class Worker(IServiceProvider serviceProvider, IHostApplicationLif
         });
     }
 
-    private static async Task SeedDataAsync(ContestContext dbContext, CancellationToken cancellationToken)
+    private async Task SeedDataAsync(ContestContext dbContext, CancellationToken cancellationToken)
     {
+        logger.LogInformation("Seeding data");
         User user1 = new()
         {
             Id = Guid.Parse("134904d0-9515-4ceb-84d0-2cae5bf60f9d"),
