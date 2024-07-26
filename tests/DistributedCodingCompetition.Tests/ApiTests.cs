@@ -1,7 +1,6 @@
-﻿using Bogus;
-using DistributedCodingCompetition.AuthService.Client;
+﻿namespace DistributedCodingCompetition.Tests;
 
-namespace DistributedCodingCompetition.Tests;
+using Bogus;
 
 public class ApiTests(ApiFixture fixture) : IClassFixture<ApiFixture>
 {

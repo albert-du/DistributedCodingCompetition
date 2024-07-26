@@ -2,6 +2,7 @@
 
 using DistributedCodingCompetition.ApiService.Client;
 using DistributedCodingCompetition.AuthService.Client;
+using DistributedCodingCompetition.CodeExecution.Client;
 using DistributedCodingCompetition.Judge.Client;
 using DotNet.Testcontainers.Builders;
 using Microsoft.Extensions.Logging;
@@ -14,7 +15,9 @@ public record struct APIs(IAuthService AuthService,
                           IProblemsService ProblemsService,
                           ITestCasesService TestCasesService,
                           ISubmissionsService SubmissionsService,
-                          IJudgeService JudgeService);
+                          IJudgeService JudgeService,
+                          ICodeExecutionService CodeExecutionService,
+                          IExecutionManagementService ExecutionManagementService);
 
 public class ApiFixture : IAsyncDisposable
 {
@@ -83,9 +86,12 @@ public class ApiFixture : IAsyncDisposable
 
             JudgeService judgeService = new(judgeHttpClient, loggerFactory.CreateLogger<JudgeService>());
 
+            CodeExecutionService codeExecutionService = new(httpClient, loggerFactory.CreateLogger<CodeExecutionService>());
+            ExecutionManagementService executionManagementService = new(httpClient, loggerFactory.CreateLogger<ExecutionManagementService>());
+
             // wait 8 seconds for the database migrations to run
             await Task.Delay(8000);
-            return new APIs(authService, usersService, contestsService, joinCodesService, problemsService, testCasesService, submissionsService, judgeService);
+            return new APIs(authService, usersService, contestsService, joinCodesService, problemsService, testCasesService, submissionsService, judgeService, codeExecutionService, executionManagementService);
         });
     }
 
