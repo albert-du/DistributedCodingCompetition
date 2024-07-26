@@ -94,4 +94,35 @@ public class ManagementController(IExecRunnerRepository execRunnerRepository, IE
 
         return NoContent();
     }
+
+    [HttpGet("runners/{id}/packages/available")]
+    public async Task<ActionResult<IReadOnlyList<string>>> GetPackagesAsync(Guid id)
+    {
+        var runner = await execRunnerRepository.ReadExecRunnerAsync(id);
+        if (runner is null)
+            return NotFound();
+
+        return Ok(await execRunnerService.FetchAvailablePackagesAsync(runner));
+    }
+
+    [HttpGet("runners/{id}/packages/installed")]
+    public async Task<ActionResult<IReadOnlyList<string>>> GetInstalledPackagesAsync(Guid id)
+    {
+        var runner = await execRunnerRepository.ReadExecRunnerAsync(id);
+        if (runner is null)
+            return NotFound();
+        var status = await execRunnerService.RefreshExecRunnerAsync(runner);
+        return Ok(status?.Packages.Split('\n') ?? []);
+    }
+
+
+    [HttpGet("runners/{id}/languages")]
+    public async Task<ActionResult<IEnumerable<string>>> GetLanguagesAsync(Guid id)
+    {
+        var runner = await execRunnerRepository.ReadExecRunnerAsync(id);
+        if (runner is null)
+            return NotFound();
+
+        return Ok(await execRunnerService.FetchAvailablePackagesAsync(runner));
+    }
 }

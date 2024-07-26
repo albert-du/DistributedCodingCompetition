@@ -4,22 +4,70 @@ public class ExecutionManagementService(HttpClient httpClient, ILogger<Execution
 {
     public async Task<ExecRunnerResponseDTO> CreateExecRunnerAsync(ExecRunnerRequestDTO request)
     {
-
+        logger.LogInformation("Creating ExecRunner {@ExecRunner}", request);
+        var response = await httpClient.PostAsJsonAsync("management/runners", request);
+        response.EnsureSuccessStatusCode();
+        return await response.Content.ReadFromJsonAsync<ExecRunnerResponseDTO>() ?? throw new Exception("Failed to parse response");
     }
 
-    public async Task<ExecRunnerResponseDTO> ReadExecRunnerAsync(Guid id);
+    public async Task<ExecRunnerResponseDTO> ReadExecRunnerAsync(Guid id)
+    {
+        logger.LogInformation("Reading ExecRunner {@Id}", id);
+        var response = await httpClient.GetAsync($"management/runners/{id}");
+        response.EnsureSuccessStatusCode();
+        return await response.Content.ReadFromJsonAsync<ExecRunnerResponseDTO>() ?? throw new Exception("Failed to parse response");
+    }
 
-    public async Task UpdateExecRunnerAsync(Guid id, ExecRunnerRequestDTO request);
+    public async Task UpdateExecRunnerAsync(Guid id, ExecRunnerRequestDTO request)
+    {
+        logger.LogInformation("Updating ExecRunner {@Id} with {@ExecRunner}", id, request);
+        var response = await httpClient.PutAsJsonAsync($"management/runners/{id}", request);
+        response.EnsureSuccessStatusCode();
+    }
 
-    public async Task DeleteExecRunnerAsync(Guid id);
+    public async Task DeleteExecRunnerAsync(Guid id)
+    {
+        logger.LogInformation("Deleting ExecRunner {@Id}", id);
+        var response = await httpClient.DeleteAsync($"management/runners/{id}");
+        response.EnsureSuccessStatusCode();
+    }
 
-    public async Task<IReadOnlyList<ExecRunnerResponseDTO>> ListExecRunnersAsync();
+    public async Task<IReadOnlyList<ExecRunnerResponseDTO>> ListExecRunnersAsync()
+    {
+        logger.LogInformation("Listing ExecRunners");
+        var response = await httpClient.GetAsync("management/runners");
+        response.EnsureSuccessStatusCode();
+        return await response.Content.ReadFromJsonAsync<IReadOnlyList<ExecRunnerResponseDTO>>() ?? throw new Exception("Failed to parse response");
+    }
 
-    public async Task SetPackagesAsync(Guid id, IEnumerable<string> packages);
+    public async Task SetPackagesAsync(Guid id, IEnumerable<string> packages)
+    {
+        logger.LogInformation("Setting packages for ExecRunner {@Id} with {@Packages}", id, packages);
+        var response = await httpClient.PostAsJsonAsync($"management/runners/{id}/packages", packages);
+        response.EnsureSuccessStatusCode();
+    }
 
-    public async Task<IEnumerable<string>> InstalledPackagesAsync(Guid id);
+    public async Task<IEnumerable<string>> InstalledPackagesAsync(Guid id)
+    {
+        logger.LogInformation("Getting installed packages for ExecRunner {@Id}", id);
+        var response = await httpClient.GetAsync($"management/runners/{id}/packages");
+        response.EnsureSuccessStatusCode();
+        return await response.Content.ReadFromJsonAsync<IEnumerable<string>>() ?? throw new Exception("Failed to parse response");
+    }
 
-    public async Task<IEnumerable<string>> AvailablePackagesAsync(Guid id);
+    public async Task<IEnumerable<string>> AvailablePackagesAsync(Guid id)
+    {
+        logger.LogInformation("Getting available packages for ExecRunner {@Id}", id);
+        var response = await httpClient.GetAsync($"management/runners/{id}/packages/available");
+        response.EnsureSuccessStatusCode();
+        return await response.Content.ReadFromJsonAsync<IEnumerable<string>>() ?? throw new Exception("Failed to parse response");
+    }
 
-    public async Task<IEnumerable<string>> InstalledLanguagesAsync(Guid id);
+    public async Task<IEnumerable<string>> InstalledLanguagesAsync(Guid id)
+    {
+        logger.LogInformation("Getting installed languages for ExecRunner {@Id}", id);
+        var response = await httpClient.GetAsync($"management/runners/{id}/languages");
+        response.EnsureSuccessStatusCode();
+        return await response.Content.ReadFromJsonAsync<IEnumerable<string>>() ?? throw new Exception("Failed to parse response");
+    }
 }
