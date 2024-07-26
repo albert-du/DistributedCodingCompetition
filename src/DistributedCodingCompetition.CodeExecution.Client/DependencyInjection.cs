@@ -20,6 +20,9 @@ public static class DependencyInjection
     {
         serviceDescriptors.AddSingleton<ICodeExecutionService, CodeExecutionService>();
         serviceDescriptors.AddHttpClient<ICodeExecutionService, CodeExecutionService>(client => client.BaseAddress = apiAddress);
+
+        serviceDescriptors.AddSingleton<IExecutionManagementService, ExecutionManagementService>();
+        serviceDescriptors.AddHttpClient<IExecutionManagementService, ExecutionManagementService>(client => client.BaseAddress = apiAddress);
         return serviceDescriptors;
     }
 

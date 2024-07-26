@@ -37,6 +37,18 @@ public class ManagementController(IExecRunnerRepository execRunnerRepository, IE
         return new ExecRunnerResponseDTO(runner.Id, runner.Name, runner.Endpoint, runner.Enabled, status);
     }
 
+    [HttpGet("runners/{id}")]
+    public async Task<ActionResult<ExecRunnerResponseDTO>> GetRunnerAsync(Guid id)
+    {
+        var runner = await execRunnerRepository.ReadExecRunnerAsync(id);
+        if (runner is null)
+            return NotFound();
+
+        var status = await execRunnerService.RefreshExecRunnerAsync(runner);
+
+        return new ExecRunnerResponseDTO(runner.Id, runner.Name, runner.Endpoint, runner.Enabled, status);
+    }
+
     [HttpPut("runners/{id}")]
     public async Task<ActionResult<ExecRunnerResponseDTO>> UpdateRunnerAsync(Guid id, [FromBody] ExecRunnerRequestDTO request)
     {
@@ -71,15 +83,15 @@ public class ManagementController(IExecRunnerRepository execRunnerRepository, IE
         return NoContent();
     }
 
-    [HttpPost]
-    public async Task<ActionResult<IReadOnlyList<string>>> SetPackagesAsync([FromBody] IReadOnlyList<string> request)
+    [HttpPost("runners{id}/packages")]
+    public async Task<ActionResult<IReadOnlyList<string>>> SetPackagesAsync(Guid id, [FromBody] IReadOnlyList<string> request)
     {
-        var runner = await execRunnerRepository.ReadExecRunnerAsync(request.RunnerId);
+        var runner = await execRunnerRepository.ReadExecRunnerAsync(id);
         if (runner is null)
             return NotFound();
 
-        await execRunnerService.SetPackagesAsync(runner, request.Packages);
+        await execRunnerService.SetPackagesAsync(runner, request);
 
-        return await execRunnerService.FetchAvailablePackagesAsync(runner);
+        return NoContent();
     }
 }
