@@ -3,6 +3,7 @@
 using DistributedCodingCompetition.ApiService.Client;
 using DistributedCodingCompetition.AuthService.Client;
 using DistributedCodingCompetition.Judge.Client;
+using DotNet.Testcontainers.Builders;
 using Microsoft.Extensions.Logging;
 using System.Diagnostics;
 
@@ -44,20 +45,29 @@ public class ApiFixture : IAsyncDisposable
             var authHttpClient = app.CreateHttpClient("authentication");
             var judgeHttpClient = app.CreateHttpClient("judge");
 
+            // create a container for the piston service
+            var container = new ContainerBuilder()
+                .WithImage("ghcr.io/engineer-man/piston")
+                .WithPortBinding(80, true)
+                .WithPortBinding(2000, 2000)
+                .WithWaitStrategy(Wait.ForUnixContainer().UntilPortIsAvailable(80))
+                .WithTmpfsMount("/piston/jobs")
+                .Build();
+
             // new process, start an execrunner and a piston simulating service
-            piston = Process.Start(new ProcessStartInfo
-            {
-                FileName = "dotnet",
-                Arguments = "run --urls=http://localhost:5228/",
-                WorkingDirectory = Path.GetFullPath($"{Environment.CurrentDirectory}\\..\\..\\..\\..\\PistonSimulator\\"),
-            });
+            //piston = Process.Start(new ProcessStartInfo
+            //{
+            //    FileName = "dotnet",
+            //    Arguments = "run --urls=http://localhost:5228/",
+            //    WorkingDirectory = Path.GetFullPath($"{Environment.CurrentDirectory}\\..\\..\\..\\..\\PistonSimulator\\"),
+            //});
 
             execRunner = Process.Start(new ProcessStartInfo
             {
                 FileName = "dotnet",
-                Arguments = "run --urls=http://localhost:5227/ -- Piston=http://localhost:5228/",
+                //Arguments = "run --urls=http://localhost:5227/ -- Piston=http://localhost:5228/",
+                Arguments = "run --urls=http://localhost:5227/ -- Piston=http://localhost:2000/",
                 WorkingDirectory = Path.GetFullPath($"{Environment.CurrentDirectory}\\..\\..\\..\\..\\..\\src\\DistributedCodingCompetition.ExecRunner\\"),
-
             });
 
             // Build service
