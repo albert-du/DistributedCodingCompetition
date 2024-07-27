@@ -58,7 +58,7 @@ public class ExecutionManagementService(HttpClient httpClient, ILogger<Execution
     public async Task<IEnumerable<string>> InstalledPackagesAsync(Guid id)
     {
         logger.LogInformation("Getting installed packages for ExecRunner {@Id}", id);
-        var response = await httpClient.GetAsync($"management/runners/{id}/packages");
+        var response = await httpClient.GetAsync($"management/runners/{id}/packages/installed");
         response.EnsureSuccessStatusCode();
         return await response.Content.ReadFromJsonAsync<IEnumerable<string>>() ?? throw new Exception("Failed to parse response");
     }

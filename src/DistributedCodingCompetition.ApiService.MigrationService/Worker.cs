@@ -39,8 +39,8 @@ public sealed class Worker(IServiceProvider serviceProvider, IHostApplicationLif
             activity?.RecordException(ex);
             throw;
         }
-
-        hostApplicationLifetime.StopApplication();
+        if (Convert.ToBoolean(configuration["ExitAfterMigration"]))
+            hostApplicationLifetime.StopApplication();
     }
 
     private static async Task EnsureDatabaseAsync(ContestContext dbContext, CancellationToken cancellationToken)

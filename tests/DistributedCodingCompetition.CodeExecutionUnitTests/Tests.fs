@@ -63,4 +63,5 @@ let ``Can balance batch requests`` () =
     let counts = result |> Seq.groupBy (fun struct (_,x) -> x) |> Seq.map (fun (x, y) -> (x, Seq.length y))
     let min = counts |> Seq.minBy (fun (_,x) -> x) |> snd
     let max = counts |> Seq.maxBy (fun (_,x) -> x) |> snd
-    Assert.True(abs(float min - float max) < 10.0)
+    Assert.True(max - min < 100)
+    

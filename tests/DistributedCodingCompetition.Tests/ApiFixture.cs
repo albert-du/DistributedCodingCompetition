@@ -47,15 +47,18 @@ public class ApiFixture : IAsyncDisposable
             var httpClient = app.CreateHttpClient("apiservice");
             var authHttpClient = app.CreateHttpClient("authentication");
             var judgeHttpClient = app.CreateHttpClient("judge");
+            var executionHttpClient = app.CreateHttpClient("codeexecution");
 
             // create a container for the piston service
             var container = new ContainerBuilder()
+                .WithName("TEST-PISTON")
                 .WithImage("ghcr.io/engineer-man/piston")
-                .WithPortBinding(80, true)
-                .WithPortBinding(2000, 2000)
-                .WithWaitStrategy(Wait.ForUnixContainer().UntilPortIsAvailable(80))
+                .WithPortBinding(2001, 2000)
+                .WithWaitStrategy(Wait.ForUnixContainer().UntilPortIsAvailable(2000))
                 .WithTmpfsMount("/piston/jobs")
                 .Build();
+
+            await container.StartAsync().ConfigureAwait(false);
 
             // new process, start an execrunner and a piston simulating service
             //piston = Process.Start(new ProcessStartInfo
@@ -69,7 +72,7 @@ public class ApiFixture : IAsyncDisposable
             {
                 FileName = "dotnet",
                 //Arguments = "run --urls=http://localhost:5227/ -- Piston=http://localhost:5228/",
-                Arguments = "run --urls=http://localhost:5227/ -- Piston=http://localhost:2000/",
+                Arguments = "run --urls=http://localhost:5227/ -- Piston=http://localhost:2001/",
                 WorkingDirectory = Path.GetFullPath($"{Environment.CurrentDirectory}\\..\\..\\..\\..\\..\\src\\DistributedCodingCompetition.ExecRunner\\"),
             });
 
@@ -86,8 +89,14 @@ public class ApiFixture : IAsyncDisposable
 
             JudgeService judgeService = new(judgeHttpClient, loggerFactory.CreateLogger<JudgeService>());
 
-            CodeExecutionService codeExecutionService = new(httpClient, loggerFactory.CreateLogger<CodeExecutionService>());
-            ExecutionManagementService executionManagementService = new(httpClient, loggerFactory.CreateLogger<ExecutionManagementService>());
+            CodeExecutionService codeExecutionService = new(executionHttpClient, loggerFactory.CreateLogger<CodeExecutionService>());
+            ExecutionManagementService executionManagementService = new(executionHttpClient, loggerFactory.CreateLogger<ExecutionManagementService>());
+
+            // clear the seeded exec runners and add a new one
+            var execRunners = await executionManagementService.ListExecRunnersAsync();
+            await Task.WhenAll(execRunners.Select(x => executionManagementService.DeleteExecRunnerAsync(x.Id)));
+
+            await executionManagementService.CreateExecRunnerAsync(new("test", "http://localhost:5227/", true, 100, "changeme"));
 
             // wait 8 seconds for the database migrations to run
             await Task.Delay(8000);

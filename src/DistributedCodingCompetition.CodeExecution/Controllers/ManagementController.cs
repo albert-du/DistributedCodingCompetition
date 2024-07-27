@@ -26,7 +26,9 @@ public class ManagementController(IExecRunnerRepository execRunnerRepository, IE
         {
             Name = request.Name,
             Endpoint = request.Endpoint,
-            Enabled = request.Enabled
+            Enabled = request.Enabled,
+            Weight = request.Weight,
+            Key = request.Key
         };
         await execRunnerRepository.CreateExecRunnerAsync(runner);
 
@@ -59,6 +61,8 @@ public class ManagementController(IExecRunnerRepository execRunnerRepository, IE
         runner.Name = request.Name;
         runner.Endpoint = request.Endpoint;
         runner.Enabled = request.Enabled;
+        runner.Weight = request.Weight;
+        runner.Key = request.Key;
 
         await execRunnerRepository.UpdateExecRunnerAsync(runner);
 
@@ -83,7 +87,7 @@ public class ManagementController(IExecRunnerRepository execRunnerRepository, IE
         return NoContent();
     }
 
-    [HttpPost("runners{id}/packages")]
+    [HttpPost("runners/{id}/packages")]
     public async Task<ActionResult<IReadOnlyList<string>>> SetPackagesAsync(Guid id, [FromBody] IReadOnlyList<string> request)
     {
         var runner = await execRunnerRepository.ReadExecRunnerAsync(id);
@@ -101,7 +105,7 @@ public class ManagementController(IExecRunnerRepository execRunnerRepository, IE
         var runner = await execRunnerRepository.ReadExecRunnerAsync(id);
         if (runner is null)
             return NotFound();
-
+        
         return Ok(await execRunnerService.FetchAvailablePackagesAsync(runner));
     }
 

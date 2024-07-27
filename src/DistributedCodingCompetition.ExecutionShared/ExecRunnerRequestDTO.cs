@@ -6,4 +6,6 @@
 /// <param name="Name"></param>
 /// <param name="Endpoint"></param>
 /// <param name="Enabled"></param>
-public record ExecRunnerRequestDTO(string Name, string Endpoint, bool Enabled);
+/// <param name="Weight"></param>
+/// <param name="Key"></param>
+public record ExecRunnerRequestDTO(string Name, string Endpoint, bool Enabled, int Weight, string Key);

@@ -73,7 +73,7 @@ public class ActiveRunnersService(IDistributedCache distributedCache, IExecRunne
             return null;
 
         // pull the exec runners from cache
-        var execRunnerString = await distributedCache.GetStringAsync(language);
+        var execRunnerString = await distributedCache.GetStringAsync($"RUNNERS-{language}");
         if (execRunnerString is null)
             return null;
 
@@ -117,7 +117,7 @@ public class ActiveRunnersService(IDistributedCache distributedCache, IExecRunne
             }
 
             // pull the exec runners from cache
-            var execRunnerString = await distributedCache.GetStringAsync(language);
+            var execRunnerString = await distributedCache.GetStringAsync($"RUNNERS-{language}");
             if (execRunnerString is null)
             {
                 foreach (var req in reqs)
