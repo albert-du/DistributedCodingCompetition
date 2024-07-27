@@ -118,7 +118,6 @@ public class EvaluationController(ILogger<EvaluationController> logger,
             logger.LogError("Problem {ProblemId} not found", submission.ProblemId);
             return;
         }
-
         // Execute the submission
         var execResults = await codeExecutionService.TryExecuteBatchAsync(testCases.Items.Select(testcase =>
             new ExecutionRequest
@@ -131,7 +130,8 @@ public class EvaluationController(ILogger<EvaluationController> logger,
         // start recording the scores.
         var possibleScore = 0;
         var score = 0;
-
+        Console.WriteLine("TestCases: " + testCases.Items.Count);
+        Console.WriteLine("ExecResults: " + execResults?.Count);
         if (execResults?.Count != testCases.Items.Count)
         {
             logger.LogError("Submission {SubmissionId} from {UserId} for problem {ProblemId} did not return the expected number of results", submission.Id, submission.UserId, submission.ProblemId);

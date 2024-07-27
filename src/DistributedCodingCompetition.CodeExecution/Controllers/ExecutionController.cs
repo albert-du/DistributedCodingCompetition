@@ -46,6 +46,7 @@ public class ExecutionController(ILogger<ExecutionController> logger, IActiveRun
         {
             if (execRunner is null)
             {
+                Console.WriteLine(request.Language);
                 logger.LogWarning("No available runners for requested language: \"{Language}\"", request.Language);
                 return StatusCode(503, $"No available runners for language: \"{request.Language}\"");
             }
