@@ -1,9 +1,5 @@
 ﻿namespace DistributedCodingCompetition.CodeExecution.Services;
 
-using System.Net;
-using DistributedCodingCompetition.CodeExecution.Models;
-using DistributedCodingCompetition.ExecutionShared;
-
 /// <inheritdoc />
 public class ExecRunnerService(HttpClient httpClient) : IExecRunnerService
 {

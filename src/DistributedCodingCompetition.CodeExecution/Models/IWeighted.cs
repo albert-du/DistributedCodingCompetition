@@ -1,4 +1,4 @@
-﻿namespace DistributedCodingCompetition.CodeExecution;
+﻿namespace DistributedCodingCompetition.CodeExecution.Models;
 
 /// <summary>
 /// Interface for weighted objects.

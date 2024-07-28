@@ -1,4 +1,3 @@
-using System.Text.Json;
 
 namespace DistributedCodingCompetition.ApiService.Client;
 
@@ -6,7 +5,7 @@ namespace DistributedCodingCompetition.ApiService.Client;
 /// A client for interacting with the DistributedCodingCompetition API.
 /// </summary>
 /// <typeparam name="TOwner">Owner Service</typeparam>
-/// <param name="httpClient">httpclient to use</param>
+/// <param name="httpClient">http client to use</param>
 /// <param name="logger">logger</param>
 /// <param name="prefix">url prefix</param>
 internal class ApiClient<TOwner>(HttpClient httpClient, ILogger<TOwner> logger, string prefix)

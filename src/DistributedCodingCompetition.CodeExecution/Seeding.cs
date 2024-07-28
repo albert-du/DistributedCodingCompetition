@@ -1,8 +1,5 @@
 ﻿namespace DistributedCodingCompetition.CodeExecution;
 
-using MongoDB.Driver;
-using DistributedCodingCompetition.CodeExecution.Services;
-
 /// <summary>
 /// Seeds the database with a default ExecRunner for development purposes
 /// </summary>

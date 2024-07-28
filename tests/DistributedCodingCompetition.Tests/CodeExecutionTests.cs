@@ -7,9 +7,9 @@ public class CodeExecutionTest(ApiFixture fixture) : IClassFixture<ApiFixture>
     [Fact]
     public async Task TestCodeExecution()
     {
-        var apis = await fixture.APIs;
-        var executionManagementService = apis.ExecutionManagementService;
-        var codeExecutionService = apis.CodeExecutionService;
+        var services = await fixture.APIs;
+        var executionManagementService = services.ExecutionManagementService;
+        var codeExecutionService = services.CodeExecutionService;
 
         var execRunners = await executionManagementService.ListExecRunnersAsync();
         Assert.NotEmpty(execRunners);
@@ -40,8 +40,8 @@ public class CodeExecutionTest(ApiFixture fixture) : IClassFixture<ApiFixture>
     [Fact]
     public async Task TestCodeExecutionService()
     {
-        var apis = await fixture.APIs;
-        var codeExecutionService = apis.CodeExecutionService;
+        var services = await fixture.APIs;
+        var codeExecutionService = services.CodeExecutionService;
 
         var languages = await codeExecutionService.AvailableLanguagesAsync();
         Assert.NotEmpty(languages);
@@ -61,8 +61,8 @@ public class CodeExecutionTest(ApiFixture fixture) : IClassFixture<ApiFixture>
     [Fact]
     public async Task TestBatchCodeExecutionService()
     {
-        var apis = await fixture.APIs;
-        var codeExecutionService = apis.CodeExecutionService;
+        var services = await fixture.APIs;
+        var codeExecutionService = services.CodeExecutionService;
 
         var languages = await codeExecutionService.AvailableLanguagesAsync();
         Assert.NotEmpty(languages);

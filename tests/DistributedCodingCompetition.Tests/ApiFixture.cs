@@ -21,18 +21,18 @@ public record struct APIs(IAuthService AuthService,
 
 public class ApiFixture : IAsyncDisposable
 {
-    readonly Task<APIs> apis;
+    private readonly Task<APIs> services;
 
-    public Task<APIs> APIs => apis;
+    public Task<APIs> APIs => services;
 
     DistributedApplication? app;
 
     Process? execRunner;
-    Process? piston;
+    //Process? piston;
 
     public ApiFixture()
     {
-        apis = Task.Run(async () =>
+        services = Task.Run(async () =>
         {
             // Arrange
             var appHost = await DistributedApplicationTestingBuilder.CreateAsync<Projects.DistributedCodingCompetition_AppHost>();
@@ -111,9 +111,9 @@ public class ApiFixture : IAsyncDisposable
             await app.DisposeAsync();
 
         execRunner?.Kill();
-        piston?.Kill();
+        //piston?.Kill();
 
         execRunner?.Dispose();
-        piston?.Dispose();
+        //piston?.Dispose();
     }
 }

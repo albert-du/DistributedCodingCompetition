@@ -44,6 +44,9 @@ public interface IExecutionManagementService
 
     /// <summary>
     /// Set the packages of an exec runner.
+    ///
+    /// While this returns immediately, the installation process continues behind the scenes on the exec runner.
+    /// Make sure to check the installed packages to see when the installation is complete.
     /// </summary>
     /// <param name="id"></param>
     /// <param name="packages"></param>
@@ -54,7 +57,7 @@ public interface IExecutionManagementService
     /// Get the installed packages of an exec runner.
     /// </summary>
     /// <param name="id"></param>
-    /// <returns></returns>
+    /// <returns>list of packages, or an empty list if installation in progress</returns>
     Task<IEnumerable<string>> InstalledPackagesAsync(Guid id);
 
     /// <summary>

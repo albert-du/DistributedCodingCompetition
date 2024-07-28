@@ -18,7 +18,6 @@ public interface ILoadBalancer<T, U> where U : IWeighted
     /// Balance a single request across exec runners.
     /// All exec runners must support the language.
     /// </summary>
-    /// <param name="request"></param>
     /// <param name="runners"></param>
     /// <returns></returns>
     U? BalanceRequest(IReadOnlyCollection<U> runners);

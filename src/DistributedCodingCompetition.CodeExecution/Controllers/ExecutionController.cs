@@ -1,9 +1,5 @@
 namespace DistributedCodingCompetition.CodeExecution.Controllers;
 
-using Microsoft.AspNetCore.Mvc;
-using DistributedCodingCompetition.CodeExecution.Services;
-using DistributedCodingCompetition.ExecutionShared;
-
 /// <summary>
 /// Controller for code execution.
 /// </summary>

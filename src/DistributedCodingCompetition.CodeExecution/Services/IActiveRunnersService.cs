@@ -1,8 +1,5 @@
 namespace DistributedCodingCompetition.CodeExecution.Services;
 
-using DistributedCodingCompetition.CodeExecution.Models;
-using DistributedCodingCompetition.ExecutionShared;
-
 /// <summary>
 /// Manages an active cache of exec runners.
 /// </summary>

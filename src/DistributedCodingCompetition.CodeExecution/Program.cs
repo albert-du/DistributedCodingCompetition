@@ -1,6 +1,15 @@
-using DistributedCodingCompetition.CodeExecution;
-using DistributedCodingCompetition.CodeExecution.Components;
-using DistributedCodingCompetition.CodeExecution.Services;
+global using System.Text.Json;
+global using System.Net;
+global using System.Threading.Tasks;
+global using Microsoft.Extensions.Caching.Distributed;
+global using MongoDB.Driver;
+global using DistributedCodingCompetition.CodeExecution;
+global using DistributedCodingCompetition.CodeExecution.Components;
+global using DistributedCodingCompetition.CodeExecution.Services;
+global using DistributedCodingCompetition.CodeExecution.Models;
+global using DistributedCodingCompetition.ExecutionShared;
+global using Microsoft.AspNetCore.Mvc;
+
 
 var builder = WebApplication.CreateBuilder(args);
 

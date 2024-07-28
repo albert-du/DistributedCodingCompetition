@@ -1,8 +1,5 @@
 ﻿namespace DistributedCodingCompetition.CodeExecution.Services;
 
-using DistributedCodingCompetition.CodeExecution.Models;
-using DistributedCodingCompetition.ExecutionShared;
-
 /// <summary>
 /// Service for managing exec runners.
 /// </summary>

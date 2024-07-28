@@ -104,7 +104,7 @@ public class ApiTests(ApiFixture fixture) : IClassFixture<ApiFixture>
         var api = await fixture.APIs;
         var usersService = api.UsersService;
 
-        var (success, user) = await usersService.TryReadUserByEmailAsync("invalid@exmple.com");
+        var (success, user) = await usersService.TryReadUserByEmailAsync("invalid@example.com");
         Assert.False(success);
         Assert.Null(user);
 
@@ -133,7 +133,7 @@ public class ApiTests(ApiFixture fixture) : IClassFixture<ApiFixture>
             Id = (await authService.TryRegisterAsync(faker.Person.Email, "password"))!.Value,
             Email = faker.Person.Email,
             FullName = faker.Person.FullName,
-            Username = "kdlsadfjldkfsdad",
+            Username = $"user{Random.Shared.Next()}",
             Birthday = faker.Person.DateOfBirth,
         });
         Assert.True(success);
@@ -266,7 +266,7 @@ public class ApiTests(ApiFixture fixture) : IClassFixture<ApiFixture>
             Id = (await authService.TryRegisterAsync(faker.Person.Email, "password"))!.Value,
             Email = faker.Person.Email,
             FullName = faker.Person.FullName,
-            Username = "kdlsadfjlk",
+            Username = $"user{Random.Shared.Next()}",
             Birthday = faker.Person.DateOfBirth,
         });
         Assert.NotNull(user);
@@ -345,7 +345,7 @@ public class ApiTests(ApiFixture fixture) : IClassFixture<ApiFixture>
         Assert.True(success);
         Assert.NotNull(contest);
 
-        (success, var contest0) = await contestsService.TryReadContestByJoinCodeAsync($"FLKJFGK:LJ{Random.Shared.Next()}");
+        (success, var contest0) = await contestsService.TryReadContestByJoinCodeAsync($"RANDOM_INVALID_JOIN_CODE{Random.Shared.Next()}");
 
         Assert.False(success);
         Assert.Null(contest0);
@@ -444,7 +444,7 @@ public class ApiTests(ApiFixture fixture) : IClassFixture<ApiFixture>
             Id = (await authService.TryRegisterAsync(faker.Person.Email, "password"))!.Value,
             Email = faker.Person.Email,
             FullName = faker.Person.FullName,
-            Username = "asdffffsasdfoi44",
+            Username = $"user{Random.Shared.Next()}",
             Birthday = faker.Person.DateOfBirth,
         });
 
@@ -519,7 +519,7 @@ public class ApiTests(ApiFixture fixture) : IClassFixture<ApiFixture>
             Id = (await authService.TryRegisterAsync(faker.Person.Email, "password"))!.Value,
             Email = faker.Person.Email,
             FullName = faker.Person.FullName,
-            Username = "asdf23rgdfsg",
+            Username = $"user{Random.Shared.Next()}",
             Birthday = faker.Person.DateOfBirth,
         });
 
@@ -561,7 +561,7 @@ public class ApiTests(ApiFixture fixture) : IClassFixture<ApiFixture>
         Assert.Equal(10, cases.Items.Count);
         for (var i = 0; i < 10; i++)
         {
-            // remove from the testcases set
+            // remove from the test cases set
             Assert.Contains(cases.Items[i].Id, testCases);
             testCases.Remove(cases.Items[i].Id);
         }
@@ -586,7 +586,7 @@ public class ApiTests(ApiFixture fixture) : IClassFixture<ApiFixture>
             Id = (await authService.TryRegisterAsync(faker.Person.Email, "password"))!.Value,
             Email = faker.Person.Email,
             FullName = faker.Person.FullName,
-            Username = "asdfoi44",
+            Username = $"user{Random.Shared.Next()}",
             Birthday = faker.Person.DateOfBirth,
         });
 
@@ -655,7 +655,7 @@ public class ApiTests(ApiFixture fixture) : IClassFixture<ApiFixture>
             Id = (await authService.TryRegisterAsync(faker.Person.Email, "password"))!.Value,
             Email = faker.Person.Email,
             FullName = faker.Person.FullName,
-            Username = "asdfoi44ff",
+            Username = $"users{Random.Shared.Next()}",
             Birthday = faker.Person.DateOfBirth,
         });
 
@@ -783,7 +783,7 @@ public class ApiTests(ApiFixture fixture) : IClassFixture<ApiFixture>
 
         Assert.True(success);
 
-        // create a few testcases
+        // create a few test cases
 
         for (var i = 0; i < 10; i++)
         {
@@ -921,7 +921,7 @@ public class ApiTests(ApiFixture fixture) : IClassFixture<ApiFixture>
 
         Assert.True(success);
 
-        // create a few testcases
+        // create a few test cases
 
         for (var i = 0; i < 10; i++)
         {
@@ -962,7 +962,7 @@ public class ApiTests(ApiFixture fixture) : IClassFixture<ApiFixture>
         }
 
         // create a submission
-        // using 'test1' which puts stdin back in stdout
+        // using 'test1' which puts standard in back in standard out
         (success, var submission) = await submissionsService.TryCreateSubmissionAsync(new()
         {
             Language = "python=3.12.0",

@@ -1,9 +1,11 @@
+global using System.Text.Json;
 global using System.Net.Http.Json;
 global using Microsoft.Extensions.Logging;
 global using Microsoft.Extensions.DependencyInjection;
 global using DistributedCodingCompetition.ApiService.Models;
 
 namespace DistributedCodingCompetition.ApiService.Client;
+
 /// <summary>
 /// Extension methods for dependency injection.
 /// </summary>

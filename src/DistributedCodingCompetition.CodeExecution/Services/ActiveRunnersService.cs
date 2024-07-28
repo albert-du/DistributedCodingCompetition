@@ -1,14 +1,9 @@
 namespace DistributedCodingCompetition.CodeExecution.Services;
 
-using System.Threading.Tasks;
-using Microsoft.Extensions.Caching.Distributed;
-using DistributedCodingCompetition.CodeExecution.Models;
-using DistributedCodingCompetition.ExecutionShared;
-using System.Text.Json;
-
 /// <inheritdoc/>
 public class ActiveRunnersService(IDistributedCache distributedCache, IExecRunnerRepository execRunnerRepository, IExecRunnerService execRunnerService) : IActiveRunnersService
 {
+    private readonly LoadBalancer<ExecutionRequest, RunnerWeight> balancer = new();
 
     /// <inheritdoc/>
     public async Task IndexExecRunnersAsync()
@@ -20,22 +15,20 @@ public class ActiveRunnersService(IDistributedCache distributedCache, IExecRunne
 
         // read all the exec runners
         var runners = await execRunnerRepository.GetExecRunnersAsync(enabled: true);
-        var tasks = runners.Select(execRunnerService.RefreshExecRunnerAsync).ToArray();
-        List<RunnerStatus?> statuses = [];
-        foreach (var task in tasks)
-            statuses.Add(await task);
+        var statuses = await Task.WhenAll(runners.Select(execRunnerService.RefreshExecRunnerAsync));
 
         Dictionary<string, List<ExecRunner>> languageMap = [];
-        for (var i = 0; i < tasks.Length; i++)
+        for (var i = 0; i < statuses.Length; i++)
         {
             var status = statuses[i];
             var runner = runners[i];
             if (status?.Ready is true)
                 foreach (var language in status.Languages.Split('\n'))
                 {
-                    if (!languageMap.ContainsKey(language))
-                        languageMap[language] = [];
-                    languageMap[language].Add(runner);
+                    if (languageMap.TryGetValue(language, out var execRunners))
+                        execRunners.Add(runner);
+                    else
+                        languageMap[language] = [runner];
                 }
         }
 
@@ -57,16 +50,15 @@ public class ActiveRunnersService(IDistributedCache distributedCache, IExecRunne
 
         // iterate through the exec runners and set the individual values
         foreach (var runner in runners)
-        {
-            var runnerString = JsonSerializer.Serialize(runner);
-            distributedCache.SetString(runner.Id.ToString(), runnerString, options);
-        }
+            distributedCache.SetString(runner.Id.ToString(), JsonSerializer.Serialize(runner), options);
+
         distributedCache.SetString("languages", string.Join(';', languageMap.Keys), options);
     }
 
     /// <inheritdoc/>
     public async Task<ExecRunner?> FindExecRunnerAsync(string language)
     {
+        // this will re-index the exec runners if they are not found
         var languages = await GetLanguagesAsync();
 
         if (!languages.Contains(language))
@@ -86,16 +78,12 @@ public class ActiveRunnersService(IDistributedCache distributedCache, IExecRunne
         }).ToArray();
 
         // select a random exec runner
-        LoadBalancer<ExecutionRequest, RunnerWeight> balancer = new();
 
         var id = balancer.BalanceRequest([.. execRunners.Select(x => new RunnerWeight(x.Item1, x.Item2))]);
 
-        var runnerString = await distributedCache.GetStringAsync(id.ToString());
-
-        if (runnerString is null)
-            return null;
-
-        return JsonSerializer.Deserialize<ExecRunner>(runnerString);
+        return await distributedCache.GetStringAsync(id.ToString()) is string runnerString
+            ? JsonSerializer.Deserialize<ExecRunner>(runnerString)
+            : null;
     }
 
     /// <inheritdoc/>
@@ -135,7 +123,6 @@ public class ActiveRunnersService(IDistributedCache distributedCache, IExecRunne
             // select a random exec runner
 
             var runners = execRunners.Select(x => new RunnerWeight(x.Item1, x.Item2)).ToArray();
-            LoadBalancer<ExecutionRequest, RunnerWeight> balancer = new();
             var pairs = balancer.BalanceRequests(runners, reqs);
             foreach (var (request, runner) in pairs)
             {
@@ -154,9 +141,13 @@ public class ActiveRunnersService(IDistributedCache distributedCache, IExecRunne
     public async Task<IEnumerable<string>> GetLanguagesAsync()
     {
         var languages = await distributedCache.GetStringAsync("languages");
+
         if (languages is null)
+        {
             await IndexExecRunnersAsync();
-        languages = await distributedCache.GetStringAsync("languages");
+            languages = await distributedCache.GetStringAsync("languages");
+        }
+
         return languages?.Split(';') ?? [];
     }
 

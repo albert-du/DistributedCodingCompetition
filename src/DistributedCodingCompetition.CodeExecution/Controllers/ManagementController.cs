@@ -1,15 +1,19 @@
 ﻿namespace DistributedCodingCompetition.CodeExecution.Controllers;
 
-using DistributedCodingCompetition.CodeExecution.Services;
-using DistributedCodingCompetition.CodeExecution.Models;
-using DistributedCodingCompetition.ExecutionShared;
-using Microsoft.AspNetCore.Mvc;
-using Microsoft.AspNetCore.Http.HttpResults;
-
+/// <summary>
+/// Controller for code execution management.
+/// </summary>
+/// <param name="execRunnerRepository"></param>
+/// <param name="execRunnerService"></param>
+/// <param name="activeRunnersService"></param>
 [ApiController]
 [Route("[controller]")]
 public class ManagementController(IExecRunnerRepository execRunnerRepository, IExecRunnerService execRunnerService, IActiveRunnersService activeRunnersService) : ControllerBase
 {
+    /// <summary>
+    /// List all the runners.
+    /// </summary>
+    /// <returns></returns>
     [HttpGet("runners")]
     public async Task<IEnumerable<ExecRunnerResponseDTO>> GetRunnersAsync()
     {
@@ -19,6 +23,11 @@ public class ManagementController(IExecRunnerRepository execRunnerRepository, IE
         return runners.Select((r, i) => new ExecRunnerResponseDTO(r.Id, r.Name, r.Endpoint, r.Enabled, statuses[i]));
     }
 
+    /// <summary>
+    /// Register a new runner.
+    /// </summary>
+    /// <param name="request"></param>
+    /// <returns></returns>
     [HttpPost("runners")]
     public async Task<ActionResult<ExecRunnerResponseDTO>> CreateRunnerAsync([FromBody] ExecRunnerRequestDTO request)
     {
@@ -34,11 +43,16 @@ public class ManagementController(IExecRunnerRepository execRunnerRepository, IE
 
         var status = await execRunnerService.RefreshExecRunnerAsync(runner);
 
-        _ = activeRunnersService.IndexExecRunnersAsync();
+        await activeRunnersService.IndexExecRunnersAsync();
 
         return new ExecRunnerResponseDTO(runner.Id, runner.Name, runner.Endpoint, runner.Enabled, status);
     }
 
+    /// <summary>
+    /// Get a runner by id.
+    /// </summary>
+    /// <param name="id"></param>
+    /// <returns></returns>
     [HttpGet("runners/{id}")]
     public async Task<ActionResult<ExecRunnerResponseDTO>> GetRunnerAsync(Guid id)
     {
@@ -51,6 +65,12 @@ public class ManagementController(IExecRunnerRepository execRunnerRepository, IE
         return new ExecRunnerResponseDTO(runner.Id, runner.Name, runner.Endpoint, runner.Enabled, status);
     }
 
+    /// <summary>
+    /// Update a runner.
+    /// </summary>
+    /// <param name="id"></param>
+    /// <param name="request"></param>
+    /// <returns></returns>
     [HttpPut("runners/{id}")]
     public async Task<ActionResult<ExecRunnerResponseDTO>> UpdateRunnerAsync(Guid id, [FromBody] ExecRunnerRequestDTO request)
     {
@@ -68,11 +88,16 @@ public class ManagementController(IExecRunnerRepository execRunnerRepository, IE
 
         var status = await execRunnerService.RefreshExecRunnerAsync(runner);
 
-        _ = activeRunnersService.IndexExecRunnersAsync();
+        await activeRunnersService.IndexExecRunnersAsync();
 
         return new ExecRunnerResponseDTO(runner.Id, runner.Name, runner.Endpoint, runner.Enabled, status);
     }
 
+    /// <summary>
+    /// Delete a runner.
+    /// </summary>
+    /// <param name="id"></param>
+    /// <returns></returns>
     [HttpDelete("runners/{id}")]
     public async Task<ActionResult> DeleteRunnerAsync(Guid id)
     {
@@ -87,6 +112,12 @@ public class ManagementController(IExecRunnerRepository execRunnerRepository, IE
         return NoContent();
     }
 
+    /// <summary>
+    /// Set the packages for a runner.
+    /// </summary>
+    /// <param name="id"></param>
+    /// <param name="request"></param>
+    /// <returns></returns>
     [HttpPost("runners/{id}/packages")]
     public async Task<ActionResult<IReadOnlyList<string>>> SetPackagesAsync(Guid id, [FromBody] IReadOnlyList<string> request)
     {
@@ -99,16 +130,26 @@ public class ManagementController(IExecRunnerRepository execRunnerRepository, IE
         return NoContent();
     }
 
+    /// <summary>
+    /// Read the available packages for a runner.
+    /// </summary>
+    /// <param name="id"></param>
+    /// <returns></returns>
     [HttpGet("runners/{id}/packages/available")]
     public async Task<ActionResult<IReadOnlyList<string>>> GetPackagesAsync(Guid id)
     {
         var runner = await execRunnerRepository.ReadExecRunnerAsync(id);
         if (runner is null)
             return NotFound();
-        
+
         return Ok(await execRunnerService.FetchAvailablePackagesAsync(runner));
     }
 
+    /// <summary>
+    /// Read the installed packages for a runner.
+    /// </summary>
+    /// <param name="id"></param>
+    /// <returns></returns>
     [HttpGet("runners/{id}/packages/installed")]
     public async Task<ActionResult<IReadOnlyList<string>>> GetInstalledPackagesAsync(Guid id)
     {
@@ -119,7 +160,11 @@ public class ManagementController(IExecRunnerRepository execRunnerRepository, IE
         return Ok(status?.Packages.Split('\n') ?? []);
     }
 
-
+    /// <summary>
+    /// Read the languages available for a runner.
+    /// </summary>
+    /// <param name="id"></param>
+    /// <returns></returns>
     [HttpGet("runners/{id}/languages")]
     public async Task<ActionResult<IEnumerable<string>>> GetLanguagesAsync(Guid id)
     {
