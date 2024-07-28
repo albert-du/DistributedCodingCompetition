@@ -95,6 +95,9 @@ public class ManagementController(IConfiguration configuration, HttpClient httpC
         if (key != configuration["Key"])
             return Unauthorized();
 
+        if (installing)
+            return Ok(new { });
+
         var packages = await httpClient.GetFromJsonAsync<IReadOnlyList<Package>>(configuration["Piston"] + "api/v2/packages") ?? [];
 
         return Ok(packages.Where(x => x.Installed).Select(x => $"{x.Name}={x.Version}").Where(x => !string.IsNullOrWhiteSpace(x)));

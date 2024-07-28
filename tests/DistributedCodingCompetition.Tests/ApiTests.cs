@@ -955,6 +955,10 @@ public class ApiTests(ApiFixture fixture) : IClassFixture<ApiFixture>
             Assert.NotNull(firstRunner);
             // install python 3.12.0
             await executionManagementService.SetPackagesAsync(firstRunner.Id, ["python=3.12.0"]);
+
+            // loop until it's installed
+            while (!(await executionManagementService.InstalledPackagesAsync(firstRunner.Id)).Contains("python=3.12.0"))
+                await Task.Delay(500);
         }
 
         // create a submission
