@@ -864,6 +864,8 @@ public class ApiTests(ApiFixture fixture) : IClassFixture<ApiFixture>
         var testCasesService = api.TestCasesService;
         var submissionsService = api.SubmissionsService;
         var judgeService = api.JudgeService;
+        var executionService = api.CodeExecutionService;
+        var executionManagementService = api.ExecutionManagementService;
 
         Faker faker = new();
         // create a user, no auth needed
@@ -942,25 +944,43 @@ public class ApiTests(ApiFixture fixture) : IClassFixture<ApiFixture>
         success = await contestsService.TryJoinPublicContestAsync(contest.Id, participant!.Id);
         Assert.True(success);
 
+        // make sure python 3.12.0 is available
+        var languages = await executionService.AvailableLanguagesAsync();
+        if (!languages.Contains("python=3.12.0"))
+        {
+            // grab the first runner
+            var execRunners = await executionManagementService.ListExecRunnersAsync();
+            Assert.NotEmpty(execRunners);
+            var firstRunner = execRunners[0];
+            Assert.NotNull(firstRunner);
+            // install python 3.12.0
+            await executionManagementService.SetPackagesAsync(firstRunner.Id, ["python=3.12.0"]);
+        }
+
         // create a submission
         // using 'test1' which puts stdin back in stdout
         (success, var submission) = await submissionsService.TryCreateSubmissionAsync(new()
         {
-            Language = "test=1.0",
+            Language = "python=3.12.0",
             ProblemId = problem!.Id,
             ContestId = contest!.Id,
             UserId = participant!.Id,
-            Code = "test1",
+            Code = "print(input())",
         });
 
         Assert.True(success);
         Assert.NotNull(submission);
 
+        // make sure it can be read back
+        (success, var submission2) = await submissionsService.TryReadSubmissionAsync(submission!.Id);
+        Assert.True(success);
+        Assert.NotNull(submission2);
+
         var error = await judgeService.JudgeAsync(submission!.Id);
         Assert.Null(error);
 
         // reread the submission
-        (success, var submission2) = await submissionsService.TryReadSubmissionAsync(submission!.Id);
+        (success, submission2) = await submissionsService.TryReadSubmissionAsync(submission!.Id);
         Assert.True(success);
         Assert.NotNull(submission2);
         Assert.NotEqual(submission, submission2);
