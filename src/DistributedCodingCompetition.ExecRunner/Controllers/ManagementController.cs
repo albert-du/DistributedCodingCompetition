@@ -5,21 +5,27 @@ using DistributedCodingCompetition.ExecutionShared;
 using System.Text;
 using System.Net.Http;
 using System.Text.Json.Serialization;
+using Microsoft.Extensions.Logging;
+using Microsoft.Extensions.DependencyInjection;
 
 /// <summary>
 /// Management Controller for ExecRunner
 /// </summary>
 /// <param name="configuration"></param>
 /// <param name="httpClient"></param>
+/// <param name="logger"></param>
+/// <param name="serviceScopeFactory"></param>
 [Route("api/[controller]")]
 [ApiController]
-public class ManagementController(IConfiguration configuration, HttpClient httpClient) : ControllerBase
+public class ManagementController(IConfiguration configuration, HttpClient httpClient, ILogger<ManagementController> logger, IServiceScopeFactory serviceScopeFactory) : ControllerBase
 {
     private readonly static DateTime startTime = DateTime.UtcNow;
     static bool installing = false;
     static bool selfCheck = false;
 
     static bool Available => !installing && selfCheck;
+
+    static string? installationResult;
 
     /// <summary>
     /// Get the status of the runner
@@ -31,6 +37,25 @@ public class ManagementController(IConfiguration configuration, HttpClient httpC
     {
         if (key != configuration["Key"])
             return Unauthorized();
+
+        if (installing)
+        {
+            logger.LogInformation("Installation in progress");
+            return new RunnerStatus
+            {
+                Languages = string.Empty,
+                Packages = string.Empty,
+                TimeStamp = DateTime.UtcNow,
+                SystemInfo = SystemInfo(),
+                Version = "1.0.0",
+                Ready = false,
+                Message = "Installation in progress",
+                Name = configuration["Name"] ?? "EXEC",
+                Uptime = DateTime.UtcNow - startTime,
+                ExecutionCount = ExecutionController.ExecutionCount,
+            };
+        }
+
         string? languages = null;
         string packages = string.Empty;
         selfCheck = true;
@@ -49,7 +74,7 @@ public class ManagementController(IConfiguration configuration, HttpClient httpC
             TimeStamp = DateTime.UtcNow,
             Version = "1.0.0",
             Ready = Available,
-            Message = installing ? "Installation in progress" : !selfCheck ? "Self Check Failed" : "Ready",
+            Message = installationResult ?? (installing ? "Installation in progress" : !selfCheck ? "Self Check Failed" : "Ready"),
             Name = configuration["Name"] ?? "EXEC",
             Uptime = DateTime.UtcNow - startTime,
             Languages = languages ?? string.Empty,
@@ -69,6 +94,9 @@ public class ManagementController(IConfiguration configuration, HttpClient httpC
     {
         if (key != configuration["Key"])
             return Unauthorized();
+
+        if (installing)
+            return Ok(new { });
 
         var packages = await httpClient.GetFromJsonAsync<IReadOnlyList<Package>>(configuration["Piston"] + "api/v2/packages") ?? [];
 
@@ -107,16 +135,39 @@ public class ManagementController(IConfiguration configuration, HttpClient httpC
             return BadRequest("Bad Spec");
         if (installing)
             return BadRequest("Already installing");
+        var oldSpec = (await httpClient.GetFromJsonAsync<IReadOnlyList<Package>>(configuration["Piston"] + "api/v2/packages") ?? []).Where(x => x.Installed).Select(x => $"{x.Name}={x.Version}").Where(x => !string.IsNullOrWhiteSpace(x));
+
+        HashSet<string> removed = new(oldSpec);
+        removed.ExceptWith(lines);
+
+        HashSet<string> installed = new(lines);
+        installed.ExceptWith(oldSpec);
+
+        if (installed.Count == 0 && removed.Count == 0)
+            return Ok("No changes");
+
+        // fire and forget
+        _ = Task.Run(async () =>
+        {
+            using var scope = serviceScopeFactory.CreateScope();
+            var httpClient = scope.ServiceProvider.GetRequiredService<HttpClient>();
+            await InstallAsync(installed, removed, httpClient);
+        });
+
+        return Ok("Installation started");
+    }
+
+    private async Task InstallAsync(IEnumerable<string> install, IEnumerable<string> remove, HttpClient httpClient)
+    {
+        Console.WriteLine("Starting installation");
         installing = true;
         try
         {
-            var oldSpec = (await httpClient.GetFromJsonAsync<IReadOnlyList<Package>>(configuration["Piston"] + "api/v2/packages") ?? []).Where(x => x.Installed).Select(x => $"{x.Name}={x.Version}").Where(x => !string.IsNullOrWhiteSpace(x));
-            HashSet<string> removed = new(oldSpec);
-            removed.ExceptWith(lines);
             List<string> response = [];
             // Uninstall removed packages
-            foreach (var package in removed)
+            foreach (var package in remove)
             {
+                Console.WriteLine($"Removing {package}");
                 var tokens = package.Split('=');
                 var name = tokens[0];
                 var version = tokens[1];
@@ -133,11 +184,10 @@ public class ManagementController(IConfiguration configuration, HttpClient httpC
                     response.Add($"ERROR: Could not remove {name}={version}; {await resp.Content.ReadAsStringAsync()}");
             }
 
-            HashSet<string> installed = new(lines);
-            installed.ExceptWith(oldSpec);
             // Install new packages
-            foreach (var package in installed)
+            foreach (var package in install)
             {
+                Console.WriteLine($"Installing {package}");
                 var tokens = package.Split('=');
                 var name = tokens[0];
                 var version = tokens[1];
@@ -154,12 +204,15 @@ public class ManagementController(IConfiguration configuration, HttpClient httpC
                 else
                     response.Add($"ERROR: Could not install {name}={version}; {await resp.Content.ReadAsStringAsync()}");
             }
-            return Ok(response.Count is 0 ? "Already to spec" : string.Join('\n', response));
+            installationResult = string.Join('\n', response);
         }
         finally
         {
             installing = false;
         }
+        Console.WriteLine("Installation complete");
+        await Task.Delay(30_000);
+        installationResult = null;
     }
 
     /// <summary>
@@ -193,6 +246,8 @@ public class ManagementController(IConfiguration configuration, HttpClient httpC
     /// <returns></returns>
     private async Task<string> GetInstalledPackages()
     {
+        if (installing)
+            return string.Empty;
         var packages = await httpClient.GetFromJsonAsync<IReadOnlyList<Package>>(configuration["Piston"] + "api/v2/packages");
         if (packages == null)
             return string.Empty;

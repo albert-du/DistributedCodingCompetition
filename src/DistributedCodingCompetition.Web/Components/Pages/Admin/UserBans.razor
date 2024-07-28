@@ -23,13 +23,13 @@ else
                 </div>
 
                 <div>
-                    <button class="rounded-lg px-2 py-1 bg-rose-500 text-slate-200" @onclick="() => UnbanUserAsync(user)">Unban</button>
+                    <button class="px-2 py-1 rounded-lg bg-rose-500 text-slate-200" @onclick="() => UnbanUserAsync(user)">Unban</button>
                 </div>
             </div>
         }
         <div class="flex">
-            <button class="rounded-lg px-2 py-1 bg-rose-500 text-slate-200" @onclick=Next enabled=@banned.NextEnabled>Next</button>
-            <button class="rounded-lg px-2 py-1 bg-rose-500 text-slate-200" @onclick=Prev enabled=@banned.PreviousEnabled>Prev</button>
+            <button class="px-2 py-1 rounded-lg bg-rose-500 text-slate-200" @onclick=Next enabled=@banned.NextEnabled>Next</button>
+            <button class="px-2 py-1 rounded-lg bg-rose-500 text-slate-200" @onclick=Prev enabled=@banned.PreviousEnabled>Prev</button>
         </div>
     </div>
 }

@@ -40,7 +40,7 @@ public sealed class UsersService(HttpClient httpClient, ILogger<UsersService> lo
 
     /// <inheritdoc/>
     public Task<(bool, UserResponseDTO?)> TryReadUserByEmailAsync(string email) =>
-        apiClient.GetAsync<UserResponseDTO>($"/email/{email}");
+        apiClient.GetAsync<UserResponseDTO>($"/email/{Uri.EscapeDataString(email)}");
 
     /// <inheritdoc/>
     public Task<(bool, UserResponseDTO?)> TryReadUserByUsernameAsync(string username) =>

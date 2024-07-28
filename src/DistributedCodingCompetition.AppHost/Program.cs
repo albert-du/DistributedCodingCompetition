@@ -6,7 +6,7 @@ var postgres = builder.AddPostgres("postgres").WithPgAdmin();
 
 var mongo = builder.AddMongoDB("mongo");
 
-var executorDatabase = postgres.AddDatabase("evaluationdb");
+var executorDatabase = mongo.AddDatabase("evaluationdb");
 
 var contestDatabase = postgres.AddDatabase("contestdb");
 
@@ -22,6 +22,7 @@ var codePersistence = builder.AddProject<Projects.DistributedCodingCompetition_C
 
 var codeExecution = builder.AddProject<Projects.DistributedCodingCompetition_CodeExecution>("codeexecution")
                            .WithExternalHttpEndpoints()
+                           .WithReference(cache)
                            .WithReference(executorDatabase);
 
 var apiService = builder.AddProject<Projects.DistributedCodingCompetition_ApiService>("apiservice")

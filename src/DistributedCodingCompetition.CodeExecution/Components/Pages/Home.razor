@@ -1,14 +1,15 @@
 ﻿@rendermode InteractiveServer
 @page "/"
-@inject ExecRunnerContext ExecRunnerContext
+@inject IExecRunnerRepository ExecRunnerRepository
 @inject NavigationManager NavigationManager
-@inject IRefreshEventService RefreshEventService
-@implements IDisposable
+@inject IActiveRunnersService ActiveRunnersService
+@inject IExecRunnerService ExecRunnerService
+@using DistributedCodingCompetition.ExecutionShared
 
 <div class="mx-12 mt-4">
     <h3 class="text-2xl">Execution Runners</h3>
 
-    @if (execRunners == null)
+    @if (runners == null)
     {
         <p><em>Loading...</em></p>
     }
@@ -31,41 +32,54 @@
                 </tr>
             </thead>
             <tbody>
-                @foreach (var runner in execRunners)
+                @foreach (var (runner, status) in runners)
                 {
                     <tr class="border border-slate-400 ">
                         <td class="border border-slate-300">@runner.Name</td>
                         <td class="border border-slate-300">@runner.Endpoint</td>
-                        <td class="border border-slate-300">@((runner.Available && runner.Enabled ? runner.Weight : 0) *
-                    100 / totalWeight) &percnt;</td>
+                        @if (totalWeight != 0)
+                        {
+                            <td class="border border-slate-300">
+                                @((status?.Ready is true && runner.Enabled ? runner.Weight : 0) *
+                                    100 / totalWeight) &percnt;
+                            </td>
+                        }
+                        else
+                        {
+                            <td class="border border-slate-300">0%</td>
+                        }
                         <td class="border border-slate-300">@runner.Enabled</td>
-                        <td class="border border-slate-300">@runner.Available</td>
-                        <td class="border border-slate-300">@runner.Live</td>
-                        <td class="border border-slate-300">@runner.Status</td>
+                        <td class="border border-slate-300">@(status?.Ready is true)</td>
+                        <td class="border border-slate-300">@(status is not null)</td>
+                        <td class="border border-slate-300">@status?.Message</td>
                         <td class="border border-slate-300">
-                            @foreach (var line in runner.SystemInfo.Split('\n'))
+                            @foreach (var line in status?.SystemInfo.Split('\n') ?? [])
                             {
                                 <div>@line</div>
                             }
 
                         </td>
                         <td class="border border-slate-300">
-                            @foreach (var p in runner.Packages)
+                            @foreach (var p in status?.Packages.Split('\n') ?? [])
                             {
                                 <div>@p</div>
                             }
                         </td>
                         <td class="border border-slate-300">
-                            @foreach (var l in runner.Languages)
+                            @foreach (var l in status?.Languages.Split('\n') ?? [])
                             {
                                 <div>@l</div>
                             }
                         </td>
                         <td class="border border-slate-300">
                             <button class="p-1 mx-1 my-2 bg-gray-200 rounded-sm hover:bg-gray-300"
-                                @onclick="() => EditRunner(runner.Id)">Edit</button>
+                                    @onclick="() => EditRunner(runner.Id)">
+                                Edit
+                            </button>
                             <button class="p-1 mx-1 my-2 rounded-sm bg-rose-500 hover:rose-gray-600"
-                                @onclick="() => DeleteRunner(runner.Id)">Delete</button>
+                                    @onclick="() => DeleteRunnerAsync(runner.Id)">
+                                Delete
+                            </button>
                         </td>
                     </tr>
                 }
@@ -76,59 +90,50 @@
 </div>
 
 @code {
-    private DateTime lastRefreshTime = DateTime.Now;
-    private List<ExecRunner>? execRunners;
-    private int totalWeight = -1;
-    protected override Task OnInitializedAsync()
-    {
-        execRunners = ExecRunnerContext.ExecRunners.ToList();
-        var t = execRunners.Where(r => r.Available && r.Enabled).Sum(r => r.Weight);
-        if (t == 0) t = -1;
-        totalWeight = t;
-        return Task.CompletedTask;
-    }
+    int totalWeight = -1;
 
-    protected override Task OnAfterRenderAsync(bool firstRender)
-    {
-        if (firstRender)
-        {
-            RefreshEventService.RefreshEvent += RefreshRunners;
-        }
-        return Task.CompletedTask;
-    }
-    bool updateInProg;
-    private async void RefreshRunners(object? sender, EventArgs args)
-    {
-        if (updateInProg)
-            return;
-        updateInProg = true;
-        execRunners = ExecRunnerContext.ExecRunners.ToList();
-        var t = execRunners.Where(r => r.Available && r.Enabled).Sum(r => r.Weight);
-        if (t == 0) t = -1;
-        totalWeight = t;
-        lastRefreshTime = DateTime.Now;
-        await InvokeAsync(StateHasChanged);
-        updateInProg = false;
-    }
+    IReadOnlyList<(ExecRunner, RunnerStatus?)>? runners;
 
-    private void AddRunner() =>
+    void AddRunner() =>
         NavigationManager.NavigateTo("execrunner");
 
-    private void EditRunner(Guid runnerId) =>
+    void EditRunner(Guid runnerId) =>
         NavigationManager.NavigateTo($"execrunner/{runnerId}");
 
-    private async Task DeleteRunner(Guid runnerId)
+    async Task DeleteRunnerAsync(Guid runnerId)
     {
-        var runner = await ExecRunnerContext.ExecRunners.FindAsync(runnerId);
-        if (runner is null)
-            return;
-        ExecRunnerContext.ExecRunners.Remove(runner);
-        await ExecRunnerContext.SaveChangesAsync();
-        execRunners?.Remove(runner); // Update UI
+        await ExecRunnerRepository.DeleteExecRunnerAsync(runnerId);
+        await ActiveRunnersService.IndexExecRunnersAsync();
+        await RefreshRunnersAsync();
     }
 
-    public void Dispose()
+    protected override async Task OnAfterRenderAsync(bool firstRender)
     {
-        RefreshEventService.RefreshEvent -= RefreshRunners;
+        if (firstRender)
+            await RefreshRunnersAsync();
+    }
+
+    async Task RefreshRunnersAsync()
+    {
+        runners = null;
+        totalWeight = 0;
+        await InvokeAsync(StateHasChanged);
+        var execRunners = await ExecRunnerRepository.GetExecRunnersAsync();
+        var statuses = new Task<RunnerStatus?>[execRunners.Count];
+        for (int i = 0; i < execRunners.Count; i++)
+            statuses[i] = ExecRunnerService.RefreshExecRunnerAsync(execRunners[i]);
+
+        await Task.WhenAll(statuses);
+        List<(ExecRunner, RunnerStatus?)> rv = new();
+        for (var i = 0; i < execRunners.Count; i++)
+        {
+            var runner = execRunners[i];
+            var status = await statuses[i];
+            rv.Add((runner, status));
+            if (status?.Ready is true && runner.Enabled)
+                totalWeight += runner.Weight;
+        }
+        runners = rv;
+        await InvokeAsync(StateHasChanged);
     }
 }

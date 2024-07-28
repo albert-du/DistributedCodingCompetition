@@ -1,49 +1,38 @@
 ﻿namespace DistributedCodingCompetition.CodeExecution.Services;
 
-using System.Net;
-using DistributedCodingCompetition.CodeExecution.Models;
-using DistributedCodingCompetition.ExecutionShared;
-
 /// <inheritdoc />
 public class ExecRunnerService(HttpClient httpClient) : IExecRunnerService
 {
     /// <inheritdoc />
-    public async Task RefreshExecRunnerAsync(ExecRunner runner)
+    public async Task<RunnerStatus?> RefreshExecRunnerAsync(ExecRunner runner)
     {
         HttpResponseMessage result;
         try
         {
             result = await httpClient.GetAsync($"{runner.Endpoint}{(runner.Endpoint.EndsWith('/') ? "" : "/")}api/management?key={runner.Key}");
-
         }
         catch (HttpRequestException)
         {
-            runner.Live = false;
-            runner.Available = false;
-            runner.Status = "Offline";
-            return;
+            return null;
         }
 
         if (result.StatusCode is HttpStatusCode.Unauthorized)
-        {
-            runner.Authenticated = false;
-            runner.Available = false;
-            return;
-        }
+            return new()
+            {
+                Name = runner.Name,
+                Version = "Unknown",
+                Uptime = TimeSpan.Zero,
+                Ready = false,
+                TimeStamp = DateTime.UtcNow,
+                Message = "Failed to authenticate to this execution runner",
+                Languages = string.Empty,
+                Packages = string.Empty,
+                SystemInfo = string.Empty,
+                ExecutionCount = 0
+            };
         if (result.StatusCode is not HttpStatusCode.OK)
-        {
-            runner.Available = false;
-            return;
-        }
-        var status = await result.Content.ReadFromJsonAsync<RunnerStatus>() ?? throw new Exception("execrunner status empty");
-        runner.Authenticated = true;
-        runner.Live = true;
-        runner.Available = status.Ready;
-        runner.Languages = [.. status.Languages.Split('\n')];
-        runner.Packages = [.. status.Packages.Split('\n')];
-        runner.SystemInfo = status.SystemInfo;
-        runner.Status = status.Message;
-        runner.Name = status.Name;
+            return null;
+        return await result.Content.ReadFromJsonAsync<RunnerStatus>() ?? throw new Exception("execrunner status empty");
     }
 
     /// <inheritdoc />
@@ -70,10 +59,6 @@ public class ExecRunnerService(HttpClient httpClient) : IExecRunnerService
     /// <inheritdoc />
     public async Task<ExecutionResult> ExecuteCodeAsync(ExecRunner runner, ExecutionRequest request)
     {
-        if (!runner.Available)
-            throw new Exception("ExecRunner not available");
-        if (!runner.Authenticated)
-            throw new Exception("ExecRunner not authenticated");
         var result = await httpClient.PostAsJsonAsync($"{runner.Endpoint}{(runner.Endpoint.EndsWith('/') ? "" : "/")}api/execution?key={runner.Key}", request);
         if (result.StatusCode is HttpStatusCode.Unauthorized)
             throw new Exception("Unauthorized");

@@ -1,21 +1,26 @@
-using Microsoft.EntityFrameworkCore;
-using Quartz;
-using Quartz.AspNetCore;
-using DistributedCodingCompetition.CodeExecution;
-using DistributedCodingCompetition.CodeExecution.Models;
-using DistributedCodingCompetition.CodeExecution.Components;
-using DistributedCodingCompetition.CodeExecution.Services;
+global using System.Text.Json;
+global using System.Net;
+global using System.Threading.Tasks;
+global using Microsoft.Extensions.Caching.Distributed;
+global using MongoDB.Driver;
+global using DistributedCodingCompetition.CodeExecution;
+global using DistributedCodingCompetition.CodeExecution.Components;
+global using DistributedCodingCompetition.CodeExecution.Services;
+global using DistributedCodingCompetition.CodeExecution.Models;
+global using DistributedCodingCompetition.ExecutionShared;
+global using Microsoft.AspNetCore.Mvc;
+
 
 var builder = WebApplication.CreateBuilder(args);
 
 builder.AddServiceDefaults();
-builder.AddNpgsqlDbContext<ExecRunnerContext>("evaluationdb");
 
 // Add services to the container.
 
 // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
+builder.AddMongoDBClient("evaluationdb");
 
 builder.Services.AddControllers();
 builder.Services.AddAntiforgery();
@@ -23,22 +28,15 @@ builder.Services.AddAntiforgery();
 builder.Services.AddRazorComponents()
     .AddInteractiveServerComponents();
 
-builder.Services.AddQuartz(q =>
+builder.Services.AddStackExchangeRedisCache(options =>
 {
-    JobKey jobKey = new("RefreshExecRunnerJob");
-    q.AddJob<RefreshExecRunnerJob>(jobKey, j => j.WithDescription("Refreshes the exec runner"));
-    q.AddTrigger(t => t
-        .WithIdentity("RefreshExecRunnerJobTrigger")
-        .ForJob(jobKey)
-        .WithCalendarIntervalSchedule(s => s.WithIntervalInSeconds(10))); // every 10 seconds
+    options.Configuration = builder.Configuration.GetConnectionString("cache");
+    options.InstanceName = "CodeExecution";
 });
 
-builder.Services.AddQuartzServer(options => options.WaitForJobsToComplete = true);
-
 builder.Services.AddSingleton<IExecRunnerService, ExecRunnerService>();
-builder.Services.AddSingleton<IRefreshEventService, RefreshEventService>();
-builder.Services.AddScoped<IExecLoadBalancer, ExecLoadBalancer>();
-
+builder.Services.AddSingleton<IActiveRunnersService, ActiveRunnersService>();
+builder.Services.AddSingleton<IExecRunnerRepository, ExecRunnerRepository>();
 
 var app = builder.Build();
 
@@ -50,31 +48,14 @@ if (app.Environment.IsDevelopment())
     app.UseSwagger();
     app.UseSwaggerUI();
 
-    // migrate delayed
-    _ = Task.Run(async () =>
-    {
-        await Task.Delay(3000);
-        using var scope = app.Services.CreateScope();
-        var context = scope.ServiceProvider.GetRequiredService<ExecRunnerContext>();
-        await context.Database.MigrateAsync();
-        // seed
-        await Seeding.SeedDataAsync(context);
-    });
+    // seed the database with a default exec runner
+    await Seeding.SeedDataAsync(app.Services.GetRequiredService<IExecRunnerRepository>());
 }
 else
 {
     app.UseExceptionHandler("/Error", createScopeForErrors: true);
     // The default HSTS value is 30 days. You may want to change this for production scenarios, see https://aka.ms/aspnetcore-hsts.
     app.UseHsts();
-
-    // migrate delayed
-    _ = Task.Run(async () =>
-    {
-        await Task.Delay(5000);
-        using var scope = app.Services.CreateScope();
-        var context = scope.ServiceProvider.GetRequiredService<ExecRunnerContext>();
-        await context.Database.MigrateAsync();
-    });
 }
 
 app.UseHttpsRedirection();

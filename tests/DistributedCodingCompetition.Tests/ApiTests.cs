@@ -1,7 +1,6 @@
-﻿using Bogus;
-using DistributedCodingCompetition.AuthService.Client;
+﻿namespace DistributedCodingCompetition.Tests;
 
-namespace DistributedCodingCompetition.Tests;
+using Bogus;
 
 public class ApiTests(ApiFixture fixture) : IClassFixture<ApiFixture>
 {
@@ -105,7 +104,7 @@ public class ApiTests(ApiFixture fixture) : IClassFixture<ApiFixture>
         var api = await fixture.APIs;
         var usersService = api.UsersService;
 
-        var (success, user) = await usersService.TryReadUserByEmailAsync("invalid@exmple.com");
+        var (success, user) = await usersService.TryReadUserByEmailAsync("invalid@example.com");
         Assert.False(success);
         Assert.Null(user);
 
@@ -134,7 +133,7 @@ public class ApiTests(ApiFixture fixture) : IClassFixture<ApiFixture>
             Id = (await authService.TryRegisterAsync(faker.Person.Email, "password"))!.Value,
             Email = faker.Person.Email,
             FullName = faker.Person.FullName,
-            Username = "kdlsadfjldkfsdad",
+            Username = $"user{Random.Shared.Next()}",
             Birthday = faker.Person.DateOfBirth,
         });
         Assert.True(success);
@@ -267,7 +266,7 @@ public class ApiTests(ApiFixture fixture) : IClassFixture<ApiFixture>
             Id = (await authService.TryRegisterAsync(faker.Person.Email, "password"))!.Value,
             Email = faker.Person.Email,
             FullName = faker.Person.FullName,
-            Username = "kdlsadfjlk",
+            Username = $"user{Random.Shared.Next()}",
             Birthday = faker.Person.DateOfBirth,
         });
         Assert.NotNull(user);
@@ -346,7 +345,7 @@ public class ApiTests(ApiFixture fixture) : IClassFixture<ApiFixture>
         Assert.True(success);
         Assert.NotNull(contest);
 
-        (success, var contest0) = await contestsService.TryReadContestByJoinCodeAsync($"FLKJFGK:LJ{Random.Shared.Next()}");
+        (success, var contest0) = await contestsService.TryReadContestByJoinCodeAsync($"RANDOM_INVALID_JOIN_CODE{Random.Shared.Next()}");
 
         Assert.False(success);
         Assert.Null(contest0);
@@ -445,7 +444,7 @@ public class ApiTests(ApiFixture fixture) : IClassFixture<ApiFixture>
             Id = (await authService.TryRegisterAsync(faker.Person.Email, "password"))!.Value,
             Email = faker.Person.Email,
             FullName = faker.Person.FullName,
-            Username = "asdffffsasdfoi44",
+            Username = $"user{Random.Shared.Next()}",
             Birthday = faker.Person.DateOfBirth,
         });
 
@@ -520,7 +519,7 @@ public class ApiTests(ApiFixture fixture) : IClassFixture<ApiFixture>
             Id = (await authService.TryRegisterAsync(faker.Person.Email, "password"))!.Value,
             Email = faker.Person.Email,
             FullName = faker.Person.FullName,
-            Username = "asdf23rgdfsg",
+            Username = $"user{Random.Shared.Next()}",
             Birthday = faker.Person.DateOfBirth,
         });
 
@@ -562,7 +561,7 @@ public class ApiTests(ApiFixture fixture) : IClassFixture<ApiFixture>
         Assert.Equal(10, cases.Items.Count);
         for (var i = 0; i < 10; i++)
         {
-            // remove from the testcases set
+            // remove from the test cases set
             Assert.Contains(cases.Items[i].Id, testCases);
             testCases.Remove(cases.Items[i].Id);
         }
@@ -587,7 +586,7 @@ public class ApiTests(ApiFixture fixture) : IClassFixture<ApiFixture>
             Id = (await authService.TryRegisterAsync(faker.Person.Email, "password"))!.Value,
             Email = faker.Person.Email,
             FullName = faker.Person.FullName,
-            Username = "asdfoi44",
+            Username = $"user{Random.Shared.Next()}",
             Birthday = faker.Person.DateOfBirth,
         });
 
@@ -656,7 +655,7 @@ public class ApiTests(ApiFixture fixture) : IClassFixture<ApiFixture>
             Id = (await authService.TryRegisterAsync(faker.Person.Email, "password"))!.Value,
             Email = faker.Person.Email,
             FullName = faker.Person.FullName,
-            Username = "asdfoi44ff",
+            Username = $"users{Random.Shared.Next()}",
             Birthday = faker.Person.DateOfBirth,
         });
 
@@ -784,7 +783,7 @@ public class ApiTests(ApiFixture fixture) : IClassFixture<ApiFixture>
 
         Assert.True(success);
 
-        // create a few testcases
+        // create a few test cases
 
         for (var i = 0; i < 10; i++)
         {
@@ -865,6 +864,8 @@ public class ApiTests(ApiFixture fixture) : IClassFixture<ApiFixture>
         var testCasesService = api.TestCasesService;
         var submissionsService = api.SubmissionsService;
         var judgeService = api.JudgeService;
+        var executionService = api.CodeExecutionService;
+        var executionManagementService = api.ExecutionManagementService;
 
         Faker faker = new();
         // create a user, no auth needed
@@ -920,7 +921,7 @@ public class ApiTests(ApiFixture fixture) : IClassFixture<ApiFixture>
 
         Assert.True(success);
 
-        // create a few testcases
+        // create a few test cases
 
         for (var i = 0; i < 10; i++)
         {
@@ -943,25 +944,59 @@ public class ApiTests(ApiFixture fixture) : IClassFixture<ApiFixture>
         success = await contestsService.TryJoinPublicContestAsync(contest.Id, participant!.Id);
         Assert.True(success);
 
+        // make sure python 3.12.0 is available
+        var languages = await executionService.AvailableLanguagesAsync();
+        if (!languages.Contains("python=3.12.0"))
+        {
+            // grab the first runner
+            var execRunners = await executionManagementService.ListExecRunnersAsync();
+            Assert.NotEmpty(execRunners);
+            var firstRunner = execRunners[0];
+            Assert.NotNull(firstRunner);
+            // install python 3.12.0
+            await executionManagementService.SetPackagesAsync(firstRunner.Id, ["python=3.12.0"]);
+
+            // loop until it's installed
+            while (!(await executionManagementService.InstalledPackagesAsync(firstRunner.Id)).Contains("python=3.12.0"))
+                await Task.Delay(500);
+        }
+
         // create a submission
-        // using 'test1' which puts stdin back in stdout
+        // using 'test1' which puts standard in back in standard out
         (success, var submission) = await submissionsService.TryCreateSubmissionAsync(new()
         {
-            Language = "test=1.0",
+            Language = "python=3.12.0",
             ProblemId = problem!.Id,
             ContestId = contest!.Id,
             UserId = participant!.Id,
-            Code = "test1",
+            Code = "print(input())",
         });
 
         Assert.True(success);
         Assert.NotNull(submission);
 
+        // make sure it can be read back
+        (success, var submission2) = await submissionsService.TryReadSubmissionAsync(submission!.Id);
+        Assert.True(success);
+        Assert.NotNull(submission2);
+
+        // before judging should be zero
+        (success, var solveStatus) = await contestsService.TryReadContestProblemUserSolveStatusAsync(contest.Id, problem.Id, participant.Id);
+        Assert.True(success);
+        Assert.NotNull(solveStatus);
+        Assert.Equal(0, solveStatus!.Points);
+
+        (success, var solveStatuses) = await contestsService.TryReadContestUserSolveStatusAsync(contest.Id, participant.Id);
+        Assert.True(success);
+        Assert.NotNull(solveStatuses);
+        Assert.Single(solveStatuses);
+        Assert.Equal(solveStatus, solveStatuses[0]);
+
         var error = await judgeService.JudgeAsync(submission!.Id);
         Assert.Null(error);
 
         // reread the submission
-        (success, var submission2) = await submissionsService.TryReadSubmissionAsync(submission!.Id);
+        (success, submission2) = await submissionsService.TryReadSubmissionAsync(submission!.Id);
         Assert.True(success);
         Assert.NotNull(submission2);
         Assert.NotEqual(submission, submission2);
@@ -985,5 +1020,42 @@ public class ApiTests(ApiFixture fixture) : IClassFixture<ApiFixture>
 
         // make sure the points match the default
         Assert.Equal(contest.DefaultPointsForProblem, submission2.Points);
+
+        // create a submission
+        // using 'test1' which puts standard in back in standard out
+        (success, var badSubmission) = await submissionsService.TryCreateSubmissionAsync(new()
+        {
+            Language = "python=3.12.0",
+            ProblemId = problem!.Id,
+            ContestId = contest!.Id,
+            UserId = participant!.Id,
+            Code = "print('incorrect')",
+        });
+
+        Assert.True(success);
+        Assert.NotNull(submission);
+
+        error = await judgeService.JudgeAsync(submission!.Id);
+        Assert.Null(error);
+        // read the bad submission again
+        (success, var badSubmission2) = await submissionsService.TryReadSubmissionAsync(badSubmission!.Id);
+        Assert.True(success);
+        Assert.NotNull(badSubmission2);
+        //Assert.True(badSubmission2.JudgedAt.HasValue);
+        Assert.Equal(0, badSubmission.Score);
+
+        // after should be updated even though there were bad submissions after
+        (success, solveStatus) = await contestsService.TryReadContestProblemUserSolveStatusAsync(contest.Id, problem.Id, participant.Id);
+        Assert.True(success);
+        Assert.NotNull(solveStatus);
+        Assert.Equal(submission2.Points, solveStatus!.Points);
+        Assert.Equal(submission2.MaxPossibleScore, solveStatus!.MaxScore);
+        Assert.Equal(submission2.Score, solveStatus!.Score);
+
+        (success, solveStatuses) = await contestsService.TryReadContestUserSolveStatusAsync(contest.Id, participant.Id);
+        Assert.True(success);
+        Assert.NotNull(solveStatuses);
+        Assert.Single(solveStatuses);
+        Assert.Equal(solveStatus, solveStatuses[0]);
     }
 }
