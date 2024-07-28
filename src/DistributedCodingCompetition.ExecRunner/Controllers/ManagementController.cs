@@ -246,6 +246,8 @@ public class ManagementController(IConfiguration configuration, HttpClient httpC
     /// <returns></returns>
     private async Task<string> GetInstalledPackages()
     {
+        if (installing)
+            return string.Empty;
         var packages = await httpClient.GetFromJsonAsync<IReadOnlyList<Package>>(configuration["Piston"] + "api/v2/packages");
         if (packages == null)
             return string.Empty;

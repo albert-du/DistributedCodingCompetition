@@ -79,9 +79,8 @@ public class ActiveRunnersService(IDistributedCache distributedCache, IExecRunne
 
         // select a random exec runner
 
-        var id = balancer.BalanceRequest([.. execRunners.Select(x => new RunnerWeight(x.Item1, x.Item2))]);
-
-        return await distributedCache.GetStringAsync(id.ToString()) is string runnerString
+        var runner = balancer.BalanceRequest([.. execRunners.Select(x => new RunnerWeight(x.Item1, x.Item2))]);
+        return await distributedCache.GetStringAsync(runner.Id.ToString()) is string runnerString
             ? JsonSerializer.Deserialize<ExecRunner>(runnerString)
             : null;
     }

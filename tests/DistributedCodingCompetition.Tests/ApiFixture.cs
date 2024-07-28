@@ -7,6 +7,8 @@ using DistributedCodingCompetition.Judge.Client;
 using DotNet.Testcontainers.Builders;
 using Microsoft.Extensions.Logging;
 using System.Diagnostics;
+using System.Net.NetworkInformation;
+using System.Net;
 
 public record struct APIs(IAuthService AuthService,
                           IUsersService UsersService,
@@ -51,15 +53,14 @@ public class ApiFixture : IAsyncDisposable
 
             // create a container for the piston service
             var container = new ContainerBuilder()
-                .WithName("TEST-PISTON")
+                .WithName($"TEST-PISTON-{Random.Shared.Next()}")
                 .WithImage("ghcr.io/engineer-man/piston")
-                .WithPortBinding(2001, 2000)
+                .WithPortBinding(2000, true)
                 .WithWaitStrategy(Wait.ForUnixContainer().UntilPortIsAvailable(2000))
                 .WithTmpfsMount("/piston/jobs")
                 .Build();
 
             await container.StartAsync().ConfigureAwait(false);
-
             // new process, start an execrunner and a piston simulating service
             //piston = Process.Start(new ProcessStartInfo
             //{
@@ -67,12 +68,12 @@ public class ApiFixture : IAsyncDisposable
             //    Arguments = "run --urls=http://localhost:5228/",
             //    WorkingDirectory = Path.GetFullPath($"{Environment.CurrentDirectory}\\..\\..\\..\\..\\PistonSimulator\\"),
             //});
-
+            var execPort = NextFreePort(5227);
             execRunner = Process.Start(new ProcessStartInfo
             {
                 FileName = "dotnet",
                 //Arguments = "run --urls=http://localhost:5227/ -- Piston=http://localhost:5228/",
-                Arguments = "run --urls=http://localhost:5227/ -- Piston=http://localhost:2001/",
+                Arguments = $"run --urls=http://localhost:{execPort}/ -- Piston=http://localhost:{container.GetMappedPublicPort(2000)}/",
                 WorkingDirectory = Path.GetFullPath($"{Environment.CurrentDirectory}\\..\\..\\..\\..\\..\\src\\DistributedCodingCompetition.ExecRunner\\"),
             });
 
@@ -96,7 +97,7 @@ public class ApiFixture : IAsyncDisposable
             var execRunners = await executionManagementService.ListExecRunnersAsync();
             await Task.WhenAll(execRunners.Select(x => executionManagementService.DeleteExecRunnerAsync(x.Id)));
 
-            await executionManagementService.CreateExecRunnerAsync(new("test", "http://localhost:5227/", true, 100, "changeme"));
+            await executionManagementService.CreateExecRunnerAsync(new("test", $"http://localhost:{execPort}/", true, 100, "changeme"));
 
             // wait 8 seconds for the database migrations to run
             await Task.Delay(8000);
@@ -115,5 +116,22 @@ public class ApiFixture : IAsyncDisposable
 
         execRunner?.Dispose();
         //piston?.Dispose();
+    }
+
+    private static bool IsFree(int port)
+    {
+        IPGlobalProperties properties = IPGlobalProperties.GetIPGlobalProperties();
+        IPEndPoint[] listeners = properties.GetActiveTcpListeners();
+        int[] openPorts = listeners.Select(item => item.Port).ToArray<int>();
+        return openPorts.All(openPort => openPort != port);
+    }
+    private static int NextFreePort(int port = 0)
+    {
+        port = (port > 0) ? port : Random.Shared.Next(1, 65535);
+        while (!IsFree(port))
+        {
+            port += 1;
+        }
+        return port;
     }
 }

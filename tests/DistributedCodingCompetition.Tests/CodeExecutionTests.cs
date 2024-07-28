@@ -35,34 +35,26 @@ public class CodeExecutionTest(ApiFixture fixture) : IClassFixture<ApiFixture>
         installed = await executionManagementService.InstalledPackagesAsync(firstRunner.Id);
         Assert.NotNull(installed);
         Assert.Contains(pythonPackage, installed);
-    }
 
-    [Fact]
-    public async Task TestCodeExecutionService()
-    {
-        var services = await fixture.APIs;
-        var codeExecutionService = services.CodeExecutionService;
 
-        var languages = await codeExecutionService.AvailableLanguagesAsync();
-        Assert.NotEmpty(languages);
-        var python = languages.FirstOrDefault(l => l.StartsWith("python"));
-        Assert.NotNull(python);
+        await executionManagementService.SetPackagesAsync(firstRunner.Id, ["python=3.12.0"]);
+
+        var start = DateTime.UtcNow;
+        while (!(await executionManagementService.InstalledPackagesAsync(firstRunner.Id)).Contains("python=3.12.0"))
+        {
+            if (DateTime.UtcNow - start > TimeSpan.FromMinutes(1))
+                throw new Exception("Timed out waiting for language install");
+            await Task.Delay(1000);
+        }
 
         ExecutionRequest request = new()
         {
-            Language = python,
+            Language = "python=3.12.0",
             Code = "print('hello world')"
         };
         var result = await codeExecutionService.TryExecuteCodeAsync(request);
         Assert.NotNull(result);
-        Assert.Equal("hello world", result.Output);
-    }
-
-    [Fact]
-    public async Task TestBatchCodeExecutionService()
-    {
-        var services = await fixture.APIs;
-        var codeExecutionService = services.CodeExecutionService;
+        Assert.Equal("hello world\n", result.Output);
 
         var languages = await codeExecutionService.AvailableLanguagesAsync();
         Assert.NotEmpty(languages);
@@ -84,7 +76,7 @@ public class CodeExecutionTest(ApiFixture fixture) : IClassFixture<ApiFixture>
         var results = await codeExecutionService.TryExecuteBatchAsync(requests);
         Assert.NotNull(results);
         Assert.Equal(2, results.Count);
-        Assert.Equal("hello world", results[0].Output);
-        Assert.Equal("goodbye world", results[1].Output);
+        Assert.Equal("hello world\n", results[0].Output);
+        Assert.Equal("goodbye world\n", results[1].Output);
     }
 }

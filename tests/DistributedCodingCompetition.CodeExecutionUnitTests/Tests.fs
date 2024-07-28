@@ -1,9 +1,9 @@
-module Tests
+module DistributedCodingCompetition.CodeExecutionUnitTests.Tests
 
 open System
 open Xunit
 open DistributedCodingCompetition.CodeExecution.Services;
-open DistributedCodingCompetition.CodeExecution;
+open DistributedCodingCompetition.CodeExecution.Models;
 
 [<Fact>]
 let ``Can balance 1 instance`` () =

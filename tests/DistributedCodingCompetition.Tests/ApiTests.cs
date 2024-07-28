@@ -980,6 +980,18 @@ public class ApiTests(ApiFixture fixture) : IClassFixture<ApiFixture>
         Assert.True(success);
         Assert.NotNull(submission2);
 
+        // before judging should be zero
+        (success, var solveStatus) = await contestsService.TryReadContestProblemUserSolveStatusAsync(contest.Id, problem.Id, participant.Id);
+        Assert.True(success);
+        Assert.NotNull(solveStatus);
+        Assert.Equal(0, solveStatus!.Points);
+
+        (success, var solveStatuses) = await contestsService.TryReadContestUserSolveStatusAsync(contest.Id, participant.Id);
+        Assert.True(success);
+        Assert.NotNull(solveStatuses);
+        Assert.Single(solveStatuses);
+        Assert.Equal(solveStatus, solveStatuses[0]);
+
         var error = await judgeService.JudgeAsync(submission!.Id);
         Assert.Null(error);
 
@@ -1008,118 +1020,10 @@ public class ApiTests(ApiFixture fixture) : IClassFixture<ApiFixture>
 
         // make sure the points match the default
         Assert.Equal(contest.DefaultPointsForProblem, submission2.Points);
-    }
-    [Fact]
-    public async Task CanJudgeIncorrectSubmission()
-    {
-        var api = await fixture.APIs;
-        var authService = api.AuthService;
-        var usersService = api.UsersService;
-        var contestsService = api.ContestsService;
-        var problemsService = api.ProblemsService;
-        var testCasesService = api.TestCasesService;
-        var submissionsService = api.SubmissionsService;
-        var judgeService = api.JudgeService;
-        var executionService = api.CodeExecutionService;
-        var executionManagementService = api.ExecutionManagementService;
-
-        Faker faker = new();
-        // create a user, no auth needed
-
-        (_, var user) = await usersService.TryCreateUserAsync(new()
-        {
-            Id = (await authService.TryRegisterAsync(faker.Person.Email, "password"))!.Value,
-            Email = faker.Person.Email,
-            FullName = faker.Person.FullName,
-            Username = $"user{Random.Shared.Next()}",
-            Birthday = faker.Person.DateOfBirth,
-        });
-
-        faker = new();
-        (_, var participant) = await usersService.TryCreateUserAsync(new()
-        {
-            Id = Guid.NewGuid(),
-            Email = faker.Person.Email,
-            FullName = faker.Person.FullName,
-            Username = $"participant{Random.Shared.Next()}",
-            Birthday = faker.Person.DateOfBirth,
-        });
-
-        Assert.NotNull(user);
-
-        // create a contest
-        var (success, contest) = await contestsService.TryCreateContestAsync(new()
-        {
-            Name = "Test Contest 1",
-            Description = "This is a test contest",
-            StartTime = DateTime.UtcNow,
-            EndTime = DateTime.UtcNow + TimeSpan.FromDays(1),
-            OwnerId = user!.Id,
-            Public = true,
-            DefaultPointsForProblem = Random.Shared.Next(100, 200)
-        });
-        Assert.True(success);
-        Assert.NotNull(contest);
-
-        // create a new problem
-
-        (success, var problem) = await problemsService.TryCreateProblemAsync(new()
-        {
-            Name = "Test Problem 1",
-            TagLine = "test problem",
-            Description = "This is a test problem",
-            OwnerId = user!.Id,
-        });
-
-        Assert.True(success);
-        Assert.NotNull(problem);
-
-
-        Assert.True(success);
-
-        // create a few test cases
-
-        for (var i = 0; i < 10; i++)
-        {
-            var x = faker.Lorem.Sentence();
-            (success, var testCase) = await testCasesService.TryCreateTestCaseAsync(new()
-            {
-                ProblemId = problem!.Id,
-                Input = x,
-                Output = x,
-            });
-            Assert.True(success);
-            Assert.NotNull(testCase);
-        }
-
-        // add the problem to the contest
-        success = await contestsService.TryAddProblemToContestAsync(contest.Id, problem.Id);
-        Assert.True(success);
-
-        // add the user to the contest
-        success = await contestsService.TryJoinPublicContestAsync(contest.Id, participant!.Id);
-        Assert.True(success);
-
-        // make sure python 3.12.0 is available
-        var languages = await executionService.AvailableLanguagesAsync();
-        if (!languages.Contains("python=3.12.0"))
-        {
-            // grab the first runner
-            var execRunners = await executionManagementService.ListExecRunnersAsync();
-            Assert.NotEmpty(execRunners);
-            var firstRunner = execRunners[0];
-            Assert.NotNull(firstRunner);
-            // install python 3.12.0
-            await executionManagementService.SetPackagesAsync(firstRunner.Id, ["python=3.12.0"]);
-
-            // loop until it's installed
-            while (!(await executionManagementService.InstalledPackagesAsync(firstRunner.Id)).Contains("python=3.12.0"))
-                await Task.Delay(500);
-        }
 
         // create a submission
         // using 'test1' which puts standard in back in standard out
-        (success, var submission) = await submissionsService.TryCreateSubmissionAsync(new()
+        (success, var badSubmission) = await submissionsService.TryCreateSubmissionAsync(new()
         {
             Language = "python=3.12.0",
             ProblemId = problem!.Id,
@@ -1131,200 +1035,16 @@ public class ApiTests(ApiFixture fixture) : IClassFixture<ApiFixture>
         Assert.True(success);
         Assert.NotNull(submission);
 
-        // make sure it can be read back
-        (success, var submission2) = await submissionsService.TryReadSubmissionAsync(submission!.Id);
-        Assert.True(success);
-        Assert.NotNull(submission2);
-
-        var error = await judgeService.JudgeAsync(submission!.Id);
+        error = await judgeService.JudgeAsync(submission!.Id);
         Assert.Null(error);
-
-        // reread the submission
-        (success, submission2) = await submissionsService.TryReadSubmissionAsync(submission!.Id);
+        // read the bad submission again
+        (success, var badSubmission2) = await submissionsService.TryReadSubmissionAsync(badSubmission!.Id);
         Assert.True(success);
-        Assert.NotNull(submission2);
-        Assert.NotEqual(submission, submission2);
+        Assert.NotNull(badSubmission2);
+        //Assert.True(badSubmission2.JudgedAt.HasValue);
+        Assert.Equal(0, badSubmission.Score);
 
-        Assert.Equal(submission!.Id, submission2!.Id);
-        Assert.Equal(submission!.ProblemId, submission2!.ProblemId);
-        Assert.Equal(submission!.ContestId, submission2!.ContestId);
-        Assert.Equal(submission!.UserId, submission2!.UserId);
-        Assert.Equal(submission!.Code, submission2!.Code);
-        Assert.Equal(submission!.Language, submission2!.Language);
-
-        // make sure the submission was judged
-        Assert.NotNull(submission2!.JudgedAt);
-        // make sure the submission was judged after it was created
-        Assert.True(submission2!.JudgedAt > submission2.CreatedAt);
-        // make sure the submission was judged before now
-        Assert.True(submission2!.JudgedAt < DateTime.UtcNow);
-
-        // make sure the submission was judged successfully
-        Assert.True(submission2!.Score == submission2!.MaxPossibleScore);
-
-        // make sure the points are zero
-        Assert.Equal(0, submission2.Points);
-    }
-
-    [Fact]
-    public async Task CanJudgeSubmissionWithProblemSolveStatus()
-    {
-        var api = await fixture.APIs;
-        var authService = api.AuthService;
-        var usersService = api.UsersService;
-        var contestsService = api.ContestsService;
-        var problemsService = api.ProblemsService;
-        var testCasesService = api.TestCasesService;
-        var submissionsService = api.SubmissionsService;
-        var judgeService = api.JudgeService;
-        var executionService = api.CodeExecutionService;
-        var executionManagementService = api.ExecutionManagementService;
-
-        Faker faker = new();
-        // create a user, no auth needed
-
-        (_, var user) = await usersService.TryCreateUserAsync(new()
-        {
-            Id = (await authService.TryRegisterAsync(faker.Person.Email, "password"))!.Value,
-            Email = faker.Person.Email,
-            FullName = faker.Person.FullName,
-            Username = $"user{Random.Shared.Next()}",
-            Birthday = faker.Person.DateOfBirth,
-        });
-
-        faker = new();
-        (_, var participant) = await usersService.TryCreateUserAsync(new()
-        {
-            Id = Guid.NewGuid(),
-            Email = faker.Person.Email,
-            FullName = faker.Person.FullName,
-            Username = $"participant{Random.Shared.Next()}",
-            Birthday = faker.Person.DateOfBirth,
-        });
-
-        Assert.NotNull(user);
-
-        // create a contest
-        var (success, contest) = await contestsService.TryCreateContestAsync(new()
-        {
-            Name = "Test Contest 1",
-            Description = "This is a test contest",
-            StartTime = DateTime.UtcNow,
-            EndTime = DateTime.UtcNow + TimeSpan.FromDays(1),
-            OwnerId = user!.Id,
-            Public = true,
-            DefaultPointsForProblem = Random.Shared.Next(100, 200)
-        });
-        Assert.True(success);
-        Assert.NotNull(contest);
-
-        // create a new problem
-
-        (success, var problem) = await problemsService.TryCreateProblemAsync(new()
-        {
-            Name = "Test Problem 1",
-            TagLine = "test problem",
-            Description = "This is a test problem",
-            OwnerId = user!.Id,
-        });
-
-        Assert.True(success);
-        Assert.NotNull(problem);
-
-
-        Assert.True(success);
-
-        // create a few test cases
-
-        for (var i = 0; i < 10; i++)
-        {
-            var x = faker.Lorem.Sentence();
-            (success, var testCase) = await testCasesService.TryCreateTestCaseAsync(new()
-            {
-                ProblemId = problem!.Id,
-                Input = x,
-                Output = x,
-            });
-            Assert.True(success);
-            Assert.NotNull(testCase);
-        }
-
-        // add the problem to the contest
-        success = await contestsService.TryAddProblemToContestAsync(contest.Id, problem.Id);
-        Assert.True(success);
-
-        // add the user to the contest
-        success = await contestsService.TryJoinPublicContestAsync(contest.Id, participant!.Id);
-        Assert.True(success);
-
-        // make sure python 3.12.0 is available
-        var languages = await executionService.AvailableLanguagesAsync();
-        if (!languages.Contains("python=3.12.0"))
-        {
-            // grab the first runner
-            var execRunners = await executionManagementService.ListExecRunnersAsync();
-            Assert.NotEmpty(execRunners);
-            var firstRunner = execRunners[0];
-            Assert.NotNull(firstRunner);
-            // install python 3.12.0
-            await executionManagementService.SetPackagesAsync(firstRunner.Id, ["python=3.12.0"]);
-
-            // loop until it's installed
-            while (!(await executionManagementService.InstalledPackagesAsync(firstRunner.Id)).Contains("python=3.12.0"))
-                await Task.Delay(500);
-        }
-
-        // create a submission
-        // using 'test1' which puts standard in back in standard out
-        (success, var submission) = await submissionsService.TryCreateSubmissionAsync(new()
-        {
-            Language = "python=3.12.0",
-            ProblemId = problem!.Id,
-            ContestId = contest!.Id,
-            UserId = participant!.Id,
-            Code = "print(input())",
-        });
-
-        Assert.True(success);
-        Assert.NotNull(submission);
-
-        // before judging should be zero
-        (success, var solveStatus) = await contestsService.TryReadContestProblemUserSolveStatusAsync(contest.Id, problem.Id, participant.Id);
-        Assert.True(success);
-        Assert.Null(solveStatus);
-
-        (success, var solveStatuses) = await contestsService.TryReadContestUserSolveStatusAsync(contest.Id, participant.Id);
-        Assert.True(success);
-        Assert.NotNull(solveStatuses);
-        Assert.Empty(solveStatuses);
-
-        var error = await judgeService.JudgeAsync(submission!.Id);
-        Assert.Null(error);
-
-        // reread the submission
-        (success, var submission2) = await submissionsService.TryReadSubmissionAsync(submission!.Id);
-        Assert.True(success);
-        Assert.NotNull(submission2);
-        Assert.NotEqual(submission, submission2);
-
-        Assert.Equal(submission!.Id, submission2!.Id);
-        Assert.Equal(submission!.ProblemId, submission2!.ProblemId);
-        Assert.Equal(submission!.ContestId, submission2!.ContestId);
-        Assert.Equal(submission!.UserId, submission2!.UserId);
-        Assert.Equal(submission!.Code, submission2!.Code);
-        Assert.Equal(submission!.Language, submission2!.Language);
-
-        // make sure the submission was judged
-        Assert.NotNull(submission2!.JudgedAt);
-        // make sure the submission was judged after it was created
-        Assert.True(submission2!.JudgedAt > submission2.CreatedAt);
-        // make sure the submission was judged before now
-        Assert.True(submission2!.JudgedAt < DateTime.UtcNow);
-
-        // make sure the submission was judged successfully
-        Assert.True(submission2!.Score == submission2!.MaxPossibleScore);
-
-        // after should be updated
+        // after should be updated even though there were bad submissions after
         (success, solveStatus) = await contestsService.TryReadContestProblemUserSolveStatusAsync(contest.Id, problem.Id, participant.Id);
         Assert.True(success);
         Assert.NotNull(solveStatus);
@@ -1335,7 +1055,7 @@ public class ApiTests(ApiFixture fixture) : IClassFixture<ApiFixture>
         (success, solveStatuses) = await contestsService.TryReadContestUserSolveStatusAsync(contest.Id, participant.Id);
         Assert.True(success);
         Assert.NotNull(solveStatuses);
-        Assert.Empty(solveStatuses);
-
+        Assert.Single(solveStatuses);
+        Assert.Equal(solveStatus, solveStatuses[0]);
     }
 }

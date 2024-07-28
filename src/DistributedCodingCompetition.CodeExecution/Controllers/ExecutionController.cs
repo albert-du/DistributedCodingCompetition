@@ -49,9 +49,8 @@ public class ExecutionController(ILogger<ExecutionController> logger, IActiveRun
             else
                 tasks.Add(execRunnerService.ExecuteCodeAsync(execRunner, request));
         }
-        List<ExecutionResult> results = new(tasks.Count);
-        foreach (var task in tasks) results.Add(await task);
-        logger.LogInformation("Batch execution completed with {Count} results", results.Count);
+        var results = await Task.WhenAll(tasks);
+        logger.LogInformation("Batch execution completed with {Length} results", results.Length);
 
         return results;
     }
