@@ -8,6 +8,9 @@
 @inject IAuthService AuthService
 @inject IUsersService UsersService
 @using DistributedCodingCompetition.AuthService.Models;
+@using System.Security.Claims;
+@using Microsoft.AspNetCore.Authentication;
+@using Microsoft.AspNetCore.Authentication.Cookies;
 
 <PageTitle>Login</PageTitle>
 
@@ -19,16 +22,15 @@
     }
     else
     {
-        <EditForm class="flex flex-col items-center justify-center gap-y-5" Model=model OnValidSubmit=SubmitAsync
-                  FormName="Login">
+        <EditForm class="flex flex-col items-center justify-center gap-y-5" Model=Model OnValidSubmit=SubmitAsync FormName="login">
             <label class="flex flex-col">
                 <div class="pl-2">
                     Email
                 </div>
                 <InputText class="w-64 px-2 py-1 ml-2 bg-gray-100 rounded-lg text-slate-800" id="username" type="email"
-                           @bind-Value=model.Email />
+                           @bind-Value=Model!.Email />
                 <div class="h-2 text-rose-500">
-                    <ValidationMessage For=@(() => model.Email) />
+                    <ValidationMessage For=@(() => Model.Email) />
                 </div>
             </label>
 
@@ -37,9 +39,9 @@
                     Password
                 </div>
                 <InputText class="w-64 px-2 py-1 ml-2 bg-gray-100 rounded-lg text-slate-800" type="password"
-                           @bind-Value=model.Password />
+                           @bind-Value=Model.Password />
                 <div class="h-2 text-rose-500">
-                    <ValidationMessage For=@(() => model.Password) />
+                    <ValidationMessage For=@(() => Model.Password) />
                 </div>
             </label>
             <div class="flex justify-center">
@@ -52,7 +54,7 @@
         </EditForm>
     }
     <div class="h-2 text-rose-500">
-        @error
+        @Model!.Error
     </div>
 </div>
 
@@ -61,17 +63,23 @@
     [CascadingParameter]
     public ConnectionDetails? ConnectionDetails { get; set; }
 
+    [CascadingParameter]
+    public HttpContext? HttpContext { get; set; }
+
     // Optional ReturnURL parameter to redirect the user to after login.
     [SupplyParameterFromQuery]
     public string? ReturnUrl { get; set; }
 
-    // Error to display to the user.
-    string? error;
-
-    LoginModel model = new();
+    [SupplyParameterFromForm]
+    LoginModel? Model { get; set; }
 
     bool submitted;
 
+    protected override async Task OnInitializedAsync()
+    {
+        Model ??= new();
+        await HttpContext?.SignOutAsync();
+    }
     private async Task SubmitAsync()
     {
         if (submitted)
@@ -82,33 +90,47 @@
         // Force a re-render to show the loading spinner.
         await InvokeAsync(StateHasChanged);
 
-        // Delay to prevent abuse.
-        await Task.Delay(500);
+        await Task.Delay(250);
 
         try
         {
-            var (success, user) = await UsersService.TryReadUserByEmailAsync(model.Email);
+            var (success, user) = await UsersService.TryReadUserByEmailAsync(Model!.Email);
             if (!success || user is null)
             {
-                error = "Failed to login.";
+                Model.Error = "Failed to login.";
                 return;
             }
 
             // Try to login the user.
 
-            if (await AuthService.TryLoginAsync(user.Id, model.Password, ConnectionDetails?.UserAgent ?? "Unknown", ConnectionDetails?.IpAddress ?? "Unknown") is not LoginResult result)
+            if (await AuthService.TryLoginAsync(user.Id, Model.Password, ConnectionDetails?.UserAgent ?? "Unknown", ConnectionDetails?.IpAddress ?? "Unknown") is not LoginResult result)
             {
-                error = $"Failed to login.";
+                Model.Error = $"Failed to login.";
                 return;
             }
+            // write the user to the session
+            var validationResult = await AuthService.ValidateTokenAsync(result.Token);
 
-            var code = await JSRuntime.InvokeAsync<int>("post", $"htau/login?token={Uri.EscapeDataString(result.Token)}");
-
-            if (code != 200)
+            if (validationResult is null)
             {
-                error = $"Failed to login. Status: {code}";
+                Model.Error = "Failed to login.";
                 return;
-            }
+            };
+
+            List<Claim> claims = [new(ClaimTypes.NameIdentifier, validationResult.Id.ToString())];
+
+            if (result.Admin)
+                claims.Add(new(ClaimTypes.Role, "Admin"));
+
+            // cookie auth
+            ClaimsIdentity claimsIdentity = new(claims, CookieAuthenticationDefaults.AuthenticationScheme);
+            AuthenticationProperties authProperties = new()
+                {
+                    IsPersistent = true,
+                    ExpiresUtc = DateTimeOffset.UtcNow.AddDays(7),
+                };
+
+            await (HttpContext?.SignInAsync(CookieAuthenticationDefaults.AuthenticationScheme, new ClaimsPrincipal(claimsIdentity), authProperties) ?? Task.CompletedTask);
 
             NavigationManager.NavigateTo(ReturnUrl ?? "/dashboard", true);
         }
@@ -118,15 +140,6 @@
         }
     }
 
-    protected override async Task OnAfterRenderAsync(bool firstRender)
-    {
-        if (firstRender && (await AuthenticationStateProvider.GetAuthenticationStateAsync()).User.Identity?.IsAuthenticated is true)
-        {
-            await JSRuntime.InvokeAsync<int>("post", "htau/logout"); // logout from the server
-
-            NavigationManager.NavigateTo(NavigationManager.Uri, true); // force a refresh
-        }
-    }
 
     private class LoginModel
     {
@@ -136,5 +149,7 @@
         [Required]
         [MinLength(8)]
         public string Password { get; set; } = string.Empty;
+
+        public string? Error { get; set; }
     }
 }

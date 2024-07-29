@@ -75,7 +75,7 @@ Project("{6EC3EE1D-3C4E-46DD-8F32-0CC8E7565705}") = "DistributedCodingCompetitio
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Web", "Web", "{4715130C-D110-403E-B7AC-D4E117D4D1D6}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "DistributedCodingCompetition.Web.Client.Client", "DistributedCodingCompetition.Web.Client\DistributedCodingCompetition.Web.Client.Client\DistributedCodingCompetition.Web.Client.Client.csproj", "{EF52BC25-778B-457A-8B1B-260FF3417AFC}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "DistributedCodingCompetition.Web.Client", "src\DistributedCodingCompetition.Web.Client\DistributedCodingCompetition.Web.Client.csproj", "{89743BDD-F1EF-4359-8962-A13B2A3DB380}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -187,10 +187,10 @@ Global
 		{8513840D-A167-472B-B8D2-32DD668DE20A}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{8513840D-A167-472B-B8D2-32DD668DE20A}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{8513840D-A167-472B-B8D2-32DD668DE20A}.Release|Any CPU.Build.0 = Release|Any CPU
-		{EF52BC25-778B-457A-8B1B-260FF3417AFC}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{EF52BC25-778B-457A-8B1B-260FF3417AFC}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{EF52BC25-778B-457A-8B1B-260FF3417AFC}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{EF52BC25-778B-457A-8B1B-260FF3417AFC}.Release|Any CPU.Build.0 = Release|Any CPU
+		{89743BDD-F1EF-4359-8962-A13B2A3DB380}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{89743BDD-F1EF-4359-8962-A13B2A3DB380}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{89743BDD-F1EF-4359-8962-A13B2A3DB380}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{89743BDD-F1EF-4359-8962-A13B2A3DB380}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -230,7 +230,7 @@ Global
 		{908D38BC-719B-46A7-B5F9-90D93092D702} = {BD82C632-3052-4A82-A507-55933DA1C512}
 		{8513840D-A167-472B-B8D2-32DD668DE20A} = {BD82C632-3052-4A82-A507-55933DA1C512}
 		{4715130C-D110-403E-B7AC-D4E117D4D1D6} = {82110145-D2F8-4F66-8700-BE8D1CD4A333}
-		{EF52BC25-778B-457A-8B1B-260FF3417AFC} = {4715130C-D110-403E-B7AC-D4E117D4D1D6}
+		{89743BDD-F1EF-4359-8962-A13B2A3DB380} = {4715130C-D110-403E-B7AC-D4E117D4D1D6}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {D27D9E1A-CBE2-47C5-9C7F-18D5154A0902}
