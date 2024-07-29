@@ -7,7 +7,11 @@
 @inject IEmailService EmailService
 @inject IAuthService AuthService
 @inject IUsersService UsersService
+@attribute [StreamRendering]
 @using DistributedCodingCompetition.AuthService.Models;
+@using System.Security.Claims;
+@using Microsoft.AspNetCore.Authentication;
+@using Microsoft.AspNetCore.Authentication.Cookies;
 
 <PageTitle>Register</PageTitle>
 
@@ -20,7 +24,7 @@
     }
     else if (otc is null)
     {
-        <EditForm class="flex flex-col items-center justify-center gap-y-5" Model=model OnValidSubmit=SubmitAsync FormName="Registration">
+        <EditForm class="flex flex-col items-center justify-center gap-y-5" Enhance Model=model OnValidSubmit=SubmitAsync FormName="Registration">
             <label class="flex flex-col">
                 <div class="pl-2">
                     Email
@@ -65,7 +69,7 @@
     }
     else if (!otcValid)
     {
-        <EditForm Model="otcModel" class="flex flex-col items-center gap-y-2">
+        <EditForm Enhance Model=otcModel class="flex flex-col items-center gap-y-2" FormName="otc-register-form">
             <h3>Enter the verification code sent to your email</h3>
             <p class="italic">@model.Email</p>
             <InputText pattern="[0-9]{6}" placeholder="000000"
@@ -91,7 +95,7 @@
     else
     {
         // otc is correct
-        <EditForm Model=model2 class="flex flex-col items-center justify-center gap-y-5" OnValidSubmit=SubmitAsync3
+        <EditForm Enhance Model=model2 class="flex flex-col items-center justify-center gap-y-5" OnValidSubmit=SubmitAsync3
                   FormName="UserDetails">
             <label class="flex flex-col">
                 <div class="pl-2">
@@ -106,7 +110,7 @@
                     Username
                     <div class="text-xs text-gray-500">5-25 characters <span class="italic">[a-z0-9_-]</span> </div>
                 </div>
-                <InputText placeholder="cool_hckr-23" class="w-64 px-2 py-1 ml-2 bg-gray-100 rounded-lg text-slate-800"
+                <InputText placeholder="cool_hacker-23" class="w-64 px-2 py-1 ml-2 bg-gray-100 rounded-lg text-slate-800"
                            @bind-Value=model2.Username />
                 <ValidationMessage For=@(() => model2.Username) />
             </label>
@@ -141,6 +145,9 @@
     [CascadingParameter]
     public ConnectionDetails? ConnectionDetails { get; set; }
 
+    [CascadingParameter]
+    public HttpContext? HttpContext { get; set; }
+
     // Redirect URL
     [SupplyParameterFromQuery]
     public string? ReturnUrl { get; set; }
@@ -149,9 +156,15 @@
     public Task<AuthenticationState?>? AuthState { get; set; }
 
     // Models
-    RegisterModel model = new();
-    RegisterModel2 model2 = new();
-    OTCModel otcModel = new();
+    [SupplyParameterFromForm]
+    public RegisterModel model { get; set; } = null!;
+
+    [SupplyParameterFromForm]
+    public RegisterModel2 model2 { get; set; } = null!;
+
+    [SupplyParameterFromForm]
+    public OTCModel otcModel { get; set; } = null!;
+
 
     string? otc = null; // generated verification code
     bool otcValid;
@@ -160,13 +173,12 @@
 
     bool loading;
 
-    protected override async Task OnAfterRenderAsync(bool firstRender)
+    protected override async Task OnInitializedAsync()
     {
-        if (!firstRender || (AuthState is null) || (await AuthState)?.User.Identity?.IsAuthenticated is not true)
-            return;
-
-        var res = await JSRuntime.InvokeAsync<int>("post", "htau/logout");
-        NavigationManager.NavigateTo(NavigationManager.Uri, true);
+        model ??= new();
+        model2 ??= new();
+        otcModel ??= new();
+        await (HttpContext?.SignOutAsync() ?? Task.CompletedTask);
     }
 
     async Task SubmitAsync()
@@ -318,7 +330,7 @@
         await InvokeAsync(StateHasChanged);
     }
 
-    class RegisterModel
+    public class RegisterModel
     {
         [Required]
         [EmailAddress]
@@ -335,7 +347,7 @@
         public string ConfirmPassword { get; set; } = string.Empty;
     }
 
-    class RegisterModel2
+    public class RegisterModel2
     {
         [Required(AllowEmptyStrings = false)]
         [Length(5, 25)]
@@ -348,7 +360,7 @@
         public DateTime Birthday { get; set; } = DateTime.UtcNow;
     }
 
-    class OTCModel
+    public class OTCModel
     {
         [Required]
         [Length(6, 6)]

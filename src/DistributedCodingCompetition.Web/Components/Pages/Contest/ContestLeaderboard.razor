@@ -3,6 +3,7 @@
 @inject IModalService ModalService
 @inject IContestsService ContestsService
 @inject ILeaderboardService LeaderboardService
+@rendermode InteractiveAuto
 
 <AuthCheck Contest=Id />
 
@@ -19,7 +20,7 @@ else
 {
     <div class="flex flex-col gap-y-1">
         <div>This leaderboard was updated @leaderboard.Creation</div>
-        <div>Displaying @leaderboard.Entries.Count contestents out of @leaderboard.Count</div>
+        <div>Displaying @leaderboard.Entries.Count contestants out of @leaderboard.Count</div>
         <div class="p-2">
             to view the latest scores, check the <a href="contest/@Id/leaderboard/live" class="text-violet-500 italic hover:underline">live leaderboard</a>
         </div>

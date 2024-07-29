@@ -8,6 +8,7 @@
 @inject IContestsService ContestsService
 @inject IJoinCodesService JoinCodesService
 @inject IModalService ModalService
+@attribute [StreamRendering]
 
 <AuthCheck Contest=Id Admin />
 
@@ -23,12 +24,15 @@
     <div>click to copy</div>
     @foreach (var cod in joinCodes)
     {
-        <button @onclick="() => CopyAsync(cod)" class="flex bg-gray-100">
+        <button onclick=@($"() => navigator.clipboard.writeText({NavigationManager.BaseUri}join/{cod.Code})") class="flex bg-gray-100">
             <div class="flex-1">@cod.Name</div>
             <div class="flex-1">Code: @cod.Code</div>
             <div class="flex-1">@cod.Uses Uses</div>
             <div class="flex-1">Expires @cod.Expiration</div>
-            <button class="w-16 p-1 font-bold text-center transition-colors duration-100 bg-white border-2 rounded-lg text-rose-500 border-rose-500 hover:bg-rose-500 hover:text-white" @onclick="() => DeleteAsync(cod.Id)">Delete</button>
+            <form data-enhance @formname="">
+                <AntiforgeryToken />
+                <button class="w-16 p-1 font-bold text-center transition-colors duration-100 bg-white border-2 rounded-lg text-rose-500 border-rose-500 hover:bg-rose-500 hover:text-white" @onclick="() => DeleteAsync(cod.Id)">Delete</button>
+            </form>
         </button>
     }
 </div>
@@ -88,7 +92,4 @@
         else
             joinCodes = joinCodes.Where(x => x.Id != id).ToArray();
     }
-
-    Task CopyAsync(JoinCodeResponseDTO code) =>
-         ClipboardService.SetClipboardAsync($"{NavigationManager.BaseUri}join/{code.Code}");
 }

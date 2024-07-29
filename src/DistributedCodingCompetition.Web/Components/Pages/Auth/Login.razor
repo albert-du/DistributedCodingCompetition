@@ -22,7 +22,7 @@
     }
     else
     {
-        <EditForm class="flex flex-col items-center justify-center gap-y-5" Model=Model OnValidSubmit=SubmitAsync FormName="login">
+        <EditForm Enhance class="flex flex-col items-center justify-center gap-y-5" Model=Model OnValidSubmit=SubmitAsync FormName="login">
             <label class="flex flex-col">
                 <div class="pl-2">
                     Email
@@ -78,7 +78,7 @@
     protected override async Task OnInitializedAsync()
     {
         Model ??= new();
-        await HttpContext?.SignOutAsync();
+        await (HttpContext?.SignOutAsync() ?? Task.CompletedTask);
     }
     private async Task SubmitAsync()
     {
