@@ -39,13 +39,13 @@ public class Argon2Service(IOptions<ArgonOptions> options) : IPasswordService
 
         // get key
         var key = argon2.GetBytes(_options.KeySize);
-        
+
         // encode
         return $"argon2id:{_options.DegreeOfParallelism};{_options.MemorySize};{_options.Iterations};{Convert.ToBase64String(salt)};{Convert.ToBase64String(key)}";
     }
 
     /// <inheritdoc/>
-    public (bool, string?) VerifyPassword(string password, string hash)
+    public (bool Success, bool NeedsRehash) VerifyPassword(string password, string hash)
     {
         var parts = hash.Split(':');
         if (parts[0] != "argon2id")
@@ -77,7 +77,7 @@ public class Argon2Service(IOptions<ArgonOptions> options) : IPasswordService
         };
 
         // get key, compare, ?rehash, return
-        return (argon2.GetBytes(keySize).SequenceEqual(key), needsRehash ? HashPassword(password) : null);
+        return (argon2.GetBytes(keySize).SequenceEqual(key), needsRehash);
     }
 
     /// <summary>
