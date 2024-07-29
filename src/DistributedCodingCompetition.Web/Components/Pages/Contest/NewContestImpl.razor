@@ -5,7 +5,7 @@
 @inject IMarkdownRenderService MarkdownRenderService
 @inject IContestsService ContestsService
 @inject IModalService ModalService
-
+@rendermode InteractiveAuto
 @if (model is null)
 {
     <LoadingSpinner />
@@ -14,7 +14,7 @@ else
 {
     <div class="pb-24">
         <h1 class="text-3xl">New Contest</h1>
-        <EditForm Model=model OnValidSubmit="SubmitAsync">
+        <EditForm Model=model OnValidSubmit=SubmitAsync FormName="new-contest-form">
             <label class="flex flex-col">
                 <div class="pl-2">
                     Name
@@ -31,7 +31,7 @@ else
 
             <label class="flex flex-col">
                 <div class="pl-2">
-                    Minimim Age
+                    Minimum Age
                 </div>
                 <InputNumber class="w-64 px-2 py-1 ml-2 bg-gray-100 rounded-lg text-slate-800" id="MinAge" @bind-Value=model.MinAge />
             </label>
