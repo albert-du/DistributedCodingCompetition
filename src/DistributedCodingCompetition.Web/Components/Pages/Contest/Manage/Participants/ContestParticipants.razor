@@ -1,10 +1,12 @@
 @*
-    TODO Implement 
+    TODO Implement
 *@
 @page "/contest/{id:guid}/manage/participants"
 @inject IContestsService ContestsService
 @inject IUsersService UsersService
 @inject IModalService ModalService
+@inject NavigationManager NavigationManager
+@attribute [StreamRendering]
 
 <AuthCheck Contest=Id Admin />
 
@@ -25,6 +27,16 @@ else
                 <p>@participant.Username</p>
                 <p>@participant.FullName</p>
             </a>
+        }
+    </div>
+    <div>
+        @if (participants.PreviousEnabled)
+        {
+            <a href="@($"{NavigationManager.BaseUri}contest/{Id}/manage/participants?page={page - 1}&count={count}")"></a>
+        }
+        @if (participants.NextEnabled)
+        {
+            <a href="@($"{NavigationManager.BaseUri}contest/{Id}/manage/participants?page={page + 1}&count={count}")"></a>
         }
     </div>
 }

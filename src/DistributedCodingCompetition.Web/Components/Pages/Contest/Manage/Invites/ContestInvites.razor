@@ -4,7 +4,6 @@
 
 @page "/contest/{id:guid}/manage/invites"
 @inject NavigationManager NavigationManager
-@inject IClipboardService ClipboardService
 @inject IContestsService ContestsService
 @inject IJoinCodesService JoinCodesService
 @inject IModalService ModalService
@@ -29,14 +28,15 @@
             <div class="flex-1">Code: @cod.Code</div>
             <div class="flex-1">@cod.Uses Uses</div>
             <div class="flex-1">Expires @cod.Expiration</div>
-            <form data-enhance @formname="">
+            <form method="post" data-enhance>
+                <input type="hidden" name="_handler" value="delete-invite" />
                 <AntiforgeryToken />
-                <button class="w-16 p-1 font-bold text-center transition-colors duration-100 bg-white border-2 rounded-lg text-rose-500 border-rose-500 hover:bg-rose-500 hover:text-white" @onclick="() => DeleteAsync(cod.Id)">Delete</button>
+                <button type="submit" name="DeleteId" value="@cod.Id" class="w-16 p-1 font-bold text-center transition-colors duration-100 bg-white border-2 rounded-lg text-rose-500 border-rose-500 hover:bg-rose-500 hover:text-white">Delete</button>
             </form>
         </button>
     }
 </div>
-
+<form @formname="delete-invite" @onsubmit=DeleteAsync></form>
 <a href="contest/@Id/manage/invites/new" class="italic hover:underline">New Invite</a>
 
 <h1 class="text-2xl">Invite to administer</h1>
@@ -85,11 +85,14 @@
             contestName = contest.Name;
     }
 
-    async Task DeleteAsync(Guid id)
+    [SupplyParameterFromForm]
+    public Guid DeleteId { get; set; }
+
+    async Task DeleteAsync()
     {
-        if (!await JoinCodesService.TryDeleteJoinCodeAsync(id))
+        if (!await JoinCodesService.TryDeleteJoinCodeAsync(DeleteId))
             ModalService.ShowError("Failed to delete join code", "Internal error");
         else
-            joinCodes = joinCodes.Where(x => x.Id != id).ToArray();
+            joinCodes = joinCodes.Where(x => x.Id != DeleteId).ToArray();
     }
 }

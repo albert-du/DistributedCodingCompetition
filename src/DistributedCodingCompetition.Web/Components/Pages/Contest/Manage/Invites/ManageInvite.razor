@@ -28,12 +28,18 @@ else
             <div class="flex-1">Expires @joinCode.Expiration UTC</div>
             <div class="flex-1">@(joinCode.Active ? "Active" : "Inactive")</div>
             <div class="flex-1">
-                <button class="btn btn-danger" @onclick=DeleteAsync>Delete</button>
+                <form data-enhance @formname="delete-invite" @onsubmit=DeleteAsync>
+                    <AntiforgeryToken />
+                    <button type="submit" class="btn btn-danger">Delete</button>
+                </form>
             </div>
             <div class="flex-1">
-                <button class="btn btn-primary" @onclick="() => SetActiveAsync(!joinCode.Active)">
-                    <span>@(joinCode.Active ? "Deactivate" : "Activate")</span>
-                </button>
+                <form data-enhance @formname="toggle-active" @onsubmit=SetActiveAsync>
+                    <button type="submit" class="btn btn-primary">
+                        <span>@(joinCode.Active ? "Deactivate" : "Activate")</span>
+                    </button>
+                </form>
+
             </div>
         </div>
     </div>
@@ -86,16 +92,16 @@ else
             ModalService.ShowError("Failed to delete invite", "Internal error");
     }
 
-    async Task SetActiveAsync(bool active)
+    async Task SetActiveAsync()
     {
         if (joinCode is null)
             return;
 
         JoinCodeRequestDTO request = new()
-        {
-            Id = joinCode.Id,
-            Active = active
-        };
+            {
+                Id = joinCode.Id,
+                Active = !joinCode.Active
+            };
 
         if (await JoinCodesService.TryUpdateJoinCodeAsync(request))
             ModalService.ShowInfo("Invite updated", "");

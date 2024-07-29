@@ -5,6 +5,7 @@
 @inject IUsersService UsersService
 @inject ISubmissionsService SubmissionsService
 @inject NavigationManager NavigationManager
+@rendermode InteractiveServer
 
 <AuthCheck Contest=ContestId Admin />
 
@@ -26,7 +27,7 @@ else
         <ul>
             @foreach (var submission in submissions.Items)
             {
-                <tr>
+                <li>
                     <td>@submission.CreatedAt</td>
                     <td>@submission.Language</td>
                     <td>@submission.Score</td>
@@ -52,7 +53,7 @@ else
                     {
                         <td><button @onclick="() => InvalidateAsync(submission)">Invalidate</button></td>
                     }
-                </tr>
+                </li>
             }
         </ul>
         <div>
