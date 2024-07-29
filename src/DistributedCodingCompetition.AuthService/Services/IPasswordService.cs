@@ -18,5 +18,5 @@ public interface IPasswordService
     /// <param name="password"></param>
     /// <param name="hash"></param>
     /// <returns>Bool, true if passing, and optionally a new hash if needed.</returns>
-    (bool Success, bool NeedsRehash) VerifyPassword(string password, string hash);
+    (bool, string?) VerifyPassword(string password, string hash);
 }

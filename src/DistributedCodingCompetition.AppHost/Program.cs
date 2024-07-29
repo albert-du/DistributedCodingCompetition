@@ -10,7 +10,7 @@ var executorDatabase = mongo.AddDatabase("evaluationdb");
 
 var contestDatabase = postgres.AddDatabase("contestdb");
 
-var authDatabase = postgres.AddDatabase("authdb");
+var authDatabase = mongo.AddDatabase("authdb");
 
 var codePersistanceDatabase = mongo.AddDatabase("codepersistencedb");
 
@@ -55,8 +55,5 @@ builder.AddProject<Projects.DistributedCodingCompetition_Web>("webfrontend")
 
 builder.AddProject<Projects.DistributedCodingCompetition_ApiService_MigrationService>("apimigrations")
        .WithReference(contestDatabase);
-
-builder.AddProject<Projects.DistributedCodingCompetition_AuthService_MigrationService>("authmigrations")
-        .WithReference(authDatabase);
 
 builder.Build().Run();
