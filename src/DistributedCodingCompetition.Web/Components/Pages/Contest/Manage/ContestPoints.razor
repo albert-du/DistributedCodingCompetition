@@ -1,6 +1,7 @@
 ﻿@page "/contest/{id:guid}/manage/points"
 @inject IModalService ModalService
 @inject IContestsService ContestsService
+@rendermode InteractiveServer
 <AuthCheck Contest=Id Admin />
 
 <PageTitle>Contest Points</PageTitle>

@@ -7,6 +7,7 @@
 @inject IModalService ModalService
 @inject IUserStateService UserStateService
 @inject NavigationManager NavigationManager
+@attribute [StreamRendering]
 <AuthCheck Contest=Id Admin />
 
 <PageTitle>Transfer Contest Ownership</PageTitle>
@@ -21,14 +22,19 @@
     <ul class="flex flex-col gap-y-2">
         @foreach (var admin in administrators.Items)
         {
-            <button @onclick="() => SelectAdmin(admin)" class="flex bg-">
-                <div>
-                    @($"@{admin.Username}")
-                </div>
-                <div>
-                    @admin.FullName
-                </div>
-            </button>
+            <form method="post" data-enhance>
+                <AntiforgeryToken />
+                <input type="submit" form="select-admin" value="Select" />
+                <input type="hidden" name="AdminId" value="@admin.Id" />
+                <button type="submit" class="flex bg-">
+                    <div>
+                        @($"@{admin.Username}")
+                    </div>
+                    <div>
+                        @admin.FullName
+                    </div>
+                </button>
+            </form>
         }
     </ul>
     @if (newOwner is not null && sanity.Equals(contest.Name, StringComparison.OrdinalIgnoreCase))
@@ -43,6 +49,7 @@
         <div>select a new owner above</div>
     }
 }
+<form @formname="select-admin" @onsubmit="@SelectAdmin"></form>
 
 
 @code {
@@ -87,8 +94,12 @@
 
     int page = 1;
 
-    void SelectAdmin(UserResponseDTO admin)
+    [SupplyParameterFromForm]
+    public Guid AdminId { get; set; }
+
+    void SelectAdmin()
     {
+        var admin = administrators?.Items.FirstOrDefault(a => a.Id == AdminId);
         newOwner = admin;
     }
 
